@@ -1,0 +1,201 @@
+/* Version 1: Data Table Focus Styles */
+
+.sticky-controls {
+  position: sticky;
+  top: 0;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  z-index: 100;
+  margin-bottom: 20px;
+}
+
+.table-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background: #f8f9fa;
+}
+
+th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+  position: sticky;
+  top: 0;
+  background: #f8f9fa;
+}
+
+td {
+  padding: 12px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.compare-column {
+  width: 60px;
+  text-align: center;
+}
+
+.compare-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.cost-cell {
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.savings-cell {
+  color: #1565c0;
+}
+
+.best-price {
+  background: #e8f5e9;
+}
+
+.best-price td {
+  font-weight: 500;
+}
+
+.custom-discount-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: #ff9800;
+  border-radius: 50%;
+  margin-left: 5px;
+  vertical-align: middle;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-small {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.comparison-panel {
+  display: none;
+  position: fixed;
+  right: 20px;
+  top: 150px;
+  width: 400px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 20px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.comparison-panel.active {
+  display: block;
+}
+
+.comparison-item {
+  border-bottom: 1px solid #e9ecef;
+  padding: 15px 0;
+}
+
+.comparison-item:last-child {
+  border-bottom: none;
+}
+
+.comparison-vendor-name {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.comparison-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.comparison-label {
+  color: #6c757d;
+}
+
+.comparison-value {
+  font-weight: 500;
+}
+
+/* Modal customizations for vendor details */
+.vendor-details {
+  display: grid;
+  gap: 20px;
+}
+
+.detail-section {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.detail-section h4 {
+  margin-bottom: 10px;
+  color: #495057;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.detail-label {
+  color: #6c757d;
+}
+
+.detail-value {
+  font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .comparison-panel {
+    width: 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  .table-container {
+    font-size: 14px;
+  }
+  
+  th, td {
+    padding: 8px;
+  }
+  
+  .comparison-panel {
+    position: static;
+    width: 100%;
+    margin-top: 20px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+}

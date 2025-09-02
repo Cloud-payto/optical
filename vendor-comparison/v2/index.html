@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendor Comparison - Version 2: Card Grid Layout</title>
+  <link rel="stylesheet" href="../shared/styles-base.css">
+  <link rel="stylesheet" href="styles-v2.css">
+</head>
+<body>
+  <div class="header">
+    <div class="container">
+      <h1>Vendor Price Comparison - Card Grid View</h1>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Controls section -->
+    <div class="controls-section">
+      <div class="price-input-section">
+        <div class="input-group">
+          <label for="retailPrice">Retail Frame Price:</label>
+          <input type="number" id="retailPrice" placeholder="e.g., 250" value="250">
+          <button class="btn btn-primary" onclick="updateCalculations()">Calculate Costs</button>
+        </div>
+      </div>
+      
+      <div class="filters-section">
+        <div class="filter-group">
+          <div class="checkbox-group">
+            <input type="checkbox" id="myVendors" onchange="filterVendors()">
+            <label for="myVendors">Show only my vendors</label>
+          </div>
+          
+          <div class="sort-controls">
+            <label for="sortBy">Sort by:</label>
+            <select id="sortBy" onchange="sortVendors()">
+              <option value="cost">Cost (Low to High)</option>
+              <option value="discount">Discount % (High to Low)</option>
+              <option value="name">Vendor Name</option>
+            </select>
+          </div>
+          
+          <div class="view-controls">
+            <button class="btn btn-secondary" id="gridView" onclick="switchView('grid')">Grid View</button>
+            <button class="btn btn-secondary" id="listView" onclick="switchView('list')">List View</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Best deal highlight -->
+    <div id="bestDealBanner" class="best-deal-banner">
+      <div class="banner-content">
+        <span class="banner-icon">🏆</span>
+        <span class="banner-text">Best Deal: </span>
+        <span id="bestDealVendor" class="banner-vendor"></span>
+        <span class="banner-price">at $<span id="bestDealPrice">0.00</span></span>
+      </div>
+    </div>
+
+    <!-- Vendor cards grid -->
+    <div class="vendors-container" id="vendorsContainer">
+      <div class="vendors-grid" id="vendorsGrid">
+        <!-- Dynamic content will be inserted here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick view modal -->
+  <div id="quickViewModal" class="modal">
+    <div class="modal-content quick-view-content">
+      <div class="modal-header">
+        <h2 id="quickViewVendorName"></h2>
+        <button class="modal-close" onclick="closeQuickView()">&times;</button>
+      </div>
+      <div id="quickViewContent"></div>
+      <div class="quick-view-actions">
+        <button class="btn btn-secondary" onclick="showCustomDiscount()">Set Custom Discount</button>
+        <button class="btn btn-primary" onclick="contactVendor()">Contact Vendor</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom discount modal -->
+  <div id="discountModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Custom Discount for <span id="customVendorName"></span></h2>
+        <button class="modal-close" onclick="closeDiscountModal()">&times;</button>
+      </div>
+      <div class="input-group">
+        <label for="customDiscount">Custom Discount %:</label>
+        <input type="number" id="customDiscount" min="0" max="100">
+        <button class="btn btn-primary" onclick="saveCustomDiscount()">Save</button>
+        <button class="btn btn-secondary" onclick="resetDiscount()">Reset to Default</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="script-v2.js"></script>
+</body>
+</html>

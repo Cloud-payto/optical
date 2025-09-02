@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendor Comparison - Version 3: Interactive Comparison Tool</title>
+  <link rel="stylesheet" href="../shared/styles-base.css">
+  <link rel="stylesheet" href="styles-v3.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="header">
+    <div class="container">
+      <h1>Vendor Price Comparison - Interactive Tool</h1>
+    </div>
+  </div>
+
+  <div class="comparison-layout">
+    <!-- Left Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <h3>Pricing Input</h3>
+        <div class="input-group">
+          <label for="retailPrice">Retail Frame Price:</label>
+          <input type="number" id="retailPrice" placeholder="e.g., 250" value="250">
+        </div>
+        <div class="input-group">
+          <label for="priceRange">Price Range:</label>
+          <div class="range-inputs">
+            <input type="number" id="minPrice" placeholder="Min" value="">
+            <span>to</span>
+            <input type="number" id="maxPrice" placeholder="Max" value="">
+          </div>
+        </div>
+        <button class="btn btn-primary full-width" onclick="updateCalculations()">Update Calculations</button>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Filters</h3>
+        <div class="filter-option">
+          <input type="checkbox" id="myVendors" onchange="applyFilters()">
+          <label for="myVendors">Vendors I work with</label>
+        </div>
+        <div class="filter-option">
+          <input type="checkbox" id="freeShipping" onchange="applyFilters()">
+          <label for="freeShipping">Free shipping only</label>
+        </div>
+        <div class="filter-option">
+          <input type="checkbox" id="net30" onchange="applyFilters()">
+          <label for="net30">NET 30 payment terms</label>
+        </div>
+        
+        <div class="filter-group">
+          <label>Minimum Order:</label>
+          <select id="minOrderFilter" onchange="applyFilters()">
+            <option value="">Any amount</option>
+            <option value="500">Under $500</option>
+            <option value="1000">Under $1,000</option>
+            <option value="1500">Under $1,500</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Available Vendors</h3>
+        <div class="vendor-list" id="vendorList">
+          <!-- Dynamic content -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Comparison Area -->
+    <div class="main-content">
+      <!-- Comparison Table -->
+      <div class="comparison-section">
+        <div class="section-header">
+          <h2>Vendor Comparison</h2>
+          <div class="comparison-controls">
+            <button class="btn btn-secondary" onclick="clearAllComparison()">Clear All</button>
+            <button class="btn btn-secondary" onclick="exportComparison()">Export</button>
+          </div>
+        </div>
+        
+        <div class="comparison-table-container">
+          <table class="comparison-table" id="comparisonTable">
+            <thead>
+              <tr>
+                <th>Vendor</th>
+                <th>Discount %</th>
+                <th>Your Cost</th>
+                <th>Savings</th>
+                <th>Min Order</th>
+                <th>Payment Terms</th>
+                <th>Shipping</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="comparisonTableBody">
+              <tr class="empty-state">
+                <td colspan="8">
+                  <div class="empty-message">
+                    <div class="empty-icon">📊</div>
+                    <p>Select vendors from the sidebar to compare pricing</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Price Comparison Chart -->
+      <div class="chart-section">
+        <div class="section-header">
+          <h3>Price Comparison Chart</h3>
+          <div class="chart-controls">
+            <label for="chartType">Chart Type:</label>
+            <select id="chartType" onchange="updateChart()">
+              <option value="bar">Bar Chart</option>
+              <option value="line">Line Chart</option>
+              <option value="radar">Radar Chart</option>
+            </select>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="priceChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Summary Statistics -->
+      <div class="summary-section">
+        <div class="summary-cards" id="summaryCards">
+          <div class="summary-card">
+            <div class="summary-value">-</div>
+            <div class="summary-label">Best Price</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-value">-</div>
+            <div class="summary-label">Average Cost</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-value">-</div>
+            <div class="summary-label">Max Savings</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-value">-</div>
+            <div class="summary-label">Vendors Compared</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Discount Modal -->
+  <div id="discountModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Custom Discount for <span id="customVendorName"></span></h2>
+        <button class="modal-close" onclick="closeDiscountModal()">&times;</button>
+      </div>
+      <div class="custom-discount-form">
+        <div class="input-group">
+          <label for="customDiscount">Negotiated Discount %:</label>
+          <input type="number" id="customDiscount" min="0" max="100">
+        </div>
+        <div class="input-group">
+          <label for="discountNotes">Notes (optional):</label>
+          <textarea id="discountNotes" rows="3" placeholder="e.g., Valid until end of year, requires minimum $1000 order"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-primary" onclick="saveCustomDiscount()">Save Custom Rate</button>
+          <button class="btn btn-secondary" onclick="resetToDefault()">Reset to Default</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="script-v3.js"></script>
+</body>
+</html>
