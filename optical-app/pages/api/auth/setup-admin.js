@@ -1,5 +1,5 @@
-import { createServerSupabaseClient } from '../../lib/supabase';
-import { createAccount, createUser } from '../../lib/database';
+import { createServerSupabaseClient } from '../../../lib/supabase';
+import { createAccount, createUser } from '../../../lib/database';
 
 // This is a setup endpoint to create the first admin account
 // Should be disabled after initial setup

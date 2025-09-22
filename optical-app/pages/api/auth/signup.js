@@ -1,5 +1,5 @@
-import { createServerSupabaseClient } from '../../lib/supabase';
-import { createAccount, createUser } from '../../lib/database';
+import { createServerSupabaseClient } from '../../../lib/supabase';
+import { createAccount, createUser } from '../../../lib/database';
 
 export default async function handler(req, res) {
   // Set CORS headers

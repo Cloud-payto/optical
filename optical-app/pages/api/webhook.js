@@ -1,5 +1,5 @@
-import { saveEmail, getEmailsByAccount, updateEmailWithParsedData, saveInventoryItems, checkDuplicateOrder } from '../lib/database';
-import parserRegistry from '../services/parserRegistry';
+import { saveEmail, getEmailsByAccount, updateEmailWithParsedData, saveInventoryItems, checkDuplicateOrder } from '../../lib/database';
+import parserRegistry from '../../services/parserRegistry';
 
 /**
  * Smart vendor detection for forwarded emails

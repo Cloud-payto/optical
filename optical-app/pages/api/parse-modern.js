@@ -1,5 +1,5 @@
-import ModernOpticalParser from '../services/ModernOpticalParser';
-import { saveInventoryItems, updateEmailWithParsedData } from '../lib/database';
+import ModernOpticalParser from '../../services/ModernOpticalParser';
+import { saveInventoryItems, updateEmailWithParsedData } from '../../lib/database';
 
 // Initialize parser
 const modernOpticalParser = new ModernOpticalParser();

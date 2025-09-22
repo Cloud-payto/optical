@@ -1,6 +1,6 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { getUserByEmail, validatePassword } from '../../lib/database';
+import { getUserByEmail, validatePassword } from '../../../lib/database';
 
 export default NextAuth({
   providers: [
@@ -13,27 +13,38 @@ export default NextAuth({
       async authorize(credentials) {
         try {
           if (!credentials?.email || !credentials?.password) {
+            console.log('Missing credentials');
             return null;
           }
+
+          console.log('Attempting to authenticate user:', credentials.email);
 
           // Get user from Supabase
           const user = await getUserByEmail(credentials.email);
           
           if (!user) {
+            console.log('User not found:', credentials.email);
             return null;
           }
+
+          console.log('User found:', user.email, 'Account:', user.accounts?.name);
 
           // Validate password
           const isValidPassword = await validatePassword(credentials.password, user.password_hash);
           
           if (!isValidPassword) {
+            console.log('Invalid password for user:', credentials.email);
             return null;
           }
 
-          // Check if account is active
-          if (user.accounts?.status !== 'active') {
+          // Check if account is active (allow trial and active accounts)
+          const allowedStatuses = ['active', 'trial'];
+          if (!allowedStatuses.includes(user.accounts?.status)) {
+            console.log('Account not active:', user.accounts?.status);
             throw new Error('Account is not active');
           }
+
+          console.log('Authentication successful for:', credentials.email);
 
           return {
             id: user.id,
@@ -69,11 +80,17 @@ export default NextAuth({
         session.user.accountStatus = token.accountStatus;
       }
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      // Allows callback URLs on the same origin
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
     }
   },
   pages: {
     signIn: '/auth/signin',
-    signUp: '/auth/signup',
     error: '/auth/error'
   },
   session: {

@@ -1,4 +1,4 @@
-import { getInventoryByAccount, saveInventoryItems, query } from '../lib/database';
+import { getInventoryByAccount, saveInventoryItems, query } from '../../lib/database';
 import { getSession } from 'next-auth/react';
 
 export default async function handler(req, res) {

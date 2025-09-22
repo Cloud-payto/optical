@@ -1,5 +1,5 @@
 const SafiloService = require('./SafiloService');
-const ModernOpticalService = require('./ModernOpticalService');
+const ModernOpticalParser = require('./ModernOpticalParser');
 
 /**
  * Parser Registry - Maps vendor domains to their parsers
@@ -26,13 +26,8 @@ class ParserRegistry {
             timeout: 15000
         });
         
-        // Initialize ModernOpticalService instance
-        this.modernOpticalService = new ModernOpticalService({
-            debug: process.env.NODE_ENV !== 'production',
-            timeout: 15000,
-            maxRetries: 3,
-            enableWebEnrichment: true
-        });
+        // Initialize ModernOpticalParser instance
+        this.modernOpticalParser = new ModernOpticalParser();
     }
 
     /**
@@ -71,29 +66,28 @@ class ParserRegistry {
     }
     
     /**
-     * Process Modern Optical HTML using ModernOpticalService
+     * Process Modern Optical HTML using ModernOpticalParser
      * @param {string} html - HTML content
      * @param {string} plainText - Plain text content
      * @returns {object} Processed order data
      */
     processModernOpticalWithService(html, plainText) {
         try {
-            console.log('🚀 Processing Modern Optical email with ModernOpticalService...');
+            console.log('🚀 Processing Modern Optical email with ModernOpticalParser...');
             
-            // Use ModernOpticalService to parse the email
-            const parsedResult = this.modernOpticalService.parseEmail(html, plainText);
+            // Use ModernOpticalParser to parse the email
+            const parsedResult = this.modernOpticalParser.parse(html, plainText);
             
-            console.log('📊 ModernOpticalService Result:');
+            console.log('📊 ModernOpticalParser Result:');
             console.log('- Vendor:', parsedResult.vendor);
             console.log('- Order Number:', parsedResult.order?.order_number);
             console.log('- Customer:', parsedResult.order?.customer_name);
             console.log('- Items Count:', parsedResult.items?.length);
-            console.log('- Unique Frames:', parsedResult.unique_frames?.length);
             
             return parsedResult;
             
         } catch (error) {
-            console.error('ModernOpticalService processing failed:', error);
+            console.error('ModernOpticalParser processing failed:', error);
             throw error;
         }
     }
@@ -326,11 +320,11 @@ class ParserRegistry {
     }
 
     /**
-     * Get Modern Optical service instance for enrichment
-     * @returns {ModernOpticalService} Service instance
+     * Get Modern Optical parser instance
+     * @returns {ModernOpticalParser} Parser instance
      */
-    getModernOpticalService() {
-        return this.modernOpticalService;
+    getModernOpticalParser() {
+        return this.modernOpticalParser;
     }
 
     /**

@@ -1,4 +1,4 @@
-import { getDashboardStats } from '../../lib/database';
+import { getDashboardStats } from '../../../lib/database';
 import { getSession } from 'next-auth/react';
 
 export default async function handler(req, res) {

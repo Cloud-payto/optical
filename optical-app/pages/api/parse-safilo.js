@@ -1,6 +1,6 @@
 import multer from 'multer';
-import SafiloService from '../services/SafiloService';
-import { saveInventoryItems, updateEmailWithParsedData, getEmailsByAccount } from '../lib/database';
+import SafiloService from '../../services/SafiloService';
+import { saveInventoryItems, updateEmailWithParsedData, getEmailsByAccount } from '../../lib/database';
 
 // Configure multer for memory storage
 const upload = multer({ 
