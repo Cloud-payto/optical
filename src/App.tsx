@@ -12,6 +12,7 @@ import AboutPage from './pages/About.tsx';
 import BrandsCostsPage from './pages/BrandsCostsPage';
 import TimeSavingPage from './pages/TimeSavingPage';
 import VendorComparisonPage from './pages/VendorComparisonPage';
+import Inventory from './pages/Inventory';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
                   <Route path="/brands" element={<BrandsCostsPage />} />
                   <Route path="/vendor-comparison" element={<VendorComparisonPage />} />
                   <Route path="/time-saving" element={<TimeSavingPage />} />
+                  <Route path="/inventory" element={<Inventory />} />
                   <Route path="/about" element={<AboutPage />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>

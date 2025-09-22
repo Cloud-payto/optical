@@ -172,7 +172,7 @@ const vendorsData = [
 
 const segments = ["All", "Premium", "Ultra-Premium", "Mid-Tier", "Value", "Boutique"];
 
-export default function VendorComparisonPage() {
+const VendorComparisonPage: React.FC = () => {
   const [filteredVendors, setFilteredVendors] = useState(vendorsData);
   const [selectedSegment, setSelectedSegment] = useState("All");
   const [sortBy, setSortBy] = useState("name");
@@ -403,4 +403,6 @@ export default function VendorComparisonPage() {
       </div>
     </div>
   );
-}
+};
+
+export default VendorComparisonPage;

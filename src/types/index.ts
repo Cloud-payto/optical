@@ -26,6 +26,7 @@ export interface SavedCalculation {
   brand: string;
   insurance?: string; // Optional insurance provider
   insurancePlan?: string; // Optional insurance plan
+  insuranceEnabled?: boolean; // Optional insurance toggle state
   yourCost: number;
   wholesaleCost: number;
   tariffTax: number;
@@ -43,7 +44,10 @@ export interface SavedCalculation {
 export interface FrameData {
   frameName: string;
   brand: string;
+  companyId?: string;
+  companyName?: string;
   insurance?: string; // Optional insurance provider
+  insuranceEnabled?: boolean; // Optional insurance toggle state
   yourCost: number;
   wholesaleCost: number;
   tariffTax: number;
@@ -66,6 +70,7 @@ export interface SavedComparison {
     frameName: string;
     brand: string;
     insurance?: string; // Optional insurance provider
+    insuranceEnabled?: boolean; // Optional insurance toggle state
     yourCost: number;
     wholesaleCost: number;
     tariffTax: number;
@@ -79,6 +84,7 @@ export interface SavedComparison {
     frameName: string;
     brand: string;
     insurance?: string; // Optional insurance provider
+    insuranceEnabled?: boolean; // Optional insurance toggle state
     yourCost: number;
     wholesaleCost: number;
     tariffTax: number;
@@ -120,6 +126,7 @@ export interface Brand {
   wholesaleCost?: number;
   yourCost?: number;
   tariffTax?: number;
+  retailPrice?: number;
   notes?: string;
 }
 

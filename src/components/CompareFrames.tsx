@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { DollarSignIcon, SlidersIcon, TrendingUpIcon, Check, ChevronDownIcon, PlusIcon, TagIcon, SaveIcon } from 'lucide-react';
+import { DollarSignIcon, SlidersIcon, TrendingUpIcon, Check, ChevronDownIcon, PlusIcon, TagIcon, SaveIcon, BuildingIcon } from 'lucide-react';
 import { calculateProfit, calculateRetailPrice, calculateDiscountPercentage } from '../utils/calculations';
-import { FrameData, SavedComparison } from '../types';
+import { FrameData, SavedComparison, Company, Brand } from '../types';
 import { useDemo } from '../contexts/DemoContext';
 
 // Helper function to format currency values
@@ -14,12 +14,10 @@ const formatCurrency = (value: number): string => {
   }).format(value);
 };
 
-// Function to load saved brands from localStorage or use defaults
-const loadSavedBrands = (): string[] => {
-  const savedBrands = localStorage.getItem('optiprofit_brands');
-  return savedBrands ? JSON.parse(savedBrands) : [
-    'Luxottica', 'Safilo', 'Marcolin', 'Essilor', 'Zeiss', 'Modo', 'Other'
-  ];
+// Function to load companies from localStorage
+const loadSavedCompanies = (): Company[] => {
+  const savedCompanies = localStorage.getItem('optiprofit_companies');
+  return savedCompanies ? JSON.parse(savedCompanies) : [];
 };
 
 // Function to load saved comparisons from localStorage
@@ -221,6 +219,8 @@ const FrameComparisonDisplay: React.FC<FrameComparisonDisplayProps> = ({ frame1,
 const initialFrameData: FrameData = {
   frameName: '',
   brand: '',
+  companyId: '',
+  companyName: '',
   yourCost: 5,
   wholesaleCost: 50,
   tariffTax: 0,
@@ -235,30 +235,36 @@ const initialFrameData: FrameData = {
 const CompareFrames: React.FC = () => {
   const { isDemo, currentStepData } = useDemo();
   
-  // State for brand selection dropdowns
-  const [brands, setBrands] = useState<string[]>(loadSavedBrands());
+  // State for companies and brands
+  const [companies, setCompanies] = useState<Company[]>(loadSavedCompanies());
   const [savedComparisons, setSavedComparisons] = useState<SavedComparison[]>(loadSavedComparisons());
   
-  // Brand dropdown states
+  // Company and Brand dropdown states
+  const [selectedCompany1, setSelectedCompany1] = useState<Company | null>(null);
+  const [selectedCompany2, setSelectedCompany2] = useState<Company | null>(null);
+  const [selectedBrand1, setSelectedBrand1] = useState<Brand | null>(null);
+  const [selectedBrand2, setSelectedBrand2] = useState<Brand | null>(null);
+  const [showCompanyDropdown1, setShowCompanyDropdown1] = useState<boolean>(false);
+  const [showCompanyDropdown2, setShowCompanyDropdown2] = useState<boolean>(false);
   const [showBrandDropdown1, setShowBrandDropdown1] = useState<boolean>(false);
   const [showBrandDropdown2, setShowBrandDropdown2] = useState<boolean>(false);
-  const [newBrandName, setNewBrandName] = useState<string>('');
-  const [showAddBrand, setShowAddBrand] = useState<boolean>(false);
-  const [addingBrandFor, setAddingBrandFor] = useState<'frame1' | 'frame2' | null>(null);
   
   // Save dialog state
   const [showSaveDialog, setShowSaveDialog] = useState<boolean>(false);
   const [saveComparisonName, setSaveComparisonName] = useState<string>('');
   
   // Refs for handling clicks outside dropdowns
+  const companyDropdownRef1 = useRef<HTMLDivElement>(null);
+  const companyDropdownRef2 = useRef<HTMLDivElement>(null);
   const brandDropdownRef1 = useRef<HTMLDivElement>(null);
   const brandDropdownRef2 = useRef<HTMLDivElement>(null);
   const saveDialogRef = useRef<HTMLDivElement>(null);
   
   // Initialize with demo data if in demo mode
   const getDemoFrame1 = (): FrameData => ({
-    frameName: 'Ray-Ban Aviator',
-    brand: 'Luxottica',
+    frameName: 'Ray-Ban',
+    brand: 'Ray-Ban',
+    companyName: 'Luxottica',
     yourCost: 15,
     wholesaleCost: 150,
     tariffTax: 6,
@@ -271,8 +277,9 @@ const CompareFrames: React.FC = () => {
   });
 
   const getDemoFrame2 = (): FrameData => ({
-    frameName: 'Carrera Sport',
-    brand: 'Safilo',
+    frameName: 'Safilo Collection',
+    brand: 'Safilo Collection',
+    companyName: 'Safilo',
     yourCost: 16,
     wholesaleCost: 160,
     tariffTax: 6.40,
@@ -287,13 +294,13 @@ const CompareFrames: React.FC = () => {
   const [frame1, setFrame1] = useState<FrameData>(
     isDemo && currentStepData?.id === 'comparison-overview' 
       ? getDemoFrame1() 
-      : { ...initialFrameData, frameName: 'Frame A' }
+      : { ...initialFrameData, frameName: '' }
   );
   
   const [frame2, setFrame2] = useState<FrameData>(
     isDemo && currentStepData?.id === 'comparison-overview'
       ? getDemoFrame2()
-      : { ...initialFrameData, frameName: 'Frame B' }
+      : { ...initialFrameData, frameName: '' }
   );
 
   // Pre-fill demo data when demo reaches comparison overview
@@ -386,10 +393,10 @@ const CompareFrames: React.FC = () => {
     frame2.insuranceReimbursement
   ]);
 
-  // Save brands to localStorage when updated
+  // Load companies when component mounts
   useEffect(() => {
-    localStorage.setItem('optiprofit_brands', JSON.stringify(brands));
-  }, [brands]);
+    setCompanies(loadSavedCompanies());
+  }, []);
 
   // Save comparisons to localStorage when updated
   useEffect(() => {
@@ -399,6 +406,12 @@ const CompareFrames: React.FC = () => {
   // Handle clicks outside dropdowns
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      if (companyDropdownRef1.current && !companyDropdownRef1.current.contains(event.target as Node)) {
+        setShowCompanyDropdown1(false);
+      }
+      if (companyDropdownRef2.current && !companyDropdownRef2.current.contains(event.target as Node)) {
+        setShowCompanyDropdown2(false);
+      }
       if (brandDropdownRef1.current && !brandDropdownRef1.current.contains(event.target as Node)) {
         setShowBrandDropdown1(false);
       }
@@ -407,7 +420,6 @@ const CompareFrames: React.FC = () => {
       }
       if (saveDialogRef.current && !saveDialogRef.current.contains(event.target as Node)) {
         setShowSaveDialog(false);
-        setShowAddBrand(false);
       }
     };
     
@@ -431,30 +443,37 @@ const CompareFrames: React.FC = () => {
     }));
   };
 
-  // Function to handle adding a new brand
-  const handleAddBrand = (): void => {
-    if (newBrandName.trim()) {
-      // Add the new brand to the list
-      const updatedBrands = [...brands, newBrandName.trim()];
-      setBrands(updatedBrands);
-      
-      // Save to localStorage
-      localStorage.setItem('optiprofit_brands', JSON.stringify(updatedBrands));
-      
-      // If we know which frame we're adding for, set its brand
-      if (addingBrandFor === 'frame1') {
-        setFrame1(prev => ({ ...prev, brand: newBrandName.trim() }));
-        setShowBrandDropdown1(false);
-      } else if (addingBrandFor === 'frame2') {
-        setFrame2(prev => ({ ...prev, brand: newBrandName.trim() }));
-        setShowBrandDropdown2(false);
-      }
-      
-      // Reset states
-      setNewBrandName('');
-      setShowAddBrand(false);
-      setAddingBrandFor(null);
-    }
+  // Handler for selecting brand and auto-populating fields
+  const handleBrandSelect1 = (company: Company, brand: Brand) => {
+    setSelectedCompany1(company);
+    setSelectedBrand1(brand);
+    setFrame1(prev => ({
+      ...prev,
+      frameName: brand.name,
+      brand: brand.name,
+      companyId: company.id,
+      companyName: company.name,
+      yourCost: brand.yourCost || prev.yourCost,
+      wholesaleCost: brand.wholesaleCost || prev.wholesaleCost,
+      tariffTax: brand.tariffTax || prev.tariffTax
+    }));
+    setShowBrandDropdown1(false);
+  };
+
+  const handleBrandSelect2 = (company: Company, brand: Brand) => {
+    setSelectedCompany2(company);
+    setSelectedBrand2(brand);
+    setFrame2(prev => ({
+      ...prev,
+      frameName: brand.name,
+      brand: brand.name,
+      companyId: company.id,
+      companyName: company.name,
+      yourCost: brand.yourCost || prev.yourCost,
+      wholesaleCost: brand.wholesaleCost || prev.wholesaleCost,
+      tariffTax: brand.tariffTax || prev.tariffTax
+    }));
+    setShowBrandDropdown2(false);
   };
 
   return (
@@ -465,19 +484,54 @@ const CompareFrames: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6" data-demo="comparison-form">
           {/* Frame 1 Inputs */}
           <div className="bg-blue-50 p-4 rounded-lg">
+            {/* Company Dropdown */}
             <div className="mb-4">
-              <label htmlFor="frameName1" className="block text-sm font-medium text-gray-700">
-                Frame Name
+              <label htmlFor="company1" className="block text-sm font-medium text-gray-700">
+                Company
               </label>
-              <input
-                type="text"
-                id="frameName1"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                value={frame1.frameName}
-                onChange={(e) => handleUpdateFrame1('frameName', e.target.value)}
-              />
+              <div className="relative" ref={companyDropdownRef1}>
+                <button
+                  type="button"
+                  className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  onClick={() => setShowCompanyDropdown1(!showCompanyDropdown1)}
+                >
+                  <div className="flex items-center">
+                    <BuildingIcon className="h-4 w-4 text-gray-400 mr-2" />
+                    <span>{selectedCompany1?.name || 'Select a company'}</span>
+                  </div>
+                  <ChevronDownIcon className="h-4 w-4 text-gray-400" />
+                </button>
+                
+                {showCompanyDropdown1 && (
+                  <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-60 overflow-auto">
+                    <ul className="py-1">
+                      {companies.map((company) => (
+                        <li key={company.id}>
+                          <button
+                            type="button"
+                            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${selectedCompany1?.id === company.id ? 'bg-blue-50 text-blue-700' : ''}`}
+                            onClick={() => {
+                              setSelectedCompany1(company);
+                              setSelectedBrand1(null);
+                              setShowCompanyDropdown1(false);
+                            }}
+                          >
+                            {company.name}
+                          </button>
+                        </li>
+                      ))}
+                      {companies.length === 0 && (
+                        <li className="px-4 py-2 text-gray-500 text-sm">
+                          No companies available. Add companies in Vendors.
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+              </div>
             </div>
             
+            {/* Brand Dropdown */}
             <div className="mb-4">
               <label htmlFor="brand1" className="block text-sm font-medium text-gray-700">
                 Brand
@@ -485,47 +539,46 @@ const CompareFrames: React.FC = () => {
               <div className="relative" ref={brandDropdownRef1}>
                 <button
                   type="button"
-                  className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  onClick={() => setShowBrandDropdown1(!showBrandDropdown1)}
+                  className={`w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                    !selectedCompany1 ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                  onClick={() => selectedCompany1 && setShowBrandDropdown1(!showBrandDropdown1)}
+                  disabled={!selectedCompany1}
                 >
                   <div className="flex items-center">
                     <TagIcon className="h-4 w-4 text-gray-400 mr-2" />
-                    <span>{frame1.brand || 'Select a brand'}</span>
+                    <span>{selectedBrand1?.name || (selectedCompany1 ? 'Select a brand' : 'Select company first')}</span>
                   </div>
                   <ChevronDownIcon className="h-4 w-4 text-gray-400" />
                 </button>
                 
-                {showBrandDropdown1 && (
+                {showBrandDropdown1 && selectedCompany1 && (
                   <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-60 overflow-auto">
                     <ul className="py-1">
-                      {brands.map((brand) => (
-                        <li key={brand}>
+                      {selectedCompany1.brands.map((brand) => (
+                        <li key={brand.id}>
                           <button
                             type="button"
-                            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${frame1.brand === brand ? 'bg-blue-50 text-blue-700' : ''}`}
-                            onClick={() => {
-                              handleUpdateFrame1('brand', brand);
-                              setShowBrandDropdown1(false);
-                            }}
+                            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${selectedBrand1?.id === brand.id ? 'bg-blue-50 text-blue-700' : ''}`}
+                            onClick={() => handleBrandSelect1(selectedCompany1, brand)}
                           >
-                            {brand}
+                            <div>
+                              <div className="font-medium">{brand.name}</div>
+                              {(brand.wholesaleCost || brand.yourCost) && (
+                                <div className="text-xs text-gray-500">
+                                  {brand.yourCost && `Your Cost: $${brand.yourCost}`}
+                                  {brand.wholesaleCost && ` • Wholesale: $${brand.wholesaleCost}`}
+                                </div>
+                              )}
+                            </div>
                           </button>
                         </li>
                       ))}
-                      <li className="border-t border-gray-200">
-                        <button
-                          type="button"
-                          className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                          onClick={() => {
-                            setShowAddBrand(true);
-                            setAddingBrandFor('frame1');
-                            setShowBrandDropdown1(false);
-                          }}
-                        >
-                          <PlusIcon className="h-4 w-4 mr-2" />
-                          Add New Brand
-                        </button>
-                      </li>
+                      {selectedCompany1.brands.length === 0 && (
+                        <li className="px-4 py-2 text-gray-500 text-sm">
+                          No brands available for this company.
+                        </li>
+                      )}
                     </ul>
                   </div>
                 )}
@@ -729,19 +782,54 @@ const CompareFrames: React.FC = () => {
           
           {/* Frame 2 Inputs */}
           <div className="bg-green-50 p-4 rounded-lg">
+            {/* Company Dropdown */}
             <div className="mb-4">
-              <label htmlFor="frameName2" className="block text-sm font-medium text-gray-700">
-                Frame Name
+              <label htmlFor="company2" className="block text-sm font-medium text-gray-700">
+                Company
               </label>
-              <input
-                type="text"
-                id="frameName2"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                value={frame2.frameName}
-                onChange={(e) => handleUpdateFrame2('frameName', e.target.value)}
-              />
+              <div className="relative" ref={companyDropdownRef2}>
+                <button
+                  type="button"
+                  className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  onClick={() => setShowCompanyDropdown2(!showCompanyDropdown2)}
+                >
+                  <div className="flex items-center">
+                    <BuildingIcon className="h-4 w-4 text-gray-400 mr-2" />
+                    <span>{selectedCompany2?.name || 'Select a company'}</span>
+                  </div>
+                  <ChevronDownIcon className="h-4 w-4 text-gray-400" />
+                </button>
+                
+                {showCompanyDropdown2 && (
+                  <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-60 overflow-auto">
+                    <ul className="py-1">
+                      {companies.map((company) => (
+                        <li key={company.id}>
+                          <button
+                            type="button"
+                            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${selectedCompany2?.id === company.id ? 'bg-blue-50 text-blue-700' : ''}`}
+                            onClick={() => {
+                              setSelectedCompany2(company);
+                              setSelectedBrand2(null);
+                              setShowCompanyDropdown2(false);
+                            }}
+                          >
+                            {company.name}
+                          </button>
+                        </li>
+                      ))}
+                      {companies.length === 0 && (
+                        <li className="px-4 py-2 text-gray-500 text-sm">
+                          No companies available. Add companies in Vendors.
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+              </div>
             </div>
             
+            {/* Brand Dropdown */}
             <div className="mb-4">
               <label htmlFor="brand2" className="block text-sm font-medium text-gray-700">
                 Brand
@@ -749,47 +837,46 @@ const CompareFrames: React.FC = () => {
               <div className="relative" ref={brandDropdownRef2}>
                 <button
                   type="button"
-                  className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  onClick={() => setShowBrandDropdown2(!showBrandDropdown2)}
+                  className={`w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                    !selectedCompany2 ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                  onClick={() => selectedCompany2 && setShowBrandDropdown2(!showBrandDropdown2)}
+                  disabled={!selectedCompany2}
                 >
                   <div className="flex items-center">
                     <TagIcon className="h-4 w-4 text-gray-400 mr-2" />
-                    <span>{frame2.brand || 'Select a brand'}</span>
+                    <span>{selectedBrand2?.name || (selectedCompany2 ? 'Select a brand' : 'Select company first')}</span>
                   </div>
                   <ChevronDownIcon className="h-4 w-4 text-gray-400" />
                 </button>
                 
-                {showBrandDropdown2 && (
+                {showBrandDropdown2 && selectedCompany2 && (
                   <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-60 overflow-auto">
                     <ul className="py-1">
-                      {brands.map((brand) => (
-                        <li key={brand}>
+                      {selectedCompany2.brands.map((brand) => (
+                        <li key={brand.id}>
                           <button
                             type="button"
-                            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${frame2.brand === brand ? 'bg-blue-50 text-blue-700' : ''}`}
-                            onClick={() => {
-                              handleUpdateFrame2('brand', brand);
-                              setShowBrandDropdown2(false);
-                            }}
+                            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${selectedBrand2?.id === brand.id ? 'bg-blue-50 text-blue-700' : ''}`}
+                            onClick={() => handleBrandSelect2(selectedCompany2, brand)}
                           >
-                            {brand}
+                            <div>
+                              <div className="font-medium">{brand.name}</div>
+                              {(brand.wholesaleCost || brand.yourCost) && (
+                                <div className="text-xs text-gray-500">
+                                  {brand.yourCost && `Your Cost: $${brand.yourCost}`}
+                                  {brand.wholesaleCost && ` • Wholesale: $${brand.wholesaleCost}`}
+                                </div>
+                              )}
+                            </div>
                           </button>
                         </li>
                       ))}
-                      <li className="border-t border-gray-200">
-                        <button
-                          type="button"
-                          className="flex items-center px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                          onClick={() => {
-                            setShowAddBrand(true);
-                            setAddingBrandFor('frame2');
-                            setShowBrandDropdown2(false);
-                          }}
-                        >
-                          <PlusIcon className="h-4 w-4 mr-2" />
-                          Add New Brand
-                        </button>
-                      </li>
+                      {selectedCompany2.brands.length === 0 && (
+                        <li className="px-4 py-2 text-gray-500 text-sm">
+                          No brands available for this company.
+                        </li>
+                      )}
                     </ul>
                   </div>
                 )}
@@ -1018,56 +1105,6 @@ const CompareFrames: React.FC = () => {
           </div>
         )}
         
-        {/* Add Brand Dialog */}
-        {showAddBrand && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Add New Brand</h3>
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="brandName" className="block text-sm font-medium text-gray-700 mb-1">
-                    Brand Name
-                  </label>
-                  <input
-                    type="text"
-                    id="brandName"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter brand name"
-                    value={newBrandName}
-                    onChange={(e) => setNewBrandName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && newBrandName.trim()) {
-                        handleAddBrand();
-                      }
-                    }}
-                    autoFocus
-                  />
-                </div>
-                <div className="flex justify-end space-x-3 pt-2">
-                  <button
-                    type="button"
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    onClick={() => {
-                      setShowAddBrand(false);
-                      setNewBrandName('');
-                      setAddingBrandFor(null);
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    onClick={handleAddBrand}
-                    disabled={!newBrandName.trim()}
-                  >
-                    Add Brand
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
         
         {/* Save Dialog */}
         {showSaveDialog && (

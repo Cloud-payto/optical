@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, Building2, User, Phone, Mail, Globe } from 'lucide-react';
-import { Company } from '../../types';
+import { X, Save, Building2, User, Phone, Mail, Globe, Package, Plus, Trash2, DollarSign } from 'lucide-react';
+import { Company, Brand } from '../../types';
 
 interface CompanyDetailsModalProps {
   isOpen: boolean;
@@ -57,6 +57,39 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
         ...prev.contactInfo,
         [field]: value
       }
+    }));
+  };
+
+  const handleAddBrand = () => {
+    const newBrand: Brand = {
+      id: `${formData.id}-${Date.now()}`,
+      name: '',
+      wholesaleCost: 0,
+      yourCost: 0,
+      tariffTax: 0,
+      retailPrice: 0
+    };
+    setFormData(prev => ({
+      ...prev,
+      brands: [...prev.brands, newBrand]
+    }));
+  };
+
+  const handleRemoveBrand = (brandId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      brands: prev.brands.filter(brand => brand.id !== brandId)
+    }));
+  };
+
+  const handleBrandChange = (brandId: string, field: keyof Brand, value: string | number) => {
+    setFormData(prev => ({
+      ...prev,
+      brands: prev.brands.map(brand =>
+        brand.id === brandId
+          ? { ...brand, [field]: field === 'name' ? value : parseFloat(value as string) || 0 }
+          : brand
+      )
     }));
   };
 
@@ -259,6 +292,149 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Brands Section */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-lg font-medium text-gray-900 flex items-center">
+                    <Package className="h-5 w-5 mr-2 text-gray-600" />
+                    Brands
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={handleAddBrand}
+                    className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add Brand
+                  </button>
+                </div>
+                
+                {formData.brands.length === 0 ? (
+                  <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+                    <Package className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                    <p className="text-gray-500">No brands added yet</p>
+                    <button
+                      type="button"
+                      onClick={handleAddBrand}
+                      className="mt-3 text-sm text-blue-600 hover:text-blue-700"
+                    >
+                      Add your first brand
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {formData.brands.map((brand) => (
+                      <div key={brand.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          <div className="md:col-span-2 lg:col-span-3">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Brand Name
+                            </label>
+                            <input
+                              type="text"
+                              className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                              value={brand.name}
+                              onChange={(e) => handleBrandChange(brand.id, 'name', e.target.value)}
+                              placeholder="Enter brand name"
+                            />
+                          </div>
+                          
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Wholesale Cost
+                            </label>
+                            <div className="relative">
+                              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <DollarSign className="h-4 w-4 text-gray-400" />
+                              </div>
+                              <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                value={brand.wholesaleCost || ''}
+                                onChange={(e) => handleBrandChange(brand.id, 'wholesaleCost', e.target.value)}
+                                placeholder="0.00"
+                              />
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Your Cost
+                            </label>
+                            <div className="relative">
+                              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <DollarSign className="h-4 w-4 text-gray-400" />
+                              </div>
+                              <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                value={brand.yourCost || ''}
+                                onChange={(e) => handleBrandChange(brand.id, 'yourCost', e.target.value)}
+                                placeholder="0.00"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Retail Price
+                            </label>
+                            <div className="relative">
+                              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <DollarSign className="h-4 w-4 text-gray-400" />
+                              </div>
+                              <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                value={brand.retailPrice || ''}
+                                onChange={(e) => handleBrandChange(brand.id, 'retailPrice', e.target.value)}
+                                placeholder="0.00"
+                              />
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Tariff Tax (Optional)
+                            </label>
+                            <div className="relative">
+                              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <DollarSign className="h-4 w-4 text-gray-400" />
+                              </div>
+                              <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                value={brand.tariffTax || ''}
+                                onChange={(e) => handleBrandChange(brand.id, 'tariffTax', e.target.value)}
+                                placeholder="0.00"
+                              />
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-end">
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveBrand(brand.id)}
+                              className="px-3 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 

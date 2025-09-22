@@ -1,7 +1,7 @@
 import { ProfitData } from '../types';
 
 /**
- * Calculate profit data based on input values
+ * Calculate profit data based on input values (with insurance)
  */
 export const calculateProfit = (
   yourCost: number,
@@ -38,9 +38,9 @@ export const calculateProfit = (
   const totalCost = yourCost + tariffTax;
   const profit = total - totalCost;
   
-  // Calculate profit margin percentage based on YOUR actual cost plus tariff tax
-  const profitMargin = totalCost > 0 
-    ? Math.round((profit / totalCost) * 100) 
+  // Calculate profit margin percentage based on total revenue collected
+  const profitMargin = total > 0 
+    ? Math.round((profit / total) * 100) 
     : 0;
   
   return {
@@ -80,6 +80,59 @@ export const calculateRetailPrice = (wholesaleCost: number, tariffTax: number, m
 export const calculateDiscountPercentage = (yourCost: number, wholesaleCost: number): number => {
   if (wholesaleCost <= 0 || yourCost >= wholesaleCost) return 0;
   return Math.round(((wholesaleCost - yourCost) / wholesaleCost) * 100);
+};
+
+/**
+ * Calculate profit data for non-insurance (cash-pay) customers
+ */
+export const calculateNonInsuranceProfit = (
+  yourCost: number,
+  wholesaleCost: number,
+  tariffTax: number,
+  retailPrice: number
+): ProfitData => {
+  // Ensure all values are valid numbers
+  yourCost = Number(yourCost) || 0;
+  wholesaleCost = Number(wholesaleCost) || 0;
+  tariffTax = Number(tariffTax) || 0;
+  retailPrice = Number(retailPrice) || 0;
+
+  // For non-insurance calculations, patient pays the full retail price
+  const patientPayment = retailPrice;
+  
+  // No insurance involvement
+  const insurancePayment = 0;
+  const insuranceReimbursement = 0;
+  const insuranceCoverage = 0;
+  const discountedAmount = 0;
+  
+  // Total revenue is just what patient pays
+  const total = patientPayment;
+  
+  // Calculate profit based on YOUR actual cost plus any tariff tax
+  const totalCost = yourCost + tariffTax;
+  const profit = total - totalCost;
+  
+  // Calculate profit margin percentage based on total revenue collected
+  const profitMargin = total > 0 
+    ? Math.round((profit / total) * 100) 
+    : 0;
+
+  return {
+    yourCost,
+    wholesaleCost,
+    tariffTax,
+    totalCost,
+    retailPrice,
+    patientPayment,
+    insurancePayment,
+    insuranceCoverage,
+    reimbursement: insuranceReimbursement,
+    total,
+    profit,
+    profitMargin,
+    discountedAmount
+  };
 };
 
 /**

@@ -11,13 +11,15 @@ import {
   ChevronLeft,
   ChevronRight,
   Package,
-  Scale
+  Scale,
+  Warehouse
 } from 'lucide-react';
 
 const navigation = [
   { name: 'Home', to: '/', icon: Home },
   { name: 'Calculator', to: '/calculator', icon: Calculator },
   { name: 'Dashboard', to: '/dashboard', icon: BarChart3 },
+  { name: 'Inventory', to: '/inventory', icon: Warehouse },
   { name: 'Vendors', to: '/brands', icon: Package },
   { name: 'Vendor Comparison', to: '/vendor-comparison', icon: Scale },
   { name: 'About', to: '/about', icon: Info },

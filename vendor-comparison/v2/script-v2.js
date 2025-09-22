@@ -111,7 +111,7 @@ function updateBestDealBanner() {
   document.getElementById('bestDealPrice').textContent = bestCost.toFixed(2);
 }
 
-function sortVendors() {
+function applySorting() {
   renderVendors();
   updateBestDealBanner();
 }

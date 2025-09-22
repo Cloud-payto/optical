@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, ChevronUp, Eye, Building2, Package, Edit3, Percent } from 'lucide-react';
+import { ChevronDown, ChevronUp, Eye, Building2, Package, Edit3, Percent, Plus } from 'lucide-react';
 import { Company } from '../../types';
 
 interface CompanyCardProps {
@@ -80,10 +80,19 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company, onViewBrandDetails, 
           >
             <div className="p-6 bg-gray-50">
               <div className="space-y-3">
-                <h4 className="text-sm font-medium text-gray-700 mb-4 flex items-center">
-                  <Package className="h-4 w-4 mr-2" />
-                  Brands
-                </h4>
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-sm font-medium text-gray-700 flex items-center">
+                    <Package className="h-4 w-4 mr-2" />
+                    Brands
+                  </h4>
+                  <button
+                    onClick={handleEditCompany}
+                    className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors duration-200"
+                  >
+                    <Plus className="h-3 w-3 mr-1" />
+                    Add Brand
+                  </button>
+                </div>
                 {company.brands.map((brand) => {
                   const discountPercentage = brand.wholesaleCost && brand.yourCost 
                     ? calculateDiscountPercentage(brand.wholesaleCost, brand.yourCost)
@@ -105,6 +114,11 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company, onViewBrandDetails, 
                           {brand.yourCost && (
                             <p className="text-xs text-gray-500">
                               Your Cost: ${brand.yourCost.toFixed(2)}
+                            </p>
+                          )}
+                          {brand.retailPrice && (
+                            <p className="text-xs text-blue-600 font-medium">
+                              Retail: ${brand.retailPrice.toFixed(2)}
                             </p>
                           )}
                           {discountPercentage > 0 && (

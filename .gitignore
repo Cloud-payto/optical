@@ -23,3 +23,12 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Database
+server/db/*.db
+server/db/*.sqlite
+*.db-journal
+
+# JSON Data files
+server/data/
+*.json.backup

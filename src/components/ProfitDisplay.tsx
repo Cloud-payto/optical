@@ -7,9 +7,10 @@ interface ProfitDisplayProps {
   profitData: ProfitData;
   animate: boolean;
   savedCalculations: SavedCalculation[];
+  insuranceEnabled: boolean;
 }
 
-const ProfitDisplay: React.FC<ProfitDisplayProps> = ({ profitData, animate, savedCalculations }) => {
+const ProfitDisplay: React.FC<ProfitDisplayProps> = ({ profitData, animate, savedCalculations, insuranceEnabled }) => {
   const { profit, patientPayment, total, yourCost, wholesaleCost, tariffTax, totalCost, profitMargin, discountedAmount, retailPrice, reimbursement } = profitData;
   
   // Determine the profitability level
@@ -51,40 +52,54 @@ const ProfitDisplay: React.FC<ProfitDisplayProps> = ({ profitData, animate, save
         <div className="bg-white rounded-lg shadow-sm p-4">
           <h4 className="text-sm font-medium text-gray-500 mb-2">Revenue Breakdown</h4>
           <div className="space-y-2">
-            {patientPayment > 0 && (
-              <div className="flex flex-col">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center">
-                    <span className="text-sm">Retail Price</span>
+            {insuranceEnabled ? (
+              // Insurance-enabled breakdown
+              <>
+                {patientPayment > 0 && (
+                  <div className="flex flex-col">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        <span className="text-sm">Retail Price</span>
+                      </div>
+                      <span className="font-medium">{formatCurrency(retailPrice)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        <span className="text-sm">Insurance Coverage</span>
+                      </div>
+                      <span className="font-medium text-green-600">-{formatCurrency(profitData.insuranceCoverage)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        <span className="text-sm">20% Discount on Difference</span>
+                        <InfoIcon className="h-3 w-3 text-gray-400 ml-1" aria-label="Insurance contracts require a 20% discount on the portion not covered by insurance" />
+                      </div>
+                      <span className="font-medium text-green-600">-{formatCurrency(discountedAmount)}</span>
+                    </div>
+                    <div className="flex justify-between items-center bg-gray-50 p-1 rounded mt-1">
+                      <span className="text-sm font-medium">Patient Payment</span>
+                      <span className="font-medium">{formatCurrency(patientPayment)}</span>
+                    </div>
                   </div>
-                  <span className="font-medium">{formatCurrency(retailPrice)}</span>
-                </div>
-                <div className="flex justify-between items-center">
+                )}
+                <div className="flex justify-between items-center mt-2">
                   <div className="flex items-center">
-                    <span className="text-sm">Insurance Coverage</span>
+                    <span className="text-sm">Insurance Reimbursement</span>
+                    <InfoIcon className="h-3 w-3 text-gray-400 ml-1" aria-label="Fixed amount paid by insurance providers (typically $57)" />
                   </div>
-                  <span className="font-medium text-green-600">-{formatCurrency(profitData.insuranceCoverage)}</span>
+                  <span className="font-medium">{formatCurrency(reimbursement)}</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center">
-                    <span className="text-sm">20% Discount on Difference</span>
-                    <InfoIcon className="h-3 w-3 text-gray-400 ml-1" aria-label="Insurance contracts require a 20% discount on the portion not covered by insurance" />
-                  </div>
-                  <span className="font-medium text-green-600">-{formatCurrency(discountedAmount)}</span>
+              </>
+            ) : (
+              // Non-insurance (cash-pay) breakdown - much simpler
+              <div className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <span className="text-sm">Customer Payment (Full Retail Price)</span>
+                  <InfoIcon className="h-3 w-3 text-gray-400 ml-1" aria-label="Customer pays full retail price (2x wholesale cost)" />
                 </div>
-                <div className="flex justify-between items-center bg-gray-50 p-1 rounded mt-1">
-                  <span className="text-sm font-medium">Patient Payment</span>
-                  <span className="font-medium">{formatCurrency(patientPayment)}</span>
-                </div>
+                <span className="font-medium">{formatCurrency(patientPayment)}</span>
               </div>
             )}
-            <div className="flex justify-between items-center mt-2">
-              <div className="flex items-center">
-                <span className="text-sm">Insurance Reimbursement</span>
-                <InfoIcon className="h-3 w-3 text-gray-400 ml-1" aria-label="Fixed amount paid by insurance providers (typically $57)" />
-              </div>
-              <span className="font-medium">{formatCurrency(reimbursement)}</span>
-            </div>
             <div className="h-px bg-gray-200 my-2"></div>
             <div className="flex justify-between items-center font-semibold">
               <span>Total Revenue</span>

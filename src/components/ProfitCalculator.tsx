@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ProfitData, SavedCalculation, Company, Brand } from '../types';
-import { calculateProfit, calculateRetailPrice } from '../utils/calculations';
+import { calculateProfit, calculateNonInsuranceProfit, calculateRetailPrice } from '../utils/calculations';
 import ProfitDisplay from './ProfitDisplay';
 import { DollarSignIcon, SaveIcon, PrinterIcon, SlidersIcon, ChevronDownIcon, PlusIcon, TagIcon, ShieldIcon, BuildingIcon } from 'lucide-react';
 
@@ -73,6 +73,7 @@ const ProfitCalculator: React.FC = () => {
   const [insuranceReimbursement, setInsuranceReimbursement] = useState<number>(57);
   const [savedCalculations, setSavedCalculations] = useState<SavedCalculation[]>(loadSavedCalculations());
   const [animateCalculation, setAnimateCalculation] = useState<boolean>(false);
+  const [insuranceEnabled, setInsuranceEnabled] = useState<boolean>(true);
   
   // Company and Brand selection state
   const [companies, setCompanies] = useState<Company[]>(loadSavedCompanies());
@@ -119,14 +120,30 @@ const ProfitCalculator: React.FC = () => {
     }
   }, [wholesaleCost, tariffTax, insuranceMultiplier, useManualRetailPrice]);
 
-  const profitData: ProfitData = calculateProfit(
-    yourCost,
-    wholesaleCost,
-    tariffTax,
-    retailPrice,
-    insuranceCoverage,
-    insuranceReimbursement
-  );
+  // Update multiplier when insurance toggle changes
+  useEffect(() => {
+    if (!insuranceEnabled && insuranceMultiplier !== 2.0) {
+      setInsuranceMultiplier(2.0); // Default to 2x for non-insurance
+    } else if (insuranceEnabled && insuranceMultiplier === 2.0) {
+      setInsuranceMultiplier(2.5); // Default back to 2.5x for insurance
+    }
+  }, [insuranceEnabled, insuranceMultiplier]);
+
+  const profitData: ProfitData = insuranceEnabled 
+    ? calculateProfit(
+        yourCost,
+        wholesaleCost,
+        tariffTax,
+        retailPrice,
+        insuranceCoverage,
+        insuranceReimbursement
+      )
+    : calculateNonInsuranceProfit(
+        yourCost,
+        wholesaleCost,
+        tariffTax,
+        retailPrice
+      );
 
   useEffect(() => {
     setAnimateCalculation(true);
@@ -190,6 +207,10 @@ const ProfitCalculator: React.FC = () => {
     if (brand.yourCost !== undefined) setYourCost(brand.yourCost);
     if (brand.wholesaleCost !== undefined) setWholesaleCost(brand.wholesaleCost);
     if (brand.tariffTax !== undefined) setTariffTax(brand.tariffTax);
+    if (brand.retailPrice !== undefined) {
+      setRetailPrice(brand.retailPrice);
+      setUseManualRetailPrice(true); // Enable manual mode when using brand retail price
+    }
   };
 
   const handleSaveCalculation = () => {
@@ -210,6 +231,7 @@ const ProfitCalculator: React.FC = () => {
       brand: brandName,
       insurance: selectedInsurance,
       insurancePlan: selectedInsurancePlan,
+      insuranceEnabled,
       yourCost,
       wholesaleCost,
       tariffTax,
@@ -282,6 +304,9 @@ const ProfitCalculator: React.FC = () => {
     setInsuranceCoverage(calculation.insuranceCoverage);
     setInsuranceReimbursement(calculation.insuranceReimbursement);
     
+    // Restore insurance toggle state, default to true for backward compatibility
+    setInsuranceEnabled(calculation.insuranceEnabled !== undefined ? calculation.insuranceEnabled : true);
+    
     // Handle brand loading - check if it's new format (Company - Brand) or legacy
     if (calculation.brand && calculation.brand.includes(' - ')) {
       const [companyName, brandName] = calculation.brand.split(' - ');
@@ -334,6 +359,45 @@ const ProfitCalculator: React.FC = () => {
         <div className="p-6 md:w-1/2">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Frame Profitability Calculator</h2>
           
+          {/* Insurance Toggle */}
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-medium text-gray-900">Insurance Billing</h3>
+                <p className="text-xs text-gray-500 mt-1">
+                  {insuranceEnabled 
+                    ? "Calculate profit with insurance provider billing" 
+                    : "Calculate profit for cash-pay customers (2x wholesale pricing)"
+                  }
+                </p>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="insuranceToggle"
+                  className="sr-only"
+                  checked={insuranceEnabled}
+                  onChange={(e) => setInsuranceEnabled(e.target.checked)}
+                />
+                <label
+                  htmlFor="insuranceToggle"
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                    insuranceEnabled ? 'bg-blue-600' : 'bg-gray-200'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      insuranceEnabled ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </label>
+                <span className="ml-3 text-sm font-medium text-gray-700">
+                  {insuranceEnabled ? 'On' : 'Off'}
+                </span>
+              </div>
+            </div>
+          </div>
+          
           <div className="space-y-4">
             {/* 2x2 Grid for Company/Insurance and Brand/Insurance Plan */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -384,10 +448,11 @@ const ProfitCalculator: React.FC = () => {
                 </div>
                 
                 {/* Insurance Provider Dropdown */}
-                <div className="space-y-2">
-                  <label htmlFor="insurance" className="block text-sm font-medium text-gray-700">
-                    Insurance Provider
-                  </label>
+                {insuranceEnabled && (
+                  <div className="space-y-2">
+                    <label htmlFor="insurance" className="block text-sm font-medium text-gray-700">
+                      Insurance Provider
+                    </label>
                   <div className="relative" ref={insuranceDropdownRef}>
                     <button
                       type="button"
@@ -446,6 +511,7 @@ const ProfitCalculator: React.FC = () => {
                     )}
                   </div>
                 </div>
+                )}
               </div>
               
               {/* RIGHT COLUMN */}
@@ -486,10 +552,11 @@ const ProfitCalculator: React.FC = () => {
                               >
                                 <div>
                                   <div className="font-medium">{brand.name}</div>
-                                  {(brand.wholesaleCost || brand.yourCost) && (
+                                  {(brand.wholesaleCost || brand.yourCost || brand.retailPrice) && (
                                     <div className="text-xs text-gray-500">
                                       {brand.yourCost && `Your Cost: $${brand.yourCost}`}
                                       {brand.wholesaleCost && ` • Wholesale: $${brand.wholesaleCost}`}
+                                      {brand.retailPrice && ` • Retail: $${brand.retailPrice}`}
                                     </div>
                                   )}
                                 </div>
@@ -508,10 +575,11 @@ const ProfitCalculator: React.FC = () => {
                 </div>
                 
                 {/* Insurance Plan Dropdown */}
-                <div className="space-y-2">
-                  <label htmlFor="insurancePlan" className="block text-sm font-medium text-gray-700">
-                    Insurance Plan
-                  </label>
+                {insuranceEnabled && (
+                  <div className="space-y-2">
+                    <label htmlFor="insurancePlan" className="block text-sm font-medium text-gray-700">
+                      Insurance Plan
+                    </label>
                   <div className="relative" ref={insurancePlanDropdownRef}>
                     <button
                       type="button"
@@ -570,6 +638,7 @@ const ProfitCalculator: React.FC = () => {
                     )}
                   </div>
                 </div>
+                )}
               </div>
             </div>
             {/* End of 2x2 grid */}
@@ -724,7 +793,7 @@ const ProfitCalculator: React.FC = () => {
             
             <div className="space-y-2">
               <label htmlFor="insuranceMultiplier" className="block text-sm font-medium text-gray-700 flex justify-between">
-                <span>Insurance Multiplier: {insuranceMultiplier.toFixed(1)}x</span>
+                <span>{insuranceEnabled ? 'Insurance ' : ''}Multiplier: {insuranceMultiplier.toFixed(1)}x</span>
                 <div className="flex items-center">
                   <input
                     type="checkbox"
@@ -795,10 +864,12 @@ const ProfitCalculator: React.FC = () => {
               )}
             </div>
             
-            <div className="space-y-2">
-              <label htmlFor="insuranceCoverage" className="block text-sm font-medium text-gray-700">
-                Insurance Coverage Amount
-              </label>
+            {insuranceEnabled && (
+              <>
+                <div className="space-y-2">
+                  <label htmlFor="insuranceCoverage" className="block text-sm font-medium text-gray-700">
+                    Insurance Coverage Amount
+                  </label>
               <div className="relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <DollarSignIcon className="h-4 w-4 text-gray-400" />
@@ -848,6 +919,8 @@ const ProfitCalculator: React.FC = () => {
                 Typically $57 for most insurance providers
               </p>
             </div>
+            </>
+            )}
           </div>
           
           <div className="mt-6 flex space-x-3">
@@ -982,6 +1055,7 @@ const ProfitCalculator: React.FC = () => {
             profitData={profitData} 
             animate={animateCalculation}
             savedCalculations={savedCalculations}
+            insuranceEnabled={insuranceEnabled}
           />
         </div>
       </div>
