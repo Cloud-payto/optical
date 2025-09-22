@@ -1,7 +1,9 @@
 const cheerio = require('cheerio');
 
-// Color mapping for normalization - matches ModernOpticalWebService
-const colorMap = new Map([
+class ModernOpticalParser {
+    constructor() {
+        // Color mapping for normalization - matches ModernOpticalWebService
+        this.colorMap = new Map([
     // Basic colors
     ['BLK', 'Black'], ['BLACK', 'Black'],
     ['GM', 'Gunmetal'], ['GUN', 'Gunmetal'], ['GUNMETAL', 'Gunmetal'],
@@ -29,67 +31,68 @@ const colorMap = new Map([
     
     // Special patterns
     ['CLEO', 'Cleo']
-]);
+        ]);
+    }
 
-/**
- * Normalize email color names to match website format
- * @param {string} colorName 
- * @returns {string}
- */
-function normalizeEmailColor(colorName) {
+    /**
+     * Normalize email color names to match website format
+     * @param {string} colorName 
+     * @returns {string}
+     */
+    normalizeEmailColor(colorName) {
     if (!colorName) return '';
     
     // Handle compound colors with slashes first
     if (colorName.includes('/')) {
-        const parts = colorName.split('/').map(part => normalizeColorPart(part.trim()));
+        const parts = colorName.split('/').map(part => this.normalizeColorPart(part.trim()));
         return parts.join('/');
     }
     
     // Handle multi-word color descriptions like "CLEO BLACK CRY"
     if (colorName.includes(' ')) {
-        const words = colorName.split(' ').map(word => normalizeColorPart(word.trim()));
+        const words = colorName.split(' ').map(word => this.normalizeColorPart(word.trim()));
         return words.join(' ');
     }
     
     // Single color part
-    return normalizeColorPart(colorName);
+    return this.normalizeColorPart(colorName);
 }
 
-/**
- * Normalize a single color part
- * @param {string} colorPart 
- * @returns {string}
- */
-function normalizeColorPart(colorPart) {
-    if (!colorPart) return '';
+    /**
+     * Normalize a single color part
+     * @param {string} colorPart 
+     * @returns {string}
+     */
+    normalizeColorPart(colorPart) {
+        if (!colorPart) return '';
+        
+        const upperColor = colorPart.toUpperCase();
     
-    const upperColor = colorPart.toUpperCase();
-    
-    // Try exact match first
-    if (colorMap.has(upperColor)) {
-        return colorMap.get(upperColor);
-    }
-    
-    // For longer words, try partial matches
-    for (const [abbrev, fullName] of colorMap.entries()) {
-        if (upperColor === abbrev || 
-            (colorPart.length <= 4 && upperColor.includes(abbrev)) ||
-            (abbrev.length > 3 && upperColor.includes(abbrev))) {
-            return fullName;
+        // Try exact match first
+        if (this.colorMap.has(upperColor)) {
+            return this.colorMap.get(upperColor);
         }
-    }
     
-    // Return original with proper case if no mapping found
-    return colorPart.charAt(0).toUpperCase() + colorPart.slice(1).toLowerCase();
-}
+        // For longer words, try partial matches
+        for (const [abbrev, fullName] of this.colorMap.entries()) {
+            if (upperColor === abbrev || 
+                (colorPart.length <= 4 && upperColor.includes(abbrev)) ||
+                (abbrev.length > 3 && upperColor.includes(abbrev))) {
+                return fullName;
+            }
+        }
+        
+        // Return original with proper case if no mapping found
+        return colorPart.charAt(0).toUpperCase() + colorPart.slice(1).toLowerCase();
+    }
 
-/**
- * Parse Modern Optical HTML emails
- * @param {string} html - The HTML content of the email
- * @param {string} plainText - The plain text content of the email
- * @returns {object} Parsed order data
- */
-function parseModernOpticalHtml(html, plainText) {
+    /**
+     * Parse Modern Optical HTML emails
+     * @param {string} html - The HTML content of the email
+     * @param {string} plainText - The plain text content of the email
+     * @returns {object} Parsed order data
+     */
+    parse(html, plainText) {
     // Temporarily disable HTML parsing to avoid cheerio dependency issues
     // const $ = cheerio.load(html);
     
@@ -188,7 +191,7 @@ function parseModernOpticalHtml(html, plainText) {
                         const cleanBrand = brandPart.trim();
                         const cleanModel = modelPart.trim();
                         const cleanColor = colorCell.trim();
-                        const normalizedColor = normalizeEmailColor(cleanColor);
+                        const normalizedColor = this.normalizeEmailColor(cleanColor);
                         const size = sizeCell.trim();
                         const quantity = parseInt(qtyCell.trim()) || 1;
                         
@@ -339,8 +342,7 @@ function parseModernOpticalHtml(html, plainText) {
         parsed_at: new Date().toISOString(),
         parser_version: '1.1.0'
     };
+    }
 }
 
-module.exports = {
-    parseModernOpticalHtml
-};
+module.exports = ModernOpticalParser;
