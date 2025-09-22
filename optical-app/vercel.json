@@ -11,20 +11,6 @@
       "maxDuration": 60
     }
   },
-  "env": {
-    "NODE_ENV": "production",
-    "NEXT_PUBLIC_API_URL": "@api-url",
-    "NEXT_PUBLIC_SUPABASE_URL": "@supabase-url",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase-anon-key",
-    "SUPABASE_SERVICE_ROLE_KEY": "@supabase-service-role-key",
-    "DATABASE_URL": "@database-url",
-    "JWT_SECRET": "@jwt-secret",
-    "NEXTAUTH_SECRET": "@nextauth-secret",
-    "NEXTAUTH_URL": "@nextauth-url",
-    "EMAIL_WEBHOOK_SECRET": "@email-webhook-secret",
-    "SAFILO_API_KEY": "@safilo-api-key",
-    "MODERN_OPTICAL_API_KEY": "@modern-optical-api-key"
-  },
   "headers": [
     {
       "source": "/api/(.*)",
