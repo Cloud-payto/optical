@@ -2,19 +2,19 @@
 import { getApiEndpoint } from '../lib/api-config';
 import { supabase } from '../lib/supabase';
 
-// Helper function to get current user ID
-function getCurrentUserId(): string {
-  const { data: { user } } = supabase.auth.getUser();
-  if (!user) {
+// Helper function to get current user ID (async)
+async function getCurrentUserId(): Promise<string> {
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) {
     throw new Error('User not authenticated. Please log in to continue.');
   }
   return user.id;
 }
 
-// Helper function to get current user ID synchronously from session
-function getCurrentUserIdSync(): string {
-  const { data: { session } } = supabase.auth.getSession();
-  if (!session?.user) {
+// Helper function to get current user ID from session (async)
+async function getCurrentUserIdFromSession(): Promise<string> {
+  const { data: { session }, error } = await supabase.auth.getSession();
+  if (error || !session?.user) {
     throw new Error('User not authenticated. Please log in to continue.');
   }
   return session.user.id;
@@ -99,7 +99,7 @@ export interface EmailResponse {
 }
 
 export async function fetchEmails(userId?: string): Promise<EmailResponse> {
-  const currentUserId = userId || getCurrentUserIdSync();
+  const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<EmailResponse>(`/emails/${currentUserId}`);
 }
 
@@ -138,13 +138,13 @@ export interface InventoryResponse {
 }
 
 export async function fetchInventory(userId?: string): Promise<InventoryResponse> {
-  const currentUserId = userId || getCurrentUserIdSync();
+  const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<InventoryResponse>(`/inventory/${currentUserId}`);
 }
 
 // Mark inventory as received (placeholder for future implementation)
 export async function markAsReceived(emailId: number, userId?: string): Promise<{ success: boolean }> {
-  const currentUserId = userId || getCurrentUserIdSync();
+  const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<{ success: boolean }>(`/emails/${currentUserId}/${emailId}/received`, {
     method: 'POST',
   });
@@ -152,14 +152,14 @@ export async function markAsReceived(emailId: number, userId?: string): Promise<
 
 // Delete functions
 export async function deleteEmail(emailId: number, userId?: string): Promise<{ success: boolean; message: string }> {
-  const currentUserId = userId || getCurrentUserIdSync();
+  const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<{ success: boolean; message: string }>(`/emails/${currentUserId}/${emailId}`, {
     method: 'DELETE',
   });
 }
 
 export async function deleteInventoryItem(itemId: number, userId?: string): Promise<{ success: boolean; message: string }> {
-  const currentUserId = userId || getCurrentUserIdSync();
+  const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<{ success: boolean; message: string }>(`/inventory/${currentUserId}/${itemId}`, {
     method: 'DELETE',
   });
@@ -167,28 +167,28 @@ export async function deleteInventoryItem(itemId: number, userId?: string): Prom
 
 // New inventory workflow functions
 export async function confirmPendingOrder(orderNumber: string, userId?: string): Promise<{ success: boolean; message: string; updatedCount: number }> {
-  const currentUserId = userId || getCurrentUserIdSync();
+  const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<{ success: boolean; message: string; updatedCount: number }>(`/inventory/${currentUserId}/confirm/${orderNumber}`, {
     method: 'POST',
   });
 }
 
 export async function archiveInventoryItem(itemId: number, userId?: string): Promise<{ success: boolean; message: string; item: InventoryItem }> {
-  const currentUserId = userId || getCurrentUserIdSync();
+  const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<{ success: boolean; message: string; item: InventoryItem }>(`/inventory/${currentUserId}/${itemId}/archive`, {
     method: 'PUT',
   });
 }
 
 export async function restoreInventoryItem(itemId: number, userId?: string): Promise<{ success: boolean; message: string; item: InventoryItem }> {
-  const currentUserId = userId || getCurrentUserIdSync();
+  const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<{ success: boolean; message: string; item: InventoryItem }>(`/inventory/${currentUserId}/${itemId}/restore`, {
     method: 'PUT',
   });
 }
 
 export async function archiveAllItemsByBrand(brandName: string, vendorName: string, userId?: string): Promise<{ success: boolean; message: string; archivedCount: number }> {
-  const currentUserId = userId || getCurrentUserIdSync();
+  const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<{ success: boolean; message: string; archivedCount: number }>(`/inventory/${currentUserId}/archive-brand`, {
     method: 'PUT',
     body: JSON.stringify({ brandName, vendorName }),
@@ -230,31 +230,31 @@ export interface OrderResponse {
 }
 
 export async function fetchOrders(userId?: string): Promise<OrderResponse> {
-  const currentUserId = userId || getCurrentUserIdSync();
+  const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<OrderResponse>(`/orders/${currentUserId}`);
 }
 
 export async function fetchOrderById(orderId: number, userId?: string): Promise<OrderResponse> {
-  const currentUserId = userId || getCurrentUserIdSync();
+  const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<OrderResponse>(`/orders/${currentUserId}/${orderId}`);
 }
 
 export async function archiveOrder(orderId: number, userId?: string): Promise<{ success: boolean; message: string; order: OrderData }> {
-  const currentUserId = userId || getCurrentUserIdSync();
+  const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<{ success: boolean; message: string; order: OrderData }>(`/orders/${currentUserId}/${orderId}/archive`, {
     method: 'PUT',
   });
 }
 
 export async function deleteOrder(orderId: number, userId?: string): Promise<{ success: boolean; message: string }> {
-  const currentUserId = userId || getCurrentUserIdSync();
+  const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<{ success: boolean; message: string }>(`/orders/${currentUserId}/${orderId}`, {
     method: 'DELETE',
   });
 }
 
 export async function deleteArchivedItemsByBrand(brandName: string, vendorName: string, userId?: string): Promise<{ success: boolean; message: string; deletedCount: number }> {
-  const currentUserId = userId || getCurrentUserIdSync();
+  const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<{ success: boolean; message: string; deletedCount: number }>(`/inventory/${currentUserId}/delete-archived-brand`, {
     method: 'DELETE',
     body: JSON.stringify({ brandName, vendorName }),
@@ -262,7 +262,7 @@ export async function deleteArchivedItemsByBrand(brandName: string, vendorName: 
 }
 
 export async function deleteArchivedItemsByVendor(vendorName: string, userId?: string): Promise<{ success: boolean; message: string; deletedCount: number }> {
-  const currentUserId = userId || getCurrentUserIdSync();
+  const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<{ success: boolean; message: string; deletedCount: number }>(`/inventory/${currentUserId}/delete-archived-vendor`, {
     method: 'DELETE',
     body: JSON.stringify({ vendorName }),
@@ -270,7 +270,7 @@ export async function deleteArchivedItemsByVendor(vendorName: string, userId?: s
 }
 
 export async function markItemAsSold(itemId: number, userId?: string): Promise<{ success: boolean; message: string; item: InventoryItem }> {
-  const currentUserId = userId || getCurrentUserIdSync();
+  const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<{ success: boolean; message: string; item: InventoryItem }>(`/inventory/${currentUserId}/${itemId}/sold`, {
     method: 'PUT',
   });
@@ -353,12 +353,12 @@ export async function fetchBrandsByVendor(vendorId: string): Promise<Brand[]> {
 }
 
 export async function fetchUserVendorPricing(userId?: string): Promise<UserVendorPricing[]> {
-  const currentUserId = userId || getCurrentUserIdSync();
+  const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<UserVendorPricing[]>(`/vendors/pricing/${currentUserId}`);
 }
 
 export async function saveUserVendorPricing(pricingData: Partial<UserVendorPricing>, userId?: string): Promise<UserVendorPricing[]> {
-  const currentUserId = userId || getCurrentUserIdSync();
+  const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<UserVendorPricing[]>(`/vendors/pricing/${currentUserId}`, {
     method: 'POST',
     body: JSON.stringify(pricingData),
@@ -366,7 +366,7 @@ export async function saveUserVendorPricing(pricingData: Partial<UserVendorPrici
 }
 
 export async function fetchCompaniesWithPricing(userId?: string): Promise<Company[]> {
-  const currentUserId = userId || getCurrentUserIdSync();
+  const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<Company[]>(`/vendors/companies/${currentUserId}`);
 }
 
