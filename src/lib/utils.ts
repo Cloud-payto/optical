@@ -63,8 +63,22 @@ export function getBaseUrl(): string {
   if (isClient()) {
     return window.location.origin;
   }
-  // Fallback for server-side rendering
-  return process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  
+  // Fallback for server-side rendering (React app)
+  const appUrl = import.meta.env.VITE_BASE_URL;
+  const isDevelopment = import.meta.env.DEV;
+  
+  if (appUrl) {
+    return appUrl;
+  }
+  
+  // Development fallback only
+  if (isDevelopment) {
+    return 'http://localhost:5173';
+  }
+  
+  // Production fallback - should rarely be used since client-side is preferred
+  return 'https://localhost';
 }
 
 export function generateId(prefix: string = 'id'): string {

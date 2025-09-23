@@ -42,12 +42,12 @@ Click "Create Web Service" and wait for deployment to complete.
 
 ## Step 2: Deploy React App
 
-### 2.1 Update React Environment Variables
+### 2.1 Update Vite Environment Variables
 Create `.env.production` in the root directory:
 ```
-REACT_APP_SUPABASE_URL=https://your-project.supabase.co
-REACT_APP_SUPABASE_ANON_KEY=your-supabase-anon-key
-REACT_APP_API_URL=https://your-express-app.onrender.com/api
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+VITE_API_URL=https://your-express-app.onrender.com/api
 ```
 
 ### 2.2 Deploy React App to Render
@@ -58,12 +58,12 @@ REACT_APP_API_URL=https://your-express-app.onrender.com/api
    - **Build Command**: `npm run build`
    - **Publish Directory**: `dist`
 
-### 2.3 Set React Environment Variables
+### 2.3 Set Vite Environment Variables
 In the Environment tab, add:
 ```
-REACT_APP_SUPABASE_URL=https://your-project.supabase.co
-REACT_APP_SUPABASE_ANON_KEY=your-supabase-anon-key
-REACT_APP_API_URL=https://your-express-app.onrender.com/api
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+VITE_API_URL=https://your-express-app.onrender.com/api
 ```
 
 ## Step 3: Update CORS Configuration
