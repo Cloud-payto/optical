@@ -11,7 +11,7 @@ export default function Auth() {
   const [showPassword, setShowPassword] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   
-  const { signIn, signUp, signInAsDemo, loading } = useAuth();
+  const { signIn, signUp, signInAsDemo, loading, authError } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,6 +73,21 @@ export default function Auth() {
         {/* Auth Form */}
         <Card className="p-8">
           <div className="space-y-6">
+            {/* Show auth error if present */}
+            {authError && (
+              <div className="bg-red-50 border border-red-200 rounded-md p-4">
+                <div className="flex">
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-red-800">
+                      Authentication Error
+                    </h3>
+                    <div className="mt-2 text-sm text-red-700">
+                      {authError}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             {/* Toggle between Login/Signup */}
             <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
               <button

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import toast from 'react-hot-toast';
 
 interface AuthContextType {
@@ -8,6 +8,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   isAuthenticated: boolean;
+  authError: string | null;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -28,28 +29,72 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+    // If Supabase is not configured, just set as unauthenticated
+    if (!isSupabaseConfigured) {
+      console.warn('Supabase not configured, setting user as unauthenticated');
+      setAuthError('Authentication service is not configured. Please contact support.');
+      setSession(null);
+      setUser(null);
       setLoading(false);
-    });
+      return;
+    }
 
-    // Listen for auth changes
+    // Get initial session with error handling
+    const getInitialSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Error getting session:', error);
+          setAuthError('Failed to check authentication status. Please try refreshing the page.');
+          // Don't throw, just set user to null and stop loading
+          setSession(null);
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+        setAuthError(null);
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      } catch (error) {
+        console.error('Failed to get initial session:', error);
+        setAuthError('Authentication system is unavailable. Please try again later.');
+        setSession(null);
+        setUser(null);
+        setLoading(false);
+      }
+    };
+
+    getInitialSession();
+
+    // Listen for auth changes with error handling
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
+      try {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error in auth state change:', error);
+        setSession(null);
+        setUser(null);
+        setLoading(false);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    if (!isSupabaseConfigured) {
+      toast.error('Authentication is not configured. Please contact support.');
+      return;
+    }
+
     try {
       setLoading(true);
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -86,6 +131,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string) => {
+    if (!isSupabaseConfigured) {
+      toast.error('Authentication is not configured. Please contact support.');
+      return;
+    }
+
     try {
       setLoading(true);
       const { data, error } = await supabase.auth.signUp({
@@ -125,6 +175,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
+    if (!isSupabaseConfigured) {
+      toast.error('Authentication is not configured. Please contact support.');
+      return;
+    }
+
     try {
       setLoading(true);
       const { error } = await supabase.auth.signOut();
@@ -143,6 +198,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInAsDemo = async () => {
+    if (!isSupabaseConfigured) {
+      toast.error('Authentication is not configured. Please contact support.');
+      return;
+    }
+
     try {
       await signIn('demo@optical-software.com', 'DemoAccount2024');
       toast.success('Welcome to the demo!', {
@@ -160,6 +220,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     session,
     loading,
     isAuthenticated: !!user,
+    authError,
     signIn,
     signUp,
     signOut,

@@ -23,8 +23,18 @@ function getCurrentUserIdSync(): string {
 // Generic API request function with auth headers
 async function apiRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
   try {
-    // Get current session for auth token
-    const { data: { session } } = await supabase.auth.getSession();
+    // Get current session for auth token with error handling
+    let session = null;
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        console.warn('Failed to get session for API request:', error);
+      } else {
+        session = data.session;
+      }
+    } catch (sessionError) {
+      console.warn('Session retrieval failed, proceeding without auth:', sessionError);
+    }
     
     const response = await fetch(getApiEndpoint(endpoint), {
       headers: {
