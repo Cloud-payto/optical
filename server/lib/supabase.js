@@ -39,12 +39,12 @@ const emailOperations = {
     }
   },
 
-  async getEmailsByAccount(accountId) {
+  async getEmailsByAccount(userId) {
     try {
       const { data, error } = await supabase
         .from('emails')
         .select('*')
-        .eq('account_id', accountId)
+        .eq('user_id', userId)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -74,13 +74,13 @@ const emailOperations = {
     }
   },
 
-  async deleteEmail(emailId, accountId) {
+  async deleteEmail(emailId, userId) {
     try {
       const { error } = await supabase
         .from('emails')
         .delete()
         .eq('id', emailId)
-        .eq('account_id', accountId);
+        .eq('user_id', userId);
       
       if (error) throw error;
       return { success: true };
@@ -106,12 +106,12 @@ const inventoryOperations = {
     }
   },
 
-  async getInventoryByAccount(accountId) {
+  async getInventoryByAccount(userId) {
     try {
       const { data, error } = await supabase
         .from('inventory')
         .select('*')
-        .eq('account_id', accountId)
+        .eq('user_id', userId)
         .neq('status', 'archived')
         .order('created_at', { ascending: false });
       
@@ -122,13 +122,13 @@ const inventoryOperations = {
     }
   },
 
-  async deleteInventoryItem(itemId, accountId) {
+  async deleteInventoryItem(itemId, userId) {
     try {
       const { error } = await supabase
         .from('inventory')
         .delete()
         .eq('id', itemId)
-        .eq('account_id', accountId);
+        .eq('user_id', userId);
       
       if (error) throw error;
       return { success: true };
@@ -137,13 +137,13 @@ const inventoryOperations = {
     }
   },
 
-  async archiveInventoryItem(itemId, accountId) {
+  async archiveInventoryItem(itemId, userId) {
     try {
       const { data, error } = await supabase
         .from('inventory')
         .update({ status: 'archived' })
         .eq('id', itemId)
-        .eq('account_id', accountId)
+        .eq('user_id', userId)
         .select()
         .single();
       
@@ -154,13 +154,13 @@ const inventoryOperations = {
     }
   },
 
-  async confirmPendingOrder(orderNumber, accountId) {
+  async confirmPendingOrder(orderNumber, userId) {
     try {
       const { data, error } = await supabase
         .from('inventory')
         .update({ status: 'confirmed' })
         .eq('order_number', orderNumber)
-        .eq('account_id', accountId)
+        .eq('user_id', userId)
         .eq('status', 'pending')
         .select();
       
@@ -174,7 +174,7 @@ const inventoryOperations = {
 
 // Database operations for orders
 const orderOperations = {
-  async getOrdersByAccount(accountId) {
+  async getOrdersByAccount(userId) {
     try {
       const { data, error } = await supabase
         .from('orders')
@@ -182,7 +182,7 @@ const orderOperations = {
           *,
           items:inventory(*)
         `)
-        .eq('account_id', accountId)
+        .eq('user_id', userId)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -192,7 +192,7 @@ const orderOperations = {
     }
   },
 
-  async getOrderById(orderId, accountId) {
+  async getOrderById(orderId, userId) {
     try {
       const { data, error } = await supabase
         .from('orders')
@@ -201,7 +201,7 @@ const orderOperations = {
           items:inventory(*)
         `)
         .eq('id', orderId)
-        .eq('account_id', accountId)
+        .eq('user_id', userId)
         .single();
       
       if (error) throw error;
@@ -211,13 +211,13 @@ const orderOperations = {
     }
   },
 
-  async archiveOrder(orderId, accountId) {
+  async archiveOrder(orderId, userId) {
     try {
       const { data, error } = await supabase
         .from('orders')
         .update({ status: 'archived' })
         .eq('id', orderId)
-        .eq('account_id', accountId)
+        .eq('user_id', userId)
         .select()
         .single();
       
@@ -231,33 +231,33 @@ const orderOperations = {
 
 // Dashboard stats operations
 const statsOperations = {
-  async getDashboardStats(accountId) {
+  async getDashboardStats(userId) {
     try {
       // Get total orders
       const { count: totalOrders } = await supabase
         .from('orders')
         .select('*', { count: 'exact', head: true })
-        .eq('account_id', accountId);
+        .eq('user_id', userId);
 
       // Get total inventory
       const { count: totalInventory } = await supabase
         .from('inventory')
         .select('*', { count: 'exact', head: true })
-        .eq('account_id', accountId)
+        .eq('user_id', userId)
         .neq('status', 'archived');
 
       // Get pending items
       const { count: pendingItems } = await supabase
         .from('inventory')
         .select('*', { count: 'exact', head: true })
-        .eq('account_id', accountId)
+        .eq('user_id', userId)
         .eq('status', 'pending');
 
       // Calculate total value (if wholesale_price exists)
       const { data: inventoryData } = await supabase
         .from('inventory')
         .select('wholesale_price, quantity')
-        .eq('account_id', accountId)
+        .eq('user_id', userId)
         .not('wholesale_price', 'is', null);
 
       const totalValue = (inventoryData || []).reduce((sum, item) => {
@@ -277,13 +277,13 @@ const statsOperations = {
 };
 
 // Check duplicate order helper
-async function checkDuplicateOrder(orderNumber, accountId) {
+async function checkDuplicateOrder(orderNumber, userId) {
   try {
     const { data, error } = await supabase
       .from('orders')
       .select('id')
       .eq('order_number', orderNumber)
-      .eq('account_id', accountId)
+      .eq('user_id', userId)
       .single();
     
     if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned

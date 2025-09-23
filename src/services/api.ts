@@ -1,21 +1,46 @@
 // API service for backend communication
 import { getApiEndpoint } from '../lib/api-config';
+import { supabase } from '../lib/supabase';
 
-// Default account ID (since we're using a single test account for now)
-const DEFAULT_ACCOUNT_ID = 1;
+// Helper function to get current user ID
+function getCurrentUserId(): string {
+  const { data: { user } } = supabase.auth.getUser();
+  if (!user) {
+    throw new Error('User not authenticated. Please log in to continue.');
+  }
+  return user.id;
+}
 
-// Generic API request function
+// Helper function to get current user ID synchronously from session
+function getCurrentUserIdSync(): string {
+  const { data: { session } } = supabase.auth.getSession();
+  if (!session?.user) {
+    throw new Error('User not authenticated. Please log in to continue.');
+  }
+  return session.user.id;
+}
+
+// Generic API request function with auth headers
 async function apiRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
   try {
+    // Get current session for auth token
+    const { data: { session } } = await supabase.auth.getSession();
+    
     const response = await fetch(getApiEndpoint(endpoint), {
       headers: {
         'Content-Type': 'application/json',
+        ...(session?.access_token && {
+          'Authorization': `Bearer ${session.access_token}`,
+        }),
         ...options?.headers,
       },
       ...options,
     });
 
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Authentication required. Please log in again.');
+      }
       throw new Error(`API Error: ${response.status} ${response.statusText}`);
     }
 
@@ -63,8 +88,9 @@ export interface EmailResponse {
   emails: EmailData[];
 }
 
-export async function fetchEmails(accountId: number = DEFAULT_ACCOUNT_ID): Promise<EmailResponse> {
-  return apiRequest<EmailResponse>(`/emails/${accountId}`);
+export async function fetchEmails(userId?: string): Promise<EmailResponse> {
+  const currentUserId = userId || getCurrentUserIdSync();
+  return apiRequest<EmailResponse>(`/emails/${currentUserId}`);
 }
 
 // Inventory API functions
@@ -101,51 +127,59 @@ export interface InventoryResponse {
   inventory: InventoryItem[];
 }
 
-export async function fetchInventory(accountId: number = DEFAULT_ACCOUNT_ID): Promise<InventoryResponse> {
-  return apiRequest<InventoryResponse>(`/inventory/${accountId}`);
+export async function fetchInventory(userId?: string): Promise<InventoryResponse> {
+  const currentUserId = userId || getCurrentUserIdSync();
+  return apiRequest<InventoryResponse>(`/inventory/${currentUserId}`);
 }
 
 // Mark inventory as received (placeholder for future implementation)
-export async function markAsReceived(emailId: number): Promise<{ success: boolean }> {
-  return apiRequest<{ success: boolean }>(`/emails/${emailId}/received`, {
+export async function markAsReceived(emailId: number, userId?: string): Promise<{ success: boolean }> {
+  const currentUserId = userId || getCurrentUserIdSync();
+  return apiRequest<{ success: boolean }>(`/emails/${currentUserId}/${emailId}/received`, {
     method: 'POST',
   });
 }
 
 // Delete functions
-export async function deleteEmail(emailId: number, accountId: number = DEFAULT_ACCOUNT_ID): Promise<{ success: boolean; message: string }> {
-  return apiRequest<{ success: boolean; message: string }>(`/emails/${accountId}/${emailId}`, {
+export async function deleteEmail(emailId: number, userId?: string): Promise<{ success: boolean; message: string }> {
+  const currentUserId = userId || getCurrentUserIdSync();
+  return apiRequest<{ success: boolean; message: string }>(`/emails/${currentUserId}/${emailId}`, {
     method: 'DELETE',
   });
 }
 
-export async function deleteInventoryItem(itemId: number, accountId: number = DEFAULT_ACCOUNT_ID): Promise<{ success: boolean; message: string }> {
-  return apiRequest<{ success: boolean; message: string }>(`/inventory/${accountId}/${itemId}`, {
+export async function deleteInventoryItem(itemId: number, userId?: string): Promise<{ success: boolean; message: string }> {
+  const currentUserId = userId || getCurrentUserIdSync();
+  return apiRequest<{ success: boolean; message: string }>(`/inventory/${currentUserId}/${itemId}`, {
     method: 'DELETE',
   });
 }
 
 // New inventory workflow functions
-export async function confirmPendingOrder(orderNumber: string, accountId: number = DEFAULT_ACCOUNT_ID): Promise<{ success: boolean; message: string; updatedCount: number }> {
-  return apiRequest<{ success: boolean; message: string; updatedCount: number }>(`/inventory/${accountId}/confirm/${orderNumber}`, {
+export async function confirmPendingOrder(orderNumber: string, userId?: string): Promise<{ success: boolean; message: string; updatedCount: number }> {
+  const currentUserId = userId || getCurrentUserIdSync();
+  return apiRequest<{ success: boolean; message: string; updatedCount: number }>(`/inventory/${currentUserId}/confirm/${orderNumber}`, {
     method: 'POST',
   });
 }
 
-export async function archiveInventoryItem(itemId: number, accountId: number = DEFAULT_ACCOUNT_ID): Promise<{ success: boolean; message: string; item: InventoryItem }> {
-  return apiRequest<{ success: boolean; message: string; item: InventoryItem }>(`/inventory/${accountId}/${itemId}/archive`, {
+export async function archiveInventoryItem(itemId: number, userId?: string): Promise<{ success: boolean; message: string; item: InventoryItem }> {
+  const currentUserId = userId || getCurrentUserIdSync();
+  return apiRequest<{ success: boolean; message: string; item: InventoryItem }>(`/inventory/${currentUserId}/${itemId}/archive`, {
     method: 'PUT',
   });
 }
 
-export async function restoreInventoryItem(itemId: number, accountId: number = DEFAULT_ACCOUNT_ID): Promise<{ success: boolean; message: string; item: InventoryItem }> {
-  return apiRequest<{ success: boolean; message: string; item: InventoryItem }>(`/inventory/${accountId}/${itemId}/restore`, {
+export async function restoreInventoryItem(itemId: number, userId?: string): Promise<{ success: boolean; message: string; item: InventoryItem }> {
+  const currentUserId = userId || getCurrentUserIdSync();
+  return apiRequest<{ success: boolean; message: string; item: InventoryItem }>(`/inventory/${currentUserId}/${itemId}/restore`, {
     method: 'PUT',
   });
 }
 
-export async function archiveAllItemsByBrand(brandName: string, vendorName: string, accountId: number = DEFAULT_ACCOUNT_ID): Promise<{ success: boolean; message: string; archivedCount: number }> {
-  return apiRequest<{ success: boolean; message: string; archivedCount: number }>(`/inventory/${accountId}/archive-brand`, {
+export async function archiveAllItemsByBrand(brandName: string, vendorName: string, userId?: string): Promise<{ success: boolean; message: string; archivedCount: number }> {
+  const currentUserId = userId || getCurrentUserIdSync();
+  return apiRequest<{ success: boolean; message: string; archivedCount: number }>(`/inventory/${currentUserId}/archive-brand`, {
     method: 'PUT',
     body: JSON.stringify({ brandName, vendorName }),
   });
@@ -185,42 +219,49 @@ export interface OrderResponse {
   error?: string;
 }
 
-export async function fetchOrders(accountId: number = DEFAULT_ACCOUNT_ID): Promise<OrderResponse> {
-  return apiRequest<OrderResponse>(`/orders/${accountId}`);
+export async function fetchOrders(userId?: string): Promise<OrderResponse> {
+  const currentUserId = userId || getCurrentUserIdSync();
+  return apiRequest<OrderResponse>(`/orders/${currentUserId}`);
 }
 
-export async function fetchOrderById(orderId: number, accountId: number = DEFAULT_ACCOUNT_ID): Promise<OrderResponse> {
-  return apiRequest<OrderResponse>(`/orders/${accountId}/${orderId}`);
+export async function fetchOrderById(orderId: number, userId?: string): Promise<OrderResponse> {
+  const currentUserId = userId || getCurrentUserIdSync();
+  return apiRequest<OrderResponse>(`/orders/${currentUserId}/${orderId}`);
 }
 
-export async function archiveOrder(orderId: number, accountId: number = DEFAULT_ACCOUNT_ID): Promise<{ success: boolean; message: string; order: OrderData }> {
-  return apiRequest<{ success: boolean; message: string; order: OrderData }>(`/orders/${accountId}/${orderId}/archive`, {
+export async function archiveOrder(orderId: number, userId?: string): Promise<{ success: boolean; message: string; order: OrderData }> {
+  const currentUserId = userId || getCurrentUserIdSync();
+  return apiRequest<{ success: boolean; message: string; order: OrderData }>(`/orders/${currentUserId}/${orderId}/archive`, {
     method: 'PUT',
   });
 }
 
-export async function deleteOrder(orderId: number, accountId: number = DEFAULT_ACCOUNT_ID): Promise<{ success: boolean; message: string }> {
-  return apiRequest<{ success: boolean; message: string }>(`/orders/${accountId}/${orderId}`, {
+export async function deleteOrder(orderId: number, userId?: string): Promise<{ success: boolean; message: string }> {
+  const currentUserId = userId || getCurrentUserIdSync();
+  return apiRequest<{ success: boolean; message: string }>(`/orders/${currentUserId}/${orderId}`, {
     method: 'DELETE',
   });
 }
 
-export async function deleteArchivedItemsByBrand(brandName: string, vendorName: string, accountId: number = DEFAULT_ACCOUNT_ID): Promise<{ success: boolean; message: string; deletedCount: number }> {
-  return apiRequest<{ success: boolean; message: string; deletedCount: number }>(`/inventory/${accountId}/delete-archived-brand`, {
+export async function deleteArchivedItemsByBrand(brandName: string, vendorName: string, userId?: string): Promise<{ success: boolean; message: string; deletedCount: number }> {
+  const currentUserId = userId || getCurrentUserIdSync();
+  return apiRequest<{ success: boolean; message: string; deletedCount: number }>(`/inventory/${currentUserId}/delete-archived-brand`, {
     method: 'DELETE',
     body: JSON.stringify({ brandName, vendorName }),
   });
 }
 
-export async function deleteArchivedItemsByVendor(vendorName: string, accountId: number = DEFAULT_ACCOUNT_ID): Promise<{ success: boolean; message: string; deletedCount: number }> {
-  return apiRequest<{ success: boolean; message: string; deletedCount: number }>(`/inventory/${accountId}/delete-archived-vendor`, {
+export async function deleteArchivedItemsByVendor(vendorName: string, userId?: string): Promise<{ success: boolean; message: string; deletedCount: number }> {
+  const currentUserId = userId || getCurrentUserIdSync();
+  return apiRequest<{ success: boolean; message: string; deletedCount: number }>(`/inventory/${currentUserId}/delete-archived-vendor`, {
     method: 'DELETE',
     body: JSON.stringify({ vendorName }),
   });
 }
 
-export async function markItemAsSold(itemId: number, accountId: number = DEFAULT_ACCOUNT_ID): Promise<{ success: boolean; message: string; item: InventoryItem }> {
-  return apiRequest<{ success: boolean; message: string; item: InventoryItem }>(`/inventory/${accountId}/${itemId}/sold`, {
+export async function markItemAsSold(itemId: number, userId?: string): Promise<{ success: boolean; message: string; item: InventoryItem }> {
+  const currentUserId = userId || getCurrentUserIdSync();
+  return apiRequest<{ success: boolean; message: string; item: InventoryItem }>(`/inventory/${currentUserId}/${itemId}/sold`, {
     method: 'PUT',
   });
 }

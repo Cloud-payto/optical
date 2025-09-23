@@ -14,7 +14,7 @@ const Header = ({ isScrolled }: { isScrolled: boolean }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolledDown, setIsScrolledDown] = useState(false);
   const [prevScrollPos, setPrevScrollPos] = useState(0);
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -73,10 +73,10 @@ const Header = ({ isScrolled }: { isScrolled: boolean }) => {
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2 text-sm text-gray-600">
                 <User className="h-4 w-4" />
-                <span>Welcome, {user?.username}</span>
+                <span>Welcome, {user?.email}</span>
               </div>
               <button 
-                onClick={logout}
+                onClick={signOut}
                 className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
               >
                 <LogOut className="h-4 w-4" />
@@ -127,10 +127,10 @@ const Header = ({ isScrolled }: { isScrolled: boolean }) => {
               <div className="px-3 py-2 border-t border-gray-100 mt-2">
                 <div className="flex items-center space-x-2 text-sm text-gray-600 mb-2">
                   <User className="h-4 w-4" />
-                  <span>Welcome, {user?.username}</span>
+                  <span>Welcome, {user?.email}</span>
                 </div>
                 <button 
-                  onClick={logout}
+                  onClick={signOut}
                   className="flex items-center justify-center space-x-2 w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-base font-medium transition-colors duration-200"
                 >
                   <LogOut className="h-4 w-4" />

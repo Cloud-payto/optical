@@ -3,11 +3,11 @@ const router = express.Router();
 const { inventoryOperations } = require('../lib/supabase');
 const parserRegistry = require('../parsers');
 
-// GET /api/inventory/:accountId - Get inventory for an account
-router.get('/:accountId', async (req, res) => {
+// GET /api/inventory/:userId - Get inventory for a user
+router.get('/:userId', async (req, res) => {
   try {
-    const { accountId } = req.params;
-    const inventory = await inventoryOperations.getInventoryByAccount(parseInt(accountId));
+    const { userId } = req.params;
+    const inventory = await inventoryOperations.getInventoryByAccount(userId);
     
     res.json({
       success: true,
@@ -51,12 +51,12 @@ router.post('/:accountId', (req, res) => {
   }
 });
 
-// DELETE /api/inventory/:accountId/:itemId - Delete inventory item
-router.delete('/:accountId/:itemId', async (req, res) => {
+// DELETE /api/inventory/:userId/:itemId - Delete inventory item
+router.delete('/:userId/:itemId', async (req, res) => {
   try {
-    const { accountId, itemId } = req.params;
+    const { userId, itemId } = req.params;
     
-    await inventoryOperations.deleteInventoryItem(parseInt(itemId), parseInt(accountId));
+    await inventoryOperations.deleteInventoryItem(parseInt(itemId), userId);
     
     res.json({
       success: true,
@@ -71,14 +71,14 @@ router.delete('/:accountId/:itemId', async (req, res) => {
   }
 });
 
-// POST /api/inventory/:accountId/confirm/:orderNumber - Confirm pending order items
-router.post('/:accountId/confirm/:orderNumber', async (req, res) => {
+// POST /api/inventory/:userId/confirm/:orderNumber - Confirm pending order items
+router.post('/:userId/confirm/:orderNumber', async (req, res) => {
   try {
-    const { accountId, orderNumber } = req.params;
+    const { userId, orderNumber } = req.params;
     
-    console.log(`📦 Confirming order ${orderNumber} for account ${accountId}`);
+    console.log(`📦 Confirming order ${orderNumber} for user ${userId}`);
     
-    const result = await inventoryOperations.confirmPendingOrder(orderNumber, parseInt(accountId));
+    const result = await inventoryOperations.confirmPendingOrder(orderNumber, userId);
     
     if (result.success) {
       res.json({
@@ -101,12 +101,12 @@ router.post('/:accountId/confirm/:orderNumber', async (req, res) => {
   }
 });
 
-// PUT /api/inventory/:accountId/:itemId/archive - Archive inventory item
-router.put('/:accountId/:itemId/archive', async (req, res) => {
+// PUT /api/inventory/:userId/:itemId/archive - Archive inventory item
+router.put('/:userId/:itemId/archive', async (req, res) => {
   try {
-    const { accountId, itemId } = req.params;
+    const { userId, itemId } = req.params;
     
-    const item = await inventoryOperations.archiveInventoryItem(parseInt(itemId), parseInt(accountId));
+    const item = await inventoryOperations.archiveInventoryItem(parseInt(itemId), userId);
     
     res.json({
       success: true,

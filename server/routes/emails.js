@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 const { emailOperations } = require('../lib/supabase');
 
-// GET /api/emails/:accountId - Get emails for an account
-router.get('/:accountId', async (req, res) => {
+// GET /api/emails/:userId - Get emails for a user
+router.get('/:userId', async (req, res) => {
   try {
-    const { accountId } = req.params;
-    const emails = await emailOperations.getEmailsByAccount(parseInt(accountId));
+    const { userId } = req.params;
+    const emails = await emailOperations.getEmailsByAccount(userId);
     
     res.json({
       success: true,
@@ -22,12 +22,12 @@ router.get('/:accountId', async (req, res) => {
   }
 });
 
-// DELETE /api/emails/:accountId/:emailId - Delete email
-router.delete('/:accountId/:emailId', async (req, res) => {
+// DELETE /api/emails/:userId/:emailId - Delete email
+router.delete('/:userId/:emailId', async (req, res) => {
   try {
-    const { accountId, emailId } = req.params;
+    const { userId, emailId } = req.params;
     
-    await emailOperations.deleteEmail(parseInt(emailId), parseInt(accountId));
+    await emailOperations.deleteEmail(parseInt(emailId), userId);
     
     res.json({
       success: true,
