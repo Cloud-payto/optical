@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { SearchIcon, PackageIcon, MailIcon, FilterIcon, RefreshCwIcon, TrashIcon, ChevronDownIcon, ChevronRightIcon, CheckIcon, ArchiveIcon, MoreVerticalIcon, XIcon, EyeIcon } from 'lucide-react';
 import { fetchEmails, fetchInventory, fetchOrders, deleteEmail, deleteInventoryItem, confirmPendingOrder, archiveInventoryItem, restoreInventoryItem, archiveAllItemsByBrand, deleteArchivedItemsByBrand, deleteArchivedItemsByVendor, markItemAsSold, archiveOrder, deleteOrder, EmailData, InventoryItem, EmailResponse, InventoryResponse, OrderData, OrderResponse } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 // Helper function to extract vendor name from email address
 const extractVendorFromEmail = (email: string): string => {
@@ -18,6 +19,7 @@ const extractVendorFromEmail = (email: string): string => {
 };
 
 const Inventory: React.FC = () => {
+  const { user, isAuthenticated } = useAuth();
   const [emails, setEmails] = useState<EmailData[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [orders, setOrders] = useState<OrderData[]>([]);
@@ -48,6 +50,12 @@ const Inventory: React.FC = () => {
 
   // Load data
   const loadData = async () => {
+    if (!isAuthenticated || !user) {
+      setError('Please log in to view inventory data');
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     
@@ -62,16 +70,28 @@ const Inventory: React.FC = () => {
       setInventory(inventoryResponse.inventory || []);
       setOrders(ordersResponse.orders || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load data');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load data';
+      setError(errorMessage);
       console.error('Error loading inventory data:', err);
+      
+      // If it's an authentication error, don't keep showing loading
+      if (errorMessage.includes('Authentication') || errorMessage.includes('401')) {
+        setLoading(false);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (isAuthenticated && user) {
+      loadData();
+    } else if (isAuthenticated === false) {
+      // If explicitly not authenticated, stop loading
+      setLoading(false);
+      setError('Please log in to view inventory data');
+    }
+  }, [isAuthenticated, user]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
