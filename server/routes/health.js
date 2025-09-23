@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { supabase } = require('../config/supabase-admin');
+const { supabase } = require('../lib/supabase');
 
 /**
  * Health check endpoint for debugging Supabase connectivity

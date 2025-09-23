@@ -28,7 +28,8 @@
       "Bash(openssl rand:*)",
       "Bash(mv:*)",
       "Bash(timeout 5s npm run dev)",
-      "Bash(VITE_SUPABASE_URL=test VITE_SUPABASE_ANON_KEY=test npm run build)"
+      "Bash(VITE_SUPABASE_URL=test VITE_SUPABASE_ANON_KEY=test npm run build)",
+      "Bash(timeout:*)"
     ],
     "deny": []
   }
