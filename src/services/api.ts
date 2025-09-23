@@ -1,5 +1,5 @@
 // API service for backend communication
-import { getApiEndpoint } from '@/lib/api-config';
+import { getApiEndpoint } from '../lib/api-config';
 
 // Default account ID (since we're using a single test account for now)
 const DEFAULT_ACCOUNT_ID = 1;
