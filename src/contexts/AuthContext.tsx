@@ -32,10 +32,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('[AUTH CONTEXT] Initializing authentication...');
+    
     // If Supabase is not configured, just set as unauthenticated
     if (!isSupabaseConfigured) {
-      console.warn('Supabase not configured, setting user as unauthenticated');
-      setAuthError('Authentication service is not configured. Please contact support.');
+      console.warn('[AUTH CONTEXT] Supabase not configured, setting user as unauthenticated');
+      setAuthError('Authentication service is not configured. Please check environment variables.');
+      setSession(null);
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+
+    // Check if supabase client exists
+    if (!supabase) {
+      console.error('[AUTH CONTEXT] Supabase client is undefined!');
+      setAuthError('Authentication client failed to initialize.');
       setSession(null);
       setUser(null);
       setLoading(false);
@@ -45,23 +57,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Get initial session with error handling
     const getInitialSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        console.log('[AUTH CONTEXT] Checking for existing session...');
+        
+        // Add timeout to prevent hanging
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Session check timeout')), 10000)
+        );
+        
+        const sessionPromise = supabase.auth.getSession();
+        
+        const { data: { session }, error } = await Promise.race([
+          sessionPromise,
+          timeoutPromise
+        ]) as Awaited<typeof sessionPromise>;
+        
         if (error) {
-          console.error('Error getting session:', error);
-          setAuthError('Failed to check authentication status. Please try refreshing the page.');
-          // Don't throw, just set user to null and stop loading
+          console.error('[AUTH CONTEXT] Error getting session:', error);
+          setAuthError(`Authentication check failed: ${error.message}`);
           setSession(null);
           setUser(null);
           setLoading(false);
           return;
         }
+        
+        console.log('[AUTH CONTEXT] Session check complete:', {
+          hasSession: !!session,
+          userId: session?.user?.id || 'none',
+          email: session?.user?.email || 'none'
+        });
+        
         setAuthError(null);
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
       } catch (error) {
-        console.error('Failed to get initial session:', error);
-        setAuthError('Authentication system is unavailable. Please try again later.');
+        console.error('[AUTH CONTEXT] Failed to get initial session:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        
+        // Provide specific error messages
+        if (errorMessage.includes('timeout')) {
+          setAuthError('Authentication service is not responding. Please check your connection.');
+        } else if (errorMessage.includes('NetworkError')) {
+          setAuthError('Network error. Please check your internet connection.');
+        } else {
+          setAuthError(`Authentication failed: ${errorMessage}`);
+        }
+        
         setSession(null);
         setUser(null);
         setLoading(false);
@@ -71,22 +112,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     getInitialSession();
 
     // Listen for auth changes with error handling
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      try {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error in auth state change:', error);
-        setSession(null);
-        setUser(null);
-        setLoading(false);
-      }
-    });
+    let subscription: any = null;
+    
+    try {
+      console.log('[AUTH CONTEXT] Setting up auth state listener...');
+      const { data } = supabase.auth.onAuthStateChange((event, session) => {
+        console.log('[AUTH CONTEXT] Auth state changed:', event, {
+          hasSession: !!session,
+          userId: session?.user?.id || 'none'
+        });
+        
+        try {
+          setSession(session);
+          setUser(session?.user ?? null);
+          setLoading(false);
+          
+          // Clear any previous errors on successful auth state change
+          if (session) {
+            setAuthError(null);
+          }
+        } catch (error) {
+          console.error('[AUTH CONTEXT] Error in auth state change handler:', error);
+          setSession(null);
+          setUser(null);
+          setLoading(false);
+        }
+      });
+      
+      subscription = data.subscription;
+      console.log('[AUTH CONTEXT] Auth state listener setup complete');
+    } catch (error) {
+      console.error('[AUTH CONTEXT] Failed to setup auth state listener:', error);
+    }
 
-    return () => subscription.unsubscribe();
+    return () => {
+      if (subscription) {
+        console.log('[AUTH CONTEXT] Cleaning up auth state listener');
+        subscription.unsubscribe();
+      }
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {

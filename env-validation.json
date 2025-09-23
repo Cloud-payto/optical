@@ -1,0 +1,19 @@
+{
+  "timestamp": "2025-09-23T22:44:05.659Z",
+  "platform": "linux",
+  "nodeVersion": "v18.19.1",
+  "environment": "development",
+  "required": {
+    "VITE_SUPABASE_URL": true,
+    "VITE_SUPABASE_ANON_KEY": true,
+    "VITE_API_URL": false
+  },
+  "optional": {
+    "VITE_APP_NAME": false,
+    "VITE_VERSION": false,
+    "VITE_BASE_URL": false,
+    "VITE_ENABLE_DEBUG": false,
+    "VITE_ENABLE_ANALYTICS": false
+  },
+  "errors": []
+}

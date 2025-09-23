@@ -11,6 +11,7 @@ const emailsRoutes = require('./routes/emails');
 const ordersRoutes = require('./routes/orders');
 const safiloRoutes = require('./routes/safilo');
 const vendorRoutes = require('./routes/vendors');
+const healthRoutes = require('./routes/health');
 
 // Import Supabase client
 const { supabase } = require('./lib/supabase');
@@ -55,16 +56,8 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    message: 'API is running',
-    timestamp: new Date().toISOString()
-  });
-});
-
 // Routes
+app.use('/api/health', healthRoutes); // Use the new detailed health routes
 app.use('/api/webhook', webhookRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/emails', emailsRoutes);
