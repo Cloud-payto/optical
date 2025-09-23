@@ -6,8 +6,13 @@ console.log('[SUPABASE INIT] Environment:', import.meta.env.MODE);
 console.log('[SUPABASE INIT] Build mode - Dev:', import.meta.env.DEV, 'Prod:', import.meta.env.PROD);
 
 // Check if import.meta.env is available
-if (typeof import === 'undefined' || !import.meta || !import.meta.env) {
-  console.error('[SUPABASE INIT] CRITICAL: import.meta.env is not available!');
+try {
+  if (!import.meta || !import.meta.env) {
+    console.error('[SUPABASE INIT] CRITICAL: import.meta.env is not available!');
+    console.error('[SUPABASE INIT] This suggests a build/bundling issue');
+  }
+} catch (error) {
+  console.error('[SUPABASE INIT] CRITICAL: import.meta is not available!');
   console.error('[SUPABASE INIT] This suggests a build/bundling issue');
 }
 

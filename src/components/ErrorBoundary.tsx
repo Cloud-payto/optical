@@ -57,8 +57,8 @@ export class ErrorBoundary extends Component<Props, State> {
         isDev: import.meta.env?.DEV || false,
         isProd: import.meta.env?.PROD || false,
         baseUrl: import.meta.env?.BASE_URL || 'unknown',
-        importMetaDefined: typeof import !== 'undefined' && !!import.meta,
-        importMetaEnvDefined: typeof import !== 'undefined' && !!import.meta?.env,
+        importMetaDefined: !!import.meta,
+        importMetaEnvDefined: !!import.meta?.env,
       });
 
       // Supabase config diagnostics
