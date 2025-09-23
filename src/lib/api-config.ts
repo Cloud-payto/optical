@@ -16,9 +16,9 @@ export function getApiBaseUrl(): string {
     );
   }
   
-  // Use environment variable if available
+  // Use environment variable if available (normalize it)
   if (apiUrl) {
-    return apiUrl;
+    return apiUrl.trim();
   }
   
   // Development fallback only
@@ -35,17 +35,18 @@ export function getApiBaseUrl(): string {
  * Returns full URL to Express server endpoint
  */
 export function getApiEndpoint(endpoint: string): string {
-  // Ensure endpoint starts with /
+  // Ensure endpoint starts with / but no double slashes
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   
-  // Get base URL and append endpoint
-  const baseUrl = getApiBaseUrl();
+  // Get base URL and normalize it (remove trailing slash)
+  const baseUrl = getApiBaseUrl().replace(/\/$/, '');
   
-  // If baseUrl already includes /api, don't add it again
+  // If baseUrl already includes /api, append endpoint directly
   if (baseUrl.endsWith('/api')) {
     return `${baseUrl}${cleanEndpoint}`;
   }
   
+  // Otherwise, add /api and the endpoint
   return `${baseUrl}/api${cleanEndpoint}`;
 }
 
@@ -58,11 +59,15 @@ export function debugApiConfig(): void {
   console.log('MODE:', import.meta.env.MODE);
   console.log('DEV:', import.meta.env.DEV);
   console.log('PROD:', import.meta.env.PROD);
-  console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
+  console.log('Raw VITE_API_URL:', `"${import.meta.env.VITE_API_URL}"`);
   try {
     const baseUrl = getApiBaseUrl();
-    console.log('Resolved API Base URL:', baseUrl);
-    console.log('Example endpoint URL:', getApiEndpoint('/health'));
+    console.log('Resolved API Base URL:', `"${baseUrl}"`);
+    console.log('Base URL ends with /api:', baseUrl.endsWith('/api'));
+    console.log('Example endpoints:');
+    console.log('  /health →', getApiEndpoint('/health'));
+    console.log('  /emails/1 →', getApiEndpoint('/emails/1'));
+    console.log('  health (no slash) →', getApiEndpoint('health'));
   } catch (error) {
     console.error('❌ API Configuration Error:', error);
   }
