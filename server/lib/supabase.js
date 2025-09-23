@@ -47,7 +47,7 @@ const emailOperations = {
       const { data, error } = await supabase
         .from('emails')
         .select('*')
-        .eq('user_id', userId)
+        .eq('account_id', userId)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -83,7 +83,7 @@ const emailOperations = {
         .from('emails')
         .delete()
         .eq('id', emailId)
-        .eq('user_id', userId);
+        .eq('account_id', userId);
       
       if (error) throw error;
       return { success: true };
@@ -114,7 +114,7 @@ const inventoryOperations = {
       const { data, error } = await supabase
         .from('inventory')
         .select('*')
-        .eq('user_id', userId)
+        .eq('account_id', userId)
         .neq('status', 'archived')
         .order('created_at', { ascending: false });
       
@@ -131,7 +131,7 @@ const inventoryOperations = {
         .from('inventory')
         .delete()
         .eq('id', itemId)
-        .eq('user_id', userId);
+        .eq('account_id', userId);
       
       if (error) throw error;
       return { success: true };
@@ -146,7 +146,7 @@ const inventoryOperations = {
         .from('inventory')
         .update({ status: 'archived' })
         .eq('id', itemId)
-        .eq('user_id', userId)
+        .eq('account_id', userId)
         .select()
         .single();
       
@@ -163,7 +163,7 @@ const inventoryOperations = {
         .from('inventory')
         .update({ status: 'confirmed' })
         .eq('order_number', orderNumber)
-        .eq('user_id', userId)
+        .eq('account_id', userId)
         .eq('status', 'pending')
         .select();
       
@@ -185,7 +185,7 @@ const orderOperations = {
           *,
           items:inventory(*)
         `)
-        .eq('user_id', userId)
+        .eq('account_id', userId)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -204,7 +204,7 @@ const orderOperations = {
           items:inventory(*)
         `)
         .eq('id', orderId)
-        .eq('user_id', userId)
+        .eq('account_id', userId)
         .single();
       
       if (error) throw error;
@@ -220,7 +220,7 @@ const orderOperations = {
         .from('orders')
         .update({ status: 'archived' })
         .eq('id', orderId)
-        .eq('user_id', userId)
+        .eq('account_id', userId)
         .select()
         .single();
       
@@ -240,27 +240,27 @@ const statsOperations = {
       const { count: totalOrders } = await supabase
         .from('orders')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId);
+        .eq('account_id', userId);
 
       // Get total inventory
       const { count: totalInventory } = await supabase
         .from('inventory')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId)
+        .eq('account_id', userId)
         .neq('status', 'archived');
 
       // Get pending items
       const { count: pendingItems } = await supabase
         .from('inventory')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId)
+        .eq('account_id', userId)
         .eq('status', 'pending');
 
       // Calculate total value (if wholesale_price exists)
       const { data: inventoryData } = await supabase
         .from('inventory')
         .select('wholesale_price, quantity')
-        .eq('user_id', userId)
+        .eq('account_id', userId)
         .not('wholesale_price', 'is', null);
 
       const totalValue = (inventoryData || []).reduce((sum, item) => {
@@ -351,7 +351,7 @@ const vendorOperations = {
           vendor:vendors(*),
           brand:brands(*)
         `)
-        .eq('user_id', userId);
+        .eq('account_id', userId);
       
       if (error) throw error;
       return data || [];
@@ -365,7 +365,7 @@ const vendorOperations = {
       const { data, error } = await supabase
         .from('account_vendor_pricing')
         .upsert({ 
-          user_id: userId, 
+          account_id: userId, 
           ...pricingData,
           updated_at: new Date().toISOString()
         })
@@ -388,12 +388,12 @@ const vendorOperations = {
           brands:brands(*),
           user_pricing:account_vendor_pricing!inner(
             discount_percentage,
-            your_cost,
+            your_cost_override,
             wholesale_cost,
             tariff_tax
           )
         `)
-        .eq('user_pricing.user_id', userId);
+        .eq('user_pricing.account_id', userId);
       
       if (error) throw error;
       return data || [];
@@ -410,7 +410,7 @@ async function checkDuplicateOrder(orderNumber, userId) {
       .from('orders')
       .select('id')
       .eq('order_number', orderNumber)
-      .eq('user_id', userId)
+      .eq('account_id', userId)
       .single();
     
     if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
