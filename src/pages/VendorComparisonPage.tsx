@@ -1,187 +1,60 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Package, ChevronDown, Check, Star, TrendingUp } from 'lucide-react';
+import { Package, ChevronDown, Check, Star, TrendingUp, Loader2 } from 'lucide-react';
 import { Container } from '../components/ui/Container';
+import { fetchVendors, Vendor } from '../services/api';
 
-// Vendor data based on the comprehensive research
-const vendorsData = [
-  // Premium Segment
-  { 
-    id: 1, 
-    name: "EssilorLuxottica", 
-    segment: "Premium",
-    brands: "Ray-Ban, Oakley, Persol, Oliver Peoples, Chanel, Prada, Versace",
-    discount: "Contact for pricing", 
-    minOrder: "$2,000-$5,000", 
-    paymentTerms: "NET 30", 
-    freeShipping: true,
-    buyingGroups: "Vision West, EPON vendors",
-    website: "www.essilorluxottica.com"
-  },
-  { 
-    id: 2, 
-    name: "Kering Eyewear", 
-    segment: "Ultra-Premium",
-    brands: "Gucci, Saint Laurent, Cartier, Montblanc",
-    discount: "Contact for pricing", 
-    minOrder: "$3,000-$7,500", 
-    paymentTerms: "NET 30",
-    freeShipping: false,
-    buyingGroups: "VSP Premier Edge (Gold/Platinum)",
-    website: "www.keringeyewear.com"
-  },
-  { 
-    id: 3, 
-    name: "Marchon Eyewear (VSP)", 
-    segment: "Premium",
-    brands: "Calvin Klein, Nike Vision, Lacoste, Ferragamo",
-    discount: "Buy 12 get 1 free", 
-    minOrder: "$1,500-$2,500", 
-    paymentTerms: "NET 30",
-    freeShipping: true,
-    buyingGroups: "EPON, Alliance, Vision West",
-    website: "www.marchon.com"
-  },
-  { 
-    id: 4, 
-    name: "Safilo Group", 
-    segment: "Premium",
-    brands: "Carrera, Smith Optics, Dior, Marc Jacobs",
-    discount: "Contact for pricing", 
-    minOrder: "$2,000-$4,000", 
-    paymentTerms: "NET 30",
-    freeShipping: false,
-    buyingGroups: "EPON Optical Group",
-    website: "www.safilogroup.com"
-  },
-  { 
-    id: 5, 
-    name: "Marcolin Group", 
-    segment: "Premium",
-    brands: "Tom Ford, Guess, Adidas, Harley-Davidson",
-    discount: "Contact for pricing", 
-    minOrder: "$3,000-$5,000", 
-    paymentTerms: "NET 30",
-    freeShipping: true,
-    buyingGroups: "Alliance Buying Group",
-    website: "www.marcolin.com"
-  },
-  
-  // Mid-Tier Segment
-  { 
-    id: 11, 
-    name: "ClearVision Optical", 
-    segment: "Mid-Tier",
-    brands: "BCBGMAXAZRIA, IZOD, Steve Madden",
-    discount: "40-55% off retail", 
-    minOrder: "$500-$1,500", 
-    paymentTerms: "NET 30",
-    freeShipping: true,
-    buyingGroups: "EPON member",
-    website: "www.cvoptical.com"
-  },
-  { 
-    id: 12, 
-    name: "Europa Eyewear", 
-    segment: "Mid-Tier",
-    brands: "American Optical, STATE, Scott Harris",
-    discount: "Contact for pricing", 
-    minOrder: "Free shipping over $250", 
-    paymentTerms: "NET 30",
-    freeShipping: true,
-    buyingGroups: "Independent focused",
-    website: "www.europaeye.com"
-  },
-  { 
-    id: 13, 
-    name: "McGee Group", 
-    segment: "Mid-Tier",
-    brands: "Vera Bradley, Life is Good, Badgley Mischka",
-    discount: "Contact for pricing", 
-    minOrder: "No buy-in required", 
-    paymentTerms: "NET 30",
-    freeShipping: false,
-    buyingGroups: "Available through groups",
-    website: "www.mcgeegroup.com"
-  },
-  { 
-    id: 14, 
-    name: "Modern Optical International", 
-    segment: "Value",
-    brands: "17 collections, 1,200+ styles",
-    discount: "Value pricing", 
-    minOrder: "Low minimums", 
-    paymentTerms: "NET 30",
-    freeShipping: true,
-    buyingGroups: "20+ groups including EPON",
-    website: "www.modernoptical.com"
-  },
-  
-  // Value Segment
-  { 
-    id: 21, 
-    name: "FGX International", 
-    segment: "Value",
-    brands: "Foster Grant, Magnivision, Gargoyles",
-    discount: "50-65% off retail", 
-    minOrder: "Low minimums", 
-    paymentTerms: "NET 30",
-    freeShipping: false,
-    buyingGroups: "Through trade division",
-    website: "www.fgxi.com"
-  },
-  { 
-    id: 22, 
-    name: "A&A Optical", 
-    segment: "Value",
-    brands: "Jimmy Crystal NY, XXL Eyewear",
-    discount: "40-55% typical", 
-    minOrder: "No minimums", 
-    paymentTerms: "NET 30",
-    freeShipping: true,
-    buyingGroups: "EPON member",
-    website: "www.aaopticalco.com"
-  },
-  
-  // Boutique/Independent
-  { 
-    id: 29, 
-    name: "Etnia Barcelona", 
-    segment: "Boutique",
-    brands: "Etnia Barcelona colorful designs",
-    discount: "Contact for pricing", 
-    minOrder: "$1,000-$2,000", 
-    paymentTerms: "NET 30",
-    freeShipping: false,
-    buyingGroups: "Independent distribution",
-    website: "www.etniabarcelona.com"
-  },
-  { 
-    id: 30, 
-    name: "Theo Eyewear", 
-    segment: "Boutique",
-    brands: "Theo avant-garde Belgian designs",
-    discount: "Contact for pricing", 
-    minOrder: "$1,500-$2,500", 
-    paymentTerms: "NET 30",
-    freeShipping: false,
-    buyingGroups: "Limited participation",
-    website: "www.theoeyewear.com"
-  }
-];
+interface VendorDisplayData extends Vendor {
+  id: number | string;
+  minOrder: string;
+  paymentTerms: string;
+  buyingGroups: string;
+}
 
 const segments = ["All", "Premium", "Ultra-Premium", "Mid-Tier", "Value", "Boutique"];
 
 const VendorComparisonPage: React.FC = () => {
-  const [filteredVendors, setFilteredVendors] = useState(vendorsData);
+  const [vendors, setVendors] = useState<VendorDisplayData[]>([]);
+  const [filteredVendors, setFilteredVendors] = useState<VendorDisplayData[]>([]);
   const [selectedSegment, setSelectedSegment] = useState("All");
   const [sortBy, setSortBy] = useState("name");
-  const [selectedVendors, setSelectedVendors] = useState<Set<number>>(new Set());
+  const [selectedVendors, setSelectedVendors] = useState<Set<number | string>>(new Set());
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  // Load vendors from Supabase
+  useEffect(() => {
+    const loadVendors = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const vendorData = await fetchVendors();
+        
+        // Transform vendor data to match VendorDisplayData interface
+        const transformedVendors: VendorDisplayData[] = vendorData.map(vendor => ({
+          ...vendor,
+          minOrder: vendor.min_order || "Contact for pricing",
+          paymentTerms: vendor.payment_terms || "NET 30",
+          buyingGroups: vendor.buying_groups || "Not specified"
+        }));
+        
+        setVendors(transformedVendors);
+      } catch (err) {
+        console.error('Error loading vendors:', err);
+        setError('Failed to load vendor data. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadVendors();
+  }, []);
+
+  // Filter and sort vendors
   useEffect(() => {
     let filtered = selectedSegment === "All" 
-      ? vendorsData 
-      : vendorsData.filter(v => v.segment === selectedSegment);
+      ? vendors 
+      : vendors.filter(v => v.segment === selectedSegment);
     
     // Sort the filtered vendors
     const sorted = [...filtered].sort((a, b) => {
@@ -203,9 +76,9 @@ const VendorComparisonPage: React.FC = () => {
     });
     
     setFilteredVendors(sorted);
-  }, [selectedSegment, sortBy]);
+  }, [selectedSegment, sortBy, vendors]);
 
-  const toggleVendorSelection = (vendorId: number) => {
+  const toggleVendorSelection = (vendorId: number | string) => {
     const newSelected = new Set(selectedVendors);
     if (newSelected.has(vendorId)) {
       newSelected.delete(vendorId);
@@ -313,21 +186,60 @@ const VendorComparisonPage: React.FC = () => {
                 </div>
               </div>
 
+              {/* Loading State */}
+              {loading && (
+                <div className="flex items-center justify-center py-12">
+                  <div className="flex items-center gap-3">
+                    <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                    <span className="text-gray-600">Loading vendor data...</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Error State */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+                  <div className="text-red-600 font-medium mb-2">Error Loading Vendors</div>
+                  <div className="text-red-500 text-sm mb-4">{error}</div>
+                  <button 
+                    onClick={() => window.location.reload()}
+                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
+
+              {/* Empty State */}
+              {!loading && !error && filteredVendors.length === 0 && (
+                <div className="text-center py-12">
+                  <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No vendors found</h3>
+                  <p className="text-gray-500">
+                    {selectedSegment !== "All" 
+                      ? `No vendors in the ${selectedSegment} segment`
+                      : 'No vendor data available'
+                    }
+                  </p>
+                </div>
+              )}
+
               {/* Vendor Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredVendors.map(vendor => {
-                  const isSelected = selectedVendors.has(vendor.id);
-                  
-                  return (
-                    <motion.div
-                      key={vendor.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      whileHover={{ y: -4 }}
-                      className={`bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 p-6 border-2 ${
-                        isSelected ? 'border-blue-500' : 'border-transparent'
-                      }`}
-                    >
+              {!loading && !error && filteredVendors.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredVendors.map(vendor => {
+                    const isSelected = selectedVendors.has(vendor.id);
+                    
+                    return (
+                      <motion.div
+                        key={vendor.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        whileHover={{ y: -4 }}
+                        className={`bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 p-6 border-2 ${
+                          isSelected ? 'border-blue-500' : 'border-transparent'
+                        }`}
+                      >
                       <div className="flex justify-between items-start mb-4">
                         <div>
                           <h3 className="text-xl font-bold text-gray-900">{vendor.name}</h3>
@@ -393,10 +305,11 @@ const VendorComparisonPage: React.FC = () => {
                           Contact
                         </button>
                       </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </motion.div>
         </Container>

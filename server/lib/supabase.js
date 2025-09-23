@@ -276,6 +276,130 @@ const statsOperations = {
   }
 };
 
+// Database operations for vendors
+const vendorOperations = {
+  async getAllVendors() {
+    try {
+      const { data, error } = await supabase
+        .from('vendors')
+        .select('*')
+        .order('name', { ascending: true });
+      
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      handleSupabaseError(error, 'getAllVendors');
+    }
+  },
+
+  async getVendorById(vendorId) {
+    try {
+      const { data, error } = await supabase
+        .from('vendors')
+        .select('*')
+        .eq('id', vendorId)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleSupabaseError(error, 'getVendorById');
+    }
+  },
+
+  async getAllBrands() {
+    try {
+      const { data, error } = await supabase
+        .from('brands')
+        .select(`
+          *,
+          vendor:vendors(name)
+        `)
+        .order('name', { ascending: true });
+      
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      handleSupabaseError(error, 'getAllBrands');
+    }
+  },
+
+  async getBrandsByVendor(vendorId) {
+    try {
+      const { data, error } = await supabase
+        .from('brands')
+        .select('*')
+        .eq('vendor_id', vendorId)
+        .order('name', { ascending: true });
+      
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      handleSupabaseError(error, 'getBrandsByVendor');
+    }
+  },
+
+  async getUserVendorPricing(userId) {
+    try {
+      const { data, error } = await supabase
+        .from('account_vendor_pricing')
+        .select(`
+          *,
+          vendor:vendors(*),
+          brand:brands(*)
+        `)
+        .eq('user_id', userId);
+      
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      handleSupabaseError(error, 'getUserVendorPricing');
+    }
+  },
+
+  async saveUserVendorPricing(userId, pricingData) {
+    try {
+      const { data, error } = await supabase
+        .from('account_vendor_pricing')
+        .upsert({ 
+          user_id: userId, 
+          ...pricingData,
+          updated_at: new Date().toISOString()
+        })
+        .select();
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleSupabaseError(error, 'saveUserVendorPricing');
+    }
+  },
+
+  async getVendorsWithUserPricing(userId) {
+    try {
+      // Get all vendors with their pricing data for the user
+      const { data, error } = await supabase
+        .from('vendors')
+        .select(`
+          *,
+          brands:brands(*),
+          user_pricing:account_vendor_pricing!inner(
+            discount_percentage,
+            your_cost,
+            wholesale_cost,
+            tariff_tax
+          )
+        `)
+        .eq('user_pricing.user_id', userId);
+      
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      handleSupabaseError(error, 'getVendorsWithUserPricing');
+    }
+  }
+};
+
 // Check duplicate order helper
 async function checkDuplicateOrder(orderNumber, userId) {
   try {
@@ -302,6 +426,7 @@ module.exports = {
   inventoryOperations,
   orderOperations,
   statsOperations,
+  vendorOperations,
   checkDuplicateOrder,
   handleSupabaseError
 };

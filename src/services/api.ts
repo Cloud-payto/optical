@@ -266,6 +266,100 @@ export async function markItemAsSold(itemId: number, userId?: string): Promise<{
   });
 }
 
+// Vendor API functions
+export interface Vendor {
+  id: string;
+  name: string;
+  segment: string;
+  brands?: string;
+  discount?: string;
+  min_order?: string;
+  payment_terms?: string;
+  free_shipping?: boolean;
+  buying_groups?: string;
+  website?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  support_email?: string;
+  support_phone?: string;
+  rep_name?: string;
+  rep_email?: string;
+  rep_phone?: string;
+}
+
+export interface Brand {
+  id: string;
+  name: string;
+  vendor_id: string;
+  wholesale_cost?: number;
+  your_cost?: number;
+  tariff_tax?: number;
+  vendor?: { name: string };
+}
+
+export interface Company {
+  id: string;
+  name: string;
+  brands: Brand[];
+  contactInfo?: {
+    companyEmail?: string;
+    companyPhone?: string;
+    supportEmail?: string;
+    supportPhone?: string;
+    website?: string;
+    repName?: string;
+    repEmail?: string;
+    repPhone?: string;
+  };
+}
+
+export interface UserVendorPricing {
+  id: string;
+  user_id: string;
+  vendor_id: string;
+  brand_id?: string;
+  discount_percentage?: number;
+  your_cost?: number;
+  wholesale_cost?: number;
+  tariff_tax?: number;
+  vendor?: Vendor;
+  brand?: Brand;
+}
+
+export async function fetchVendors(): Promise<Vendor[]> {
+  return apiRequest<Vendor[]>('/vendors');
+}
+
+export async function fetchVendorById(vendorId: string): Promise<Vendor> {
+  return apiRequest<Vendor>(`/vendors/${vendorId}`);
+}
+
+export async function fetchAllBrands(): Promise<Brand[]> {
+  return apiRequest<Brand[]>('/vendors/brands/all');
+}
+
+export async function fetchBrandsByVendor(vendorId: string): Promise<Brand[]> {
+  return apiRequest<Brand[]>(`/vendors/${vendorId}/brands`);
+}
+
+export async function fetchUserVendorPricing(userId?: string): Promise<UserVendorPricing[]> {
+  const currentUserId = userId || getCurrentUserIdSync();
+  return apiRequest<UserVendorPricing[]>(`/vendors/pricing/${currentUserId}`);
+}
+
+export async function saveUserVendorPricing(pricingData: Partial<UserVendorPricing>, userId?: string): Promise<UserVendorPricing[]> {
+  const currentUserId = userId || getCurrentUserIdSync();
+  return apiRequest<UserVendorPricing[]>(`/vendors/pricing/${currentUserId}`, {
+    method: 'POST',
+    body: JSON.stringify(pricingData),
+  });
+}
+
+export async function fetchCompaniesWithPricing(userId?: string): Promise<Company[]> {
+  const currentUserId = userId || getCurrentUserIdSync();
+  return apiRequest<Company[]>(`/vendors/companies/${currentUserId}`);
+}
+
 // Health check
 export interface HealthResponse {
   status: string;

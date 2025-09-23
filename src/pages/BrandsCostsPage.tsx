@@ -1,92 +1,27 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Search, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { Container } from '../components/ui/Container';
 import CompanyCard from '../components/brands/CompanyCard';
 import BrandDetailsModal from '../components/brands/BrandDetailsModal';
 import CompanyDetailsModal from '../components/brands/CompanyDetailsModal';
 import AddCompanyModal from '../components/brands/AddCompanyModal';
 import { Company, Brand } from '../types';
+import { fetchCompaniesWithPricing, saveUserVendorPricing } from '../services/api';
 
-// Sample data
-const initialCompanies: Company[] = [
-  {
-    id: '1',
-    name: 'Modern Optical',
-    brands: [
-      { id: '1-1', name: 'MODERN TIMES', wholesaleCost: 85.00, yourCost: 7.50, tariffTax: 2.50 },
-      { id: '1-2', name: 'MODERN METALS', wholesaleCost: 120.00, yourCost: 12.00, tariffTax: 4.00 }
-    ],
-    contactInfo: {
-      companyEmail: 'contact@modernoptical.com',
-      companyPhone: '(555) 123-4567',
-      supportEmail: 'support@modernoptical.com',
-      supportPhone: '(555) 123-4568',
-      website: 'https://www.modernoptical.com',
-      repName: 'Sarah Johnson',
-      repEmail: 'sarah.johnson@modernoptical.com',
-      repPhone: '(555) 123-4569'
-    }
-  },
-  {
-    id: '2',
-    name: 'ClearVision',
-    brands: [
-      { id: '2-1', name: 'ClearView Classic', wholesaleCost: 65.00, yourCost: 6.00 },
-      { id: '2-2', name: 'ClearView Sport', wholesaleCost: 75.00, yourCost: 7.50 },
-      { id: '2-3', name: 'ClearView Designer', wholesaleCost: 95.00, yourCost: 9.50 }
-    ],
-    contactInfo: {
-      companyEmail: 'info@clearvision.com',
-      supportEmail: 'support@clearvision.com',
-      website: 'https://www.clearvision.com',
-      repName: 'Mike Chen',
-      repEmail: 'mike.chen@clearvision.com',
-      repPhone: '(555) 234-5678'
-    }
-  },
-  {
-    id: '3',
-    name: 'Luxottica',
-    brands: [
-      { id: '3-1', name: 'Ray-Ban', wholesaleCost: 150.00, yourCost: 15.00, tariffTax: 6.00 }
-    ],
-    contactInfo: {
-      companyEmail: 'orders@luxottica.com',
-      companyPhone: '(555) 987-6543',
-      supportEmail: 'support@luxottica.com',
-      supportPhone: '(555) 987-6544',
-      website: 'https://www.luxottica.com',
-      repName: 'David Rodriguez',
-      repEmail: 'david.rodriguez@luxottica.com',
-      repPhone: '(555) 987-6545'
-    }
-  },
-  {
-    id: '4',
-    name: 'Safilo',
-    brands: [
-      { id: '4-1', name: 'Safilo Collection', wholesaleCost: 110.00, yourCost: 11.00 },
-      { id: '4-2', name: 'Safilo Premium', wholesaleCost: 140.00, yourCost: 14.00, tariffTax: 5.50 }
-    ],
-    contactInfo: {
-      companyEmail: 'contact@safilo.com',
-      website: 'https://www.safilo.com',
-      repName: 'Anna Thompson',
-      repEmail: 'anna.thompson@safilo.com',
-      repPhone: '(555) 345-6789'
-    }
+// Function to load companies from Supabase (replacing localStorage approach)
+const loadCompaniesFromSupabase = async (): Promise<Company[]> => {
+  try {
+    const companies = await fetchCompaniesWithPricing();
+    return companies;
+  } catch (error) {
+    console.error('Error loading companies from Supabase:', error);
+    return [];
   }
-];
-
-// Function to load companies from localStorage or use default data
-const loadSavedCompanies = (): Company[] => {
-  const savedCompanies = localStorage.getItem('optiprofit_companies');
-  return savedCompanies ? JSON.parse(savedCompanies) : initialCompanies;
 };
 
 const BrandsCostsPage: React.FC = () => {
-  const [companies, setCompanies] = useState<Company[]>(loadSavedCompanies());
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedBrand, setSelectedBrand] = useState<{ brand: Brand; companyName: string } | null>(null);
@@ -94,12 +29,28 @@ const BrandsCostsPage: React.FC = () => {
   const [isBrandModalOpen, setIsBrandModalOpen] = useState(false);
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
   const [isAddCompanyModalOpen, setIsAddCompanyModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const itemsPerPage = 6;
 
-  // Save companies to localStorage when updated
+  // Load companies from Supabase on component mount
   useEffect(() => {
-    localStorage.setItem('optiprofit_companies', JSON.stringify(companies));
-  }, [companies]);
+    const loadCompanies = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const companiesData = await loadCompaniesFromSupabase();
+        setCompanies(companiesData);
+      } catch (err) {
+        console.error('Error loading companies:', err);
+        setError('Failed to load company data. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCompanies();
+  }, []);
 
   // Filter companies based on search term
   const filteredCompanies = useMemo(() => {
@@ -136,31 +87,59 @@ const BrandsCostsPage: React.FC = () => {
     }
   };
 
-  const handleSaveBrand = (updatedBrand: Brand) => {
-    setCompanies(prevCompanies => 
-      prevCompanies.map(company => ({
-        ...company,
-        brands: company.brands.map(brand => 
-          brand.id === updatedBrand.id ? updatedBrand : brand
-        )
-      }))
-    );
+  const handleSaveBrand = async (updatedBrand: Brand) => {
+    try {
+      // Save to Supabase
+      await saveUserVendorPricing({
+        brand_id: updatedBrand.id,
+        wholesale_cost: updatedBrand.wholesaleCost,
+        your_cost: updatedBrand.yourCost,
+        tariff_tax: updatedBrand.tariffTax
+      });
+
+      // Update local state
+      setCompanies(prevCompanies => 
+        prevCompanies.map(company => ({
+          ...company,
+          brands: company.brands.map(brand => 
+            brand.id === updatedBrand.id ? updatedBrand : brand
+          )
+        }))
+      );
+    } catch (error) {
+      console.error('Error saving brand:', error);
+      setError('Failed to save brand changes. Please try again.');
+    }
   };
 
-  const handleSaveCompany = (updatedCompany: Company) => {
-    setCompanies(prevCompanies => 
-      prevCompanies.map(company => 
-        company.id === updatedCompany.id ? updatedCompany : company
-      )
-    );
+  const handleSaveCompany = async (updatedCompany: Company) => {
+    try {
+      // For now, just update local state since vendor company info
+      // is more complex to save than individual brand pricing
+      setCompanies(prevCompanies => 
+        prevCompanies.map(company => 
+          company.id === updatedCompany.id ? updatedCompany : company
+        )
+      );
+    } catch (error) {
+      console.error('Error saving company:', error);
+      setError('Failed to save company changes. Please try again.');
+    }
   };
 
   const handleAddNewCompany = () => {
     setIsAddCompanyModalOpen(true);
   };
 
-  const handleSaveNewCompany = (newCompany: Company) => {
-    setCompanies(prevCompanies => [...prevCompanies, newCompany]);
+  const handleSaveNewCompany = async (newCompany: Company) => {
+    try {
+      // For now, just update local state since adding new vendors
+      // requires more complex database operations
+      setCompanies(prevCompanies => [...prevCompanies, newCompany]);
+    } catch (error) {
+      console.error('Error adding new company:', error);
+      setError('Failed to add new company. Please try again.');
+    }
   };
 
   return (
@@ -203,39 +182,65 @@ const BrandsCostsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Company Cards */}
-          <div className="space-y-4 mb-8">
-            {paginatedCompanies.length > 0 ? (
-              paginatedCompanies.map((company, index) => (
-                <motion.div
-                  key={company.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                  data-demo={index === 0 ? "company-card" : undefined}
-                >
-                  <CompanyCard
-                    company={company}
-                    onViewBrandDetails={handleViewBrandDetails}
-                    onEditCompany={handleEditCompany}
-                  />
-                </motion.div>
-              ))
-            ) : (
-              <div className="text-center py-12">
-                <div className="text-gray-400 mb-4">
-                  <Search className="h-12 w-12 mx-auto" />
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No companies found</h3>
-                <p className="text-gray-500">
-                  {searchTerm 
-                    ? `No companies or brands match "${searchTerm}"`
-                    : 'No companies available'
-                  }
-                </p>
+          {/* Loading State */}
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <div className="flex items-center gap-3">
+                <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                <span className="text-gray-600">Loading company data...</span>
               </div>
-            )}
-          </div>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center mb-8">
+              <div className="text-red-600 font-medium mb-2">Error Loading Companies</div>
+              <div className="text-red-500 text-sm mb-4">{error}</div>
+              <button 
+                onClick={() => window.location.reload()}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {/* Company Cards */}
+          {!loading && !error && (
+            <div className="space-y-4 mb-8">
+              {paginatedCompanies.length > 0 ? (
+                paginatedCompanies.map((company, index) => (
+                  <motion.div
+                    key={company.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                    data-demo={index === 0 ? "company-card" : undefined}
+                  >
+                    <CompanyCard
+                      company={company}
+                      onViewBrandDetails={handleViewBrandDetails}
+                      onEditCompany={handleEditCompany}
+                    />
+                  </motion.div>
+                ))
+              ) : (
+                <div className="text-center py-12">
+                  <div className="text-gray-400 mb-4">
+                    <Search className="h-12 w-12 mx-auto" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No companies found</h3>
+                  <p className="text-gray-500">
+                    {searchTerm 
+                      ? `No companies or brands match "${searchTerm}"`
+                      : 'No companies available'
+                    }
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Pagination */}
           {totalPages > 1 && (
