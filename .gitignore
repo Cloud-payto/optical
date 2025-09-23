@@ -32,3 +32,5 @@ server/db/*.sqlite
 # JSON Data files
 server/data/
 *.json.backup
+
+.vercel

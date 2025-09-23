@@ -23,7 +23,10 @@
       "Bash(npm run:*)",
       "Bash(npm start)",
       "Bash(npm audit:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(cp:*)",
+      "Bash(openssl rand:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }
