@@ -1,25 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { 
-  getInventoryByAccount, 
-  upsertInventory, 
-  deleteInventoryItem,
-  updateInventoryStatus,
-  confirmPendingOrder,
-  archiveInventoryItem,
-  restoreInventoryItem,
-  archiveAllItemsByBrand,
-  deleteArchivedItemsByBrand,
-  deleteArchivedItemsByVendor,
-  markInventoryItemAsSold
-} = require('../db/database');
+const { inventoryOperations } = require('../lib/supabase');
 const parserRegistry = require('../parsers');
 
 // GET /api/inventory/:accountId - Get inventory for an account
-router.get('/:accountId', (req, res) => {
+router.get('/:accountId', async (req, res) => {
   try {
     const { accountId } = req.params;
-    const inventory = getInventoryByAccount(accountId);
+    const inventory = await inventoryOperations.getInventoryByAccount(parseInt(accountId));
     
     res.json({
       success: true,
@@ -64,23 +52,16 @@ router.post('/:accountId', (req, res) => {
 });
 
 // DELETE /api/inventory/:accountId/:itemId - Delete inventory item
-router.delete('/:accountId/:itemId', (req, res) => {
+router.delete('/:accountId/:itemId', async (req, res) => {
   try {
     const { accountId, itemId } = req.params;
     
-    const result = deleteInventoryItem(accountId, parseInt(itemId));
+    await inventoryOperations.deleteInventoryItem(parseInt(itemId), parseInt(accountId));
     
-    if (result.success) {
-      res.json({
-        success: true,
-        message: 'Inventory item deleted successfully'
-      });
-    } else {
-      res.status(404).json({
-        success: false,
-        error: result.error || 'Inventory item not found'
-      });
-    }
+    res.json({
+      success: true,
+      message: 'Inventory item deleted successfully'
+    });
   } catch (error) {
     console.error('Error deleting inventory item:', error);
     res.status(500).json({
@@ -97,7 +78,7 @@ router.post('/:accountId/confirm/:orderNumber', async (req, res) => {
     
     console.log(`📦 Confirming order ${orderNumber} for account ${accountId}`);
     
-    const result = await confirmPendingOrder(accountId, orderNumber);
+    const result = await inventoryOperations.confirmPendingOrder(orderNumber, parseInt(accountId));
     
     if (result.success) {
       res.json({
@@ -121,24 +102,17 @@ router.post('/:accountId/confirm/:orderNumber', async (req, res) => {
 });
 
 // PUT /api/inventory/:accountId/:itemId/archive - Archive inventory item
-router.put('/:accountId/:itemId/archive', (req, res) => {
+router.put('/:accountId/:itemId/archive', async (req, res) => {
   try {
     const { accountId, itemId } = req.params;
     
-    const result = archiveInventoryItem(accountId, parseInt(itemId));
+    const item = await inventoryOperations.archiveInventoryItem(parseInt(itemId), parseInt(accountId));
     
-    if (result.success) {
-      res.json({
-        success: true,
-        message: 'Item archived successfully',
-        item: result.item
-      });
-    } else {
-      res.status(404).json({
-        success: false,
-        error: result.error
-      });
-    }
+    res.json({
+      success: true,
+      message: 'Item archived successfully',
+      item: item
+    });
   } catch (error) {
     console.error('Error archiving inventory item:', error);
     res.status(500).json({

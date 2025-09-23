@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { getEmailsByAccount, deleteEmail } = require('../db/database');
+const { emailOperations } = require('../lib/supabase');
 
 // GET /api/emails/:accountId - Get emails for an account
-router.get('/:accountId', (req, res) => {
+router.get('/:accountId', async (req, res) => {
   try {
     const { accountId } = req.params;
-    const emails = getEmailsByAccount(accountId);
+    const emails = await emailOperations.getEmailsByAccount(parseInt(accountId));
     
     res.json({
       success: true,
@@ -23,23 +23,16 @@ router.get('/:accountId', (req, res) => {
 });
 
 // DELETE /api/emails/:accountId/:emailId - Delete email
-router.delete('/:accountId/:emailId', (req, res) => {
+router.delete('/:accountId/:emailId', async (req, res) => {
   try {
     const { accountId, emailId } = req.params;
     
-    const result = deleteEmail(accountId, parseInt(emailId));
+    await emailOperations.deleteEmail(parseInt(emailId), parseInt(accountId));
     
-    if (result.success) {
-      res.json({
-        success: true,
-        message: 'Email deleted successfully'
-      });
-    } else {
-      res.status(404).json({
-        success: false,
-        error: result.error || 'Email not found'
-      });
-    }
+    res.json({
+      success: true,
+      message: 'Email deleted successfully'
+    });
   } catch (error) {
     console.error('Error deleting email:', error);
     res.status(500).json({

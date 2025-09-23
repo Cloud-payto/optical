@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: optiprofit-express-api
+    env: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: SUPABASE_URL
+        fromGroup: supabase
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        fromGroup: supabase
+      - key: CORS_ORIGIN
+        # Set this to your React app URL after deployment
+        value: https://your-react-app.onrender.com
+      - key: EMAIL_WEBHOOK_SECRET
+        # Add this from your CloudMailin dashboard
+        sync: false
+      - key: SAFILO_API_KEY
+        # Optional: Add vendor API keys if available
+        sync: false
+      - key: MODERN_OPTICAL_API_KEY
+        # Optional: Add vendor API keys if available
+        sync: false

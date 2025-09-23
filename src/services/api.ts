@@ -1,5 +1,5 @@
 // API service for backend communication
-const API_BASE_URL = 'http://localhost:3001/api';
+import { getApiEndpoint } from '@/lib/api-config';
 
 // Default account ID (since we're using a single test account for now)
 const DEFAULT_ACCOUNT_ID = 1;
@@ -7,7 +7,7 @@ const DEFAULT_ACCOUNT_ID = 1;
 // Generic API request function
 async function apiRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetch(getApiEndpoint(endpoint), {
       headers: {
         'Content-Type': 'application/json',
         ...options?.headers,

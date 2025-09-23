@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
+require('dotenv').config();
 
 // Import routes
 const webhookRoutes = require('./routes/webhook');
@@ -10,30 +11,54 @@ const emailsRoutes = require('./routes/emails');
 const ordersRoutes = require('./routes/orders');
 const safiloRoutes = require('./routes/safilo');
 
-// Import database
-const { initializeDatabase } = require('./db/database');
+// Import Supabase client
+const { supabase } = require('./lib/supabase');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Initialize database
-initializeDatabase();
+// Test Supabase connection on startup
+(async () => {
+  try {
+    const { data, error } = await supabase.from('emails').select('count').limit(1);
+    if (error) throw error;
+    console.log('✅ Supabase connection established');
+  } catch (error) {
+    console.error('❌ Supabase connection failed:', error.message);
+    console.log('Please check your SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables');
+  }
+})();
+
+// CORS configuration
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  credentials: true,
+  optionsSuccessStatus: 200
+};
 
 // Middleware
-app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true
-}));
+app.use(cors(corsOptions));
 
 // Parse JSON bodies
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Health check endpoint
+// Health check endpoint for Render.com monitoring
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    message: 'Express server is running',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    version: process.env.npm_package_version || '1.0.0'
+  });
+});
+
+// API health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
-    message: 'Server is running',
+    message: 'API is running',
     timestamp: new Date().toISOString()
   });
 });

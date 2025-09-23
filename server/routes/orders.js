@@ -1,17 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { 
-  getOrdersByAccount, 
-  getOrderById,
-  archiveOrder,
-  deleteOrder
-} = require('../db/database');
+const { orderOperations } = require('../lib/supabase');
 
 // GET /api/orders/:accountId - Get all orders for an account
-router.get('/:accountId', (req, res) => {
+router.get('/:accountId', async (req, res) => {
   try {
     const { accountId } = req.params;
-    const orders = getOrdersByAccount(accountId);
+    const orders = await orderOperations.getOrdersByAccount(parseInt(accountId));
     
     res.json({
       success: true,
@@ -28,22 +23,15 @@ router.get('/:accountId', (req, res) => {
 });
 
 // GET /api/orders/:accountId/:orderId - Get a specific order
-router.get('/:accountId/:orderId', (req, res) => {
+router.get('/:accountId/:orderId', async (req, res) => {
   try {
     const { accountId, orderId } = req.params;
-    const result = getOrderById(accountId, parseInt(orderId));
+    const order = await orderOperations.getOrderById(parseInt(orderId), parseInt(accountId));
     
-    if (result.success) {
-      res.json({
-        success: true,
-        order: result.order
-      });
-    } else {
-      res.status(404).json({
-        success: false,
-        error: result.error
-      });
-    }
+    res.json({
+      success: true,
+      order: order
+    });
   } catch (error) {
     console.error('Error fetching order:', error);
     res.status(500).json({
@@ -54,23 +42,16 @@ router.get('/:accountId/:orderId', (req, res) => {
 });
 
 // PUT /api/orders/:accountId/:orderId/archive - Archive an order
-router.put('/:accountId/:orderId/archive', (req, res) => {
+router.put('/:accountId/:orderId/archive', async (req, res) => {
   try {
     const { accountId, orderId } = req.params;
-    const result = archiveOrder(accountId, parseInt(orderId));
+    const order = await orderOperations.archiveOrder(parseInt(orderId), parseInt(accountId));
     
-    if (result.success) {
-      res.json({
-        success: true,
-        message: 'Order archived successfully',
-        order: result.order
-      });
-    } else {
-      res.status(404).json({
-        success: false,
-        error: result.error
-      });
-    }
+    res.json({
+      success: true,
+      message: 'Order archived successfully',
+      order: order
+    });
   } catch (error) {
     console.error('Error archiving order:', error);
     res.status(500).json({

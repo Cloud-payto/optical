@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { saveEmail, getEmailsByAccount, updateEmailWithParsedData, saveInventoryItems, checkDuplicateOrder } = require('../db/database');
+const { emailOperations, inventoryOperations, checkDuplicateOrder } = require('../lib/supabase');
 const parserRegistry = require('../parsers');
 
 /**
@@ -138,9 +138,23 @@ router.post('/email', async (req, res) => {
     const accountId = 1;
 
     // Save to database
-    const result = saveEmail(accountId, JSON.stringify(req.body), emailData);
+    const result = await emailOperations.saveEmail({
+      account_id: accountId,
+      from_email: emailData.from,
+      to_email: emailData.to,
+      subject: emailData.subject,
+      message_id: emailData.message_id,
+      spam_score: emailData.spam_score,
+      spam_status: emailData.spam_status,
+      attachments_count: emailData.attachments_count,
+      raw_data: JSON.stringify(req.body),
+      plain_text: emailData.plain_text,
+      html_text: emailData.html_text,
+      received_at: emailData.date,
+      processed_at: new Date().toISOString()
+    });
     
-    console.log('Email saved to database with ID:', result.emailId);
+    console.log('Email saved to database with ID:', result.id);
 
     // Try to parse the email using vendor-specific parser
     console.log('\n=== VENDOR DETECTION START ===');
@@ -170,26 +184,26 @@ router.post('/email', async (req, res) => {
           console.log(`Checking for duplicate order: ${orderNumber} from ${customerName} (${accountNumber})`);
           
           if (orderNumber) {
-            const duplicateCheck = checkDuplicateOrder(accountId, orderNumber, customerName, accountNumber);
+            const duplicateCheck = await checkDuplicateOrder(orderNumber, accountId);
             console.log('Duplicate check result:', duplicateCheck);
             
-            if (duplicateCheck.isDuplicate) {
-              console.log(`Duplicate order detected: ${duplicateCheck.message}`);
+            if (duplicateCheck) {
+              console.log(`Duplicate order detected: ${orderNumber}`);
               
               // Still update email with parsed data for reference, but don't create inventory
-              updateEmailWithParsedData(result.emailId, {
+              await emailOperations.updateEmailWithParsedData(result.id, {
                 ...parsedData,
                 duplicate_order: true,
-                duplicate_message: duplicateCheck.message
+                duplicate_message: `Duplicate order: ${orderNumber}`
               });
               
               return res.status(200).json({ 
                 success: true,
                 message: 'Email processed but duplicate order detected',
-                emailId: result.emailId,
+                emailId: result.id,
                 parsed: true,
                 duplicate: true,
-                duplicateMessage: duplicateCheck.message
+                duplicateMessage: `Duplicate order: ${orderNumber}`
               });
             }
           } else {
@@ -197,19 +211,35 @@ router.post('/email', async (req, res) => {
           }
           
           // Update email with parsed data
-          updateEmailWithParsedData(result.emailId, parsedData);
+          await emailOperations.updateEmailWithParsedData(result.id, parsedData);
           
-          // Save inventory items with "pending" status
-          parsedData.items.forEach(item => {
-            saveInventoryItems(accountId, [{
-              ...item,
-              status: 'pending',
-              email_id: result.emailId,
-              order_number: parsedData.order?.order_number || '',
-              account_number: parsedData.account_number || parsedData.order?.account_number || '',
-              vendor: item.vendor || parsedData.vendor || '' // Ensure vendor is passed through
-            }]);
-          });
+          // Prepare inventory items with "pending" status
+          const inventoryItems = parsedData.items.map(item => ({
+            account_id: accountId,
+            sku: item.sku,
+            brand: item.brand,
+            model: item.model,
+            color: item.color,
+            color_code: item.color_code,
+            color_name: item.color_name,
+            size: item.size,
+            full_size: item.full_size,
+            temple_length: item.temple_length,
+            quantity: item.quantity,
+            vendor: item.vendor || parsedData.vendor || '',
+            status: 'pending',
+            email_id: result.id,
+            order_number: parsedData.order?.order_number || '',
+            account_number: parsedData.account_number || parsedData.order?.account_number || '',
+            full_name: item.full_name,
+            wholesale_price: item.wholesale_price,
+            upc: item.upc,
+            in_stock: item.in_stock,
+            api_verified: item.api_verified
+          }));
+          
+          // Save inventory items
+          await inventoryOperations.saveInventoryItems(inventoryItems);
           
           console.log('Email parsed and inventory items created');
         } else {
@@ -227,7 +257,7 @@ router.post('/email', async (req, res) => {
     res.status(200).json({ 
       success: true,
       message: 'Email processed successfully',
-      emailId: result.emailId,
+      emailId: result.id,
       parsed: parserRegistry.hasParser(fromEmail)
     });
 
