@@ -385,12 +385,22 @@ const vendorOperations = {
         .from('vendors')
         .select(`
           *,
-          brands:brands(*),
-          user_pricing:account_vendor_pricing!inner(
-            discount_percentage,
-            your_cost_override,
+          brands!left(
+            id,
+            name,
+            category,
+            tier,
             wholesale_cost,
-            tariff_tax
+            msrp,
+            map_price
+          ),
+          user_pricing:account_vendor_pricing!left(
+            discount_percentage,
+            multiplier,
+            your_cost_override,
+            payment_terms,
+            minimum_order,
+            free_shipping_threshold
           )
         `)
         .eq('user_pricing.account_id', userId);
