@@ -99,15 +99,33 @@ const BrandsCostsPage: React.FC = () => {
 
       console.log('🔥 DEBUG: Found company:', { id: company.id, name: company.name });
 
+      // Check if this is a new brand (invalid concatenated ID) or existing brand
+      const isNewBrand = !updatedBrand.id || updatedBrand.id.includes('-' + company.id) || updatedBrand.id.length > 36;
+      
+      console.log('🔥 DEBUG: Brand ID analysis:', {
+        brandId: updatedBrand.id,
+        isNewBrand,
+        brandIdLength: updatedBrand.id?.length,
+        containsCompanyId: updatedBrand.id?.includes('-' + company.id)
+      });
+      
       const dataToSend = {
-        brand_id: updatedBrand.id,
+        // For new brands, send name instead of invalid ID
+        ...(isNewBrand ? {
+          brand_name: updatedBrand.name,
+          brand_id: undefined // Don't send invalid ID
+        } : {
+          brand_id: updatedBrand.id, // Send valid existing ID
+          brand_name: undefined
+        }),
         vendor_id: company.id,
         // Save global wholesale cost if it has changed
         global_wholesale_cost: updatedBrand.wholesaleCost,
         // Save account-specific wholesale cost (negotiated price)
         wholesale_cost: updatedBrand.yourCost || updatedBrand.wholesaleCost,
         tariff_tax: updatedBrand.tariffTax || 0,
-        notes: updatedBrand.notes
+        discount_percentage: 0, // Default value
+        notes: updatedBrand.notes || ''
       };
 
       console.log('🔥 DEBUG: Sending to API:', dataToSend);
@@ -117,14 +135,33 @@ const BrandsCostsPage: React.FC = () => {
       
       console.log('🔥 DEBUG: API response:', result);
 
-      // Update local state
+      // Update local state - handle both existing and new brands
       setCompanies(prevCompanies => 
-        prevCompanies.map(company => ({
-          ...company,
-          brands: company.brands.map(brand => 
-            brand.id === updatedBrand.id ? updatedBrand : brand
-          )
-        }))
+        prevCompanies.map(comp => {
+          if (comp.id === company.id) {
+            return {
+              ...comp,
+              brands: comp.brands.map(brand => {
+                if (isNewBrand) {
+                  // For new brands, match by name (since ID was invalid)
+                  if (brand.name === updatedBrand.name) {
+                    return {
+                      ...updatedBrand,
+                      id: result.data?.brand_id || result.brand_id || brand.id // Use real ID from DB
+                    };
+                  }
+                } else {
+                  // For existing brands, match by ID
+                  if (brand.id === updatedBrand.id) {
+                    return updatedBrand;
+                  }
+                }
+                return brand;
+              })
+            };
+          }
+          return comp;
+        })
       );
     } catch (error) {
       console.error('Error saving brand:', error);

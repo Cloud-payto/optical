@@ -64,17 +64,20 @@ router.get('/pricing/:userId', async (req, res) => {
 router.post('/pricing/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-    const brandData = req.body;
+    const brandData = {
+      ...req.body,
+      brand_name: req.body.brand_name, // Ensure this is passed for new brands
+    };
     
     console.log('🔥 DEBUG: POST /pricing/:userId called');
     console.log('🔥 DEBUG: Account ID (userId):', userId);
     console.log('🔥 DEBUG: Received from frontend:', brandData);
     
-    // Validate required fields
-    if (!brandData.brand_id || !brandData.vendor_id) {
+    // Validate required fields - either brand_id (existing) OR brand_name (new) + vendor_id
+    if ((!brandData.brand_id && !brandData.brand_name) || !brandData.vendor_id) {
       console.log('🔥 DEBUG: Missing required fields');
       return res.status(400).json({ 
-        error: 'Missing required fields: brand_id and vendor_id are required' 
+        error: 'Missing required fields: (brand_id OR brand_name) AND vendor_id are required' 
       });
     }
     
