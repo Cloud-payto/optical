@@ -308,9 +308,14 @@ export interface Brand {
   name: string;
   vendor_id: string;
   wholesale_cost?: number;
+  wholesaleCost?: number; // camelCase version
   your_cost?: number;
+  yourCost?: number; // camelCase version
   tariff_tax?: number;
+  tariffTax?: number; // camelCase version
+  retailPrice?: number; // Add retailPrice field
   vendor?: { name: string };
+  notes?: string;
 }
 
 export interface Company {

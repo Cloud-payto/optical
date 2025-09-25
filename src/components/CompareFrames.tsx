@@ -455,7 +455,9 @@ const CompareFrames: React.FC = () => {
       companyName: company.name,
       yourCost: brand.yourCost || prev.yourCost,
       wholesaleCost: brand.wholesaleCost || prev.wholesaleCost,
-      tariffTax: brand.tariffTax || prev.tariffTax
+      tariffTax: brand.tariffTax || prev.tariffTax,
+      retailPrice: brand.retailPrice || prev.retailPrice,
+      useManualRetailPrice: brand.retailPrice ? true : prev.useManualRetailPrice
     }));
     setShowBrandDropdown1(false);
   };
@@ -471,7 +473,9 @@ const CompareFrames: React.FC = () => {
       companyName: company.name,
       yourCost: brand.yourCost || prev.yourCost,
       wholesaleCost: brand.wholesaleCost || prev.wholesaleCost,
-      tariffTax: brand.tariffTax || prev.tariffTax
+      tariffTax: brand.tariffTax || prev.tariffTax,
+      retailPrice: brand.retailPrice || prev.retailPrice,
+      useManualRetailPrice: brand.retailPrice ? true : prev.useManualRetailPrice
     }));
     setShowBrandDropdown2(false);
   };

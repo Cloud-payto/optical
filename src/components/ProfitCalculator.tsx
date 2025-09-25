@@ -246,11 +246,18 @@ const ProfitCalculator: React.FC = () => {
       setTariffTax(brand.tariffTax);
     }
     
-    // Calculate retail price based on wholesale cost and multiplier
-    if (brand.wholesaleCost !== undefined && brand.wholesaleCost !== null && !useManualRetailPrice) {
-      const calculatedRetail = calculateRetailPrice(brand.wholesaleCost, brand.tariffTax || 0, insuranceMultiplier);
-      console.log('🔥 DEBUG: Calculated retail price:', calculatedRetail);
-      setRetailPrice(calculatedRetail);
+    // Set retail price from brand MSRP if available
+    if (brand.retailPrice !== undefined && brand.retailPrice !== null && brand.retailPrice > 0) {
+      console.log('🔥 DEBUG: Setting retailPrice from brand MSRP:', brand.retailPrice);
+      setRetailPrice(brand.retailPrice);
+      setUseManualRetailPrice(true); // Switch to manual mode since we're using saved MSRP
+    } else {
+      // Calculate retail price based on wholesale cost and multiplier if no MSRP
+      if (brand.wholesaleCost !== undefined && brand.wholesaleCost !== null && !useManualRetailPrice) {
+        const calculatedRetail = calculateRetailPrice(brand.wholesaleCost, brand.tariffTax || 0, insuranceMultiplier);
+        console.log('🔥 DEBUG: No MSRP found, calculated retail price:', calculatedRetail);
+        setRetailPrice(calculatedRetail);
+      }
     }
   };
 
