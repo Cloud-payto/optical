@@ -481,7 +481,7 @@ const vendorOperations = {
         };
       });
       
-      return vendorsWithAccountData;
+      return vendorsWithPricing;
     } catch (error) {
       handleSupabaseError(error, 'getVendorsWithAccountBrands');
     }
