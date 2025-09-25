@@ -279,7 +279,7 @@ const statsOperations = {
   }
 };
 
-// Database operations for vendors
+// Database operations for vendors and account brands
 const vendorOperations = {
   async getAllVendors() {
     try {
@@ -342,10 +342,10 @@ const vendorOperations = {
     }
   },
 
-  async getUserVendorPricing(userId) {
+  async getAccountBrands(userId) {
     try {
       const { data, error } = await supabase
-        .from('account_vendor_pricing')
+        .from('account_brands')
         .select(`
           *,
           vendor:vendors(*),
@@ -356,60 +356,134 @@ const vendorOperations = {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      handleSupabaseError(error, 'getUserVendorPricing');
+      handleSupabaseError(error, 'getAccountBrands');
     }
   },
 
-  async saveUserVendorPricing(userId, pricingData) {
+  async saveAccountBrand(userId, brandData) {
     try {
-      const { data, error } = await supabase
-        .from('account_vendor_pricing')
-        .upsert({ 
-          account_id: userId, 
-          ...pricingData,
-          updated_at: new Date().toISOString()
-        })
+      // Separate global brand data from account-specific brand data
+      const { brand_id, vendor_id, global_wholesale_cost, msrp, map_price, ...accountBrandData } = brandData;
+      
+      // Start a transaction-like approach using multiple operations
+      let globalBrandData = null;
+      let accountBrandResult = null;
+
+      // 1. If global pricing is provided, update the global brands table
+      if (brand_id && (global_wholesale_cost !== undefined || msrp !== undefined || map_price !== undefined)) {
+        const globalBrandUpdateData = {};
+        if (global_wholesale_cost !== undefined) globalBrandUpdateData.wholesale_cost = global_wholesale_cost;
+        if (msrp !== undefined) globalBrandUpdateData.msrp = msrp;
+        if (map_price !== undefined) globalBrandUpdateData.map_price = map_price;
+        
+        const { data: brandUpdateResult, error: brandError } = await supabase
+          .from('brands')
+          .upsert({ 
+            id: brand_id,
+            vendor_id: vendor_id,
+            ...globalBrandUpdateData,
+            updated_at: new Date().toISOString()
+          })
+          .select();
+        
+        if (brandError) throw brandError;
+        globalBrandData = brandUpdateResult;
+      }
+
+      // 2. Save account-specific brand data to account_brands table
+      const accountBrandFields = {
+        account_id: userId,
+        vendor_id: vendor_id,
+        brand_id: brand_id,
+        ...accountBrandData,
+        updated_at: new Date().toISOString()
+      };
+
+      const { data: accountUpdateResult, error: accountError } = await supabase
+        .from('account_brands')
+        .upsert(accountBrandFields)
         .select();
       
-      if (error) throw error;
-      return data;
+      if (accountError) throw accountError;
+      accountBrandResult = accountUpdateResult;
+
+      return {
+        global_brand: globalBrandData,
+        account_brand: accountBrandResult,
+        success: true
+      };
     } catch (error) {
-      handleSupabaseError(error, 'saveUserVendorPricing');
+      handleSupabaseError(error, 'saveAccountBrand');
     }
   },
 
-  async getVendorsWithUserPricing(userId) {
+  async getVendorsWithAccountBrands(userId) {
     try {
-      // Get all vendors with their pricing data for the user
+      // Get all vendors with their brands and user-specific pricing
       const { data, error } = await supabase
         .from('vendors')
         .select(`
-          *,
-          brands!left(
+          id,
+          name,
+          code,
+          domain,
+          is_active,
+          settings,
+          brands!vendor_id(
             id,
             name,
             category,
             tier,
             wholesale_cost,
             msrp,
-            map_price
-          ),
-          user_pricing:account_vendor_pricing!left(
-            discount_percentage,
-            multiplier,
-            your_cost_override,
-            payment_terms,
-            minimum_order,
-            free_shipping_threshold,
-            tariff_tax
+            map_price,
+            is_active,
+            notes
           )
-        `)
-        .eq('user_pricing.account_id', userId);
+        `);
       
       if (error) throw error;
-      return data || [];
+      
+      // Get user-specific pricing for each vendor/brand combination
+      const vendorIds = data?.map(v => v.id) || [];
+      const brandIds = data?.flatMap(v => v.brands?.map(b => b.id) || []) || [];
+      
+      let accountBrands = [];
+      if (vendorIds.length > 0) {
+        const { data: accountBrandData, error: accountBrandError } = await supabase
+          .from('account_brands')
+          .select('*')
+          .eq('account_id', userId)
+          .in('vendor_id', vendorIds);
+        
+        if (accountBrandError) throw accountBrandError;
+        accountBrands = accountBrandData || [];
+      }
+      
+      // Merge vendor data with user pricing
+      const vendorsWithPricing = (data || []).map(vendor => {
+        const brandsWithAccountData = (vendor.brands || []).map(brand => {
+          const accountBrand = accountBrands.find(ab => 
+            ab.vendor_id === vendor.id && ab.brand_id === brand.id
+          );
+          
+          return {
+            ...brand,
+            // Use COALESCE logic: account wholesale cost OR global brand default
+            effective_wholesale_cost: accountBrand?.wholesale_cost || brand.wholesale_cost || 0,
+            account_brand: accountBrand
+          };
+        });
+        
+        return {
+          ...vendor,
+          brands: brandsWithAccountData
+        };
+      });
+      
+      return vendorsWithAccountData;
     } catch (error) {
-      handleSupabaseError(error, 'getVendorsWithUserPricing');
+      handleSupabaseError(error, 'getVendorsWithAccountBrands');
     }
   }
 };

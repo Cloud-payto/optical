@@ -48,28 +48,54 @@ router.get('/:vendorId/brands', async (req, res) => {
   }
 });
 
-// Get user-specific vendor pricing
+// Get user-specific account brands
 router.get('/pricing/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-    const pricing = await vendorOperations.getUserVendorPricing(userId);
-    res.json(pricing);
+    const accountBrands = await vendorOperations.getAccountBrands(userId);
+    res.json(accountBrands);
   } catch (error) {
-    console.error('Error fetching user vendor pricing:', error);
-    res.status(500).json({ error: 'Failed to fetch vendor pricing' });
+    console.error('Error fetching account brands:', error);
+    res.status(500).json({ error: 'Failed to fetch account brands' });
   }
 });
 
-// Save user-specific vendor pricing
+// Save account-specific brand data
 router.post('/pricing/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-    const pricingData = req.body;
-    const result = await vendorOperations.saveUserVendorPricing(userId, pricingData);
-    res.json(result);
+    const brandData = req.body;
+    
+    // Validate required fields
+    if (!brandData.brand_id || !brandData.vendor_id) {
+      return res.status(400).json({ 
+        error: 'Missing required fields: brand_id and vendor_id are required' 
+      });
+    }
+    
+    console.log('Saving account brand data:', { userId, brandData });
+    
+    const result = await vendorOperations.saveAccountBrand(userId, brandData);
+    
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Account brand data saved successfully',
+        data: result
+      });
+    } else {
+      res.status(500).json({ 
+        error: 'Failed to save account brand data', 
+        details: result 
+      });
+    }
   } catch (error) {
-    console.error('Error saving user vendor pricing:', error);
-    res.status(500).json({ error: 'Failed to save vendor pricing' });
+    console.error('Error saving account brand data:', error);
+    res.status(500).json({ 
+      error: 'Failed to save account brand data',
+      message: error.message,
+      details: error.stack 
+    });
   }
 });
 
@@ -77,30 +103,30 @@ router.post('/pricing/:userId', async (req, res) => {
 router.get('/companies/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-    const vendorsWithPricing = await vendorOperations.getVendorsWithUserPricing(userId);
+    const vendorsWithAccountBrands = await vendorOperations.getVendorsWithAccountBrands(userId);
     
     // Transform vendors to Company format expected by frontend
-    const companies = vendorsWithPricing.map(vendor => ({
+    const companies = vendorsWithAccountBrands.map(vendor => ({
       id: vendor.id,
       name: vendor.name,
       brands: (vendor.brands || []).map(brand => ({
         id: brand.id,
         name: brand.name,
         wholesaleCost: brand.wholesale_cost || 0,
-        yourCost: vendor.user_pricing?.[0]?.your_cost_override || brand.wholesale_cost || 0,
-        tariffTax: vendor.user_pricing?.[0]?.tariff_tax || 0,
+        yourCost: brand.effective_wholesale_cost || brand.wholesale_cost || 0,
+        tariffTax: brand.account_brand?.tariff_tax || 0,
         retailPrice: brand.msrp || 0,
-        notes: ''
+        notes: brand.notes || brand.account_brand?.notes || ''
       })),
       contactInfo: {
-        companyEmail: vendor.contact_email || '',
-        companyPhone: vendor.contact_phone || '',
-        supportEmail: vendor.support_email || '',
-        supportPhone: vendor.support_phone || '',
-        website: vendor.website || '',
-        repName: vendor.rep_name || '',
-        repEmail: vendor.rep_email || '',
-        repPhone: vendor.rep_phone || ''
+        companyEmail: '',
+        companyPhone: '',
+        supportEmail: '',
+        supportPhone: '',
+        website: vendor.domain || '',
+        repName: '',
+        repEmail: '',
+        repPhone: ''
       }
     }));
     

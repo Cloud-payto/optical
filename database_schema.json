@@ -1,5 +1,149 @@
 [
   {
+    "table_name": "account_brands",
+    "column_name": "id",
+    "data_type": "uuid",
+    "character_maximum_length": null,
+    "column_default": "uuid_generate_v4()",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "account_brands",
+    "column_name": "account_id",
+    "data_type": "uuid",
+    "character_maximum_length": null,
+    "column_default": null,
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "account_brands",
+    "column_name": "vendor_id",
+    "data_type": "uuid",
+    "character_maximum_length": null,
+    "column_default": null,
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "account_brands",
+    "column_name": "brand_id",
+    "data_type": "uuid",
+    "character_maximum_length": null,
+    "column_default": null,
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "account_brands",
+    "column_name": "discount_percentage",
+    "data_type": "numeric",
+    "character_maximum_length": null,
+    "column_default": null,
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "account_brands",
+    "column_name": "multiplier",
+    "data_type": "numeric",
+    "character_maximum_length": null,
+    "column_default": null,
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "account_brands",
+    "column_name": "your_cost_override",
+    "data_type": "numeric",
+    "character_maximum_length": null,
+    "column_default": null,
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "account_brands",
+    "column_name": "payment_terms",
+    "data_type": "character varying",
+    "character_maximum_length": 100,
+    "column_default": null,
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "account_brands",
+    "column_name": "minimum_order",
+    "data_type": "numeric",
+    "character_maximum_length": null,
+    "column_default": null,
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "account_brands",
+    "column_name": "free_shipping_threshold",
+    "data_type": "numeric",
+    "character_maximum_length": null,
+    "column_default": null,
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "account_brands",
+    "column_name": "notes",
+    "data_type": "text",
+    "character_maximum_length": null,
+    "column_default": null,
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "account_brands",
+    "column_name": "is_active",
+    "data_type": "boolean",
+    "character_maximum_length": null,
+    "column_default": "true",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "account_brands",
+    "column_name": "negotiated_date",
+    "data_type": "date",
+    "character_maximum_length": null,
+    "column_default": null,
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "account_brands",
+    "column_name": "expires_date",
+    "data_type": "date",
+    "character_maximum_length": null,
+    "column_default": null,
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "account_brands",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "character_maximum_length": null,
+    "column_default": "CURRENT_TIMESTAMP",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "account_brands",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "character_maximum_length": null,
+    "column_default": "CURRENT_TIMESTAMP",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "account_brands",
+    "column_name": "tariff_tax",
+    "data_type": "numeric",
+    "character_maximum_length": null,
+    "column_default": null,
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "account_brands",
+    "column_name": "wholesale_cost",
+    "data_type": "numeric",
+    "character_maximum_length": null,
+    "column_default": null,
+    "is_nullable": "YES"
+  },
+  {
     "table_name": "account_inventory_summary",
     "column_name": "account_id",
     "data_type": "uuid",
@@ -50,142 +194,6 @@
   {
     "table_name": "account_inventory_summary",
     "column_name": "total_value",
-    "data_type": "numeric",
-    "character_maximum_length": null,
-    "column_default": null,
-    "is_nullable": "YES"
-  },
-  {
-    "table_name": "account_vendor_pricing",
-    "column_name": "id",
-    "data_type": "uuid",
-    "character_maximum_length": null,
-    "column_default": "uuid_generate_v4()",
-    "is_nullable": "NO"
-  },
-  {
-    "table_name": "account_vendor_pricing",
-    "column_name": "account_id",
-    "data_type": "uuid",
-    "character_maximum_length": null,
-    "column_default": null,
-    "is_nullable": "YES"
-  },
-  {
-    "table_name": "account_vendor_pricing",
-    "column_name": "vendor_id",
-    "data_type": "uuid",
-    "character_maximum_length": null,
-    "column_default": null,
-    "is_nullable": "YES"
-  },
-  {
-    "table_name": "account_vendor_pricing",
-    "column_name": "brand_id",
-    "data_type": "uuid",
-    "character_maximum_length": null,
-    "column_default": null,
-    "is_nullable": "YES"
-  },
-  {
-    "table_name": "account_vendor_pricing",
-    "column_name": "discount_percentage",
-    "data_type": "numeric",
-    "character_maximum_length": null,
-    "column_default": null,
-    "is_nullable": "YES"
-  },
-  {
-    "table_name": "account_vendor_pricing",
-    "column_name": "multiplier",
-    "data_type": "numeric",
-    "character_maximum_length": null,
-    "column_default": null,
-    "is_nullable": "YES"
-  },
-  {
-    "table_name": "account_vendor_pricing",
-    "column_name": "your_cost_override",
-    "data_type": "numeric",
-    "character_maximum_length": null,
-    "column_default": null,
-    "is_nullable": "YES"
-  },
-  {
-    "table_name": "account_vendor_pricing",
-    "column_name": "payment_terms",
-    "data_type": "character varying",
-    "character_maximum_length": 100,
-    "column_default": null,
-    "is_nullable": "YES"
-  },
-  {
-    "table_name": "account_vendor_pricing",
-    "column_name": "minimum_order",
-    "data_type": "numeric",
-    "character_maximum_length": null,
-    "column_default": null,
-    "is_nullable": "YES"
-  },
-  {
-    "table_name": "account_vendor_pricing",
-    "column_name": "free_shipping_threshold",
-    "data_type": "numeric",
-    "character_maximum_length": null,
-    "column_default": null,
-    "is_nullable": "YES"
-  },
-  {
-    "table_name": "account_vendor_pricing",
-    "column_name": "notes",
-    "data_type": "text",
-    "character_maximum_length": null,
-    "column_default": null,
-    "is_nullable": "YES"
-  },
-  {
-    "table_name": "account_vendor_pricing",
-    "column_name": "is_active",
-    "data_type": "boolean",
-    "character_maximum_length": null,
-    "column_default": "true",
-    "is_nullable": "YES"
-  },
-  {
-    "table_name": "account_vendor_pricing",
-    "column_name": "negotiated_date",
-    "data_type": "date",
-    "character_maximum_length": null,
-    "column_default": null,
-    "is_nullable": "YES"
-  },
-  {
-    "table_name": "account_vendor_pricing",
-    "column_name": "expires_date",
-    "data_type": "date",
-    "character_maximum_length": null,
-    "column_default": null,
-    "is_nullable": "YES"
-  },
-  {
-    "table_name": "account_vendor_pricing",
-    "column_name": "created_at",
-    "data_type": "timestamp with time zone",
-    "character_maximum_length": null,
-    "column_default": "CURRENT_TIMESTAMP",
-    "is_nullable": "YES"
-  },
-  {
-    "table_name": "account_vendor_pricing",
-    "column_name": "updated_at",
-    "data_type": "timestamp with time zone",
-    "character_maximum_length": null,
-    "column_default": "CURRENT_TIMESTAMP",
-    "is_nullable": "YES"
-  },
-  {
-    "table_name": "account_vendor_pricing",
-    "column_name": "tariff_tax",
     "data_type": "numeric",
     "character_maximum_length": null,
     "column_default": null,

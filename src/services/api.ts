@@ -323,17 +323,23 @@ export interface Company {
   };
 }
 
-export interface UserVendorPricing {
+export interface AccountBrand {
   id: string;
-  user_id: string;
+  account_id: string;
   vendor_id: string;
   brand_id?: string;
   discount_percentage?: number;
-  your_cost?: number;
   wholesale_cost?: number;
   tariff_tax?: number;
+  notes?: string;
   vendor?: Vendor;
   brand?: Brand;
+}
+
+// Keep the old interface for backward compatibility during transition
+export interface UserVendorPricing extends AccountBrand {
+  user_id: string;
+  your_cost?: number;
 }
 
 export async function fetchVendors(): Promise<Vendor[]> {
@@ -352,16 +358,16 @@ export async function fetchBrandsByVendor(vendorId: string): Promise<Brand[]> {
   return apiRequest<Brand[]>(`/vendors/${vendorId}/brands`);
 }
 
-export async function fetchUserVendorPricing(userId?: string): Promise<UserVendorPricing[]> {
+export async function fetchAccountBrands(userId?: string): Promise<UserVendorPricing[]> {
   const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<UserVendorPricing[]>(`/vendors/pricing/${currentUserId}`);
 }
 
-export async function saveUserVendorPricing(pricingData: Partial<UserVendorPricing>, userId?: string): Promise<UserVendorPricing[]> {
+export async function saveAccountBrand(brandData: Partial<UserVendorPricing>, userId?: string): Promise<UserVendorPricing[]> {
   const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<UserVendorPricing[]>(`/vendors/pricing/${currentUserId}`, {
     method: 'POST',
-    body: JSON.stringify(pricingData),
+    body: JSON.stringify(brandData),
   });
 }
 

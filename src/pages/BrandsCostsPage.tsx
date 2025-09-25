@@ -7,9 +7,9 @@ import BrandDetailsModal from '../components/brands/BrandDetailsModal';
 import CompanyDetailsModal from '../components/brands/CompanyDetailsModal';
 import AddCompanyModal from '../components/brands/AddCompanyModal';
 import { Company, Brand } from '../types';
-import { fetchCompaniesWithPricing, saveUserVendorPricing } from '../services/api';
+import { fetchCompaniesWithPricing, saveAccountBrand } from '../services/api';
 
-// Function to load companies from Supabase (replacing localStorage approach)
+// Function to load companies with account-specific brand data from Supabase
 const loadCompaniesFromSupabase = async (): Promise<Company[]> => {
   try {
     const companies = await fetchCompaniesWithPricing();
@@ -89,12 +89,22 @@ const BrandsCostsPage: React.FC = () => {
 
   const handleSaveBrand = async (updatedBrand: Brand) => {
     try {
-      // Save to Supabase
-      await saveUserVendorPricing({
+      // Find the company (vendor) that contains this brand
+      const company = companies.find(c => c.brands.some(b => b.id === updatedBrand.id));
+      if (!company) {
+        throw new Error('Could not find vendor for this brand');
+      }
+
+      // Save to Supabase with correct data structure
+      await saveAccountBrand({
         brand_id: updatedBrand.id,
-        wholesale_cost: updatedBrand.wholesaleCost,
-        your_cost: updatedBrand.yourCost,
-        tariff_tax: updatedBrand.tariffTax || 0
+        vendor_id: company.id,
+        // Save global wholesale cost if it has changed
+        global_wholesale_cost: updatedBrand.wholesaleCost,
+        // Save account-specific wholesale cost (negotiated price)
+        wholesale_cost: updatedBrand.yourCost || updatedBrand.wholesaleCost,
+        tariff_tax: updatedBrand.tariffTax || 0,
+        notes: updatedBrand.notes
       });
 
       // Update local state
@@ -108,7 +118,13 @@ const BrandsCostsPage: React.FC = () => {
       );
     } catch (error) {
       console.error('Error saving brand:', error);
-      setError('Failed to save brand changes. Please try again.');
+      if (error.message.includes('Could not find vendor')) {
+        setError('Error: Could not find the vendor for this brand. Please refresh the page and try again.');
+      } else if (error.response?.data?.error) {
+        setError(`Failed to save brand changes: ${error.response.data.error}`);
+      } else {
+        setError('Failed to save brand changes. Please check your internet connection and try again.');
+      }
     }
   };
 
