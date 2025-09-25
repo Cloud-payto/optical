@@ -89,14 +89,17 @@ const BrandsCostsPage: React.FC = () => {
 
   const handleSaveBrand = async (updatedBrand: Brand) => {
     try {
+      console.log('🔥 DEBUG: handleSaveBrand called with:', updatedBrand);
+      
       // Find the company (vendor) that contains this brand
       const company = companies.find(c => c.brands.some(b => b.id === updatedBrand.id));
       if (!company) {
         throw new Error('Could not find vendor for this brand');
       }
 
-      // Save to Supabase with correct data structure
-      await saveAccountBrand({
+      console.log('🔥 DEBUG: Found company:', { id: company.id, name: company.name });
+
+      const dataToSend = {
         brand_id: updatedBrand.id,
         vendor_id: company.id,
         // Save global wholesale cost if it has changed
@@ -105,7 +108,14 @@ const BrandsCostsPage: React.FC = () => {
         wholesale_cost: updatedBrand.yourCost || updatedBrand.wholesaleCost,
         tariff_tax: updatedBrand.tariffTax || 0,
         notes: updatedBrand.notes
-      });
+      };
+
+      console.log('🔥 DEBUG: Sending to API:', dataToSend);
+
+      // Save to Supabase with correct data structure
+      const result = await saveAccountBrand(dataToSend);
+      
+      console.log('🔥 DEBUG: API response:', result);
 
       // Update local state
       setCompanies(prevCompanies => 

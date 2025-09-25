@@ -362,8 +362,21 @@ const vendorOperations = {
 
   async saveAccountBrand(userId, brandData) {
     try {
+      console.log('🔥 DEBUG: saveAccountBrand called');
+      console.log('🔥 DEBUG: userId (account_id):', userId);
+      console.log('🔥 DEBUG: brandData received:', brandData);
+      
       // Separate global brand data from account-specific brand data
       const { brand_id, vendor_id, global_wholesale_cost, msrp, map_price, ...accountBrandData } = brandData;
+      
+      console.log('🔥 DEBUG: Extracted fields:', {
+        brand_id,
+        vendor_id,
+        global_wholesale_cost,
+        msrp,
+        map_price,
+        accountBrandData
+      });
       
       // Start a transaction-like approach using multiple operations
       let globalBrandData = null;
@@ -371,10 +384,13 @@ const vendorOperations = {
 
       // 1. If global pricing is provided, update the global brands table
       if (brand_id && (global_wholesale_cost !== undefined || msrp !== undefined || map_price !== undefined)) {
+        console.log('🔥 DEBUG: Updating global brands table');
         const globalBrandUpdateData = {};
         if (global_wholesale_cost !== undefined) globalBrandUpdateData.wholesale_cost = global_wholesale_cost;
         if (msrp !== undefined) globalBrandUpdateData.msrp = msrp;
         if (map_price !== undefined) globalBrandUpdateData.map_price = map_price;
+        
+        console.log('🔥 DEBUG: Global brand update data:', globalBrandUpdateData);
         
         const { data: brandUpdateResult, error: brandError } = await supabase
           .from('brands')
@@ -386,11 +402,53 @@ const vendorOperations = {
           })
           .select();
         
-        if (brandError) throw brandError;
+        if (brandError) {
+          console.error('🔥 DEBUG: Error updating brands table:', brandError);
+          throw brandError;
+        }
+        
+        console.log('🔥 DEBUG: Global brand update result:', brandUpdateResult);
         globalBrandData = brandUpdateResult;
       }
 
-      // 2. Save account-specific brand data to account_brands table
+      // 2. First, let's verify the brand exists in the brands table
+      console.log('🔥 DEBUG: Verifying brand exists in brands table');
+      const { data: existingBrand, error: brandCheckError } = await supabase
+        .from('brands')
+        .select('id, name, vendor_id')
+        .eq('id', brand_id)
+        .single();
+      
+      if (brandCheckError) {
+        console.log('🔥 DEBUG: Brand check error:', brandCheckError);
+        console.log('🔥 DEBUG: Brand does not exist, creating it first');
+        
+        // Create the brand if it doesn't exist
+        const { data: newBrand, error: createBrandError } = await supabase
+          .from('brands')
+          .insert({
+            id: brand_id,
+            vendor_id: vendor_id,
+            name: `Brand ${brand_id}`, // Temporary name
+            wholesale_cost: global_wholesale_cost,
+            msrp: msrp,
+            map_price: map_price,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .select()
+          .single();
+          
+        if (createBrandError) {
+          console.error('🔥 DEBUG: Error creating brand:', createBrandError);
+          throw createBrandError;
+        }
+        console.log('🔥 DEBUG: Created new brand:', newBrand);
+      } else {
+        console.log('🔥 DEBUG: Brand exists:', existingBrand);
+      }
+
+      // 3. Save account-specific brand data to account_brands table
       const accountBrandFields = {
         account_id: userId,
         vendor_id: vendor_id,
@@ -399,26 +457,38 @@ const vendorOperations = {
         updated_at: new Date().toISOString()
       };
 
+      console.log('🔥 DEBUG: Attempting to save to account_brands table:', accountBrandFields);
+
       const { data: accountUpdateResult, error: accountError } = await supabase
         .from('account_brands')
         .upsert(accountBrandFields)
         .select();
       
-      if (accountError) throw accountError;
+      if (accountError) {
+        console.error('🔥 DEBUG: Error saving to account_brands table:', accountError);
+        throw accountError;
+      }
+      
+      console.log('🔥 DEBUG: Successfully saved to account_brands:', accountUpdateResult);
       accountBrandResult = accountUpdateResult;
 
-      return {
+      const finalResult = {
         global_brand: globalBrandData,
         account_brand: accountBrandResult,
         success: true
       };
+
+      console.log('🔥 DEBUG: Final result:', finalResult);
+      return finalResult;
     } catch (error) {
+      console.error('🔥 DEBUG: Error in saveAccountBrand:', error);
       handleSupabaseError(error, 'saveAccountBrand');
     }
   },
 
   async getVendorsWithAccountBrands(userId) {
     try {
+      console.log('Starting getVendorsWithAccountBrands for userId:', userId);
       // Get all vendors with their brands and user-specific pricing
       const { data, error } = await supabase
         .from('vendors')
@@ -481,9 +551,11 @@ const vendorOperations = {
         };
       });
       
+      console.log('Function completed, returning:', vendorsWithPricing?.length, 'vendors');
       return vendorsWithPricing;
     } catch (error) {
-      handleSupabaseError(error, 'getVendorsWithAccountBrands');
+      console.error(`Supabase error during getVendorsWithAccountBrands:`, error);
+      throw error; // This will be caught by the route handler
     }
   }
 };

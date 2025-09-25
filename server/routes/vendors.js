@@ -66,16 +66,23 @@ router.post('/pricing/:userId', async (req, res) => {
     const { userId } = req.params;
     const brandData = req.body;
     
+    console.log('🔥 DEBUG: POST /pricing/:userId called');
+    console.log('🔥 DEBUG: Account ID (userId):', userId);
+    console.log('🔥 DEBUG: Received from frontend:', brandData);
+    
     // Validate required fields
     if (!brandData.brand_id || !brandData.vendor_id) {
+      console.log('🔥 DEBUG: Missing required fields');
       return res.status(400).json({ 
         error: 'Missing required fields: brand_id and vendor_id are required' 
       });
     }
     
-    console.log('Saving account brand data:', { userId, brandData });
+    console.log('🔥 DEBUG: Calling saveAccountBrand with userId:', userId, 'brandData:', brandData);
     
     const result = await vendorOperations.saveAccountBrand(userId, brandData);
+    
+    console.log('🔥 DEBUG: saveAccountBrand result:', result);
     
     if (result.success) {
       res.json({
