@@ -94,7 +94,7 @@ const BrandsCostsPage: React.FC = () => {
         brand_id: updatedBrand.id,
         wholesale_cost: updatedBrand.wholesaleCost,
         your_cost: updatedBrand.yourCost,
-        tariff_tax: updatedBrand.tariffTax
+        tariff_tax: updatedBrand.tariffTax || 0
       });
 
       // Update local state

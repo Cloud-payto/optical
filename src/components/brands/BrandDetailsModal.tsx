@@ -93,6 +93,11 @@ const BrandDetailsModal: React.FC<BrandDetailsModalProps> = ({
       newErrors.yourCost = 'Your cost should be less than wholesale cost';
     }
 
+    // Validate tariff tax
+    if (isTariffEnabled && (formData.tariffTax < 0 || formData.tariffTax > 100)) {
+      newErrors.tariffTax = 'Tariff tax must be between 0 and 100';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -240,12 +245,19 @@ const BrandDetailsModal: React.FC<BrandDetailsModalProps> = ({
                       type="number"
                       step="0.01"
                       min="0"
-                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                      max="100"
+                      className={`block w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500 ${
+                        errors.tariffTax ? 'border-red-300' : 'border-gray-300'
+                      }`}
                       value={formData.tariffTax}
                       onChange={(e) => handleInputChange('tariffTax', parseFloat(e.target.value) || 0)}
                       placeholder="0.00"
                     />
                   </div>
+                )}
+                
+                {errors.tariffTax && (
+                  <p className="mt-1 text-sm text-red-600">{errors.tariffTax}</p>
                 )}
                 
                 {!isTariffEnabled && (

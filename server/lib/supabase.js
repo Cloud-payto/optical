@@ -400,7 +400,8 @@ const vendorOperations = {
             your_cost_override,
             payment_terms,
             minimum_order,
-            free_shipping_threshold
+            free_shipping_threshold,
+            tariff_tax
           )
         `)
         .eq('user_pricing.account_id', userId);
