@@ -371,6 +371,7 @@ const vendorOperations = {
         brand_name,  // New field for creating brands
         vendor_id, 
         global_wholesale_cost,
+        msrp,        // Retail price for brands table
         wholesale_cost,
         tariff_tax,
         discount_percentage,
@@ -390,6 +391,7 @@ const vendorOperations = {
             name: brand_name,
             vendor_id: vendor_id,
             wholesale_cost: global_wholesale_cost || wholesale_cost,
+            msrp: msrp || 0,
             is_active: true
           })
           .select()
@@ -404,15 +406,21 @@ const vendorOperations = {
         console.log('✅ Brand created with ID:', finalBrandId);
         
       } else if (brand_id) {
-        // Update EXISTING brand if global_wholesale_cost provided
-        if (global_wholesale_cost !== undefined) {
+        // Update EXISTING brand if global_wholesale_cost or msrp provided
+        if (global_wholesale_cost !== undefined || msrp !== undefined) {
           console.log('🔥 Updating existing brand:', brand_id);
+          
+          const updateData = {};
+          if (global_wholesale_cost !== undefined) {
+            updateData.wholesale_cost = global_wholesale_cost;
+          }
+          if (msrp !== undefined) {
+            updateData.msrp = msrp;
+          }
           
           const { error: updateError } = await supabase
             .from('brands')
-            .update({
-              wholesale_cost: global_wholesale_cost
-            })
+            .update(updateData)
             .eq('id', brand_id);
           
           if (updateError) {
@@ -441,25 +449,47 @@ const vendorOperations = {
       
       console.log('🔥 Account brand data to upsert:', accountBrandData);
       
-      // Try different upsert approaches based on Supabase version
+      // Try multiple upsert approaches
       let accountBrand, accountError;
       
       try {
-        // Method 1: Try modern Supabase upsert with onConflict
-        console.log('🔥 Attempting upsert with onConflict parameter');
+        // Method 1: Simple upsert (let Supabase auto-detect conflicts)
+        console.log('🔥 Attempting simple upsert (auto-conflict resolution)');
         const result = await supabase
           .from('account_brands')
-          .upsert(accountBrandData, { 
-            onConflict: 'account_id,brand_id',
-            ignoreDuplicates: false 
-          })
+          .upsert(accountBrandData)
           .select()
           .single();
           
         accountBrand = result.data;
         accountError = result.error;
+        
+        if (accountError && accountError.code === '23505') {
+          // Constraint violation - try with explicit conflict resolution
+          console.log('🔥 Auto-conflict failed, trying with exact constraint name');
+          
+          const result2 = await supabase
+            .from('account_brands')
+            .upsert(accountBrandData, {
+              onConflict: 'account_brands_account_id_brand_id_key',
+              ignoreDuplicates: false
+            })
+            .select()
+            .single();
+            
+          accountBrand = result2.data;
+          accountError = result2.error;
+          
+          if (accountError) {
+            console.log('🔥 Exact constraint name failed too, falling back to manual');
+            throw new Error('All upsert methods failed, using manual approach');
+          } else {
+            console.log('✅ Exact constraint name method worked!');
+          }
+        }
+        
       } catch (err) {
-        console.log('🔥 onConflict method failed, trying manual check method');
+        console.log('🔥 Simple upsert failed, trying manual approach');
         
         // Method 2: Manual check and update/insert
         const { data: existing } = await supabase

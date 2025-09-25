@@ -121,6 +121,8 @@ const BrandsCostsPage: React.FC = () => {
         vendor_id: company.id,
         // Save global wholesale cost if it has changed
         global_wholesale_cost: updatedBrand.wholesaleCost,
+        // Save MSRP (retail price) to brands table
+        msrp: updatedBrand.retailPrice || 0,
         // Save account-specific wholesale cost (negotiated price)
         wholesale_cost: updatedBrand.yourCost || updatedBrand.wholesaleCost,
         tariff_tax: updatedBrand.tariffTax || 0,
