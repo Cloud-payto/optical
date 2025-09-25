@@ -119,6 +119,16 @@ const ProfitCalculator: React.FC = () => {
         setLoadingCompanies(true);
         setCompaniesError(null);
         const companiesData = await fetchCompaniesWithPricing();
+        console.log('🔥 DEBUG: Calculator loaded companies:', companiesData);
+        
+        // Log brands with their pricing data
+        companiesData.forEach(company => {
+          console.log(`🔥 DEBUG: Company "${company.name}" has ${company.brands.length} brands:`);
+          company.brands.forEach(brand => {
+            console.log(`  - ${brand.name}: yourCost=${brand.yourCost}, wholesaleCost=${brand.wholesaleCost}, tariffTax=${brand.tariffTax}`);
+          });
+        });
+        
         setCompanies(companiesData);
       } catch (error) {
         console.error('Error loading companies:', error);
@@ -218,17 +228,28 @@ const ProfitCalculator: React.FC = () => {
 
   // Handle brand selection and auto-populate fields
   const handleBrandSelect = (brand: Brand) => {
+    console.log('🔥 DEBUG: Brand selected in calculator:', brand);
     setSelectedBrand(brand);
     setShowBrandDropdown(false);
     
-    // Auto-populate fields from brand data (using camelCase properties from API)
-    if (brand.your_cost !== undefined && brand.your_cost !== null) setYourCost(brand.your_cost);
-    if (brand.wholesale_cost !== undefined && brand.wholesale_cost !== null) setWholesaleCost(brand.wholesale_cost);
-    if (brand.tariff_tax !== undefined && brand.tariff_tax !== null) setTariffTax(brand.tariff_tax);
+    // Auto-populate fields from brand data (using camelCase properties from frontend API)
+    if (brand.yourCost !== undefined && brand.yourCost !== null) {
+      console.log('🔥 DEBUG: Setting yourCost from brand:', brand.yourCost);
+      setYourCost(brand.yourCost);
+    }
+    if (brand.wholesaleCost !== undefined && brand.wholesaleCost !== null) {
+      console.log('🔥 DEBUG: Setting wholesaleCost from brand:', brand.wholesaleCost);
+      setWholesaleCost(brand.wholesaleCost);
+    }
+    if (brand.tariffTax !== undefined && brand.tariffTax !== null) {
+      console.log('🔥 DEBUG: Setting tariffTax from brand:', brand.tariffTax);
+      setTariffTax(brand.tariffTax);
+    }
     
     // Calculate retail price based on wholesale cost and multiplier
-    if (brand.wholesale_cost !== undefined && brand.wholesale_cost !== null && !useManualRetailPrice) {
-      const calculatedRetail = calculateRetailPrice(brand.wholesale_cost, brand.tariff_tax || 0, insuranceMultiplier);
+    if (brand.wholesaleCost !== undefined && brand.wholesaleCost !== null && !useManualRetailPrice) {
+      const calculatedRetail = calculateRetailPrice(brand.wholesaleCost, brand.tariffTax || 0, insuranceMultiplier);
+      console.log('🔥 DEBUG: Calculated retail price:', calculatedRetail);
       setRetailPrice(calculatedRetail);
     }
   };

@@ -425,23 +425,83 @@ const vendorOperations = {
         throw new Error('Either brand_id or brand_name must be provided');
       }
 
-      // Step 2: Create/update account_brands entry
+      // Step 2: Create/update account_brands entry using proper upsert with conflict resolution
       console.log('🔥 Saving to account_brands with brand_id:', finalBrandId);
       
-      const { data: accountBrand, error: accountError } = await supabase
-        .from('account_brands')
-        .upsert({
-          account_id: userId,
-          brand_id: finalBrandId,  // Use the real UUID
-          vendor_id: vendor_id,
-          wholesale_cost: wholesale_cost,
-          tariff_tax: tariff_tax || 0,
-          discount_percentage: discount_percentage || 0,
-          notes: notes || '',
-          updated_at: new Date().toISOString()
-        })
-        .select()
-        .single();
+      const accountBrandData = {
+        account_id: userId,
+        brand_id: finalBrandId,  // Use the real UUID
+        vendor_id: vendor_id,
+        wholesale_cost: wholesale_cost,
+        tariff_tax: tariff_tax || 0,
+        discount_percentage: discount_percentage || 0,
+        notes: notes || '',
+        updated_at: new Date().toISOString()
+      };
+      
+      console.log('🔥 Account brand data to upsert:', accountBrandData);
+      
+      // Try different upsert approaches based on Supabase version
+      let accountBrand, accountError;
+      
+      try {
+        // Method 1: Try modern Supabase upsert with onConflict
+        console.log('🔥 Attempting upsert with onConflict parameter');
+        const result = await supabase
+          .from('account_brands')
+          .upsert(accountBrandData, { 
+            onConflict: 'account_id,brand_id',
+            ignoreDuplicates: false 
+          })
+          .select()
+          .single();
+          
+        accountBrand = result.data;
+        accountError = result.error;
+      } catch (err) {
+        console.log('🔥 onConflict method failed, trying manual check method');
+        
+        // Method 2: Manual check and update/insert
+        const { data: existing } = await supabase
+          .from('account_brands')
+          .select('id')
+          .eq('account_id', userId)
+          .eq('brand_id', finalBrandId)
+          .single();
+          
+        if (existing) {
+          // Update existing
+          console.log('🔥 Existing record found, updating');
+          const result = await supabase
+            .from('account_brands')
+            .update({
+              vendor_id: vendor_id,
+              wholesale_cost: wholesale_cost,
+              tariff_tax: tariff_tax || 0,
+              discount_percentage: discount_percentage || 0,
+              notes: notes || '',
+              updated_at: new Date().toISOString()
+            })
+            .eq('account_id', userId)
+            .eq('brand_id', finalBrandId)
+            .select()
+            .single();
+            
+          accountBrand = result.data;
+          accountError = result.error;
+        } else {
+          // Insert new
+          console.log('🔥 No existing record found, inserting new');
+          const result = await supabase
+            .from('account_brands')
+            .insert(accountBrandData)
+            .select()
+            .single();
+            
+          accountBrand = result.data;
+          accountError = result.error;
+        }
+      }
 
       if (accountError) {
         console.error('🔥 Error saving account_brands:', accountError);
@@ -497,6 +557,8 @@ const vendorOperations = {
       
       let accountBrands = [];
       if (vendorIds.length > 0) {
+        console.log('🔥 DEBUG: Fetching account_brands for userId:', userId, 'vendorIds:', vendorIds);
+        
         const { data: accountBrandData, error: accountBrandError } = await supabase
           .from('account_brands')
           .select('*')
@@ -505,6 +567,9 @@ const vendorOperations = {
         
         if (accountBrandError) throw accountBrandError;
         accountBrands = accountBrandData || [];
+        
+        console.log('🔥 DEBUG: Found account_brands data:', accountBrands.length, 'records');
+        console.log('🔥 DEBUG: Account brands:', accountBrands);
       }
       
       // Merge vendor data with user pricing
@@ -513,6 +578,12 @@ const vendorOperations = {
           const accountBrand = accountBrands.find(ab => 
             ab.vendor_id === vendor.id && ab.brand_id === brand.id
           );
+          
+          if (accountBrand) {
+            console.log('🔥 DEBUG: Found account_brand for brand:', brand.name, 'data:', accountBrand);
+          } else {
+            console.log('🔥 DEBUG: No account_brand found for brand:', brand.name, 'vendor:', vendor.id, 'brand:', brand.id);
+          }
           
           return {
             ...brand,
