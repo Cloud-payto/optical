@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ProfitData, SavedCalculation, Company, Brand } from '../types';
+import { ProfitData, SavedCalculation } from '../types';
+import { Company, Brand, fetchCompaniesWithPricing } from '../services/api';
 import { calculateProfit, calculateNonInsuranceProfit, calculateRetailPrice } from '../utils/calculations';
 import ProfitDisplay from './ProfitDisplay';
 import { DollarSignIcon, SaveIcon, PrinterIcon, SlidersIcon, ChevronDownIcon, PlusIcon, TagIcon, ShieldIcon, BuildingIcon } from 'lucide-react';
@@ -14,11 +15,7 @@ const formatCurrency = (value: number): string => {
   }).format(value);
 };
 
-// Helper function to load companies from localStorage  
-const loadSavedCompanies = (): Company[] => {
-  const savedCompanies = localStorage.getItem('optiprofit_companies');
-  return savedCompanies ? JSON.parse(savedCompanies) : [];
-};
+// Companies will now be loaded from Supabase instead of localStorage
 
 // Helper function to load saved brands from localStorage or use defaults (legacy support)
 const loadSavedBrands = (): string[] => {
@@ -76,11 +73,13 @@ const ProfitCalculator: React.FC = () => {
   const [insuranceEnabled, setInsuranceEnabled] = useState<boolean>(true);
   
   // Company and Brand selection state
-  const [companies, setCompanies] = useState<Company[]>(loadSavedCompanies());
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
   const [showCompanyDropdown, setShowCompanyDropdown] = useState<boolean>(false);
   const [showBrandDropdown, setShowBrandDropdown] = useState<boolean>(false);
+  const [loadingCompanies, setLoadingCompanies] = useState<boolean>(true);
+  const [companiesError, setCompaniesError] = useState<string | null>(null);
   
   // Legacy brand selection state (for backward compatibility)
   const [brands, setBrands] = useState<string[]>(loadSavedBrands());
@@ -112,6 +111,25 @@ const ProfitCalculator: React.FC = () => {
   const insuranceDropdownRef = useRef<HTMLDivElement>(null);
   const insurancePlanDropdownRef = useRef<HTMLDivElement>(null);
   const saveDialogRef = useRef<HTMLDivElement>(null);
+
+  // Load companies from Supabase
+  useEffect(() => {
+    const loadCompanies = async () => {
+      try {
+        setLoadingCompanies(true);
+        setCompaniesError(null);
+        const companiesData = await fetchCompaniesWithPricing();
+        setCompanies(companiesData);
+      } catch (error) {
+        console.error('Error loading companies:', error);
+        setCompaniesError('Failed to load companies. Please try again.');
+      } finally {
+        setLoadingCompanies(false);
+      }
+    };
+
+    loadCompanies();
+  }, []);
 
   // Calculate retail price based on multiplier when not using manual price
   useEffect(() => {
@@ -203,13 +221,15 @@ const ProfitCalculator: React.FC = () => {
     setSelectedBrand(brand);
     setShowBrandDropdown(false);
     
-    // Auto-populate fields from brand data
-    if (brand.yourCost !== undefined) setYourCost(brand.yourCost);
-    if (brand.wholesaleCost !== undefined) setWholesaleCost(brand.wholesaleCost);
-    if (brand.tariffTax !== undefined) setTariffTax(brand.tariffTax);
-    if (brand.retailPrice !== undefined) {
-      setRetailPrice(brand.retailPrice);
-      setUseManualRetailPrice(true); // Enable manual mode when using brand retail price
+    // Auto-populate fields from brand data (using camelCase properties from API)
+    if (brand.your_cost !== undefined && brand.your_cost !== null) setYourCost(brand.your_cost);
+    if (brand.wholesale_cost !== undefined && brand.wholesale_cost !== null) setWholesaleCost(brand.wholesale_cost);
+    if (brand.tariff_tax !== undefined && brand.tariff_tax !== null) setTariffTax(brand.tariff_tax);
+    
+    // Calculate retail price based on wholesale cost and multiplier
+    if (brand.wholesale_cost !== undefined && brand.wholesale_cost !== null && !useManualRetailPrice) {
+      const calculatedRetail = calculateRetailPrice(brand.wholesale_cost, brand.tariff_tax || 0, insuranceMultiplier);
+      setRetailPrice(calculatedRetail);
     }
   };
 
@@ -425,21 +445,30 @@ const ProfitCalculator: React.FC = () => {
                     {showCompanyDropdown && (
                       <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-60 overflow-auto">
                         <ul className="py-1">
-                          {companies.map((company) => (
-                            <li key={company.id}>
-                              <button
-                                type="button"
-                                className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${selectedCompany?.id === company.id ? 'bg-blue-50 text-blue-700' : ''}`}
-                                onClick={() => handleCompanySelect(company)}
-                              >
-                                {company.name}
-                              </button>
+                          {loadingCompanies ? (
+                            <li className="px-4 py-2 text-gray-500 text-sm">
+                              Loading companies...
                             </li>
-                          ))}
-                          {companies.length === 0 && (
+                          ) : companiesError ? (
+                            <li className="px-4 py-2 text-red-500 text-sm">
+                              {companiesError}
+                            </li>
+                          ) : companies.length === 0 ? (
                             <li className="px-4 py-2 text-gray-500 text-sm">
                               No companies available. Add companies in Brands & Costs.
                             </li>
+                          ) : (
+                            companies.map((company) => (
+                              <li key={company.id}>
+                                <button
+                                  type="button"
+                                  className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${selectedCompany?.id === company.id ? 'bg-blue-50 text-blue-700' : ''}`}
+                                  onClick={() => handleCompanySelect(company)}
+                                >
+                                  {company.name}
+                                </button>
+                              </li>
+                            ))
                           )}
                         </ul>
                       </div>
@@ -552,11 +581,11 @@ const ProfitCalculator: React.FC = () => {
                               >
                                 <div>
                                   <div className="font-medium">{brand.name}</div>
-                                  {(brand.wholesaleCost || brand.yourCost || brand.retailPrice) && (
+                                  {(brand.wholesale_cost || brand.your_cost) && (
                                     <div className="text-xs text-gray-500">
-                                      {brand.yourCost && `Your Cost: $${brand.yourCost}`}
-                                      {brand.wholesaleCost && ` • Wholesale: $${brand.wholesaleCost}`}
-                                      {brand.retailPrice && ` • Retail: $${brand.retailPrice}`}
+                                      {brand.your_cost !== null && brand.your_cost !== undefined && `Your Cost: $${brand.your_cost}`}
+                                      {brand.wholesale_cost !== null && brand.wholesale_cost !== undefined && ` • Wholesale: $${brand.wholesale_cost}`}
+                                      {brand.tariff_tax !== null && brand.tariff_tax !== undefined && ` • Tariff: $${brand.tariff_tax}`}
                                     </div>
                                   )}
                                 </div>
@@ -643,8 +672,8 @@ const ProfitCalculator: React.FC = () => {
             </div>
             {/* End of 2x2 grid */}
             
-            {/* Legacy Brand Dropdown - shown when no companies are available */}
-            {companies.length === 0 && (
+            {/* Legacy Brand Dropdown - shown when no companies are available or still loading */}
+            {(companies.length === 0 && !loadingCompanies) && (
               <div className="space-y-2 border-t border-gray-200 pt-4">
                 <label htmlFor="legacyBrand" className="block text-sm font-medium text-gray-700">
                   Brand (Legacy)
