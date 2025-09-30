@@ -166,7 +166,7 @@ const Inventory: React.FC = () => {
       setDeletingItems(prev => new Set(prev).add(itemId));
 
       try {
-        await deleteInventoryItem(String(itemId));
+        await deleteInventoryItem(itemId);
         toast.success('Item deleted successfully');
         await loadData();
       } catch (err) {
@@ -182,7 +182,7 @@ const Inventory: React.FC = () => {
   };
 
   // Delete inventory item function
-  const handleDeleteInventoryItem = async (itemId: number) => {
+  const handleDeleteInventoryItem = async (itemId: string) => {
     setConfirmDeleteDialog({ isOpen: true, emailId: null, itemId, type: 'item' });
   };
 
@@ -800,7 +800,7 @@ const Inventory: React.FC = () => {
                           Items
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Received
+                          Email Received
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Status

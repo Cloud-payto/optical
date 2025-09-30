@@ -56,7 +56,7 @@ router.delete('/:userId/:itemId', async (req, res) => {
   try {
     const { userId, itemId } = req.params;
     
-    await inventoryOperations.deleteInventoryItem(parseInt(itemId), userId);
+    await inventoryOperations.deleteInventoryItem(itemId, userId);
     
     res.json({
       success: true,

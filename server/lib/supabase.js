@@ -188,10 +188,23 @@ const inventoryOperations = {
 
   async confirmPendingOrder(orderNumber, userId) {
     try {
+      // First, find the order ID from the order number
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .select('id')
+        .eq('order_number', orderNumber)
+        .eq('account_id', userId)
+        .single();
+      
+      if (orderError || !order) {
+        throw new Error(`Order not found: ${orderNumber}`);
+      }
+      
+      // Then update inventory items that belong to this order
       const { data, error } = await supabase
         .from('inventory')
         .update({ status: 'confirmed' })
-        .eq('order_number', orderNumber)
+        .eq('order_id', order.id)
         .eq('account_id', userId)
         .eq('status', 'pending')
         .select();
