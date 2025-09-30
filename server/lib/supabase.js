@@ -256,6 +256,21 @@ const orderOperations = {
     }
   },
 
+  async saveOrder(orderData) {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .insert([orderData])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleSupabaseError(error, 'saveOrder');
+    }
+  },
+
   async archiveOrder(orderId, userId) {
     try {
       const { data, error } = await supabase

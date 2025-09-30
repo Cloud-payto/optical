@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { emailOperations, inventoryOperations, checkDuplicateOrder, supabase } = require('../lib/supabase');
+const { emailOperations, inventoryOperations, orderOperations, checkDuplicateOrder, supabase } = require('../lib/supabase');
 const parserRegistry = require('../parsers');
 
 /**
@@ -323,9 +323,36 @@ router.post('/email', async (req, res) => {
           // Update email with parsed data
           await emailOperations.updateEmailWithParsedData(result.id, parsedData);
           
-          // Prepare inventory items with "pending" status
+          // Create order record first
+          let orderId = null;
+          if (parsedData.order) {
+            try {
+              const orderRecord = await orderOperations.saveOrder({
+                account_id: accountId,
+                vendor_id: vendorIdForInventory,
+                email_id: result.id,
+                order_number: parsedData.order.order_number,
+                reference_number: parsedData.order.reference_number,
+                customer_name: parsedData.order.customer_name,
+                customer_code: parsedData.order.customer_code,
+                placed_by: parsedData.order.placed_by,
+                order_date: parsedData.order.order_date,
+                phone: parsedData.order.phone,
+                total_pieces: parsedData.order.total_pieces,
+                status: 'pending'
+              });
+              orderId = orderRecord.id;
+              console.log(`✓ Created order record with ID: ${orderId}`);
+            } catch (orderError) {
+              console.error('Failed to create order record:', orderError);
+              // Continue without order_id for backward compatibility
+            }
+          }
+          
+          // Prepare inventory items with "pending" status and link to order
           const inventoryItems = parsedData.items.map(item => ({
             account_id: accountId,
+            order_id: orderId, // ✅ Now linked to order!
             sku: item.sku,
             brand: item.brand,
             model: item.model,
