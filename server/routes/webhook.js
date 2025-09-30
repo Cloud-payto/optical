@@ -251,10 +251,10 @@ router.post('/email', async (req, res) => {
           console.log('- Customer Name:', parsedData.order?.customer_name);
           console.log('- Parser Version:', parsedData.parser_version);
           
-          // Save or update vendor account number if available
-          if (parsedData.account_number && parsedData.vendor) {
+          // Look up vendor UUID by name for inventory items
+          let vendorIdForInventory = null;
+          if (parsedData.vendor) {
             try {
-              // Look up vendor UUID by name
               const { data: vendor, error: vendorError } = await supabase
                 .from('vendors')
                 .select('id')
@@ -262,18 +262,27 @@ router.post('/email', async (req, res) => {
                 .single();
               
               if (vendor && !vendorError) {
-                await emailOperations.saveOrUpdateVendorAccountNumber(
-                  accountId,
-                  vendor.id, // Use proper vendor UUID
-                  parsedData.account_number
-                );
-                console.log(`✓ Saved vendor account #${parsedData.account_number} for ${parsedData.vendor} (account ${accountId})`);
+                vendorIdForInventory = vendor.id;
+                
+                // Save or update vendor account number if available
+                if (parsedData.account_number) {
+                  try {
+                    await emailOperations.saveOrUpdateVendorAccountNumber(
+                      accountId,
+                      vendor.id, // Use proper vendor UUID
+                      parsedData.account_number
+                    );
+                    console.log(`✓ Saved vendor account #${parsedData.account_number} for ${parsedData.vendor} (account ${accountId})`);
+                  } catch (vendorAccountError) {
+                    console.error('Failed to save vendor account number:', vendorAccountError);
+                    // Don't fail the entire process if this fails
+                  }
+                }
               } else {
                 console.warn(`Vendor '${parsedData.vendor}' not found in vendors table`);
               }
-            } catch (vendorAccountError) {
-              console.error('Failed to save vendor account number:', vendorAccountError);
-              // Don't fail the entire process if this fails
+            } catch (vendorLookupError) {
+              console.error('Failed to lookup vendor:', vendorLookupError);
             }
           }
           
@@ -327,7 +336,7 @@ router.post('/email', async (req, res) => {
             full_size: item.full_size,
             temple_length: item.temple_length,
             quantity: item.quantity,
-            vendor: item.vendor || parsedData.vendor || '',
+            vendor_id: vendorIdForInventory,
             status: 'pending',
             email_id: result.id,
             wholesale_price: item.wholesale_price,

@@ -40,6 +40,12 @@ const Inventory: React.FC = () => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [archivingBrands, setArchivingBrands] = useState<Set<string>>(new Set());
   const [selectedEmailDetails, setSelectedEmailDetails] = useState<EmailData | null>(null);
+  const [confirmDeleteDialog, setConfirmDeleteDialog] = useState<{
+    isOpen: boolean;
+    emailId: string | null;
+    itemId: number | null;
+    type: 'email' | 'item' | null;
+  }>({ isOpen: false, emailId: null, itemId: null, type: null });
   const [showOrderDetailsModal, setShowOrderDetailsModal] = useState(false);
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
   const [selectedFrames, setSelectedFrames] = useState<Set<number>>(new Set());
@@ -134,28 +140,53 @@ const Inventory: React.FC = () => {
 
   // Delete email function
   const handleDeleteEmail = async (emailId: string) => {
-    if (!confirm('Are you sure you want to delete this email?')) {
-      return;
-    }
+    setConfirmDeleteDialog({ isOpen: true, emailId, itemId: null, type: 'email' });
+  };
 
-    setDeletingItems(prev => new Set(prev).add(emailId));
-    
-    try {
-      await deleteEmail(emailId);
-      await loadData(); // Refresh the data
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete email');
-    } finally {
-      setDeletingItems(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(emailId);
-        return newSet;
-      });
+  const confirmDelete = async () => {
+    const { emailId, itemId, type } = confirmDeleteDialog;
+
+    if (type === 'email' && emailId) {
+      setDeletingItems(prev => new Set(prev).add(emailId));
+
+      try {
+        await deleteEmail(emailId);
+        toast.success('Email deleted successfully');
+        await loadData(); // Refresh the data
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'Failed to delete email');
+      } finally {
+        setDeletingItems(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(emailId);
+          return newSet;
+        });
+      }
+    } else if (type === 'item' && itemId) {
+      setDeletingItems(prev => new Set(prev).add(itemId));
+
+      try {
+        await deleteInventoryItem(String(itemId));
+        toast.success('Item deleted successfully');
+        await loadData();
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'Failed to delete item');
+      } finally {
+        setDeletingItems(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(itemId);
+          return newSet;
+        });
+      }
     }
   };
 
   // Delete inventory item function
   const handleDeleteInventoryItem = async (itemId: number) => {
+    setConfirmDeleteDialog({ isOpen: true, emailId: null, itemId, type: 'item' });
+  };
+
+  const oldHandleDeleteInventoryItem = async (itemId: number) => {
     if (!confirm('Are you sure you want to delete this inventory item?')) {
       return;
     }
@@ -780,28 +811,37 @@ const Inventory: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {filteredEmails.map((email) => {
-                        const isParsed = email.parse_status === 'parsed' && email.parsed_data;
-                        const vendorName = isParsed ? email.parsed_data!.vendor : extractVendorFromEmail(email.from_email);
-                        
-                        // Extract brands from items if brands array is missing
-                        const getBrands = () => {
-                          if (!isParsed || !email.parsed_data) return [];
-                          if (email.parsed_data.brands && email.parsed_data.brands.length > 0) {
-                            return email.parsed_data.brands;
-                          }
-                          // Fallback: extract unique brands from items
-                          if (email.parsed_data.items && email.parsed_data.items.length > 0) {
-                            const uniqueBrands = [...new Set(email.parsed_data.items.map(item => item.brand).filter(Boolean))];
-                            return uniqueBrands;
-                          }
-                          return [];
-                        };
-                        
-                        const brands = getBrands();
-                        
-                        return (
-                          <tr key={email.id} className="hover:bg-gray-50">
+                      <AnimatePresence mode="popLayout">
+                        {filteredEmails.map((email, index) => {
+                          const isParsed = email.parse_status === 'parsed' && email.parsed_data;
+                          const vendorName = isParsed ? email.parsed_data!.vendor : extractVendorFromEmail(email.from_email);
+
+                          // Extract brands from items if brands array is missing
+                          const getBrands = () => {
+                            if (!isParsed || !email.parsed_data) return [];
+                            if (email.parsed_data.brands && email.parsed_data.brands.length > 0) {
+                              return email.parsed_data.brands;
+                            }
+                            // Fallback: extract unique brands from items
+                            if (email.parsed_data.items && email.parsed_data.items.length > 0) {
+                              const uniqueBrands = [...new Set(email.parsed_data.items.map(item => item.brand).filter(Boolean))];
+                              return uniqueBrands;
+                            }
+                            return [];
+                          };
+
+                          const brands = getBrands();
+
+                          return (
+                            <motion.tr
+                              key={email.id}
+                              layout
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: 20, height: 0 }}
+                              transition={{ duration: 0.3, delay: index * 0.05 }}
+                              className="hover:bg-gray-50"
+                            >
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                               <div className="flex items-center">
                                 <span>{vendorName}</span>
@@ -865,10 +905,12 @@ const Inventory: React.FC = () => {
                                   <EyeIcon className="h-4 w-4 mr-1" />
                                   View Details
                                 </button>
-                                <button
+                                <motion.button
+                                  whileHover={{ scale: 1.05 }}
+                                  whileTap={{ scale: 0.95 }}
                                   onClick={() => handleDeleteEmail(email.id)}
                                   disabled={deletingItems.has(email.id)}
-                                  className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
                                   {deletingItems.has(email.id) ? (
                                     <span className="flex items-center">
@@ -878,12 +920,13 @@ const Inventory: React.FC = () => {
                                   ) : (
                                     <TrashIcon className="h-4 w-4" />
                                   )}
-                                </button>
+                                </motion.button>
                               </div>
                             </td>
-                          </tr>
-                        );
-                      })}
+                          </motion.tr>
+                          );
+                        })}
+                      </AnimatePresence>
                     </tbody>
                   </table>
                 </div>
@@ -2388,6 +2431,20 @@ const Inventory: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Confirm Delete Dialog */}
+      <ConfirmDialog
+        isOpen={confirmDeleteDialog.isOpen}
+        onClose={() => setConfirmDeleteDialog({ isOpen: false, emailId: null, itemId: null, type: null })}
+        onConfirm={confirmDelete}
+        title={confirmDeleteDialog.type === 'email' ? 'Delete Email' : 'Delete Item'}
+        message={confirmDeleteDialog.type === 'email'
+          ? 'Are you sure you want to delete this email? This action cannot be undone.'
+          : 'Are you sure you want to delete this inventory item? This action cannot be undone.'}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   );
 };
