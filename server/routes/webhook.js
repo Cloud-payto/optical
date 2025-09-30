@@ -151,7 +151,6 @@ router.post('/email', async (req, res) => {
       plain_text: emailData.plain_text,
       html_text: emailData.html_text,
       received_at: emailData.date,
-      processed_at: new Date().toISOString()
     });
     
     console.log('Email saved to database with ID:', result.id);
