@@ -111,9 +111,21 @@ router.post('/email', async (req, res) => {
     } = req.body;
 
     // Extract important email data
+    // CloudMailin sends 'to' as either a string or an array
+    let toEmail = 'unknown';
+    if (envelope?.to) {
+      // If it's an array, take the first element; if it's a string, use it directly
+      toEmail = Array.isArray(envelope.to) ? envelope.to[0] : envelope.to;
+    } else if (headers?.to) {
+      toEmail = headers.to;
+    }
+    
+    console.log('Raw envelope.to:', envelope?.to);
+    console.log('Processed to email:', toEmail);
+
     const emailData = {
       from: envelope?.from || headers?.from || 'unknown',
-      to: envelope?.to?.[0] || headers?.to || 'unknown',
+      to: toEmail,
       subject: headers?.subject || 'No Subject',
       date: headers?.date || new Date().toISOString(),
       message_id: headers?.message_id || null,
@@ -135,28 +147,42 @@ router.post('/email', async (req, res) => {
 
     // Extract account UUID from plus-addressed email
     function extractAccountIdFromEmail(email) {
+      console.log('Attempting to extract UUID from email:', email);
+      
       // Parse: a48947dbd077295c13ea+{uuid}@cloudmailin.net
       const match = email.match(/\+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})@/i);
       
       if (!match) {
+        console.error('UUID extraction failed. Email format:', email);
+        console.error('Expected format: a48947dbd077295c13ea+{uuid}@cloudmailin.net');
         throw new Error(`Invalid email format - no account UUID found in: ${email}`);
       }
       
-      console.log(`Extracted account ID: ${match[1]} from email: ${email}`);
-      return match[1];
+      const uuid = match[1];
+      console.log(`Successfully extracted UUID: ${uuid} from email: ${email}`);
+      return uuid;
     }
 
     // Extract accountId from the 'to' email address
     let accountId;
     try {
+      console.log('=== ACCOUNT EXTRACTION START ===');
+      console.log('Email to parse:', emailData.to);
       accountId = extractAccountIdFromEmail(emailData.to);
-      console.log(`Processing email for account: ${accountId}`);
+      console.log(`Account UUID extracted: ${accountId}`);
+      console.log('=== ACCOUNT EXTRACTION SUCCESS ===');
     } catch (error) {
-      console.error('Failed to extract account ID:', error.message);
+      console.error('=== ACCOUNT EXTRACTION FAILED ===');
+      console.error('Error:', error.message);
+      console.error('Email that failed:', emailData.to);
       return res.status(200).json({ 
         success: false,
         error: error.message,
-        message: 'Invalid recipient email format - missing account UUID'
+        message: 'Invalid recipient email format - missing account UUID',
+        debug: {
+          receivedEmail: emailData.to,
+          expectedFormat: 'a48947dbd077295c13ea+{uuid}@cloudmailin.net'
+        }
       });
     }
 
