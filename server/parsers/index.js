@@ -155,7 +155,7 @@ class ParserRegistry {
                 order_date: orderInfo.orderDate,
                 phone: orderInfo.customerPhone,
                 total_pieces: items.reduce((sum, item) => sum + item.quantity, 0),
-                parse_status: 'success'
+                parse_status: 'parsed'
             },
             items: items,
             parsed_at: new Date().toISOString(),

@@ -232,7 +232,7 @@ function updateEmailWithParsedData(emailId, parsedData) {
       emails[emailIndex] = {
         ...emails[emailIndex],
         parsed_data: parsedData,
-        parse_status: 'success',
+        parse_status: 'parsed',
         parsed_at: new Date().toISOString()
       };
       writeJsonFile(emailsFile, emails);
