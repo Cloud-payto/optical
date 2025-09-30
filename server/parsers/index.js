@@ -142,8 +142,8 @@ class ParserRegistry {
             account_number: orderInfo.accountNumber,
             brands: [...new Set(frames.map(f => f.brand))],
             order: {
-                order_number: orderInfo.orderNumber,
-                reference_number: orderInfo.referenceNumber,
+                order_number: orderInfo.orderNumber, // Now the correct Order Reference Number
+                reference_number: orderInfo.eyeRepOrderNumber, // Store EyeRep number as reference
                 vendor: 'Safilo',
                 account_number: orderInfo.accountNumber,
                 customer_name: orderInfo.customerName,

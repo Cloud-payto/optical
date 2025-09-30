@@ -135,6 +135,7 @@ class SafiloService {
             accountNumber: '',
             orderNumber: '', 
             referenceNumber: '',
+            eyeRepOrderNumber: '', // Store EyeRep number separately
             placedBy: '',
             placedByNumber: '',
             orderDate: '',
@@ -154,17 +155,32 @@ class SafiloService {
             
             // Pattern 1: Account Number: followed by values
             if (line === 'Account Number:' && i + 5 < lines.length) {
+                // Based on PDF structure:
+                // Line i+0: "Account Number:"
+                // Line i+1: "EyeRep Order Number:"  
+                // Line i+2: "Order Reference Number:"
+                // Line i+3: "1111708" (Account Number)
+                // Line i+4: "5002949163" (EyeRep Order Number)
+                // Line i+5: "113006337" (Order Reference Number - CORRECT!)
                 orderInfo.accountNumber = lines[i + 3] || '';
-                orderInfo.orderNumber = lines[i + 4] || '';
-                orderInfo.referenceNumber = lines[i + 5] || '';
+                orderInfo.eyeRepOrderNumber = lines[i + 4] || '';  // EyeRep number
+                orderInfo.orderNumber = lines[i + 5] || '';        // Order Reference Number (CORRECT!)
                 break;
             }
             
-            // Pattern 2: Look for EyeRep Order Number directly
-            if (line.includes('EyeRep Order Number')) {
-                const orderMatch = line.match(/EyeRep Order Number[:\s]*(\d+)/);
+            // Pattern 2: Look for Order Reference Number (the correct field)
+            if (line.includes('Order Reference Number')) {
+                const orderMatch = line.match(/Order Reference Number[:\s]*(\d+)/);
                 if (orderMatch) {
                     orderInfo.orderNumber = orderMatch[1];
+                }
+            }
+            
+            // Pattern 2b: Also capture EyeRep Order Number for reference
+            if (line.includes('EyeRep Order Number')) {
+                const eyeRepMatch = line.match(/EyeRep Order Number[:\s]*(\d+)/);
+                if (eyeRepMatch) {
+                    orderInfo.eyeRepOrderNumber = eyeRepMatch[1]; // Store separately
                 }
             }
             
@@ -192,11 +208,44 @@ class SafiloService {
             }
         }
         
-        // Parse Date
+        // Parse Date - try multiple patterns
         for (let i = 0; i < lines.length; i++) {
-            if (lines[i] === 'Date:' && i + 2 < lines.length) {
-                orderInfo.orderDate = lines[i + 2] || '';
-                break;
+            const line = lines[i];
+            
+            // Pattern 1: "Date:" on its own line, value on next line
+            if (line === 'Date:' && i + 1 < lines.length) {
+                const nextLine = lines[i + 1].trim();
+                if (nextLine.match(/\d{2}\/\d{2}\/\d{4}/)) {
+                    orderInfo.orderDate = nextLine;
+                    break;
+                }
+            }
+            
+            // Pattern 2: "Date:" with value on same line
+            if (line.startsWith('Date:')) {
+                const dateMatch = line.match(/Date:\s*(\d{2}\/\d{2}\/\d{4})/);
+                if (dateMatch) {
+                    orderInfo.orderDate = dateMatch[1];
+                    break;
+                }
+            }
+            
+            // Pattern 3: Just find any line with the date format near "Date:"
+            if (line.includes('Date:')) {
+                const dateMatch = line.match(/(\d{2}\/\d{2}\/\d{4})/);
+                if (dateMatch) {
+                    orderInfo.orderDate = dateMatch[1];
+                    break;
+                }
+            }
+            
+            // Pattern 4: Legacy - Date 2 lines after "Date:" label
+            if (line === 'Date:' && i + 2 < lines.length) {
+                const dateLine = lines[i + 2].trim();
+                if (dateLine.match(/\d{2}\/\d{2}\/\d{4}/)) {
+                    orderInfo.orderDate = dateLine;
+                    break;
+                }
             }
         }
         
@@ -234,6 +283,15 @@ class SafiloService {
         orderInfo.shipToCode = orderInfo.customerCode;
         orderInfo.shipToAddress = orderInfo.customerAddress;
         orderInfo.shipToPhone = orderInfo.customerPhone;
+        
+        // Debug logging to verify parsing
+        console.log('📋 Parsed Order Info:');
+        console.log('  - Account Number:', orderInfo.accountNumber);
+        console.log('  - Order Reference Number (CORRECT):', orderInfo.orderNumber);
+        console.log('  - EyeRep Order Number (reference only):', orderInfo.eyeRepOrderNumber);
+        console.log('  - Date:', orderInfo.orderDate);
+        console.log('  - Customer:', orderInfo.customerName);
+        console.log('  - Placed By:', orderInfo.placedBy);
         
         return orderInfo;
     }
