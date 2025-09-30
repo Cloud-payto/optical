@@ -189,7 +189,7 @@ router.post('/email', async (req, res) => {
     // Validate that this account exists in Supabase
     try {
       const { data: accountExists, error: accountError } = await supabase
-        .from('profiles')  // Using profiles table which links to auth.users
+        .from('accounts')  // Check the accounts table
         .select('id')
         .eq('id', accountId)
         .single();
