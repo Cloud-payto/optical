@@ -134,10 +134,7 @@ class ParserRegistry {
             // Validation data
             api_verified: frame.validation?.validated || false,
             confidence_score: frame.validation?.confidence || 0,
-            validation_reason: frame.validation?.reason || null,
-            
-            // Additional metadata
-            full_name: `${frame.brand} ${frame.model}`
+            validation_reason: frame.validation?.reason || null
         }));
         
         return {

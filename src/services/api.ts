@@ -69,7 +69,7 @@ async function apiRequest<T>(endpoint: string, options?: RequestInit): Promise<T
 
 // Email API functions
 export interface EmailData {
-  id: number;
+  id: string; // UUID format
   from_email: string;
   to_email: string;
   subject: string;
@@ -111,8 +111,8 @@ export async function fetchEmails(userId?: string): Promise<EmailResponse> {
 
 // Inventory API functions
 export interface InventoryItem {
-  id: number;
-  account_id: number;
+  id: string; // UUID format
+  account_id: string; // UUID format
   sku: string;
   brand?: string;
   model?: string;
@@ -127,7 +127,7 @@ export interface InventoryItem {
   status?: string;
   order_number?: string;
   account_number?: string;
-  email_id?: number;
+  email_id?: string; // UUID format
   full_name?: string;
   wholesale_price?: number;
   upc?: string;
@@ -157,14 +157,14 @@ export async function markAsReceived(emailId: number, userId?: string): Promise<
 }
 
 // Delete functions
-export async function deleteEmail(emailId: number, userId?: string): Promise<{ success: boolean; message: string }> {
+export async function deleteEmail(emailId: string, userId?: string): Promise<{ success: boolean; message: string }> {
   const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<{ success: boolean; message: string }>(`/emails/${currentUserId}/${emailId}`, {
     method: 'DELETE',
   });
 }
 
-export async function deleteInventoryItem(itemId: number, userId?: string): Promise<{ success: boolean; message: string }> {
+export async function deleteInventoryItem(itemId: string, userId?: string): Promise<{ success: boolean; message: string }> {
   const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<{ success: boolean; message: string }>(`/inventory/${currentUserId}/${itemId}`, {
     method: 'DELETE',

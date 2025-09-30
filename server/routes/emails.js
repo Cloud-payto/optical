@@ -26,7 +26,15 @@ router.get('/:userId', async (req, res) => {
 router.delete('/:userId/:emailId', async (req, res) => {
   try {
     const { userId, emailId } = req.params;
-    
+
+    // Debug logging
+    console.log('DELETE request received:', {
+      emailId: emailId,
+      typeof: typeof emailId,
+      fullParams: req.params,
+      fullUrl: req.url
+    });
+
     // Validate emailId is provided and looks like a valid UUID
     if (!emailId || emailId === 'undefined' || emailId === 'null') {
       return res.status(400).json({

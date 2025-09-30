@@ -27,7 +27,7 @@ const Inventory: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'emails' | 'pending' | 'current' | 'orders' | 'archive' | 'sold'>('emails');
-  const [deletingItems, setDeletingItems] = useState<Set<number>>(new Set());
+  const [deletingItems, setDeletingItems] = useState<Set<number | string>>(new Set());
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
   const [expandedVendors, setExpandedVendors] = useState<Set<string>>(new Set());
   const [expandedBrands, setExpandedBrands] = useState<Set<string>>(new Set());
@@ -130,7 +130,7 @@ const Inventory: React.FC = () => {
   }, [openDropdown]);
 
   // Delete email function
-  const handleDeleteEmail = async (emailId: number) => {
+  const handleDeleteEmail = async (emailId: string) => {
     if (!confirm('Are you sure you want to delete this email?')) {
       return;
     }

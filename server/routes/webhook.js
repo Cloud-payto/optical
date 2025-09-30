@@ -320,7 +320,6 @@ router.post('/email', async (req, res) => {
             status: 'pending',
             email_id: result.id,
             order_number: parsedData.order?.order_number || '',
-            full_name: item.full_name,
             wholesale_price: item.wholesale_price,
             upc: item.upc,
             in_stock: item.in_stock,

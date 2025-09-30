@@ -227,7 +227,6 @@ function parseModernOpticalHtml(html, plainText) {
                             color_normalized: normalizedColor,
                             size: size,
                             quantity: quantity,
-                            full_name: `${cleanBrand} - ${cleanModel}`,
                             vendor,
                             status: 'pending',
                             order_number: orderNumber,
@@ -269,7 +268,6 @@ function parseModernOpticalHtml(html, plainText) {
                             color: cleanColor,
                             size: itemSize,
                             quantity: parseInt(itemQty) || 1,
-                            full_name: `${cleanBrand} - ${cleanModel}`,
                             vendor,
                             status: 'pending',
                             order_number: orderNumber
@@ -302,7 +300,6 @@ function parseModernOpticalHtml(html, plainText) {
                         color: 'UNKNOWN',
                         size: '55',
                         quantity: 1,
-                        full_name: `${brand} - ${model}`,
                         vendor,
                         status: 'pending',
                         order_number: orderNumber

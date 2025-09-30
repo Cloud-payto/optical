@@ -267,7 +267,6 @@ function saveInventoryItems(accountId, items) {
         order_number: item.order_number || '',
         account_number: item.account_number || '',
         email_id: item.email_id || null,
-        full_name: item.full_name || '',
         // Additional fields from Safilo processor
         temple_length: item.temple_length || null,
         full_size: item.full_size || null,
