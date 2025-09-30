@@ -254,12 +254,23 @@ router.post('/email', async (req, res) => {
           // Save or update vendor account number if available
           if (parsedData.account_number && parsedData.vendor) {
             try {
-              await emailOperations.saveOrUpdateVendorAccountNumber(
-                accountId,
-                parsedData.vendor, // Using vendor name as vendor_id for now
-                parsedData.account_number
-              );
-              console.log(`✓ Saved vendor account #${parsedData.account_number} for ${parsedData.vendor} (account ${accountId})`);
+              // Look up vendor UUID by name
+              const { data: vendor, error: vendorError } = await supabase
+                .from('vendors')
+                .select('id')
+                .ilike('name', parsedData.vendor)
+                .single();
+              
+              if (vendor && !vendorError) {
+                await emailOperations.saveOrUpdateVendorAccountNumber(
+                  accountId,
+                  vendor.id, // Use proper vendor UUID
+                  parsedData.account_number
+                );
+                console.log(`✓ Saved vendor account #${parsedData.account_number} for ${parsedData.vendor} (account ${accountId})`);
+              } else {
+                console.warn(`Vendor '${parsedData.vendor}' not found in vendors table`);
+              }
             } catch (vendorAccountError) {
               console.error('Failed to save vendor account number:', vendorAccountError);
               // Don't fail the entire process if this fails
@@ -319,7 +330,6 @@ router.post('/email', async (req, res) => {
             vendor: item.vendor || parsedData.vendor || '',
             status: 'pending',
             email_id: result.id,
-            order_number: parsedData.order?.order_number || '',
             wholesale_price: item.wholesale_price,
             upc: item.upc,
             in_stock: item.in_stock,

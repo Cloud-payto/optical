@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { SearchIcon, PackageIcon, MailIcon, FilterIcon, RefreshCwIcon, TrashIcon, ChevronDownIcon, ChevronRightIcon, CheckIcon, ArchiveIcon, MoreVerticalIcon, XIcon, EyeIcon, Copy, Check } from 'lucide-react';
 import { fetchEmails, fetchInventory, fetchOrders, deleteEmail, deleteInventoryItem, confirmPendingOrder, archiveInventoryItem, restoreInventoryItem, archiveAllItemsByBrand, deleteArchivedItemsByBrand, deleteArchivedItemsByVendor, markItemAsSold, archiveOrder, deleteOrder, EmailData, InventoryItem, EmailResponse, InventoryResponse, OrderData, OrderResponse } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import toast from 'react-hot-toast';
 
 // Helper function to extract vendor name from email address
 const extractVendorFromEmail = (email: string): string => {
