@@ -555,11 +555,11 @@ const Inventory: React.FC = () => {
   // Group pending inventory by order number for new UX
   const groupPendingByOrder = (items: typeof inventory) => {
     return items.reduce((orders, item) => {
-      const orderKey = `${item.vendor}-${(item as any).order_number || 'Unknown'}`;
+      const orderKey = `${item.vendor?.name}-${item.order?.order_number || 'Unknown'}`;
       if (!orders[orderKey]) {
         orders[orderKey] = {
-          vendor: item.vendor,
-          orderNumber: (item as any).order_number || 'Unknown',
+          vendor: item.vendor?.name,
+          orderNumber: item.order?.order_number || 'Unknown',
           accountNumber: (item as any).account_number || '',
           items: []
         };
@@ -574,7 +574,7 @@ const Inventory: React.FC = () => {
   // Helper function to group inventory by vendor, then by brand
   const groupInventoryByVendorAndBrand = (items: typeof inventory) => {
     return items.reduce((vendors, item) => {
-      const vendor = item.vendor || 'Unknown Vendor';
+      const vendor = item.vendor?.name || 'Unknown Vendor';
       const brand = (item as any).brand || 'Unknown Brand';
       
       if (!vendors[vendor]) {
@@ -1004,7 +1004,7 @@ const Inventory: React.FC = () => {
                                 const colorName = (item as any).color_name || (item as any).color || '';
                                 const size = (item as any).size || '';
                                 const fullSize = (item as any).full_size || '';
-                                const orderNumber = (item as any).order_number || '';
+                                const orderNumber = item.order?.order_number || '';
                                 const accountNumber = (item as any).account_number || '';
                                 
                                 const frameName = model || fullName;
@@ -1093,7 +1093,7 @@ const Inventory: React.FC = () => {
                                               </div>
                                               <div className="flex justify-between">
                                                 <span className="text-sm text-gray-500">Vendor:</span>
-                                                <span className="text-sm text-gray-900">{item.vendor}</span>
+                                                <span className="text-sm text-gray-900">{item.vendor?.name}</span>
                                               </div>
                                               {orderNumber && (
                                                 <div className="flex justify-between">
@@ -1330,7 +1330,7 @@ const Inventory: React.FC = () => {
                                           const size = (item as any).size || '';
                                           const fullSize = (item as any).full_size || '';
                                           const status = (item as any).status || 'current';
-                                          const orderNumber = (item as any).order_number || '';
+                                          const orderNumber = item.order?.order_number || '';
                                           const accountNumber = (item as any).account_number || '';
                                           
                                           // Use model directly, don't mix with other data
@@ -1429,7 +1429,7 @@ const Inventory: React.FC = () => {
                                                         </div>
                                                         <div className="flex justify-between">
                                                           <span className="text-sm text-gray-500">Vendor:</span>
-                                                          <span className="text-sm text-gray-900">{item.vendor}</span>
+                                                          <span className="text-sm text-gray-900">{item.vendor?.name}</span>
                                                         </div>
                                                         {orderNumber && (
                                                           <div className="flex justify-between">

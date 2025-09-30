@@ -19,6 +19,7 @@ CREATE TABLE public.account_brands (
   updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
   tariff_tax numeric,
   wholesale_cost numeric,
+  vendor_account_number character varying,
   CONSTRAINT account_brands_pkey PRIMARY KEY (id),
   CONSTRAINT account_brands_account_id_fkey FOREIGN KEY (account_id) REFERENCES public.accounts(id),
   CONSTRAINT account_brands_vendor_id_fkey FOREIGN KEY (vendor_id) REFERENCES public.vendors(id),

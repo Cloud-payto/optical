@@ -138,7 +138,11 @@ const inventoryOperations = {
     try {
       const { data, error } = await supabase
         .from('inventory')
-        .select('*')
+        .select(`
+          *,
+          vendor:vendors(name),
+          order:orders(order_number, customer_name)
+        `)
         .eq('account_id', userId)
         .neq('status', 'archived')
         .order('created_at', { ascending: false });
