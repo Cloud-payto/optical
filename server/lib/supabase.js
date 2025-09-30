@@ -90,6 +90,31 @@ const emailOperations = {
     } catch (error) {
       handleSupabaseError(error, 'deleteEmail');
     }
+  },
+
+  async saveOrUpdateVendorAccountNumber(accountId, vendorId, vendorAccountNumber) {
+    try {
+      const { data, error } = await supabase
+        .from('account_brands')
+        .upsert(
+          { 
+            account_id: accountId,
+            vendor_id: vendorId,
+            vendor_account_number: vendorAccountNumber
+          },
+          { 
+            onConflict: 'account_id,vendor_id',
+            ignoreDuplicates: false 
+          }
+        )
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleSupabaseError(error, 'saveOrUpdateVendorAccountNumber');
+    }
   }
 };
 

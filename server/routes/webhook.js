@@ -251,6 +251,21 @@ router.post('/email', async (req, res) => {
           console.log('- Customer Name:', parsedData.order?.customer_name);
           console.log('- Parser Version:', parsedData.parser_version);
           
+          // Save or update vendor account number if available
+          if (parsedData.account_number && parsedData.vendor) {
+            try {
+              await emailOperations.saveOrUpdateVendorAccountNumber(
+                accountId,
+                parsedData.vendor, // Using vendor name as vendor_id for now
+                parsedData.account_number
+              );
+              console.log(`✓ Saved vendor account #${parsedData.account_number} for ${parsedData.vendor} (account ${accountId})`);
+            } catch (vendorAccountError) {
+              console.error('Failed to save vendor account number:', vendorAccountError);
+              // Don't fail the entire process if this fails
+            }
+          }
+          
           // Check for duplicate order before processing
           const orderNumber = parsedData.order?.order_number;
           const customerName = parsedData.order?.customer_name;
@@ -305,7 +320,6 @@ router.post('/email', async (req, res) => {
             status: 'pending',
             email_id: result.id,
             order_number: parsedData.order?.order_number || '',
-            account_number: parsedData.account_number || parsedData.order?.account_number || '',
             full_name: item.full_name,
             wholesale_price: item.wholesale_price,
             upc: item.upc,
