@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { emailOperations, inventoryOperations, checkDuplicateOrder } = require('../lib/supabase');
+const { emailOperations, inventoryOperations, checkDuplicateOrder, supabase } = require('../lib/supabase');
 const parserRegistry = require('../parsers');
 
 /**
@@ -133,9 +133,59 @@ router.post('/email', async (req, res) => {
       attachments: emailData.attachments_count
     });
 
-    // TODO: Determine account_id based on 'to' email address
-    // For now, we'll use a placeholder account_id = 1
-    const accountId = 1;
+    // Extract account UUID from plus-addressed email
+    function extractAccountIdFromEmail(email) {
+      // Parse: a48947dbd077295c13ea+{uuid}@cloudmailin.net
+      const match = email.match(/\+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})@/i);
+      
+      if (!match) {
+        throw new Error(`Invalid email format - no account UUID found in: ${email}`);
+      }
+      
+      console.log(`Extracted account ID: ${match[1]} from email: ${email}`);
+      return match[1];
+    }
+
+    // Extract accountId from the 'to' email address
+    let accountId;
+    try {
+      accountId = extractAccountIdFromEmail(emailData.to);
+      console.log(`Processing email for account: ${accountId}`);
+    } catch (error) {
+      console.error('Failed to extract account ID:', error.message);
+      return res.status(200).json({ 
+        success: false,
+        error: error.message,
+        message: 'Invalid recipient email format - missing account UUID'
+      });
+    }
+
+    // Validate that this account exists in Supabase
+    try {
+      const { data: accountExists, error: accountError } = await supabase
+        .from('profiles')  // Using profiles table which links to auth.users
+        .select('id')
+        .eq('id', accountId)
+        .single();
+
+      if (accountError || !accountExists) {
+        console.error(`Unknown account: ${accountId}`, accountError);
+        return res.status(200).json({ 
+          success: false,
+          error: `Unknown account: ${accountId}`,
+          message: 'Email received but account not found'
+        });
+      }
+      
+      console.log(`Account ${accountId} validated successfully`);
+    } catch (validationError) {
+      console.error('Account validation error:', validationError);
+      return res.status(200).json({ 
+        success: false,
+        error: validationError.message,
+        message: 'Email received but account validation failed'
+      });
+    }
 
     // Save to database
     const result = await emailOperations.saveEmail({

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SearchIcon, PackageIcon, MailIcon, FilterIcon, RefreshCwIcon, TrashIcon, ChevronDownIcon, ChevronRightIcon, CheckIcon, ArchiveIcon, MoreVerticalIcon, XIcon, EyeIcon } from 'lucide-react';
+import { SearchIcon, PackageIcon, MailIcon, FilterIcon, RefreshCwIcon, TrashIcon, ChevronDownIcon, ChevronRightIcon, CheckIcon, ArchiveIcon, MoreVerticalIcon, XIcon, EyeIcon, Copy, Check } from 'lucide-react';
 import { fetchEmails, fetchInventory, fetchOrders, deleteEmail, deleteInventoryItem, confirmPendingOrder, archiveInventoryItem, restoreInventoryItem, archiveAllItemsByBrand, deleteArchivedItemsByBrand, deleteArchivedItemsByVendor, markItemAsSold, archiveOrder, deleteOrder, EmailData, InventoryItem, EmailResponse, InventoryResponse, OrderData, OrderResponse } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -47,6 +47,30 @@ const Inventory: React.FC = () => {
   const [sellingItems, setSellingItems] = useState<Set<number>>(new Set());
   const [deletingBrands, setDeletingBrands] = useState<Set<string>>(new Set());
   const [deletingVendors, setDeletingVendors] = useState<Set<string>>(new Set());
+  const [copied, setCopied] = useState(false);
+
+  // Copy email to clipboard
+  const copyToClipboard = async () => {
+    if (!user?.id) return;
+    
+    const email = `a48947dbd077295c13ea+${user.id}@cloudmailin.net`;
+    try {
+      await navigator.clipboard.writeText(email);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy email:', err);
+      // Fallback for browsers that don't support clipboard API
+      const textArea = document.createElement('textarea');
+      textArea.value = email;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   // Load data
   const loadData = async () => {
@@ -565,6 +589,34 @@ const Inventory: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Inventory Management</h1>
           <p className="text-gray-600">Track pending orders and received inventory items</p>
         </div>
+
+        {/* Forwarding Email Section */}
+        {user && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <h3 className="text-sm font-medium text-gray-700 mb-2">
+              📧 Forward vendor emails to:
+            </h3>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 bg-white px-3 py-2 rounded border border-blue-200 text-sm font-mono text-gray-800">
+                a48947dbd077295c13ea+{user.id}@cloudmailin.net
+              </code>
+              <button
+                onClick={copyToClipboard}
+                className="inline-flex items-center px-3 py-2 border border-blue-200 rounded-md text-sm font-medium text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                title={copied ? 'Copied!' : 'Copy to clipboard'}
+              >
+                {copied ? (
+                  <Check size={16} className="text-green-600" />
+                ) : (
+                  <Copy size={16} />
+                )}
+              </button>
+            </div>
+            {copied && (
+              <p className="mt-2 text-xs text-green-600">Email address copied to clipboard!</p>
+            )}
+          </div>
+        )}
 
         {/* Error Message */}
         {error && (
