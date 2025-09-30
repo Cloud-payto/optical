@@ -27,7 +27,25 @@ router.delete('/:userId/:emailId', async (req, res) => {
   try {
     const { userId, emailId } = req.params;
     
-    await emailOperations.deleteEmail(parseInt(emailId), userId);
+    // Validate emailId is provided and looks like a valid UUID
+    if (!emailId || emailId === 'undefined' || emailId === 'null') {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid email ID provided'
+      });
+    }
+    
+    // Basic UUID format validation (8-4-4-4-12 hex characters)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(emailId)) {
+      return res.status(400).json({
+        success: false,
+        error: `Invalid email ID format: ${emailId}. Expected UUID format.`
+      });
+    }
+    
+    // Pass emailId as string (not parsed as integer)
+    await emailOperations.deleteEmail(emailId, userId);
     
     res.json({
       success: true,
