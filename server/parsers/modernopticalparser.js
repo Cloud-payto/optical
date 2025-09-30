@@ -327,7 +327,7 @@ function parseModernOpticalHtml(html, plainText) {
             order_date: orderDate,
             customer_name: customerName,
             total_pieces: parseInt(totalPieces),
-            parse_status: 'parsed'
+            parse_status: 'success'
         },
         items: items,
         unique_frames: Array.from(uniqueFrames.values()), // Add unique frames for webscraping optimization

@@ -84,7 +84,7 @@ function transformSafiloResult(safiloResult) {
       order_date: orderInfo.orderDate,
       phone: orderInfo.customerPhone,
       total_pieces: items.reduce((sum, item) => sum + item.quantity, 0),
-      parse_status: 'parsed'
+      parse_status: 'success'
     },
     items: items,
     parsed_at: new Date().toISOString(),
