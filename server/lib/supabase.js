@@ -64,7 +64,7 @@ const emailOperations = {
         .update({ 
           parsed_data: parsedData,
           parse_status: 'completed',
-          processed_at: new Date().toISOString()
+          received_at: new Date().toISOString()
         })
         .eq('id', emailId)
         .select()
