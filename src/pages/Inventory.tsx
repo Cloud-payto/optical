@@ -22,8 +22,6 @@ const extractVendorFromEmail = (email: string): string => {
 };
 
 const Inventory: React.FC = () => {
-  console.log('🔥 Inventory component is rendering!');
-
   const { user, isAuthenticated } = useAuth();
   const [emails, setEmails] = useState<EmailData[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
@@ -32,8 +30,6 @@ const Inventory: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'orders' | 'inventory' | 'archive'>('orders');
-
-  console.log('📍 Current activeTab state:', activeTab);
   const [ordersSubTab, setOrdersSubTab] = useState<'pending' | 'confirmed'>('pending');
   const [inventorySubTab, setInventorySubTab] = useState<'pending' | 'current' | 'sold'>('pending');
   const [deletingItems, setDeletingItems] = useState<Set<number | string>>(new Set());
@@ -123,9 +119,7 @@ const Inventory: React.FC = () => {
   };
 
   useEffect(() => {
-    console.log('⚡ useEffect triggered - isAuthenticated:', isAuthenticated, 'user:', user?.id);
     if (isAuthenticated && user) {
-      console.log('📞 Calling loadData()...');
       loadData();
     } else if (isAuthenticated === false) {
       // If explicitly not authenticated, stop loading
@@ -564,48 +558,9 @@ const Inventory: React.FC = () => {
 
   // Separate inventory by status
   const pendingInventory = filteredInventory.filter(item => item.status === 'pending');
-  const currentInventory = filteredInventory.filter(item => item.status === 'confirmed'); // Changed from 'current' to 'confirmed' to match DB constraint
+  const currentInventory = filteredInventory.filter(item => item.status === 'confirmed');
   const archivedInventory = filteredInventory.filter(item => item.status === 'archived');
   const soldInventory = filteredInventory.filter(item => item.status === 'sold');
-
-  // Debug logging for inventory counts and status
-  React.useEffect(() => {
-    if (inventory.length > 0) {
-      console.log('🔍 Inventory Debug Info:');
-      console.log(`Total inventory items: ${inventory.length}`);
-      console.log(`Pending: ${pendingInventory.length}, Current: ${currentInventory.length}, Archived: ${archivedInventory.length}, Sold: ${soldInventory.length}`);
-
-      // Show status distribution
-      const statusCounts = inventory.reduce((acc, item) => {
-        acc[item.status] = (acc[item.status] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>);
-      console.log('Status distribution:', statusCounts);
-
-      // Sample items
-      console.log('Sample pending items:', pendingInventory.slice(0, 2));
-      console.log('Sample current items:', currentInventory.slice(0, 2));
-
-      // Check grouping
-      if (currentInventory.length > 0) {
-        console.log('🔍 Current Inventory Grouping Debug:');
-        console.log('First current item vendor:', currentInventory[0]?.vendor);
-        console.log('First current item brand:', (currentInventory[0] as any)?.brand);
-        console.log('Grouped current inventory keys:', Object.keys(groupedCurrentInventory));
-        console.log('Grouped current inventory:', groupedCurrentInventory);
-      }
-
-      // Check orders
-      console.log('📋 Orders Debug:');
-      console.log('Total orders:', orders.length);
-      const confirmedOrders = orders.filter(order => order.status === 'confirmed' && !order.metadata?.archived);
-      console.log('Confirmed orders (not archived):', confirmedOrders.length);
-      console.log('Sample orders:', orders.slice(0, 2));
-      if (confirmedOrders.length > 0) {
-        console.log('Sample confirmed order:', confirmedOrders[0]);
-      }
-    }
-  }, [inventory, orders, pendingInventory.length, currentInventory.length]);
 
   // Group pending inventory by order number for new UX
   const groupPendingByOrder = (items: typeof inventory) => {
@@ -741,25 +696,6 @@ const Inventory: React.FC = () => {
           <p className="text-gray-600">Track pending orders and received inventory items</p>
         </div>
 
-        {/* DEBUG: Test if activeTab state is accessible here */}
-        {activeTab === 'inventory' && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 9999,
-            background: 'yellow',
-            padding: '20px',
-            border: '5px solid red',
-            fontSize: '24px',
-            color: 'black',
-            textAlign: 'center'
-          }}>
-            🚨 INVENTORY TAB IS ACTIVE! activeTab = {activeTab}
-          </div>
-        )}
-
         {/* Forwarding Email Section */}
         {user && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
@@ -850,10 +786,7 @@ const Inventory: React.FC = () => {
               Orders ({filteredEmails.length + orders.filter(o => o.status === 'confirmed' && !o.metadata?.archived).length})
             </button>
             <button
-              onClick={() => {
-                console.log('🔘 Clicking Inventory tab, setting activeTab to: inventory');
-                setActiveTab('inventory');
-              }}
+              onClick={() => setActiveTab('inventory')}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'inventory'
                   ? 'border-green-500 text-green-600'
@@ -1163,43 +1096,9 @@ const Inventory: React.FC = () => {
               )}
             </div>
           )}
-          {/* ========== ORDERS TAB SHOULD END HERE ========== */}
-          {/* FORCE CLOSE - Testing if there's a missing closing brace */}
-
           {/* INVENTORY TAB */}
-          <div style={{background: 'orange', padding: '20px', margin: '10px', fontSize: '20px'}}>
-            🔥 CODE BEFORE INVENTORY CHECK - activeTab: {activeTab}
-          </div>
           {activeTab === 'inventory' && (
-            <div style={{
-              position: 'fixed',
-              top: '100px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              zIndex: 9998,
-              background: 'lime',
-              padding: '50px',
-              border: '10px solid purple',
-              fontSize: '24px',
-              color: 'black',
-              width: '80%',
-              maxWidth: '800px'
-            }}>
-              <h1 style={{fontSize: '48px', color: 'black'}}>🎉 INVENTORY CONTENT IS HERE!</h1>
-              <p style={{fontSize: '24px', color: 'black'}}>Total items: {inventory.length}</p>
-              <p style={{fontSize: '24px', color: 'black'}}>Current items: {currentInventory.length}</p>
-              <p style={{fontSize: '18px', color: 'red', marginTop: '20px'}}>
-                ⚠️ If you see this, the inventory tab is rendering but something is hiding the actual content below!
-              </p>
-            </div>
-          )}
-          {/* TEMPORARY - REMOVED ALL INVENTORY CONTENT TO TEST */}
-          {false && activeTab === 'inventory' && (
             <div>
-              {/* DEBUG: Visible marker to confirm this renders */}
-              <div style={{background: 'red', color: 'white', padding: '20px', fontSize: '24px'}}>
-                🚨 INVENTORY TAB IS RENDERING - TOTAL ITEMS: {inventory.length}
-              </div>
               {/* Inventory Sub-tabs */}
               <div className="border-b border-gray-200 bg-gray-50 px-6">
                 <nav className="flex space-x-8">
