@@ -965,6 +965,27 @@ const Inventory: React.FC = () => {
                                   <EyeIcon className="h-4 w-4 mr-1" />
                                   Preview Order
                                 </button>
+                                {isParsed && email.parsed_data?.order?.order_number && (
+                                  <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => handleConfirmOrder(email.parsed_data!.order.order_number)}
+                                    disabled={confirmingOrders.has(email.parsed_data!.order.order_number)}
+                                    className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                  >
+                                    {confirmingOrders.has(email.parsed_data!.order.order_number) ? (
+                                      <span className="flex items-center">
+                                        <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-1"></div>
+                                        Confirming...
+                                      </span>
+                                    ) : (
+                                      <>
+                                        <CheckIcon className="h-4 w-4 mr-1" />
+                                        Confirm Order
+                                      </>
+                                    )}
+                                  </motion.button>
+                                )}
                                 <motion.button
                                   whileHover={{ scale: 1.05 }}
                                   whileTap={{ scale: 0.95 }}
@@ -1112,6 +1133,26 @@ const Inventory: React.FC = () => {
                   <p className="mt-1 text-sm text-gray-500">
                     {searchTerm ? 'No pending items match your search.' : 'No pending inventory items yet.'}
                   </p>
+                </div>
+              ) : Object.entries(groupedPendingOrders).length === 0 ? (
+                <div className="text-center py-12">
+                  <PackageIcon className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">Pending items found but cannot be displayed</h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {pendingInventory.length} pending item{pendingInventory.length !== 1 ? 's' : ''} exist but cannot be grouped by order.
+                    This usually means the items are missing vendor or order information.
+                  </p>
+                  <div className="mt-4">
+                    <button
+                      onClick={() => {
+                        console.log('Pending inventory items:', pendingInventory);
+                        console.log('Grouped orders:', groupedPendingOrders);
+                      }}
+                      className="text-sm text-blue-600 hover:text-blue-800"
+                    >
+                      Log debug info to console
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -1379,6 +1420,26 @@ const Inventory: React.FC = () => {
                   <p className="mt-1 text-sm text-gray-500">
                     {searchTerm ? 'No current items match your search.' : 'No confirmed inventory items yet.'}
                   </p>
+                </div>
+              ) : Object.entries(groupedCurrentInventory).length === 0 ? (
+                <div className="text-center py-12">
+                  <PackageIcon className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">Current items found but cannot be displayed</h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {currentInventory.length} current item{currentInventory.length !== 1 ? 's' : ''} exist but cannot be grouped.
+                    This usually means the items are missing vendor or brand information.
+                  </p>
+                  <div className="mt-4">
+                    <button
+                      onClick={() => {
+                        console.log('Current inventory items:', currentInventory);
+                        console.log('Grouped current inventory:', groupedCurrentInventory);
+                      }}
+                      className="text-sm text-blue-600 hover:text-blue-800"
+                    >
+                      Log debug info to console
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-4">
