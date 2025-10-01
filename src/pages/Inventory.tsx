@@ -22,6 +22,8 @@ const extractVendorFromEmail = (email: string): string => {
 };
 
 const Inventory: React.FC = () => {
+  console.log('🔥 Inventory component is rendering!');
+
   const { user, isAuthenticated } = useAuth();
   const [emails, setEmails] = useState<EmailData[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
@@ -30,6 +32,8 @@ const Inventory: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'orders' | 'inventory' | 'archive'>('orders');
+
+  console.log('📍 Current activeTab state:', activeTab);
   const [ordersSubTab, setOrdersSubTab] = useState<'pending' | 'confirmed'>('pending');
   const [inventorySubTab, setInventorySubTab] = useState<'pending' | 'current' | 'sold'>('pending');
   const [deletingItems, setDeletingItems] = useState<Set<number | string>>(new Set());
