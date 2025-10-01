@@ -1090,6 +1090,8 @@ const Inventory: React.FC = () => {
                   </table>
                 </div>
               )}
+            </div>
+          )}
 
               {/* Confirmed Orders Content */}
               {ordersSubTab === 'confirmed' && (
@@ -1161,6 +1163,8 @@ const Inventory: React.FC = () => {
               )}
             </div>
           )}
+          {/* ========== ORDERS TAB SHOULD END HERE ========== */}
+          {/* FORCE CLOSE - Testing if there's a missing closing brace */}
 
           {/* INVENTORY TAB */}
           <div style={{background: 'orange', padding: '20px', margin: '10px', fontSize: '20px'}}>
