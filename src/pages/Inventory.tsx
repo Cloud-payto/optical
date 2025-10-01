@@ -123,7 +123,9 @@ const Inventory: React.FC = () => {
   };
 
   useEffect(() => {
+    console.log('⚡ useEffect triggered - isAuthenticated:', isAuthenticated, 'user:', user?.id);
     if (isAuthenticated && user) {
+      console.log('📞 Calling loadData()...');
       loadData();
     } else if (isAuthenticated === false) {
       // If explicitly not authenticated, stop loading
@@ -1142,11 +1144,15 @@ const Inventory: React.FC = () => {
           )}
 
           {/* INVENTORY TAB */}
-          {(() => {
-            console.log('📊 Checking if inventory tab should render. activeTab:', activeTab, 'Expected: inventory', 'Match:', activeTab === 'inventory');
-            return null;
-          })()}
           {activeTab === 'inventory' && (
+            <div style={{background: 'yellow', padding: '50px', margin: '20px'}}>
+              <h1 style={{fontSize: '48px', color: 'black'}}>🎉 INVENTORY TAB WORKS!</h1>
+              <p style={{fontSize: '24px', color: 'black'}}>Total items: {inventory.length}</p>
+              <p style={{fontSize: '24px', color: 'black'}}>Current items: {currentInventory.length}</p>
+            </div>
+          )}
+          {/* TEMPORARY - REMOVED ALL INVENTORY CONTENT TO TEST */}
+          {false && activeTab === 'inventory' && (
             <div>
               {/* DEBUG: Visible marker to confirm this renders */}
               <div style={{background: 'red', color: 'white', padding: '20px', fontSize: '24px'}}>
