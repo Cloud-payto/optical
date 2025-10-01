@@ -188,7 +188,7 @@ const inventoryOperations = {
 
   async confirmPendingOrder(orderNumber, userId) {
     try {
-      // First, find the order with vendor information
+      // First, try to find the order with vendor information
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .select('id, vendor_id, vendors(name)')
@@ -196,24 +196,62 @@ const inventoryOperations = {
         .eq('account_id', userId)
         .single();
 
+      let pendingItems;
+      let vendorName;
+
       if (orderError || !order) {
-        throw new Error(`Order not found: ${orderNumber}`);
+        // If order doesn't exist in orders table, look for pending inventory items directly
+        console.log(`⚠️ Order ${orderNumber} not found in orders table, searching inventory items directly`);
+
+        // Get all pending items for this user and filter in JavaScript
+        // since we can't easily query the enriched_data JSONB field with Supabase
+        const { data: allPendingItems, error: inventoryError } = await supabase
+          .from('inventory')
+          .select('*, vendors(name), order:orders(order_number, customer_name, order_date)')
+          .eq('account_id', userId)
+          .eq('status', 'pending');
+
+        if (inventoryError) throw inventoryError;
+
+        // Filter items that match the order number (either in orders table or enriched_data)
+        const items = allPendingItems?.filter(item => {
+          // Check if order.order_number matches
+          if (item.order?.order_number === orderNumber) return true;
+          // Check if enriched_data contains the order number
+          if (item.enriched_data?.order_number === orderNumber) return true;
+          // Check if enriched_data.order.order_number matches
+          if (item.enriched_data?.order?.order_number === orderNumber) return true;
+          return false;
+        }) || [];
+
+        if (items.length === 0) {
+          return { success: false, message: `No pending items found for order ${orderNumber}` };
+        }
+
+        pendingItems = items;
+        vendorName = items[0]?.vendors?.name || items[0]?.vendor?.name || 'Unknown';
+      } else {
+        // Get pending inventory items for this order
+        const { data: items, error: fetchError } = await supabase
+          .from('inventory')
+          .select('*')
+          .eq('order_id', order.id)
+          .eq('account_id', userId)
+          .eq('status', 'pending');
+
+        if (fetchError) throw fetchError;
+
+        pendingItems = items;
+        vendorName = order.vendors?.name;
       }
 
-      // Get pending inventory items for this order
-      const { data: pendingItems, error: fetchError } = await supabase
-        .from('inventory')
-        .select('*')
-        .eq('order_id', order.id)
-        .eq('account_id', userId)
-        .eq('status', 'pending');
-
-      if (fetchError) throw fetchError;
+      if (!pendingItems || pendingItems.length === 0) {
+        return { success: false, message: `No pending items found for order ${orderNumber}` };
+      }
 
       let enrichedItems = pendingItems;
 
       // Apply Modern Optical web enrichment if applicable
-      const vendorName = order.vendors?.name;
       if (vendorName === 'Modern Optical') {
         try {
           console.log('🌐 Applying Modern Optical web enrichment...');
@@ -251,13 +289,15 @@ const inventoryOperations = {
       const results = await Promise.all(updatePromises);
       const updatedItems = results.map(r => r.data?.[0]).filter(Boolean);
 
-      // Update order status to 'confirmed' after all items are confirmed
-      await supabase
-        .from('orders')
-        .update({ status: 'confirmed' })
-        .eq('id', order.id);
+      // Update order status to 'confirmed' after all items are confirmed (if order exists)
+      if (order) {
+        await supabase
+          .from('orders')
+          .update({ status: 'confirmed' })
+          .eq('id', order.id);
+      }
 
-      return updatedItems;
+      return { success: true, message: `Confirmed ${updatedItems.length} items`, updatedCount: updatedItems.length };
     } catch (error) {
       handleSupabaseError(error, 'confirmPendingOrder');
     }
