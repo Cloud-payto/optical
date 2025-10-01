@@ -741,6 +741,25 @@ const Inventory: React.FC = () => {
           <p className="text-gray-600">Track pending orders and received inventory items</p>
         </div>
 
+        {/* DEBUG: Test if activeTab state is accessible here */}
+        {activeTab === 'inventory' && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 9999,
+            background: 'yellow',
+            padding: '20px',
+            border: '5px solid red',
+            fontSize: '24px',
+            color: 'black',
+            textAlign: 'center'
+          }}>
+            🚨 INVENTORY TAB IS ACTIVE! activeTab = {activeTab}
+          </div>
+        )}
+
         {/* Forwarding Email Section */}
         {user && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
