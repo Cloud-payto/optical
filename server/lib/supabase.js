@@ -330,6 +330,21 @@ const orderOperations = {
     } catch (error) {
       handleSupabaseError(error, 'archiveOrder');
     }
+  },
+
+  async deleteOrder(orderId, userId) {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .delete()
+        .eq('id', orderId)
+        .eq('account_id', userId);
+
+      if (error) throw error;
+      return { success: true };
+    } catch (error) {
+      handleSupabaseError(error, 'deleteOrder');
+    }
   }
 };
 

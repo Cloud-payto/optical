@@ -62,22 +62,15 @@ router.put('/:userId/:orderId/archive', async (req, res) => {
 });
 
 // DELETE /api/orders/:accountId/:orderId - Delete an archived order
-router.delete('/:accountId/:orderId', (req, res) => {
+router.delete('/:accountId/:orderId', async (req, res) => {
   try {
     const { accountId, orderId } = req.params;
-    const result = deleteOrder(accountId, orderId);
-    
-    if (result.success) {
-      res.json({
-        success: true,
-        message: 'Order deleted successfully'
-      });
-    } else {
-      res.status(400).json({
-        success: false,
-        error: result.error
-      });
-    }
+    await orderOperations.deleteOrder(orderId, accountId);
+
+    res.json({
+      success: true,
+      message: 'Order deleted successfully'
+    });
   } catch (error) {
     console.error('Error deleting order:', error);
     res.status(500).json({
