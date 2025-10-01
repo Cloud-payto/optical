@@ -620,41 +620,45 @@ const Inventory: React.FC = () => {
   };
 
   /**
-   * Safely format order date string (MM/DD/YYYY) for display
-   * Avoids timezone issues by parsing in local timezone
+   * Safely format order date string for display
+   * Handles multiple formats: MM/DD/YYYY, YYYY-MM-DD, ISO timestamps
    */
   const formatOrderDate = (dateString: string | undefined): string => {
     if (!dateString) return 'N/A';
-    
-    // If already formatted, return as is
+
+    // If already formatted with comma, return as is
     if (dateString.includes(',')) return dateString;
-    
-    // Parse MM/DD/YYYY format
-    const [month, day, year] = dateString.split('/');
-    
-    // Validate parts exist
-    if (!month || !day || !year) {
-      console.error('Invalid date format:', dateString);
-      return dateString;
+
+    let date: Date;
+
+    // Try different date formats
+    if (dateString.includes('/')) {
+      // Handle MM/DD/YYYY format
+      const [month, day, year] = dateString.split('/');
+      if (month && day && year) {
+        date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      } else {
+        console.error('Invalid MM/DD/YYYY format:', dateString);
+        return dateString;
+      }
+    } else if (dateString.includes('-')) {
+      // Handle YYYY-MM-DD or ISO format
+      date = new Date(dateString);
+    } else {
+      // Try parsing as-is
+      date = new Date(dateString);
     }
-    
-    // Create date in local timezone (not UTC)
-    const date = new Date(
-      parseInt(year), 
-      parseInt(month) - 1, 
-      parseInt(day)
-    );
-    
+
     // Verify parsing succeeded
     if (isNaN(date.getTime())) {
       console.error('Invalid date format:', dateString);
       return dateString;
     }
-    
+
     // Format for display
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
       day: 'numeric',
       timeZone: 'America/Phoenix'
     });
