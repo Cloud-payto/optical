@@ -1164,10 +1164,26 @@ const Inventory: React.FC = () => {
 
           {/* INVENTORY TAB */}
           {activeTab === 'inventory' && (
-            <div style={{background: 'yellow', padding: '50px', margin: '20px'}}>
-              <h1 style={{fontSize: '48px', color: 'black'}}>🎉 INVENTORY TAB WORKS!</h1>
+            <div style={{
+              position: 'fixed',
+              top: '100px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 9998,
+              background: 'lime',
+              padding: '50px',
+              border: '10px solid purple',
+              fontSize: '24px',
+              color: 'black',
+              width: '80%',
+              maxWidth: '800px'
+            }}>
+              <h1 style={{fontSize: '48px', color: 'black'}}>🎉 INVENTORY CONTENT IS HERE!</h1>
               <p style={{fontSize: '24px', color: 'black'}}>Total items: {inventory.length}</p>
               <p style={{fontSize: '24px', color: 'black'}}>Current items: {currentInventory.length}</p>
+              <p style={{fontSize: '18px', color: 'red', marginTop: '20px'}}>
+                ⚠️ If you see this, the inventory tab is rendering but something is hiding the actual content below!
+              </p>
             </div>
           )}
           {/* TEMPORARY - REMOVED ALL INVENTORY CONTENT TO TEST */}
