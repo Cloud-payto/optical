@@ -1137,6 +1137,10 @@ const Inventory: React.FC = () => {
           {/* INVENTORY TAB */}
           {activeTab === 'inventory' && (
             <div>
+              {/* DEBUG: Visible marker to confirm this renders */}
+              <div style={{background: 'red', color: 'white', padding: '20px', fontSize: '24px'}}>
+                🚨 INVENTORY TAB IS RENDERING - TOTAL ITEMS: {inventory.length}
+              </div>
               {/* Inventory Sub-tabs */}
               <div className="border-b border-gray-200 bg-gray-50 px-6">
                 <nav className="flex space-x-8">
@@ -1493,10 +1497,15 @@ const Inventory: React.FC = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
+                  {(() => {
+                    console.log('🎨 Rendering current inventory. Grouped entries:', Object.entries(groupedCurrentInventory).length);
+                    return null;
+                  })()}
                   {Object.entries(groupedCurrentInventory).map(([vendorName, brands]) => {
+                    console.log('🎨 Rendering vendor:', vendorName, 'with brands:', Object.keys(brands));
                     const isVendorExpanded = expandedVendors.has(vendorName);
                     const totalItemsInVendor = Object.values(brands).flat().length;
-                    
+
                     return (
                       <div key={vendorName} className="bg-white rounded-lg border border-gray-200 shadow-sm">
                         {/* Vendor Header */}
