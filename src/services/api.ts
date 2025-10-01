@@ -123,9 +123,16 @@ export interface InventoryItem {
   full_size?: string;
   temple_length?: string;
   quantity: number;
-  vendor: string;
+  vendor?: {
+    name?: string;
+  };
+  order?: {
+    order_number?: string;
+    order_date?: string;
+    customer_name?: string;
+  };
   status?: string;
-  order_number?: string;
+  order_number?: string; // Legacy field
   account_number?: string;
   email_id?: string; // UUID format
   full_name?: string;

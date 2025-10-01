@@ -571,6 +571,21 @@ const Inventory: React.FC = () => {
   };
 
   const groupedPendingOrders = groupPendingByOrder(pendingInventory);
+  
+  // Debug: Log order dates to check format (disabled for production)
+  // React.useEffect(() => {
+  //   if (pendingInventory.length > 0) {
+  //     console.log('Debug: Sample inventory item with order data:', pendingInventory[0]);
+  //     console.log('Debug: Order date from first item:', pendingInventory[0]?.order?.order_date);
+  //   }
+  //   
+  //   // Test the formatOrderDate function with known values
+  //   console.log('Testing formatOrderDate function:');
+  //   console.log('- Input: "09/08/2025" → Output:', formatOrderDate("09/08/2025"));
+  //   console.log('- Input: undefined → Output:', formatOrderDate(undefined));
+  //   console.log('- Input: "invalid" → Output:', formatOrderDate("invalid"));
+  //   console.log('- Input: "12/25/2023" → Output:', formatOrderDate("12/25/2023"));
+  // }, [pendingInventory]);
 
   // Helper function to group inventory by vendor, then by brand
   const groupInventoryByVendorAndBrand = (items: typeof inventory) => {
@@ -601,6 +616,47 @@ const Inventory: React.FC = () => {
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
+    });
+  };
+
+  /**
+   * Safely format order date string (MM/DD/YYYY) for display
+   * Avoids timezone issues by parsing in local timezone
+   */
+  const formatOrderDate = (dateString: string | undefined): string => {
+    if (!dateString) return 'N/A';
+    
+    // If already formatted, return as is
+    if (dateString.includes(',')) return dateString;
+    
+    // Parse MM/DD/YYYY format
+    const [month, day, year] = dateString.split('/');
+    
+    // Validate parts exist
+    if (!month || !day || !year) {
+      console.error('Invalid date format:', dateString);
+      return dateString;
+    }
+    
+    // Create date in local timezone (not UTC)
+    const date = new Date(
+      parseInt(year), 
+      parseInt(month) - 1, 
+      parseInt(day)
+    );
+    
+    // Verify parsing succeeded
+    if (isNaN(date.getTime())) {
+      console.error('Invalid date format:', dateString);
+      return dateString;
+    }
+    
+    // Format for display
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric',
+      timeZone: 'America/Phoenix'
     });
   };
 
@@ -972,7 +1028,7 @@ const Inventory: React.FC = () => {
                                 <p className="text-sm text-gray-500">
                                   {order.items.length} item{order.items.length !== 1 ? 's' : ''} pending confirmation
                                   {order.accountNumber && ` • Account #${order.accountNumber}`}
-                                  {order.orderDate && ` • ${formatDate(order.orderDate)}`}
+                                  {order.orderDate && ` • ${formatOrderDate(order.orderDate)}`}
                                 </p>
                               </div>
                             </div>
@@ -1091,7 +1147,7 @@ const Inventory: React.FC = () => {
                                             <div className="space-y-2">
                                               <div className="flex justify-between">
                                                 <span className="text-sm text-gray-500">Order Date:</span>
-                                                <span className="text-sm text-gray-900">{item.order?.order_date ? formatDate(item.order.order_date) : 'Not available'}</span>
+                                                <span className="text-sm text-gray-900">{formatOrderDate(item.order?.order_date)}</span>
                                               </div>
                                               <div className="flex justify-between">
                                                 <span className="text-sm text-gray-500">Vendor:</span>
@@ -1427,7 +1483,7 @@ const Inventory: React.FC = () => {
                                                       <div className="space-y-2">
                                                         <div className="flex justify-between">
                                                           <span className="text-sm text-gray-500">Order Date:</span>
-                                                          <span className="text-sm text-gray-900">{item.order?.order_date ? formatDate(item.order.order_date) : 'Not available'}</span>
+                                                          <span className="text-sm text-gray-900">{formatOrderDate(item.order?.order_date)}</span>
                                                         </div>
                                                         <div className="flex justify-between">
                                                           <span className="text-sm text-gray-500">Vendor:</span>
