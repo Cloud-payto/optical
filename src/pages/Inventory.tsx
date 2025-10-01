@@ -255,12 +255,20 @@ const Inventory: React.FC = () => {
     }
 
     setConfirmingOrders(prev => new Set(prev).add(orderNumber));
-    
+
     try {
-      await confirmPendingOrder(orderNumber);
+      const result = await confirmPendingOrder(orderNumber);
       await loadData(); // Refresh the data
+
+      // Show success message
+      toast.success(`Successfully confirmed order ${orderNumber}. ${result.updatedCount} items moved to current inventory.`);
+
+      // Auto-switch to inventory tab and current subtab to show the confirmed items
+      setActiveTab('inventory');
+      setInventorySubTab('current');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to confirm order');
+      toast.error(err instanceof Error ? err.message : 'Failed to confirm order');
     } finally {
       setConfirmingOrders(prev => {
         const newSet = new Set(prev);
@@ -571,8 +579,27 @@ const Inventory: React.FC = () => {
       // Sample items
       console.log('Sample pending items:', pendingInventory.slice(0, 2));
       console.log('Sample current items:', currentInventory.slice(0, 2));
+
+      // Check grouping
+      if (currentInventory.length > 0) {
+        console.log('🔍 Current Inventory Grouping Debug:');
+        console.log('First current item vendor:', currentInventory[0]?.vendor);
+        console.log('First current item brand:', (currentInventory[0] as any)?.brand);
+        console.log('Grouped current inventory keys:', Object.keys(groupedCurrentInventory));
+        console.log('Grouped current inventory:', groupedCurrentInventory);
+      }
+
+      // Check orders
+      console.log('📋 Orders Debug:');
+      console.log('Total orders:', orders.length);
+      const confirmedOrders = orders.filter(order => order.status === 'confirmed' && !order.metadata?.archived);
+      console.log('Confirmed orders (not archived):', confirmedOrders.length);
+      console.log('Sample orders:', orders.slice(0, 2));
+      if (confirmedOrders.length > 0) {
+        console.log('Sample confirmed order:', confirmedOrders[0]);
+      }
     }
-  }, [inventory, pendingInventory.length, currentInventory.length]);
+  }, [inventory, orders, pendingInventory.length, currentInventory.length]);
 
   // Group pending inventory by order number for new UX
   const groupPendingByOrder = (items: typeof inventory) => {
