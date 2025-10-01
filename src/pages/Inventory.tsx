@@ -29,7 +29,9 @@ const Inventory: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState<'emails' | 'pending' | 'current' | 'orders' | 'archive' | 'sold'>('emails');
+  const [activeTab, setActiveTab] = useState<'orders' | 'inventory' | 'archive'>('orders');
+  const [ordersSubTab, setOrdersSubTab] = useState<'pending' | 'confirmed'>('pending');
+  const [inventorySubTab, setInventorySubTab] = useState<'pending' | 'current' | 'sold'>('pending');
   const [deletingItems, setDeletingItems] = useState<Set<number | string>>(new Set());
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
   const [expandedVendors, setExpandedVendors] = useState<Set<string>>(new Set());
@@ -760,83 +762,79 @@ const Inventory: React.FC = () => {
           </button>
         </div>
 
-        {/* Tabs */}
+        {/* Main Tabs */}
         <div className="mb-6">
-          <nav className="flex space-x-8">
-            <button
-              onClick={() => setActiveTab('emails')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'emails'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <MailIcon className="h-5 w-5 inline mr-2" />
-              Pending Orders ({filteredEmails.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('pending')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'pending'
-                  ? 'border-orange-500 text-orange-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <PackageIcon className="h-5 w-5 inline mr-2" />
-              Pending Inventory ({pendingInventory.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('current')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'current'
-                  ? 'border-green-500 text-green-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <PackageIcon className="h-5 w-5 inline mr-2" />
-              Current Inventory ({currentInventory.length})
-            </button>
+          <nav className="flex space-x-8 border-b border-gray-200">
             <button
               onClick={() => setActiveTab('orders')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'orders'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              <CheckIcon className="h-5 w-5 inline mr-2" />
-              Confirmed Orders ({orders.filter(o => !o.metadata?.archived).length})
+              <MailIcon className="h-5 w-5 inline mr-2" />
+              Orders ({filteredEmails.length + orders.filter(o => !o.metadata?.archived).length})
+            </button>
+            <button
+              onClick={() => setActiveTab('inventory')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'inventory'
+                  ? 'border-green-500 text-green-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <PackageIcon className="h-5 w-5 inline mr-2" />
+              Inventory ({pendingInventory.length + currentInventory.length + soldInventory.length})
             </button>
             <button
               onClick={() => setActiveTab('archive')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'archive'
                   ? 'border-gray-500 text-gray-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              <PackageIcon className="h-5 w-5 inline mr-2" />
-              Archive ({archivedInventory.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('sold')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'sold'
-                  ? 'border-purple-500 text-purple-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <CheckIcon className="h-5 w-5 inline mr-2" />
-              Sold ({soldInventory.length})
+              <ArchiveIcon className="h-5 w-5 inline mr-2" />
+              Archive ({archivedInventory.length + orders.filter(o => o.metadata?.archived).length})
             </button>
           </nav>
         </div>
 
         {/* Content */}
         <div className="bg-white shadow rounded-lg overflow-hidden">
-          
-          {/* Pending Orders Tab */}
-          {activeTab === 'emails' && (
+
+          {/* ORDERS TAB */}
+          {activeTab === 'orders' && (
+            <div>
+              {/* Orders Sub-tabs */}
+              <div className="border-b border-gray-200 bg-gray-50 px-6">
+                <nav className="flex space-x-8">
+                  <button
+                    onClick={() => setOrdersSubTab('pending')}
+                    className={`py-3 px-1 border-b-2 font-medium text-sm ${
+                      ordersSubTab === 'pending'
+                        ? 'border-orange-500 text-orange-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    Pending ({filteredEmails.length})
+                  </button>
+                  <button
+                    onClick={() => setOrdersSubTab('confirmed')}
+                    className={`py-3 px-1 border-b-2 font-medium text-sm ${
+                      ordersSubTab === 'confirmed'
+                        ? 'border-green-500 text-green-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    Confirmed ({orders.filter(o => !o.metadata?.archived).length})
+                  </button>
+                </nav>
+              </div>
+
+              {/* Pending Orders Content */}
+              {ordersSubTab === 'pending' && (
             <div>
               {filteredEmails.length === 0 ? (
                 <div className="text-center py-12">
@@ -992,11 +990,110 @@ const Inventory: React.FC = () => {
                   </table>
                 </div>
               )}
+              )}
+
+              {/* Confirmed Orders Content */}
+              {ordersSubTab === 'confirmed' && (
+                <div className="p-6">
+                  <div className="space-y-4">
+                    {orders
+                      .filter(order => !order.metadata?.archived)
+                      .filter(order => {
+                        if (!searchTerm) return true;
+                        return (
+                          (order.order_number || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (order.vendor || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (order.customer_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          (order.account_number || '').toLowerCase().includes(searchTerm.toLowerCase())
+                        );
+                      })
+                      .map(order => (
+                        <div key={order.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                          <div className="flex justify-between items-start mb-4">
+                            <div>
+                              <h3 className="text-lg font-semibold text-gray-900">
+                                {order.vendor} • {order.customer_name || 'Unknown Customer'}
+                              </h3>
+                              <p className="text-sm text-gray-600 mt-1">
+                                Order #{order.order_number}
+                                {order.account_number && ` • Account: ${order.account_number}`}
+                              </p>
+                            </div>
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => handleArchiveOrder(order.id)}
+                                className="text-gray-600 hover:text-gray-900 text-sm px-3 py-1 border border-gray-300 rounded hover:bg-gray-50"
+                              >
+                                <ArchiveIcon className="h-4 w-4 inline mr-1" />
+                                Archive
+                              </button>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                            <div>
+                              <span className="font-medium text-gray-600">Order Date:</span>
+                              <span className="ml-2 text-gray-900">{order.order_date || 'Not specified'}</span>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-600">Total Pieces:</span>
+                              <span className="ml-2 text-gray-900">{order.total_pieces || 0}</span>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-600">Status:</span>
+                              <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                                Confirmed
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Pending Inventory Tab */}
-          {activeTab === 'pending' && (
+          {/* INVENTORY TAB */}
+          {activeTab === 'inventory' && (
+            <div>
+              {/* Inventory Sub-tabs */}
+              <div className="border-b border-gray-200 bg-gray-50 px-6">
+                <nav className="flex space-x-8">
+                  <button
+                    onClick={() => setInventorySubTab('pending')}
+                    className={`py-3 px-1 border-b-2 font-medium text-sm ${
+                      inventorySubTab === 'pending'
+                        ? 'border-orange-500 text-orange-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    Pending ({pendingInventory.length})
+                  </button>
+                  <button
+                    onClick={() => setInventorySubTab('current')}
+                    className={`py-3 px-1 border-b-2 font-medium text-sm ${
+                      inventorySubTab === 'current'
+                        ? 'border-green-500 text-green-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    Current ({currentInventory.length})
+                  </button>
+                  <button
+                    onClick={() => setInventorySubTab('sold')}
+                    className={`py-3 px-1 border-b-2 font-medium text-sm ${
+                      inventorySubTab === 'sold'
+                        ? 'border-purple-500 text-purple-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    Sold ({soldInventory.length})
+                  </button>
+                </nav>
+              </div>
+
+              {/* Pending Inventory Content */}
+              {inventorySubTab === 'pending' && (
             <div>
               {pendingInventory.length === 0 ? (
                 <div className="text-center py-12">
@@ -1262,8 +1359,8 @@ const Inventory: React.FC = () => {
             </div>
           )}
 
-          {/* Current Inventory Tab */}
-          {activeTab === 'current' && (
+              {/* Current Inventory Content */}
+              {inventorySubTab === 'current' && (
             <div>
               {currentInventory.length === 0 ? (
                 <div className="text-center py-12">
@@ -1603,18 +1700,8 @@ const Inventory: React.FC = () => {
             </div>
           )}
 
-          {/* Orders Tab */}
-          {activeTab === 'orders' && (
-            <div>
-              {orders.length === 0 ? (
-                <div className="text-center py-12">
-                  <CheckIcon className="mx-auto h-12 w-12 text-gray-400" />
-                  <h3 className="mt-2 text-sm font-medium text-gray-900">No confirmed orders</h3>
-                  <p className="mt-1 text-sm text-gray-500">
-                    {searchTerm ? 'No orders match your search.' : 'No orders have been confirmed yet.'}
-                  </p>
-                </div>
-              ) : (
+              {/* Sold Inventory Content */}
+              {inventorySubTab === 'sold' && (
                 <div>
                   {/* Confirmed Orders Section */}
                   <div className="mb-6">
@@ -2022,22 +2109,49 @@ const Inventory: React.FC = () => {
                 </div>
               )}
             </div>
+              )}
+            </div>
           )}
 
-          {/* Sold Inventory Tab */}
-          {activeTab === 'sold' && (
-            <div>
-              {soldInventory.length === 0 ? (
-                <div className="text-center py-12">
-                  <CheckIcon className="mx-auto h-12 w-12 text-gray-400" />
-                  <h3 className="mt-2 text-sm font-medium text-gray-900">No sold inventory items</h3>
-                  <p className="mt-1 text-sm text-gray-500">
-                    {searchTerm ? 'No sold items match your search.' : 'No inventory items have been sold yet.'}
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {Object.entries(groupInventoryByVendorAndBrand(soldInventory)).map(([vendorName, brands]) => {
+          {/* ARCHIVE TAB */}
+          {activeTab === 'archive' && (
+            <div className="p-6">
+              <div className="space-y-8">
+                {/* Archived Orders Section */}
+                {orders.filter(order => order.metadata?.archived).length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">Archived Orders</h3>
+                    <div className="space-y-4">
+                      {orders
+                        .filter(order => order.metadata?.archived)
+                        .map(order => (
+                          <div key={order.id} className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <h4 className="text-md font-semibold text-gray-700">
+                                  {order.vendor} • {order.customer_name || 'Unknown Customer'}
+                                </h4>
+                                <p className="text-sm text-gray-500 mt-1">
+                                  Order #{order.order_number}
+                                  {order.account_number && ` • Account: ${order.account_number}`}
+                                </p>
+                              </div>
+                              <span className="px-2 py-1 bg-gray-200 text-gray-700 rounded-full text-xs font-medium">
+                                Archived
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Archived Inventory Section */}
+                {archivedInventory.length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">Archived Inventory</h3>
+                    <div className="space-y-4">
+                      {Object.entries(groupInventoryByVendorAndBrand(archivedInventory)).map(([vendorName, brands]) => {
                     const isVendorExpanded = expandedVendors.has(vendorName);
                     const totalItemsInVendor = Object.values(brands).flat().length;
                     
@@ -2156,9 +2270,22 @@ const Inventory: React.FC = () => {
                         )}
                       </div>
                     );
-                  })}
-                </div>
-              )}
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Empty State */}
+                {orders.filter(o => o.metadata?.archived).length === 0 && archivedInventory.length === 0 && (
+                  <div className="text-center py-12">
+                    <ArchiveIcon className="mx-auto h-12 w-12 text-gray-400" />
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">No archived items</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Archived orders and inventory will appear here
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
