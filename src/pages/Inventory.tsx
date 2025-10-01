@@ -554,6 +554,26 @@ const Inventory: React.FC = () => {
   const archivedInventory = filteredInventory.filter(item => item.status === 'archived');
   const soldInventory = filteredInventory.filter(item => item.status === 'sold');
 
+  // Debug logging for inventory counts and status
+  React.useEffect(() => {
+    if (inventory.length > 0) {
+      console.log('🔍 Inventory Debug Info:');
+      console.log(`Total inventory items: ${inventory.length}`);
+      console.log(`Pending: ${pendingInventory.length}, Current: ${currentInventory.length}, Archived: ${archivedInventory.length}, Sold: ${soldInventory.length}`);
+
+      // Show status distribution
+      const statusCounts = inventory.reduce((acc, item) => {
+        acc[item.status] = (acc[item.status] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      console.log('Status distribution:', statusCounts);
+
+      // Sample items
+      console.log('Sample pending items:', pendingInventory.slice(0, 2));
+      console.log('Sample current items:', currentInventory.slice(0, 2));
+    }
+  }, [inventory, pendingInventory.length, currentInventory.length]);
+
   // Group pending inventory by order number for new UX
   const groupPendingByOrder = (items: typeof inventory) => {
     return items.reduce((orders, item) => {

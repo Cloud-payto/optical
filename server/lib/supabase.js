@@ -271,6 +271,7 @@ const inventoryOperations = {
 
       // Update each item with enriched data and move to current inventory
       console.log(`🔄 Updating ${enrichedItems.length} items to current status...`);
+      console.log(`📝 Sample item IDs to update:`, enrichedItems.slice(0, 3).map(i => i.id));
 
       const updatePromises = enrichedItems.map(enrichedItem =>
         supabase
@@ -289,9 +290,21 @@ const inventoryOperations = {
       );
 
       const results = await Promise.all(updatePromises);
+
+      // Check for errors in the results
+      const errors = results.filter(r => r.error);
+      if (errors.length > 0) {
+        console.error(`❌ Errors updating items:`, errors.map(e => e.error));
+      }
+
       const updatedItems = results.map(r => r.data?.[0]).filter(Boolean);
 
       console.log(`✅ Successfully updated ${updatedItems.length} items to current inventory`);
+
+      if (updatedItems.length === 0 && enrichedItems.length > 0) {
+        console.error(`⚠️ WARNING: Tried to update ${enrichedItems.length} items but 0 were updated!`);
+        console.error(`📊 First enriched item structure:`, JSON.stringify(enrichedItems[0], null, 2));
+      }
 
       // Update order status to 'confirmed' after all items are confirmed (if order exists)
       if (order) {
