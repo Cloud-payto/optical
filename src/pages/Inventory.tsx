@@ -1093,9 +1093,9 @@ const Inventory: React.FC = () => {
             </div>
           )}
 
-              {/* Confirmed Orders Content */}
-              {ordersSubTab === 'confirmed' && (
-                <div className="p-6">
+          {/* Confirmed Orders Content */}
+          {ordersSubTab === 'confirmed' && (
+            <div className="p-6">
                   {orders.filter(order => order.status === 'confirmed' && !order.metadata?.archived).length === 0 ? (
                     <div className="text-center py-12">
                       <CheckIcon className="mx-auto h-12 w-12 text-gray-400" />
@@ -2296,8 +2296,6 @@ const Inventory: React.FC = () => {
                     );
                   })}
                 </div>
-              )}
-            </div>
               )}
             </div>
           )}
