@@ -269,12 +269,14 @@ const inventoryOperations = {
         }
       }
 
-      // Update each item with enriched data and confirmed status
+      // Update each item with enriched data and move to current inventory
+      console.log(`🔄 Updating ${enrichedItems.length} items to current status...`);
+
       const updatePromises = enrichedItems.map(enrichedItem =>
         supabase
           .from('inventory')
           .update({
-            status: 'confirmed',
+            status: 'current',  // Changed from 'confirmed' to 'current' to match frontend expectations
             upc: enrichedItem.upc || null,
             wholesale_price: enrichedItem.wholesale_price || null,
             msrp: enrichedItem.msrp || null,
@@ -289,12 +291,18 @@ const inventoryOperations = {
       const results = await Promise.all(updatePromises);
       const updatedItems = results.map(r => r.data?.[0]).filter(Boolean);
 
+      console.log(`✅ Successfully updated ${updatedItems.length} items to current inventory`);
+
       // Update order status to 'confirmed' after all items are confirmed (if order exists)
       if (order) {
+        console.log(`📋 Updating order ${order.id} status to confirmed...`);
         await supabase
           .from('orders')
           .update({ status: 'confirmed' })
           .eq('id', order.id);
+        console.log(`✅ Order status updated successfully`);
+      } else {
+        console.log(`⚠️ No order record found in orders table for order number ${orderNumber}`);
       }
 
       return { success: true, message: `Confirmed ${updatedItems.length} items`, updatedCount: updatedItems.length };

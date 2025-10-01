@@ -957,10 +957,10 @@ const Inventory: React.FC = () => {
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              <div className="flex space-x-2">
+                              <div className="flex flex-col space-y-2">
                                 <button
                                   onClick={() => handleViewOrderDetails(email)}
-                                  className="text-blue-600 hover:text-blue-900 flex items-center"
+                                  className="text-blue-600 hover:text-blue-900 flex items-center justify-start"
                                 >
                                   <EyeIcon className="h-4 w-4 mr-1" />
                                   Preview Order
@@ -971,7 +971,7 @@ const Inventory: React.FC = () => {
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => handleConfirmOrder(email.parsed_data!.order.order_number)}
                                     disabled={confirmingOrders.has(email.parsed_data!.order.order_number)}
-                                    className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="inline-flex items-center justify-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                   >
                                     {confirmingOrders.has(email.parsed_data!.order.order_number) ? (
                                       <span className="flex items-center">
@@ -991,7 +991,7 @@ const Inventory: React.FC = () => {
                                   whileTap={{ scale: 0.95 }}
                                   onClick={() => handleDeleteEmail(email.id)}
                                   disabled={deletingItems.has(email.id)}
-                                  className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                  className="text-red-600 hover:text-red-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-start"
                                 >
                                   {deletingItems.has(email.id) ? (
                                     <span className="flex items-center">
@@ -999,7 +999,10 @@ const Inventory: React.FC = () => {
                                       Deleting...
                                     </span>
                                   ) : (
-                                    <TrashIcon className="h-4 w-4" />
+                                    <>
+                                      <TrashIcon className="h-4 w-4 mr-1" />
+                                      Delete
+                                    </>
                                   )}
                                 </motion.button>
                               </div>
