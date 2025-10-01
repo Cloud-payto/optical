@@ -805,7 +805,7 @@ const Inventory: React.FC = () => {
               }`}
             >
               <CheckIcon className="h-5 w-5 inline mr-2" />
-              Confirmed Orders ({orders.filter(o => o.status !== 'archived').length})
+              Confirmed Orders ({orders.filter(o => !o.metadata?.archived).length})
             </button>
             <button
               onClick={() => setActiveTab('archive')}
@@ -1621,7 +1621,7 @@ const Inventory: React.FC = () => {
                     <h3 className="text-lg font-medium text-gray-900 mb-4">Confirmed Orders</h3>
                     <div className="space-y-4">
                       {orders
-                        .filter(order => order.status !== 'archived')
+                        .filter(order => !order.metadata?.archived)
                         .filter(order => {
                           if (!searchTerm) return true;
                           return (
@@ -1714,12 +1714,12 @@ const Inventory: React.FC = () => {
                   </div>
 
                   {/* Archived Orders Section */}
-                  {orders.filter(order => order.status === 'archived').length > 0 && (
+                  {orders.filter(order => order.metadata?.archived).length > 0 && (
                     <div className="mt-8">
                       <h3 className="text-lg font-medium text-gray-900 mb-4">Archived Orders</h3>
                       <div className="space-y-4">
                         {orders
-                          .filter(order => order.status === 'archived')
+                          .filter(order => order.metadata?.archived)
                           .filter(order => {
                             if (!searchTerm) return true;
                             return (

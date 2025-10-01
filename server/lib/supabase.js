@@ -316,12 +316,15 @@ const orderOperations = {
     try {
       const { data, error } = await supabase
         .from('orders')
-        .update({ status: 'archived' })
+        .update({
+          status: 'cancelled',  // Database only allows: pending, confirmed, shipped, delivered, cancelled
+          metadata: { archived: true, archived_at: new Date().toISOString() }
+        })
         .eq('id', orderId)
         .eq('account_id', userId)
         .select()
         .single();
-      
+
       if (error) throw error;
       return data;
     } catch (error) {
