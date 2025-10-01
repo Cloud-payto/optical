@@ -990,7 +990,6 @@ const Inventory: React.FC = () => {
                   </table>
                 </div>
               )}
-              )}
 
               {/* Confirmed Orders Content */}
               {ordersSubTab === 'confirmed' && (
