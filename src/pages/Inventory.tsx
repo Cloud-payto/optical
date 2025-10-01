@@ -1163,6 +1163,9 @@ const Inventory: React.FC = () => {
           )}
 
           {/* INVENTORY TAB */}
+          <div style={{background: 'orange', padding: '20px', margin: '10px', fontSize: '20px'}}>
+            🔥 CODE BEFORE INVENTORY CHECK - activeTab: {activeTab}
+          </div>
           {activeTab === 'inventory' && (
             <div style={{
               position: 'fixed',
