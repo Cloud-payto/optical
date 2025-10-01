@@ -825,7 +825,10 @@ const Inventory: React.FC = () => {
               Orders ({filteredEmails.length + orders.filter(o => o.status === 'confirmed' && !o.metadata?.archived).length})
             </button>
             <button
-              onClick={() => setActiveTab('inventory')}
+              onClick={() => {
+                console.log('🔘 Clicking Inventory tab, setting activeTab to: inventory');
+                setActiveTab('inventory');
+              }}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'inventory'
                   ? 'border-green-500 text-green-600'
@@ -1135,6 +1138,10 @@ const Inventory: React.FC = () => {
           )}
 
           {/* INVENTORY TAB */}
+          {(() => {
+            console.log('📊 Checking if inventory tab should render. activeTab:', activeTab, 'Expected: inventory', 'Match:', activeTab === 'inventory');
+            return null;
+          })()}
           {activeTab === 'inventory' && (
             <div>
               {/* DEBUG: Visible marker to confirm this renders */}
