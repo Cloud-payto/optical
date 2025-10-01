@@ -127,17 +127,28 @@ function parseModernOpticalHtml(html, plainText) {
     
     // Improved customer name extraction
     function extractCustomerName(text) {
-        // Try direct pattern first - most reliable
-        const directMatch = text.match(/Customer<\/h3>[\s\S]*?<p class="card-text">\s*(.*?)\s*<br/);
+        // Pattern 1: Direct match with account number in parentheses
+        // Example: "MARANA EYE CARE (93277)"
+        const directMatch = text.match(/Customer<\/h3>[\s\S]*?<p class="card-text">\s*([A-Z][A-Z0-9\s&.,'()-]+?)\s*\((\d{4,6})\)/);
         if (directMatch) {
-            let name = directMatch[1].trim().replace(/<[^>]*>/g, '');
-            name = name.replace(/\s*\(\d+\)/, '').trim(); // Remove account number
-            if (name && name.length > 2 && !name.includes('<')) {
+            const name = directMatch[1].trim();
+            if (name && name.length > 2 && name !== 'Customer') {
+                console.log('  ✓ Customer name extracted (Pattern 1):', name);
                 return name;
             }
         }
-        
-        // Fallback: Clean up HTML method
+
+        // Pattern 2: Text after Customer header, before line break
+        const textMatch = text.match(/Customer<\/h3>[\s\S]*?<p class="card-text">\s*\n?\s*([A-Z][^\n<(]+?)(?:\s*\(|\s*<br)/i);
+        if (textMatch) {
+            const name = textMatch[1].trim();
+            if (name && name.length > 2 && name !== 'Customer') {
+                console.log('  ✓ Customer name extracted (Pattern 2):', name);
+                return name;
+            }
+        }
+
+        // Pattern 3: Fallback - Clean up HTML method
         const customerSection = text.match(/Customer<\/h3>[\s\S]*?<\/div>/);
         if (customerSection) {
             const cleaned = customerSection[0]
@@ -145,13 +156,19 @@ function parseModernOpticalHtml(html, plainText) {
                 .split('\n')
                 .map(line => line.trim())
                 .filter(line => line && line.length > 2 && /^[A-Z]/.test(line) && line !== 'Customer');
-            
+
             if (cleaned.length > 0) {
                 let name = cleaned[0];
-                name = name.replace(/\s*\(\d+\)/, '').trim(); // Remove account number
-                return name;
+                // Remove account number in parentheses
+                name = name.replace(/\s*\(\d{4,6}\).*$/, '').trim();
+                if (name) {
+                    console.log('  ✓ Customer name extracted (Pattern 3):', name);
+                    return name;
+                }
             }
         }
+
+        console.log('  ✗ Customer name not found');
         return '';
     }
     
