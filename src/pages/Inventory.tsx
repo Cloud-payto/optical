@@ -535,10 +535,24 @@ const Inventory: React.FC = () => {
   };
 
   // Filter data based on search term
-  const filteredEmails = emails.filter(email =>
-    (email.subject || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (email.from_email || '').toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredEmails = emails.filter(email => {
+    // Filter by search term
+    const matchesSearch = (email.subject || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (email.from_email || '').toLowerCase().includes(searchTerm.toLowerCase());
+
+    if (!matchesSearch) return false;
+
+    // Exclude emails whose orders have been confirmed
+    const orderNumber = email.parsed_data?.order?.order_number;
+    if (orderNumber) {
+      const isConfirmed = orders.some(order =>
+        order.order_number === orderNumber && order.status === 'confirmed'
+      );
+      if (isConfirmed) return false;
+    }
+
+    return true;
+  });
 
   const filteredInventory = inventory.filter(item => {
     const fullName = (item as any).full_name || item.sku || '';
@@ -1029,71 +1043,110 @@ const Inventory: React.FC = () => {
           {/* Confirmed Orders Content */}
           {ordersSubTab === 'confirmed' && (
             <div className="p-6">
-                  {orders.filter(order => order.status === 'confirmed' && !order.metadata?.archived).length === 0 ? (
-                    <div className="text-center py-12">
-                      <CheckIcon className="mx-auto h-12 w-12 text-gray-400" />
-                      <h3 className="mt-2 text-sm font-medium text-gray-900">No confirmed orders</h3>
-                      <p className="mt-1 text-sm text-gray-500">
-                        Confirmed orders will appear here after you confirm pending inventory
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {orders
-                        .filter(order => order.status === 'confirmed' && !order.metadata?.archived)
-                        .filter(order => {
-                          if (!searchTerm) return true;
-                          return (
-                            (order.order_number || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            (order.vendor || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            (order.customer_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            (order.account_number || '').toLowerCase().includes(searchTerm.toLowerCase())
-                          );
-                        })
-                        .map(order => (
-                        <div key={order.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-                          <div className="flex justify-between items-start mb-4">
+              {orders.filter(order => order.status === 'confirmed' && !order.metadata?.archived).length === 0 ? (
+                <div className="text-center py-12">
+                  <CheckIcon className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">No confirmed orders</h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Confirmed orders will appear here after you confirm pending inventory
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {orders
+                    .filter(order => order.status === 'confirmed' && !order.metadata?.archived)
+                    .filter(order => {
+                      if (!searchTerm) return true;
+                      return (
+                        (order.order_number || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        (order.vendor || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        (order.customer_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        (order.account_number || '').toLowerCase().includes(searchTerm.toLowerCase())
+                      );
+                    })
+                    .map((order) => (
+                      <div key={order.id} className="bg-white rounded-lg border border-gray-200 shadow-sm">
+                        <div className="px-6 py-4">
+                          <div className="flex items-center justify-between">
                             <div>
-                              <h3 className="text-lg font-semibold text-gray-900">
-                                {order.vendor} • {order.customer_name || 'Unknown Customer'}
-                              </h3>
+                              <h3 className="text-lg font-semibold text-gray-900">Order #{order.order_number}</h3>
                               <p className="text-sm text-gray-600 mt-1">
-                                Order #{order.order_number}
-                                {order.account_number && ` • Account: ${order.account_number}`}
+                                {order.vendor} • {order.customer_name || 'Unknown Customer'}
                               </p>
+                              {order.account_number && (
+                                <p className="text-sm text-gray-500">Account: {order.account_number}</p>
+                              )}
                             </div>
-                            <div className="flex space-x-2">
-                              <button
-                                onClick={() => handleArchiveOrder(order.id)}
-                                className="text-gray-600 hover:text-gray-900 text-sm px-3 py-1 border border-gray-300 rounded hover:bg-gray-50"
-                              >
-                                <ArchiveIcon className="h-4 w-4 inline mr-1" />
-                                Archive
-                              </button>
+                            <div className="text-right">
+                              <div className="flex items-center space-x-4">
+                                <div>
+                                  <p className="text-sm font-medium text-gray-900">{order.total_items} items</p>
+                                  <p className="text-xs text-gray-500">
+                                    Confirmed {formatDate(order.confirmed_at)}
+                                  </p>
+                                </div>
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                  Confirmed
+                                </span>
+                                <button
+                                  onClick={() => handleArchiveOrder(order.id)}
+                                  disabled={archivingOrders.has(order.id)}
+                                  className="inline-flex items-center px-3 py-1 border border-orange-300 text-sm font-medium rounded-md text-orange-700 bg-white hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  {archivingOrders.has(order.id) ? (
+                                    <>
+                                      <div className="animate-spin h-3 w-3 border-2 border-orange-500 border-t-transparent rounded-full mr-2"></div>
+                                      Archiving...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ArchiveIcon className="h-4 w-4 mr-1" />
+                                      Archive
+                                    </>
+                                  )}
+                                </button>
+                              </div>
                             </div>
                           </div>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                            <div>
-                              <span className="font-medium text-gray-600">Order Date:</span>
-                              <span className="ml-2 text-gray-900">{order.order_date || 'Not specified'}</span>
+
+                          {/* Order Details */}
+                          <div className="mt-4 pt-4 border-t border-gray-200">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                              <div>
+                                <span className="font-medium text-gray-600">Rep:</span>
+                                <span className="ml-2 text-gray-900">{order.rep_name || 'Not specified'}</span>
+                              </div>
+                              <div>
+                                <span className="font-medium text-gray-600">Order Date:</span>
+                                <span className="ml-2 text-gray-900">{order.order_date || 'Not specified'}</span>
+                              </div>
+                              <div>
+                                <span className="font-medium text-gray-600">Email ID:</span>
+                                <span className="ml-2 text-gray-900">#{order.email_id}</span>
+                              </div>
                             </div>
-                            <div>
-                              <span className="font-medium text-gray-600">Total Pieces:</span>
-                              <span className="ml-2 text-gray-900">{order.total_pieces || 0}</span>
-                            </div>
-                            <div>
-                              <span className="font-medium text-gray-600">Status:</span>
-                              <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
-                                Confirmed
-                              </span>
+
+                            {/* Items List */}
+                            <div className="mt-4">
+                              <h4 className="text-sm font-medium text-gray-900 mb-2">Items ({order.items.length}):</h4>
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                {order.items.map((item) => (
+                                  <div key={item.id} className="text-xs bg-gray-50 rounded px-2 py-1">
+                                    <span className="font-medium">{item.brand} - {item.model}</span>
+                                    <br />
+                                    <span className="text-gray-600">{item.color} • Size {item.size} • Qty: {item.quantity}</span>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           </div>
                         </div>
-                        ))}
-                    </div>
-                  )}
+                      </div>
+                    ))}
                 </div>
               )}
+            </div>
+          )}
             </div>
           )}
           {/* INVENTORY TAB */}
@@ -1790,200 +1843,53 @@ const Inventory: React.FC = () => {
 
               {/* Sold Inventory Content */}
               {inventorySubTab === 'sold' && (
-                <div>
-                  {/* Confirmed Orders Section */}
-                  <div className="mb-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Confirmed Orders</h3>
-                    <div className="space-y-4">
-                      {orders
-                        .filter(order => !order.metadata?.archived)
-                        .filter(order => {
-                          if (!searchTerm) return true;
-                          return (
-                            (order.order_number || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            (order.vendor || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            (order.customer_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            (order.account_number || '').toLowerCase().includes(searchTerm.toLowerCase())
-                          );
-                        })
-                        .map((order) => (
-                        <div key={order.id} className="bg-white rounded-lg border border-gray-200 shadow-sm">
-                          <div className="px-6 py-4">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <h3 className="text-lg font-semibold text-gray-900">Order #{order.order_number}</h3>
-                                <p className="text-sm text-gray-600 mt-1">
-                                  {order.vendor} • {order.customer_name || 'Unknown Customer'}
-                                </p>
-                                {order.account_number && (
-                                  <p className="text-sm text-gray-500">Account: {order.account_number}</p>
-                                )}
-                              </div>
-                              <div className="text-right">
-                                <div className="flex items-center space-x-4">
-                                  <div>
-                                    <p className="text-sm font-medium text-gray-900">{order.total_items} items</p>
-                                    <p className="text-xs text-gray-500">
-                                      Confirmed {formatDate(order.confirmed_at)}
-                                    </p>
-                                  </div>
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    Confirmed
-                                  </span>
-                                  <button
-                                    onClick={() => handleArchiveOrder(order.id)}
-                                    disabled={archivingOrders.has(order.id)}
-                                    className="inline-flex items-center px-3 py-1 border border-orange-300 text-sm font-medium rounded-md text-orange-700 bg-white hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                                  >
-                                    {archivingOrders.has(order.id) ? (
-                                      <>
-                                        <div className="animate-spin h-3 w-3 border-2 border-orange-500 border-t-transparent rounded-full mr-2"></div>
-                                        Archiving...
-                                      </>
-                                    ) : (
-                                      <>
-                                        <ArchiveIcon className="h-4 w-4 mr-1" />
-                                        Archive
-                                      </>
-                                    )}
-                                  </button>
-                                </div>
-                              </div>
+                <div className="p-6">
+                  {soldInventory.length === 0 ? (
+                    <div className="text-center py-12">
+                      <PackageIcon className="mx-auto h-12 w-12 text-gray-400" />
+                      <h3 className="mt-2 text-sm font-medium text-gray-900">No sold items</h3>
+                      <p className="mt-1 text-sm text-gray-500">
+                        {searchTerm ? 'No sold items match your search.' : 'Sold inventory items will appear here.'}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {soldInventory.map((item) => (
+                        <div key={item.id} className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-4">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <h3 className="text-sm font-semibold text-gray-900">{item.brand}</h3>
+                              <p className="text-sm text-gray-600">{item.model}</p>
                             </div>
-                        
-                        {/* Order Details */}
-                        <div className="mt-4 pt-4 border-t border-gray-200">
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                            <div>
-                              <span className="font-medium text-gray-600">Rep:</span>
-                              <span className="ml-2 text-gray-900">{order.rep_name || 'Not specified'}</span>
-                            </div>
-                            <div>
-                              <span className="font-medium text-gray-600">Order Date:</span>
-                              <span className="ml-2 text-gray-900">{order.order_date || 'Not specified'}</span>
-                            </div>
-                            <div>
-                              <span className="font-medium text-gray-600">Email ID:</span>
-                              <span className="ml-2 text-gray-900">#{order.email_id}</span>
-                            </div>
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                              Sold
+                            </span>
                           </div>
-                          
-                          {/* Items List */}
-                          <div className="mt-4">
-                            <h4 className="text-sm font-medium text-gray-900 mb-2">Items ({order.items.length}):</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                              {order.items.map((item) => (
-                                <div key={item.id} className="text-xs bg-gray-50 rounded px-2 py-1">
-                                  <span className="font-medium">{item.brand} - {item.model}</span>
-                                  <br />
-                                  <span className="text-gray-600">{item.color} • Size {item.size} • Qty: {item.quantity}</span>
-                                </div>
-                              ))}
+
+                          <div className="space-y-2 text-xs">
+                            <div className="flex justify-between">
+                              <span className="text-gray-500">Color:</span>
+                              <span className="text-gray-900 font-medium">{item.color_name || item.color}</span>
                             </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-500">Size:</span>
+                              <span className="text-gray-900 font-medium">{item.full_size || item.size}</span>
+                            </div>
+                            {item.upc && (
+                              <div className="flex justify-between">
+                                <span className="text-gray-500">UPC:</span>
+                                <span className="text-gray-900 font-mono text-xs">{item.upc}</span>
+                              </div>
+                            )}
+                            {item.sold_date && (
+                              <div className="flex justify-between pt-2 border-t border-gray-100">
+                                <span className="text-gray-500">Sold Date:</span>
+                                <span className="text-gray-900">{new Date(item.sold_date).toLocaleDateString()}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
-                      </div>
-                    </div>
                       ))}
-                    </div>
-                  </div>
-
-                  {/* Archived Orders Section */}
-                  {orders.filter(order => order.metadata?.archived).length > 0 && (
-                    <div className="mt-8">
-                      <h3 className="text-lg font-medium text-gray-900 mb-4">Archived Orders</h3>
-                      <div className="space-y-4">
-                        {orders
-                          .filter(order => order.metadata?.archived)
-                          .filter(order => {
-                            if (!searchTerm) return true;
-                            return (
-                              (order.order_number || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                              (order.vendor || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                              (order.customer_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                              (order.account_number || '').toLowerCase().includes(searchTerm.toLowerCase())
-                            );
-                          })
-                          .map((order) => (
-                            <div key={order.id} className="bg-gray-50 rounded-lg border border-gray-300 shadow-sm">
-                              <div className="px-6 py-4">
-                                <div className="flex items-center justify-between">
-                                  <div>
-                                    <h3 className="text-lg font-semibold text-gray-700">Order #{order.order_number}</h3>
-                                    <p className="text-sm text-gray-600 mt-1">
-                                      {order.vendor} • {order.customer_name || 'Unknown Customer'}
-                                    </p>
-                                    {order.account_number && (
-                                      <p className="text-sm text-gray-500">Account: {order.account_number}</p>
-                                    )}
-                                  </div>
-                                  <div className="text-right">
-                                    <div className="flex items-center space-x-4">
-                                      <div>
-                                        <p className="text-sm font-medium text-gray-700">{order.total_items} items</p>
-                                        <p className="text-xs text-gray-500">
-                                          Archived {formatDate((order as any).archived_at || order.confirmed_at)}
-                                        </p>
-                                      </div>
-                                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-700">
-                                        Archived
-                                      </span>
-                                      <button
-                                        onClick={() => handleDeleteOrder(order.id)}
-                                        disabled={deletingOrders.has(order.id)}
-                                        className="inline-flex items-center px-3 py-1 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                                      >
-                                        {deletingOrders.has(order.id) ? (
-                                          <>
-                                            <div className="animate-spin h-3 w-3 border-2 border-red-500 border-t-transparent rounded-full mr-2"></div>
-                                            Deleting...
-                                          </>
-                                        ) : (
-                                          <>
-                                            <TrashIcon className="h-4 w-4 mr-1" />
-                                            Delete
-                                          </>
-                                        )}
-                                      </button>
-                                    </div>
-                                  </div>
-                                </div>
-                                
-                                {/* Order Details */}
-                                <div className="mt-4 pt-4 border-t border-gray-200">
-                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                                    <div>
-                                      <span className="font-medium text-gray-600">Rep:</span>
-                                      <span className="ml-2 text-gray-700">{order.rep_name || 'Not specified'}</span>
-                                    </div>
-                                    <div>
-                                      <span className="font-medium text-gray-600">Order Date:</span>
-                                      <span className="ml-2 text-gray-700">{order.order_date || 'Not specified'}</span>
-                                    </div>
-                                    <div>
-                                      <span className="font-medium text-gray-600">Email ID:</span>
-                                      <span className="ml-2 text-gray-700">#{order.email_id}</span>
-                                    </div>
-                                  </div>
-                                  
-                                  {/* Items List */}
-                                  <div className="mt-4">
-                                    <h4 className="text-sm font-medium text-gray-700 mb-2">Items ({order.items.length}):</h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                                      {order.items.map((item) => (
-                                        <div key={item.id} className="text-xs bg-gray-100 rounded px-2 py-1">
-                                          <span className="font-medium">{item.brand} - {item.model}</span>
-                                          <br />
-                                          <span className="text-gray-600">{item.color} • Size {item.size} • Qty: {item.quantity}</span>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                      </div>
                     </div>
                   )}
                 </div>

@@ -293,12 +293,12 @@ router.delete('/:accountId/delete-archived-vendor', (req, res) => {
 });
 
 // PUT /api/inventory/:accountId/:itemId/sold - Mark item as sold
-router.put('/:accountId/:itemId/sold', (req, res) => {
+router.put('/:accountId/:itemId/sold', async (req, res) => {
   try {
     const { accountId, itemId } = req.params;
 
-    const result = markInventoryItemAsSold(accountId, itemId);
-    
+    const result = await inventoryOperations.markInventoryItemAsSold(itemId, accountId);
+
     if (result.success) {
       res.json({
         success: true,

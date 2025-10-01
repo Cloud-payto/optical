@@ -178,11 +178,32 @@ const inventoryOperations = {
         .eq('account_id', userId)
         .select()
         .single();
-      
+
       if (error) throw error;
       return data;
     } catch (error) {
       handleSupabaseError(error, 'archiveInventoryItem');
+    }
+  },
+
+  async markInventoryItemAsSold(itemId, userId) {
+    try {
+      const { data, error } = await supabase
+        .from('inventory')
+        .update({
+          status: 'sold',
+          sold_date: new Date().toISOString().split('T')[0] // Set current date as sold_date
+        })
+        .eq('id', itemId)
+        .eq('account_id', userId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return { success: true, item: data };
+    } catch (error) {
+      handleSupabaseError(error, 'markInventoryItemAsSold');
+      return { success: false, error: error.message };
     }
   },
 
