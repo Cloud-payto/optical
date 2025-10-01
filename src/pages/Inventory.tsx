@@ -774,7 +774,7 @@ const Inventory: React.FC = () => {
               }`}
             >
               <MailIcon className="h-5 w-5 inline mr-2" />
-              Orders ({filteredEmails.length + orders.filter(o => !o.metadata?.archived).length})
+              Orders ({filteredEmails.length + orders.filter(o => o.status === 'confirmed' && !o.metadata?.archived).length})
             </button>
             <button
               onClick={() => setActiveTab('inventory')}
@@ -828,7 +828,7 @@ const Inventory: React.FC = () => {
                         : 'border-transparent text-gray-500 hover:text-gray-700'
                     }`}
                   >
-                    Confirmed ({orders.filter(o => !o.metadata?.archived).length})
+                    Confirmed ({orders.filter(o => o.status === 'confirmed' && !o.metadata?.archived).length})
                   </button>
                 </nav>
               </div>
@@ -994,19 +994,28 @@ const Inventory: React.FC = () => {
               {/* Confirmed Orders Content */}
               {ordersSubTab === 'confirmed' && (
                 <div className="p-6">
-                  <div className="space-y-4">
-                    {orders
-                      .filter(order => !order.metadata?.archived)
-                      .filter(order => {
-                        if (!searchTerm) return true;
-                        return (
-                          (order.order_number || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          (order.vendor || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          (order.customer_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          (order.account_number || '').toLowerCase().includes(searchTerm.toLowerCase())
-                        );
-                      })
-                      .map(order => (
+                  {orders.filter(order => order.status === 'confirmed' && !order.metadata?.archived).length === 0 ? (
+                    <div className="text-center py-12">
+                      <CheckIcon className="mx-auto h-12 w-12 text-gray-400" />
+                      <h3 className="mt-2 text-sm font-medium text-gray-900">No confirmed orders</h3>
+                      <p className="mt-1 text-sm text-gray-500">
+                        Confirmed orders will appear here after you confirm pending inventory
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {orders
+                        .filter(order => order.status === 'confirmed' && !order.metadata?.archived)
+                        .filter(order => {
+                          if (!searchTerm) return true;
+                          return (
+                            (order.order_number || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            (order.vendor || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            (order.customer_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            (order.account_number || '').toLowerCase().includes(searchTerm.toLowerCase())
+                          );
+                        })
+                        .map(order => (
                         <div key={order.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
                           <div className="flex justify-between items-start mb-4">
                             <div>
@@ -1045,8 +1054,9 @@ const Inventory: React.FC = () => {
                             </div>
                           </div>
                         </div>
-                      ))}
-                  </div>
+                        ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

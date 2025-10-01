@@ -251,6 +251,12 @@ const inventoryOperations = {
       const results = await Promise.all(updatePromises);
       const updatedItems = results.map(r => r.data?.[0]).filter(Boolean);
 
+      // Update order status to 'confirmed' after all items are confirmed
+      await supabase
+        .from('orders')
+        .update({ status: 'confirmed' })
+        .eq('id', order.id);
+
       return updatedItems;
     } catch (error) {
       handleSupabaseError(error, 'confirmPendingOrder');
