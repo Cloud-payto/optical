@@ -272,13 +272,21 @@ const orderOperations = {
         .from('orders')
         .select(`
           *,
+          vendor:vendors(name),
           items:inventory(*)
         `)
         .eq('account_id', userId)
         .order('created_at', { ascending: false });
-      
+
       if (error) throw error;
-      return data || [];
+
+      // Flatten vendor object to vendor string for easier access
+      const ordersWithVendorName = data?.map(order => ({
+        ...order,
+        vendor: order.vendor?.name || 'Unknown Vendor'
+      })) || [];
+
+      return ordersWithVendorName;
     } catch (error) {
       handleSupabaseError(error, 'getOrdersByAccount');
     }

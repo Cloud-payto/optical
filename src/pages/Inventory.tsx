@@ -641,28 +641,29 @@ const Inventory: React.FC = () => {
         date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
       } else {
         console.error('Invalid MM/DD/YYYY format:', dateString);
-        return dateString;
+        return 'Invalid Date';
       }
-    } else if (dateString.includes('-')) {
-      // Handle YYYY-MM-DD or ISO format
-      date = new Date(dateString);
+    } else if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      // Handle YYYY-MM-DD format (date only, no time)
+      // Parse as local date to avoid timezone issues
+      const [year, month, day] = dateString.split('-');
+      date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
     } else {
-      // Try parsing as-is
+      // Handle ISO timestamp or other formats
       date = new Date(dateString);
     }
 
     // Verify parsing succeeded
     if (isNaN(date.getTime())) {
       console.error('Invalid date format:', dateString);
-      return dateString;
+      return 'Invalid Date';
     }
 
-    // Format for display
+    // Format for display (removed timezone to avoid date shifting)
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric',
-      timeZone: 'America/Phoenix'
+      day: 'numeric'
     });
   };
 
@@ -962,7 +963,7 @@ const Inventory: React.FC = () => {
                                   className="text-blue-600 hover:text-blue-900 flex items-center"
                                 >
                                   <EyeIcon className="h-4 w-4 mr-1" />
-                                  View Details
+                                  Preview Order
                                 </button>
                                 <motion.button
                                   whileHover={{ scale: 1.05 }}
