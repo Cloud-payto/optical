@@ -560,13 +560,14 @@ const Inventory: React.FC = () => {
         orders[orderKey] = {
           vendor: item.vendor?.name,
           orderNumber: item.order?.order_number || 'Unknown',
+          orderDate: item.order?.order_date || '',
           accountNumber: (item as any).account_number || '',
           items: []
         };
       }
       orders[orderKey].items.push(item);
       return orders;
-    }, {} as Record<string, { vendor: string; orderNumber: string; accountNumber: string; items: typeof inventory }>);
+    }, {} as Record<string, { vendor: string; orderNumber: string; orderDate: string; accountNumber: string; items: typeof inventory }>);
   };
 
   const groupedPendingOrders = groupPendingByOrder(pendingInventory);
@@ -971,6 +972,7 @@ const Inventory: React.FC = () => {
                                 <p className="text-sm text-gray-500">
                                   {order.items.length} item{order.items.length !== 1 ? 's' : ''} pending confirmation
                                   {order.accountNumber && ` • Account #${order.accountNumber}`}
+                                  {order.orderDate && ` • ${formatDate(order.orderDate)}`}
                                 </p>
                               </div>
                             </div>
@@ -1089,7 +1091,7 @@ const Inventory: React.FC = () => {
                                             <div className="space-y-2">
                                               <div className="flex justify-between">
                                                 <span className="text-sm text-gray-500">Order Date:</span>
-                                                <span className="text-sm text-gray-900">{formatDate(item.created_at)}</span>
+                                                <span className="text-sm text-gray-900">{item.order?.order_date ? formatDate(item.order.order_date) : 'Not available'}</span>
                                               </div>
                                               <div className="flex justify-between">
                                                 <span className="text-sm text-gray-500">Vendor:</span>
@@ -1425,7 +1427,7 @@ const Inventory: React.FC = () => {
                                                       <div className="space-y-2">
                                                         <div className="flex justify-between">
                                                           <span className="text-sm text-gray-500">Order Date:</span>
-                                                          <span className="text-sm text-gray-900">{formatDate(item.created_at)}</span>
+                                                          <span className="text-sm text-gray-900">{item.order?.order_date ? formatDate(item.order.order_date) : 'Not available'}</span>
                                                         </div>
                                                         <div className="flex justify-between">
                                                           <span className="text-sm text-gray-500">Vendor:</span>

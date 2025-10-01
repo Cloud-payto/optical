@@ -272,11 +272,11 @@ class SafiloService {
             }
         }
         
-        // Parse Phone
-        const phoneMatch = text.match(/Phone:(\d+)/);
-        if (phoneMatch) {
-            orderInfo.customerPhone = phoneMatch[1];
-        }
+        // Parse Phone - NOT NEEDED (commented out as per requirements)
+        // const phoneMatch = text.match(/Phone:(\d+)/);
+        // if (phoneMatch) {
+        //     orderInfo.customerPhone = phoneMatch[1];
+        // }
         
         // Ship to same as customer for this format
         orderInfo.shipToName = orderInfo.customerName;

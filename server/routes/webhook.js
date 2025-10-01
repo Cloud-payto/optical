@@ -337,7 +337,7 @@ router.post('/email', async (req, res) => {
                 customer_code: parsedData.order.customer_code,
                 placed_by: parsedData.order.placed_by,
                 order_date: parsedData.order.order_date,
-                phone: parsedData.order.phone,
+                // phone: parsedData.order.phone, // Removed as not needed
                 total_pieces: parsedData.order.total_pieces,
                 status: 'pending'
               });

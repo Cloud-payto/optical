@@ -141,7 +141,7 @@ const inventoryOperations = {
         .select(`
           *,
           vendor:vendors(name),
-          order:orders(order_number, customer_name)
+          order:orders(order_number, customer_name, order_date)
         `)
         .eq('account_id', userId)
         .neq('status', 'archived')
