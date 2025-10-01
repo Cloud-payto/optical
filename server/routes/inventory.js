@@ -105,8 +105,8 @@ router.post('/:userId/confirm/:orderNumber', async (req, res) => {
 router.put('/:userId/:itemId/archive', async (req, res) => {
   try {
     const { userId, itemId } = req.params;
-    
-    const item = await inventoryOperations.archiveInventoryItem(parseInt(itemId), userId);
+
+    const item = await inventoryOperations.archiveInventoryItem(itemId, userId);
     
     res.json({
       success: true,
@@ -126,8 +126,8 @@ router.put('/:userId/:itemId/archive', async (req, res) => {
 router.put('/:accountId/:itemId/restore', (req, res) => {
   try {
     const { accountId, itemId } = req.params;
-    
-    const result = restoreInventoryItem(accountId, parseInt(itemId));
+
+    const result = restoreInventoryItem(accountId, itemId);
     
     if (result.success) {
       res.json({
@@ -296,8 +296,8 @@ router.delete('/:accountId/delete-archived-vendor', (req, res) => {
 router.put('/:accountId/:itemId/sold', (req, res) => {
   try {
     const { accountId, itemId } = req.params;
-    
-    const result = markInventoryItemAsSold(accountId, parseInt(itemId));
+
+    const result = markInventoryItemAsSold(accountId, itemId);
     
     if (result.success) {
       res.json({

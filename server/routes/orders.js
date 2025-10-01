@@ -26,7 +26,7 @@ router.get('/:userId', async (req, res) => {
 router.get('/:userId/:orderId', async (req, res) => {
   try {
     const { userId, orderId } = req.params;
-    const order = await orderOperations.getOrderById(parseInt(orderId), userId);
+    const order = await orderOperations.getOrderById(orderId, userId);
     
     res.json({
       success: true,
@@ -45,7 +45,7 @@ router.get('/:userId/:orderId', async (req, res) => {
 router.put('/:userId/:orderId/archive', async (req, res) => {
   try {
     const { userId, orderId } = req.params;
-    const order = await orderOperations.archiveOrder(parseInt(orderId), userId);
+    const order = await orderOperations.archiveOrder(orderId, userId);
     
     res.json({
       success: true,
@@ -65,7 +65,7 @@ router.put('/:userId/:orderId/archive', async (req, res) => {
 router.delete('/:accountId/:orderId', (req, res) => {
   try {
     const { accountId, orderId } = req.params;
-    const result = deleteOrder(accountId, parseInt(orderId));
+    const result = deleteOrder(accountId, orderId);
     
     if (result.success) {
       res.json({
