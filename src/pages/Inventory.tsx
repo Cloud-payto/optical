@@ -550,7 +550,7 @@ const Inventory: React.FC = () => {
 
   // Separate inventory by status
   const pendingInventory = filteredInventory.filter(item => item.status === 'pending');
-  const currentInventory = filteredInventory.filter(item => item.status === 'current');
+  const currentInventory = filteredInventory.filter(item => item.status === 'confirmed'); // Changed from 'current' to 'confirmed' to match DB constraint
   const archivedInventory = filteredInventory.filter(item => item.status === 'archived');
   const soldInventory = filteredInventory.filter(item => item.status === 'sold');
 

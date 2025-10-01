@@ -277,7 +277,7 @@ const inventoryOperations = {
         supabase
           .from('inventory')
           .update({
-            status: 'current',  // Changed from 'confirmed' to 'current' to match frontend expectations
+            status: 'confirmed',  // Using 'confirmed' which is allowed by DB constraint
             upc: enrichedItem.upc || null,
             wholesale_price: enrichedItem.wholesale_price || null,
             msrp: enrichedItem.msrp || null,
