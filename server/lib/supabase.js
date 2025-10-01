@@ -188,29 +188,70 @@ const inventoryOperations = {
 
   async confirmPendingOrder(orderNumber, userId) {
     try {
-      // First, find the order ID from the order number
+      // First, find the order with vendor information
       const { data: order, error: orderError } = await supabase
         .from('orders')
-        .select('id')
+        .select('id, vendor_id, vendors(name)')
         .eq('order_number', orderNumber)
         .eq('account_id', userId)
         .single();
-      
+
       if (orderError || !order) {
         throw new Error(`Order not found: ${orderNumber}`);
       }
-      
-      // Then update inventory items that belong to this order
-      const { data, error } = await supabase
+
+      // Get pending inventory items for this order
+      const { data: pendingItems, error: fetchError } = await supabase
         .from('inventory')
-        .update({ status: 'confirmed' })
+        .select('*')
         .eq('order_id', order.id)
         .eq('account_id', userId)
-        .eq('status', 'pending')
-        .select();
-      
-      if (error) throw error;
-      return data;
+        .eq('status', 'pending');
+
+      if (fetchError) throw fetchError;
+
+      let enrichedItems = pendingItems;
+
+      // Apply Modern Optical web enrichment if applicable
+      const vendorName = order.vendors?.name;
+      if (vendorName === 'Modern Optical') {
+        try {
+          console.log('🌐 Applying Modern Optical web enrichment...');
+          const parserRegistry = require('../parsers');
+          const modernOpticalService = parserRegistry.getModernOpticalService();
+
+          // Enrich items with web data (UPC, wholesale price, MSRP)
+          enrichedItems = await modernOpticalService.enrichPendingItems(pendingItems);
+          console.log(`✅ Web enrichment completed for ${enrichedItems.length} items`);
+
+        } catch (enrichmentError) {
+          console.error('⚠️ Web enrichment failed, proceeding without enrichment:', enrichmentError.message);
+          // Continue with original items if enrichment fails
+          enrichedItems = pendingItems;
+        }
+      }
+
+      // Update each item with enriched data and confirmed status
+      const updatePromises = enrichedItems.map(enrichedItem =>
+        supabase
+          .from('inventory')
+          .update({
+            status: 'confirmed',
+            upc: enrichedItem.upc || null,
+            wholesale_price: enrichedItem.wholesale_price || null,
+            msrp: enrichedItem.msrp || null,
+            in_stock: enrichedItem.in_stock || null,
+            api_verified: enrichedItem.api_verified || false,
+            enriched_data: enrichedItem.enriched_data || null
+          })
+          .eq('id', enrichedItem.id)
+          .select()
+      );
+
+      const results = await Promise.all(updatePromises);
+      const updatedItems = results.map(r => r.data?.[0]).filter(Boolean);
+
+      return updatedItems;
     } catch (error) {
       handleSupabaseError(error, 'confirmPendingOrder');
     }

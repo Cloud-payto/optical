@@ -103,7 +103,13 @@ function parseModernOpticalHtml(html, plainText) {
     const orderNumber = textToUse.match(/Order\s*(?:Number|#)?\s*:?\s*(\d+)/i)?.[1] || '';
     const repName = textToUse.match(/Placed By Rep:\s*([^\n]+)/)?.[1]?.trim() || '';
     const orderDate = textToUse.match(/Date:\s*([\d\/]+)/)?.[1]?.trim() || '';
-    
+
+    // Debug logging for order details
+    console.log('📋 Modern Optical Parser - Order Details:');
+    console.log('  Order Number:', orderNumber);
+    console.log('  Rep Name:', repName);
+    console.log('  Order Date:', orderDate);
+
     // Improved account number extraction
     function extractAccountNumber(text) {
         const patterns = [
@@ -151,7 +157,11 @@ function parseModernOpticalHtml(html, plainText) {
     
     let accountNumber = extractAccountNumber(textToUse);
     const customerName = extractCustomerName(textToUse);
-    
+
+    // Debug logging for customer info
+    console.log('  Account Number:', accountNumber);
+    console.log('  Customer Name:', customerName);
+
     // Extract items and collect unique brands
     const items = [];
     const brands = new Set();
