@@ -94,7 +94,7 @@ const emailOperations = {
 
   async saveOrUpdateVendorAccountNumber(accountId, vendorId, vendorAccountNumber) {
     try {
-      // Upsert into account_vendors table (separate from brands)
+      // Try to upsert into account_vendors table (separate from brands)
       const { data, error } = await supabase
         .from('account_vendors')
         .upsert(
@@ -111,12 +111,21 @@ const emailOperations = {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // If table doesn't exist, just log and continue
+        if (error.code === '42P01' || error.code === '42P10') {
+          console.log(`ℹ️  account_vendors table not set up yet, skipping vendor account number save`);
+          return { skipped: true, message: 'Table not ready' };
+        }
+        throw error;
+      }
 
       console.log(`✅ Saved vendor account number for account ${accountId}, vendor ${vendorId}`);
       return data;
     } catch (error) {
-      handleSupabaseError(error, 'saveOrUpdateVendorAccountNumber');
+      // Log but don't throw - this is not critical for email parsing
+      console.warn(`⚠️  Could not save vendor account number:`, error.message);
+      return { error: error.message };
     }
   }
 };
