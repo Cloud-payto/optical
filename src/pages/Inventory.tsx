@@ -108,11 +108,20 @@ const Inventory: React.FC = () => {
       // Debug: Log order dates received from API
       if (ordersResponse.orders && ordersResponse.orders.length > 0) {
         console.log('📅 FRONTEND: Orders received from API');
+        console.log('📦 First order object:', JSON.stringify(ordersResponse.orders[0], null, 2));
         ordersResponse.orders.slice(0, 3).forEach((order: any) => {
           console.log(`  Order ${order.order_number}:`);
+          console.log(`    - status: ${order.status}`);
           console.log(`    - order_date: ${order.order_date} (type: ${typeof order.order_date})`);
           console.log(`    - customer_name: ${order.customer_name}`);
+          console.log(`    - All keys:`, Object.keys(order));
         });
+
+        const confirmedOrders = ordersResponse.orders.filter((o: any) => o.status === 'confirmed');
+        const pendingOrders = ordersResponse.orders.filter((o: any) => o.status === 'pending');
+        console.log(`  Total orders: ${ordersResponse.orders.length}`);
+        console.log(`  Confirmed orders: ${confirmedOrders.length}`);
+        console.log(`  Pending orders: ${pendingOrders.length}`);
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load data';
@@ -691,7 +700,13 @@ const Inventory: React.FC = () => {
    * Format date without time (for order dates, sold dates, etc.)
    */
   const formatDateOnly = (dateString: string | null | undefined) => {
-    console.log('🔍 formatDateOnly called with:', dateString, 'type:', typeof dateString);
+    // Persistent logging that won't be cleared
+    const debugMsg = `🔍 formatDateOnly: "${dateString}" (${typeof dateString})`;
+    console.log(debugMsg);
+
+    // Also log to a global array so we can inspect it
+    if (!(window as any).dateDebugLogs) (window as any).dateDebugLogs = [];
+    (window as any).dateDebugLogs.push(debugMsg);
 
     if (!dateString) {
       console.log('  → Returning N/A (empty)');
