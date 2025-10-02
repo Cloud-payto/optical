@@ -151,20 +151,20 @@ router.put('/:accountId/:itemId/restore', (req, res) => {
 });
 
 // PUT /api/inventory/:accountId/archive-brand - Archive all items by brand
-router.put('/:accountId/archive-brand', (req, res) => {
+router.put('/:accountId/archive-brand', async (req, res) => {
   try {
     const { accountId } = req.params;
     const { brandName, vendorName } = req.body;
-    
+
     if (!brandName || !vendorName) {
       return res.status(400).json({
         success: false,
         error: 'Brand name and vendor name are required'
       });
     }
-    
-    const result = archiveAllItemsByBrand(accountId, brandName, vendorName);
-    
+
+    const result = await inventoryOperations.archiveAllItemsByBrand(accountId, brandName, vendorName);
+
     if (result.success) {
       res.json({
         success: true,
@@ -221,20 +221,20 @@ router.post('/:accountId/test-enrichment', async (req, res) => {
 });
 
 // DELETE /api/inventory/:accountId/delete-archived-brand - Delete all archived items by brand
-router.delete('/:accountId/delete-archived-brand', (req, res) => {
+router.delete('/:accountId/delete-archived-brand', async (req, res) => {
   try {
     const { accountId } = req.params;
     const { brandName, vendorName } = req.body;
-    
+
     if (!brandName || !vendorName) {
       return res.status(400).json({
         success: false,
         error: 'Brand name and vendor name are required'
       });
     }
-    
-    const result = deleteArchivedItemsByBrand(accountId, brandName, vendorName);
-    
+
+    const result = await inventoryOperations.deleteArchivedItemsByBrand(accountId, brandName, vendorName);
+
     if (result.success) {
       res.json({
         success: true,
@@ -257,20 +257,20 @@ router.delete('/:accountId/delete-archived-brand', (req, res) => {
 });
 
 // DELETE /api/inventory/:accountId/delete-archived-vendor - Delete all archived items by vendor
-router.delete('/:accountId/delete-archived-vendor', (req, res) => {
+router.delete('/:accountId/delete-archived-vendor', async (req, res) => {
   try {
     const { accountId } = req.params;
     const { vendorName } = req.body;
-    
+
     if (!vendorName) {
       return res.status(400).json({
         success: false,
         error: 'Vendor name is required'
       });
     }
-    
-    const result = deleteArchivedItemsByVendor(accountId, vendorName);
-    
+
+    const result = await inventoryOperations.deleteArchivedItemsByVendor(accountId, vendorName);
+
     if (result.success) {
       res.json({
         success: true,

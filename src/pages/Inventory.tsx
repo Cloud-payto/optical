@@ -2435,6 +2435,12 @@ const Inventory: React.FC = () => {
                         <span className="text-gray-500">Email Received:</span>
                         <span className="ml-2 text-gray-900">{formatDate(selectedEmailDetails.received_at)}</span>
                       </div>
+                      {selectedEmailDetails.parsed_data?.order?.order_date && (
+                        <div>
+                          <span className="text-gray-500">Order Date:</span>
+                          <span className="ml-2 text-gray-900">{formatDateOnly(selectedEmailDetails.parsed_data.order.order_date)}</span>
+                        </div>
+                      )}
                       <div className="md:col-span-2">
                         <span className="text-gray-500">Subject:</span>
                         <span className="ml-2 text-gray-900">{selectedEmailDetails.subject}</span>
