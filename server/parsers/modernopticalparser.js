@@ -127,15 +127,28 @@ function parseModernOpticalHtml(html, plainText) {
     
     // Improved customer name extraction
     function extractCustomerName(text) {
+        console.log('\n🔍 CUSTOMER NAME EXTRACTION DEBUG:');
+
+        // First, let's see what we're working with
+        const customerSection = text.match(/Customer<\/h3>[\s\S]{0,300}/);
+        if (customerSection) {
+            console.log('📝 HTML Section Found:');
+            console.log(customerSection[0].substring(0, 300));
+            console.log('\n');
+        }
+
         // Pattern 1: Look for text after Customer header with account in parentheses
         // Match: "MARANA EYE CARE (93277)" or "CUSTOMER NAME (12345)"
         const pattern1 = text.match(/Customer<\/h3>[\s\S]*?<p[^>]*>\s*([A-Z][A-Z0-9\s&.,'@-]+?)\s*\((\d{4,6})\)/);
         if (pattern1) {
             const name = pattern1[1].trim();
+            console.log('✓ Pattern 1 matched:', name);
             if (name && name.length > 2 && name !== 'Customer') {
-                console.log('  ✓ Customer name extracted (Pattern 1):', name);
+                console.log('  ✅ Customer name extracted (Pattern 1):', name);
                 return name;
             }
+        } else {
+            console.log('✗ Pattern 1 did not match');
         }
 
         // Pattern 2: Match first line after card-text that has capital letters
@@ -144,15 +157,19 @@ function parseModernOpticalHtml(html, plainText) {
             let name = pattern2[1].trim();
             // Clean up account number if it got captured
             name = name.replace(/\s*\(\d{4,6}\).*$/, '').trim();
+            console.log('✓ Pattern 2 matched:', name);
             if (name && name.length > 2 && name !== 'Customer') {
-                console.log('  ✓ Customer name extracted (Pattern 2):', name);
+                console.log('  ✅ Customer name extracted (Pattern 2):', name);
                 return name;
             }
+        } else {
+            console.log('✗ Pattern 2 did not match');
         }
 
         // Pattern 3: Aggressive fallback - strip ALL HTML and find first valid line
         const pattern3 = text.match(/Customer<\/h3>[\s\S]{0,500}?<\/div>/);
         if (pattern3) {
+            console.log('✓ Pattern 3 section found, processing...');
             const stripped = pattern3[0]
                 .replace(/<[^>]*>/g, '\n') // Replace tags with newlines
                 .split('\n')
@@ -167,27 +184,27 @@ function parseModernOpticalHtml(html, plainText) {
                            !line.match(/^Phone:/i); // Not phone line
                 });
 
+            console.log('  Stripped lines:', stripped);
+
             if (stripped.length > 0) {
                 let name = stripped[0];
                 // Remove account number in parentheses
                 name = name.replace(/\s*\(\d{4,6}\).*$/, '').trim();
                 if (name) {
-                    console.log('  ✓ Customer name extracted (Pattern 3):', name);
+                    console.log('  ✅ Customer name extracted (Pattern 3):', name);
                     return name;
                 }
             }
+        } else {
+            console.log('✗ Pattern 3 did not match');
         }
 
-        console.log('  ✗ Customer name not found - Debug HTML:');
-        const debugSection = text.match(/Customer<\/h3>[\s\S]{0,200}/);
-        if (debugSection) {
-            console.log(debugSection[0].substring(0, 200));
-        }
+        console.log('❌ Customer name not found\n');
         return '';
     }
     
     let accountNumber = extractAccountNumber(textToUse);
-    const customerName = extractCustomerName(textToUse);
+    const customerName = extractCustomerName(html || textToUse); // Use HTML for better parsing
 
     // Debug logging for customer info
     console.log('  Account Number:', accountNumber);

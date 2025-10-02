@@ -343,6 +343,7 @@ router.post('/email', async (req, res) => {
               });
               orderId = orderRecord.id;
               console.log(`✓ Created order record with ID: ${orderId}`);
+              console.log(`  📅 Order date saved:`, parsedData.order.order_date);
             } catch (orderError) {
               console.error('Failed to create order record:', orderError);
               // Continue without order_id for backward compatibility

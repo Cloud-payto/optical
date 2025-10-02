@@ -368,6 +368,14 @@ const orderOperations = {
         vendor: order.vendor?.name || 'Unknown Vendor'
       })) || [];
 
+      // Debug: Log order dates
+      if (ordersWithVendorName.length > 0) {
+        console.log('📅 Sample order dates from DB:');
+        ordersWithVendorName.slice(0, 3).forEach(order => {
+          console.log(`  Order ${order.order_number}: order_date = ${order.order_date}, customer = ${order.customer_name}`);
+        });
+      }
+
       return ordersWithVendorName;
     } catch (error) {
       handleSupabaseError(error, 'getOrdersByAccount');
