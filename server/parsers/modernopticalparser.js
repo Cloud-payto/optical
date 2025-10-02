@@ -135,6 +135,8 @@ function parseModernOpticalHtml(html, plainText) {
             console.log('📝 HTML Section Found:');
             console.log(customerSection[0].substring(0, 300));
             console.log('\n');
+        } else {
+            console.log('⚠️ No Customer<\/h3> found in HTML - trying plain text...\n');
         }
 
         // Pattern 1: Look for text after Customer header with account in parentheses
@@ -197,6 +199,25 @@ function parseModernOpticalHtml(html, plainText) {
             }
         } else {
             console.log('✗ Pattern 3 did not match');
+        }
+
+        // Pattern 4: Plain text fallback - look for customer name with account number
+        // For forwarded emails or when HTML parsing fails
+        console.log('🔄 Trying plain text patterns...');
+
+        // Match patterns like "MARANA EYE CARE (93277)" in plain text
+        const plainPattern1 = text.match(/([A-Z][A-Z0-9\s&.,'@-]{3,50}?)\s*\((\d{4,6})\)/);
+        if (plainPattern1) {
+            const name = plainPattern1[1].trim();
+            // Make sure it's not an email subject or other metadata
+            if (name &&
+                name.length > 3 &&
+                !name.match(/order|receipt|subject|from:|to:/i) &&
+                !name.match(/^\d/) // Doesn't start with number
+            ) {
+                console.log('  ✅ Customer name extracted (Plain Text Pattern):', name);
+                return name;
+            }
         }
 
         console.log('❌ Customer name not found\n');

@@ -1153,7 +1153,7 @@ const Inventory: React.FC = () => {
                                 <div>
                                   <p className="text-sm font-medium text-gray-900">{order.total_items} items</p>
                                   <p className="text-xs text-gray-500">
-                                    Confirmed {formatDate(order.confirmed_at)}
+                                    Order Date: {formatDateOnly(order.order_date)}
                                   </p>
                                 </div>
                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
