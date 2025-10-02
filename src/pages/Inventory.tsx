@@ -1057,6 +1057,11 @@ const Inventory: React.FC = () => {
                                   <div className="text-xs text-gray-500">
                                     Account: {email.parsed_data!.account_number}
                                   </div>
+                                  {email.parsed_data!.order.order_date && (
+                                    <div className="text-xs text-gray-500">
+                                      Date: {formatDateOnly(email.parsed_data!.order.order_date)}
+                                    </div>
+                                  )}
                                 </div>
                               ) : (
                                 <div className="truncate max-w-xs">{email.subject}</div>
