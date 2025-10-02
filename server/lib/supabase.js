@@ -94,23 +94,26 @@ const emailOperations = {
 
   async saveOrUpdateVendorAccountNumber(accountId, vendorId, vendorAccountNumber) {
     try {
+      // Upsert into account_vendors table (separate from brands)
       const { data, error } = await supabase
-        .from('account_brands')
+        .from('account_vendors')
         .upsert(
-          { 
+          {
             account_id: accountId,
             vendor_id: vendorId,
-            vendor_account_number: vendorAccountNumber
+            vendor_account_number: vendorAccountNumber,
+            updated_at: new Date().toISOString()
           },
-          { 
-            onConflict: 'account_id,vendor_id',
-            ignoreDuplicates: false 
+          {
+            onConflict: 'account_id,vendor_id'
           }
         )
         .select()
         .single();
 
       if (error) throw error;
+
+      console.log(`✅ Saved vendor account number for account ${accountId}, vendor ${vendorId}`);
       return data;
     } catch (error) {
       handleSupabaseError(error, 'saveOrUpdateVendorAccountNumber');
