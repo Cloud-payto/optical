@@ -403,13 +403,27 @@ const orderOperations = {
 
   async saveOrder(orderData) {
     try {
+      console.log('💾 SAVING ORDER TO DATABASE:');
+      console.log('  Order Number:', orderData.order_number);
+      console.log('  Order Date (raw):', orderData.order_date);
+      console.log('  Order Date (type):', typeof orderData.order_date);
+      console.log('  Customer Name:', orderData.customer_name);
+
       const { data, error } = await supabase
         .from('orders')
         .insert([orderData])
         .select()
         .single();
-      
-      if (error) throw error;
+
+      if (error) {
+        console.error('❌ Database error saving order:', error);
+        throw error;
+      }
+
+      console.log('✅ Order saved successfully!');
+      console.log('  Returned order_date from DB:', data.order_date);
+      console.log('  Returned customer_name from DB:', data.customer_name);
+
       return data;
     } catch (error) {
       handleSupabaseError(error, 'saveOrder');

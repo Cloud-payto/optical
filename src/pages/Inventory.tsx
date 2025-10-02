@@ -104,6 +104,16 @@ const Inventory: React.FC = () => {
       setEmails(emailResponse.emails || []);
       setInventory(inventoryResponse.inventory || []);
       setOrders(ordersResponse.orders || []);
+
+      // Debug: Log order dates received from API
+      if (ordersResponse.orders && ordersResponse.orders.length > 0) {
+        console.log('📅 FRONTEND: Orders received from API');
+        ordersResponse.orders.slice(0, 3).forEach((order: any) => {
+          console.log(`  Order ${order.order_number}:`);
+          console.log(`    - order_date: ${order.order_date} (type: ${typeof order.order_date})`);
+          console.log(`    - customer_name: ${order.customer_name}`);
+        });
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load data';
       setError(errorMessage);
@@ -681,7 +691,12 @@ const Inventory: React.FC = () => {
    * Format date without time (for order dates, sold dates, etc.)
    */
   const formatDateOnly = (dateString: string | null | undefined) => {
-    if (!dateString) return 'N/A';
+    console.log('🔍 formatDateOnly called with:', dateString, 'type:', typeof dateString);
+
+    if (!dateString) {
+      console.log('  → Returning N/A (empty)');
+      return 'N/A';
+    }
 
     try {
       let date: Date;
@@ -690,26 +705,33 @@ const Inventory: React.FC = () => {
       if (dateString.includes('/')) {
         const [month, day, year] = dateString.split('/').map(Number);
         date = new Date(year, month - 1, day);
+        console.log(`  → Parsed MM/DD/YYYY: ${month}/${day}/${year} → ${date}`);
       }
       // Handle formats like "2025-09-05"
       else if (dateString.includes('-')) {
         date = new Date(dateString + 'T00:00:00'); // Add time to avoid timezone issues
+        console.log(`  → Parsed YYYY-MM-DD: ${dateString} → ${date}`);
       }
       // ISO format
       else {
         date = new Date(dateString);
+        console.log(`  → Parsed ISO: ${dateString} → ${date}`);
       }
 
       if (isNaN(date.getTime())) {
+        console.log('  → Invalid date, returning original:', dateString);
         return dateString; // Return original if can't parse
       }
 
-      return date.toLocaleDateString('en-US', {
+      const formatted = date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
         day: 'numeric'
       });
+      console.log('  → Formatted result:', formatted);
+      return formatted;
     } catch (error) {
+      console.error('  → Error formatting date:', error);
       return dateString || 'N/A';
     }
   };
@@ -1189,7 +1211,9 @@ const Inventory: React.FC = () => {
                               </div>
                               <div>
                                 <span className="font-medium text-gray-600">Order Date:</span>
-                                <span className="ml-2 text-gray-900">{formatDateOnly(order.order_date)}</span>
+                                <span className="ml-2 text-gray-900" title={`Raw: ${order.order_date}`}>
+                                  {formatDateOnly(order.order_date)}
+                                </span>
                               </div>
                               <div>
                                 <span className="font-medium text-gray-600">Email ID:</span>
