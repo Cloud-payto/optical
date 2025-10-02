@@ -127,38 +127,48 @@ function parseModernOpticalHtml(html, plainText) {
     
     // Improved customer name extraction
     function extractCustomerName(text) {
-        // Pattern 1: Direct match with account number in parentheses
-        // Example: "MARANA EYE CARE (93277)"
-        const directMatch = text.match(/Customer<\/h3>[\s\S]*?<p class="card-text">\s*([A-Z][A-Z0-9\s&.,'()-]+?)\s*\((\d{4,6})\)/);
-        if (directMatch) {
-            const name = directMatch[1].trim();
+        // Pattern 1: Look for text after Customer header with account in parentheses
+        // Match: "MARANA EYE CARE (93277)" or "CUSTOMER NAME (12345)"
+        const pattern1 = text.match(/Customer<\/h3>[\s\S]*?<p[^>]*>\s*([A-Z][A-Z0-9\s&.,'@-]+?)\s*\((\d{4,6})\)/);
+        if (pattern1) {
+            const name = pattern1[1].trim();
             if (name && name.length > 2 && name !== 'Customer') {
                 console.log('  ✓ Customer name extracted (Pattern 1):', name);
                 return name;
             }
         }
 
-        // Pattern 2: Text after Customer header, before line break
-        const textMatch = text.match(/Customer<\/h3>[\s\S]*?<p class="card-text">\s*\n?\s*([A-Z][^\n<(]+?)(?:\s*\(|\s*<br)/i);
-        if (textMatch) {
-            const name = textMatch[1].trim();
+        // Pattern 2: Match first line after card-text that has capital letters
+        const pattern2 = text.match(/Customer<\/h3>[\s\S]*?card-text[^>]*>[\s\n]*([A-Z][A-Z0-9\s&.,'@()-]+?)[\s\n]*(?:\(|\<br|<\/)/i);
+        if (pattern2) {
+            let name = pattern2[1].trim();
+            // Clean up account number if it got captured
+            name = name.replace(/\s*\(\d{4,6}\).*$/, '').trim();
             if (name && name.length > 2 && name !== 'Customer') {
                 console.log('  ✓ Customer name extracted (Pattern 2):', name);
                 return name;
             }
         }
 
-        // Pattern 3: Fallback - Clean up HTML method
-        const customerSection = text.match(/Customer<\/h3>[\s\S]*?<\/div>/);
-        if (customerSection) {
-            const cleaned = customerSection[0]
-                .replace(/<[^>]*>/g, '') // Remove HTML tags
+        // Pattern 3: Aggressive fallback - strip ALL HTML and find first valid line
+        const pattern3 = text.match(/Customer<\/h3>[\s\S]{0,500}?<\/div>/);
+        if (pattern3) {
+            const stripped = pattern3[0]
+                .replace(/<[^>]*>/g, '\n') // Replace tags with newlines
                 .split('\n')
                 .map(line => line.trim())
-                .filter(line => line && line.length > 2 && /^[A-Z]/.test(line) && line !== 'Customer');
+                .filter(line => {
+                    // Must start with capital, be longer than 2 chars, and not be "Customer"
+                    return line &&
+                           line.length > 2 &&
+                           /^[A-Z]/.test(line) &&
+                           line !== 'Customer' &&
+                           !line.match(/^\d+$/) && // Not just numbers
+                           !line.match(/^Phone:/i); // Not phone line
+                });
 
-            if (cleaned.length > 0) {
-                let name = cleaned[0];
+            if (stripped.length > 0) {
+                let name = stripped[0];
                 // Remove account number in parentheses
                 name = name.replace(/\s*\(\d{4,6}\).*$/, '').trim();
                 if (name) {
@@ -168,7 +178,11 @@ function parseModernOpticalHtml(html, plainText) {
             }
         }
 
-        console.log('  ✗ Customer name not found');
+        console.log('  ✗ Customer name not found - Debug HTML:');
+        const debugSection = text.match(/Customer<\/h3>[\s\S]{0,200}/);
+        if (debugSection) {
+            console.log(debugSection[0].substring(0, 200));
+        }
         return '';
     }
     

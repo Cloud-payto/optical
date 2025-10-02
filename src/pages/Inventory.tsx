@@ -633,14 +633,85 @@ const Inventory: React.FC = () => {
   const groupedCurrentInventory = groupInventoryByVendorAndBrand(currentInventory);
   const groupedArchivedInventory = groupInventoryByVendorAndBrand(archivedInventory);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return 'N/A';
+
+    try {
+      // Handle various date formats
+      let date: Date;
+
+      // Check if it's already a valid ISO date string
+      if (dateString.includes('T') || dateString.includes('Z')) {
+        date = new Date(dateString);
+      }
+      // Handle formats like "9/5/2025" or "09/08/2025"
+      else if (dateString.includes('/')) {
+        const [month, day, year] = dateString.split('/').map(Number);
+        date = new Date(year, month - 1, day);
+      }
+      // Handle formats like "2025-09-05"
+      else if (dateString.includes('-')) {
+        date = new Date(dateString);
+      }
+      // Fallback: try parsing directly
+      else {
+        date = new Date(dateString);
+      }
+
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        console.warn('Invalid date:', dateString);
+        return dateString; // Return original string if can't parse
+      }
+
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      console.error('Date formatting error:', error, dateString);
+      return dateString || 'Invalid date';
+    }
+  };
+
+  /**
+   * Format date without time (for order dates, sold dates, etc.)
+   */
+  const formatDateOnly = (dateString: string | null | undefined) => {
+    if (!dateString) return 'N/A';
+
+    try {
+      let date: Date;
+
+      // Handle formats like "9/5/2025" or "09/08/2025"
+      if (dateString.includes('/')) {
+        const [month, day, year] = dateString.split('/').map(Number);
+        date = new Date(year, month - 1, day);
+      }
+      // Handle formats like "2025-09-05"
+      else if (dateString.includes('-')) {
+        date = new Date(dateString + 'T00:00:00'); // Add time to avoid timezone issues
+      }
+      // ISO format
+      else {
+        date = new Date(dateString);
+      }
+
+      if (isNaN(date.getTime())) {
+        return dateString; // Return original if can't parse
+      }
+
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch (error) {
+      return dateString || 'N/A';
+    }
   };
 
   /**
@@ -1118,7 +1189,7 @@ const Inventory: React.FC = () => {
                               </div>
                               <div>
                                 <span className="font-medium text-gray-600">Order Date:</span>
-                                <span className="ml-2 text-gray-900">{order.order_date || 'Not specified'}</span>
+                                <span className="ml-2 text-gray-900">{formatDateOnly(order.order_date)}</span>
                               </div>
                               <div>
                                 <span className="font-medium text-gray-600">Email ID:</span>
@@ -1884,7 +1955,7 @@ const Inventory: React.FC = () => {
                             {item.sold_date && (
                               <div className="flex justify-between pt-2 border-t border-gray-100">
                                 <span className="text-gray-500">Sold Date:</span>
-                                <span className="text-gray-900">{new Date(item.sold_date).toLocaleDateString()}</span>
+                                <span className="text-gray-900">{formatDateOnly(item.sold_date)}</span>
                               </div>
                             )}
                           </div>
