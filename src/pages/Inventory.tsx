@@ -1080,7 +1080,7 @@ const Inventory: React.FC = () => {
                               )}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {formatDate(email.processed_at)}
+                              {formatDate(email.received_at)}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
@@ -2432,8 +2432,8 @@ const Inventory: React.FC = () => {
                         <span className="ml-2 text-gray-900">{selectedEmailDetails.from_email}</span>
                       </div>
                       <div>
-                        <span className="text-gray-500">Date:</span>
-                        <span className="ml-2 text-gray-900">{formatDate(selectedEmailDetails.processed_at)}</span>
+                        <span className="text-gray-500">Email Received:</span>
+                        <span className="ml-2 text-gray-900">{formatDate(selectedEmailDetails.received_at)}</span>
                       </div>
                       <div className="md:col-span-2">
                         <span className="text-gray-500">Subject:</span>
@@ -2473,6 +2473,12 @@ const Inventory: React.FC = () => {
                             <span className="text-gray-500">Total Pieces:</span>
                             <span className="ml-2 text-gray-900">{selectedEmailDetails.parsed_data.order.total_pieces || selectedEmailDetails.parsed_data.items.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0)}</span>
                           </div>
+                          {selectedEmailDetails.parsed_data.order.order_date && (
+                            <div>
+                              <span className="text-gray-500">Order Date:</span>
+                              <span className="ml-2 text-gray-900">{formatDateOnly(selectedEmailDetails.parsed_data.order.order_date)}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
 

@@ -75,7 +75,8 @@ export interface EmailData {
   subject: string;
   attachments_count: number;
   spam_score: number;
-  processed_at: string;
+  received_at: string; // Changed from processed_at to match database
+  created_at?: string;
   parse_status?: string;
   parsed_data?: {
     vendor: string;
@@ -86,6 +87,8 @@ export interface EmailData {
       vendor: string;
       customer_name: string;
       total_pieces: number;
+      order_date?: string; // Add order_date field
+      rep_name?: string;
     };
     items: Array<{
       sku: string;

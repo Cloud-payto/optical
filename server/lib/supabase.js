@@ -343,6 +343,110 @@ const inventoryOperations = {
     } catch (error) {
       handleSupabaseError(error, 'confirmPendingOrder');
     }
+  },
+
+  async archiveAllItemsByBrand(userId, brandName, vendorName) {
+    try {
+      // First, get vendor_id from vendor name
+      const { data: vendor, error: vendorError } = await supabase
+        .from('vendors')
+        .select('id')
+        .eq('name', vendorName)
+        .single();
+
+      if (vendorError || !vendor) {
+        return { success: false, error: `Vendor '${vendorName}' not found` };
+      }
+
+      // Update all items matching the brand and vendor to archived status
+      const { data, error } = await supabase
+        .from('inventory')
+        .update({ status: 'archived' })
+        .eq('account_id', userId)
+        .eq('vendor_id', vendor.id)
+        .eq('brand', brandName)
+        .neq('status', 'archived') // Only update items not already archived
+        .select();
+
+      if (error) throw error;
+
+      return {
+        success: true,
+        archivedCount: data?.length || 0,
+        message: `Archived ${data?.length || 0} items from ${brandName}`
+      };
+    } catch (error) {
+      handleSupabaseError(error, 'archiveAllItemsByBrand');
+    }
+  },
+
+  async deleteArchivedItemsByBrand(userId, brandName, vendorName) {
+    try {
+      // First, get vendor_id from vendor name
+      const { data: vendor, error: vendorError } = await supabase
+        .from('vendors')
+        .select('id')
+        .eq('name', vendorName)
+        .single();
+
+      if (vendorError || !vendor) {
+        return { success: false, error: `Vendor '${vendorName}' not found` };
+      }
+
+      // Delete all archived items matching the brand and vendor
+      const { data, error } = await supabase
+        .from('inventory')
+        .delete()
+        .eq('account_id', userId)
+        .eq('vendor_id', vendor.id)
+        .eq('brand', brandName)
+        .eq('status', 'archived')
+        .select();
+
+      if (error) throw error;
+
+      return {
+        success: true,
+        deletedCount: data?.length || 0,
+        message: `Deleted ${data?.length || 0} archived items from ${brandName}`
+      };
+    } catch (error) {
+      handleSupabaseError(error, 'deleteArchivedItemsByBrand');
+    }
+  },
+
+  async deleteArchivedItemsByVendor(userId, vendorName) {
+    try {
+      // First, get vendor_id from vendor name
+      const { data: vendor, error: vendorError } = await supabase
+        .from('vendors')
+        .select('id')
+        .eq('name', vendorName)
+        .single();
+
+      if (vendorError || !vendor) {
+        return { success: false, error: `Vendor '${vendorName}' not found` };
+      }
+
+      // Delete all archived items matching the vendor
+      const { data, error } = await supabase
+        .from('inventory')
+        .delete()
+        .eq('account_id', userId)
+        .eq('vendor_id', vendor.id)
+        .eq('status', 'archived')
+        .select();
+
+      if (error) throw error;
+
+      return {
+        success: true,
+        deletedCount: data?.length || 0,
+        message: `Deleted ${data?.length || 0} archived items from ${vendorName}`
+      };
+    } catch (error) {
+      handleSupabaseError(error, 'deleteArchivedItemsByVendor');
+    }
   }
 };
 
