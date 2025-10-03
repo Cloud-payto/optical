@@ -246,6 +246,21 @@ const inventoryOperations = {
 
         if (inventoryError) throw inventoryError;
 
+        console.log(`🔍 Found ${allPendingItems?.length || 0} total pending items for user`);
+
+        // Log sample of enriched_data to debug
+        if (allPendingItems && allPendingItems.length > 0) {
+          console.log(`📋 Sample enriched_data structures:`);
+          allPendingItems.slice(0, 3).forEach((item, idx) => {
+            console.log(`  Item ${idx + 1}:`, {
+              id: item.id,
+              order_order_number: item.order?.order_number,
+              enriched_data_order_number: item.enriched_data?.order_number,
+              enriched_data_order_object: item.enriched_data?.order?.order_number
+            });
+          });
+        }
+
         // Filter items that match the order number (either in orders table or enriched_data)
         const items = allPendingItems?.filter(item => {
           // Check if order.order_number matches
@@ -256,6 +271,8 @@ const inventoryOperations = {
           if (item.enriched_data?.order?.order_number === orderNumber) return true;
           return false;
         }) || [];
+
+        console.log(`🎯 Filtered to ${items.length} items matching order number ${orderNumber}`);
 
         if (items.length === 0) {
           return { success: false, message: `No pending items found for order ${orderNumber}` };
