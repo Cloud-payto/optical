@@ -633,7 +633,12 @@ const Inventory: React.FC = () => {
   };
 
   const groupedPendingOrders = groupPendingByOrder(pendingInventory);
-  
+
+  console.log('📦 GROUPED ORDERS DEBUG:');
+  console.log('  Keys:', Object.keys(groupedPendingOrders));
+  console.log('  Count:', Object.keys(groupedPendingOrders).length);
+  console.log('  Full object:', groupedPendingOrders);
+
   // Debug: Log order dates to check format (disabled for production)
   // React.useEffect(() => {
   //   if (pendingInventory.length > 0) {
