@@ -318,43 +318,17 @@ const inventoryOperations = {
         return { success: false, message: `No pending items found for order ${orderNumber}` };
       }
 
-      let enrichedItems = pendingItems;
+      // Update each item to confirmed status (enrichment should have already happened in n8n)
+      console.log(`🔄 Updating ${pendingItems.length} items to confirmed status...`);
+      console.log(`📝 Sample item IDs to update:`, pendingItems.slice(0, 3).map(i => i.id));
 
-      // Apply Modern Optical web enrichment if applicable
-      if (vendorName === 'Modern Optical') {
-        try {
-          console.log('🌐 Applying Modern Optical web enrichment...');
-          const parserRegistry = require('../parsers');
-          const modernOpticalService = parserRegistry.getModernOpticalService();
-
-          // Enrich items with web data (UPC, wholesale price, MSRP)
-          enrichedItems = await modernOpticalService.enrichPendingItems(pendingItems);
-          console.log(`✅ Web enrichment completed for ${enrichedItems.length} items`);
-
-        } catch (enrichmentError) {
-          console.error('⚠️ Web enrichment failed, proceeding without enrichment:', enrichmentError.message);
-          // Continue with original items if enrichment fails
-          enrichedItems = pendingItems;
-        }
-      }
-
-      // Update each item with enriched data and move to current inventory
-      console.log(`🔄 Updating ${enrichedItems.length} items to current status...`);
-      console.log(`📝 Sample item IDs to update:`, enrichedItems.slice(0, 3).map(i => i.id));
-
-      const updatePromises = enrichedItems.map(enrichedItem =>
+      const updatePromises = pendingItems.map(item =>
         supabase
           .from('inventory')
           .update({
-            status: 'confirmed',  // Using 'confirmed' which is allowed by DB constraint
-            upc: enrichedItem.upc || null,
-            wholesale_price: enrichedItem.wholesale_price || null,
-            msrp: enrichedItem.msrp || null,
-            in_stock: enrichedItem.in_stock || null,
-            api_verified: enrichedItem.api_verified || false,
-            enriched_data: enrichedItem.enriched_data || null
+            status: 'confirmed'
           })
-          .eq('id', enrichedItem.id)
+          .eq('id', item.id)
           .select()
       );
 
@@ -368,11 +342,11 @@ const inventoryOperations = {
 
       const updatedItems = results.map(r => r.data?.[0]).filter(Boolean);
 
-      console.log(`✅ Successfully updated ${updatedItems.length} items to current inventory`);
+      console.log(`✅ Successfully updated ${updatedItems.length} items to confirmed status`);
 
-      if (updatedItems.length === 0 && enrichedItems.length > 0) {
-        console.error(`⚠️ WARNING: Tried to update ${enrichedItems.length} items but 0 were updated!`);
-        console.error(`📊 First enriched item structure:`, JSON.stringify(enrichedItems[0], null, 2));
+      if (updatedItems.length === 0 && pendingItems.length > 0) {
+        console.error(`⚠️ WARNING: Tried to update ${pendingItems.length} items but 0 were updated!`);
+        console.error(`📊 First pending item structure:`, JSON.stringify(pendingItems[0], null, 2));
       }
 
       // Update order status to 'confirmed' after all items are confirmed (if order exists)

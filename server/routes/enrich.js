@@ -100,9 +100,20 @@ router.post('/modernoptical', async (req, res) => {
     // Update items in database with enriched data
     try {
       console.log('[ENRICH] Updating items in database...');
+      console.log('[ENRICH] Sample enriched item structure:', {
+        id: enrichedItems[0]?.id,
+        upc: enrichedItems[0]?.upc,
+        api_verified: enrichedItems[0]?.api_verified,
+        hasEnrichedData: !!enrichedItems[0]?.enriched_data
+      });
 
-      const updatePromises = enrichedItems.map(enrichedItem =>
-        supabase
+      const updatePromises = enrichedItems.map(enrichedItem => {
+        if (!enrichedItem.id) {
+          console.error('[ENRICH] Item missing ID:', enrichedItem);
+          return Promise.resolve({ error: 'Missing ID', data: null });
+        }
+
+        return supabase
           .from('inventory')
           .update({
             upc: enrichedItem.upc || null,
@@ -126,14 +137,17 @@ router.post('/modernoptical', async (req, res) => {
             }
           })
           .eq('id', enrichedItem.id)
-          .select()
-      );
+          .select();
+      });
 
       const results = await Promise.all(updatePromises);
       const errors = results.filter(r => r.error);
 
       if (errors.length > 0) {
-        console.error('[ENRICH] Errors updating items:', errors.map(e => e.error));
+        console.error('[ENRICH] Errors updating items:');
+        errors.forEach((err, idx) => {
+          console.error(`  Error ${idx + 1}:`, err.error);
+        });
       }
 
       const updatedItems = results.map(r => r.data?.[0]).filter(Boolean);
