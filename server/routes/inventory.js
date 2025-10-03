@@ -75,12 +75,12 @@ router.delete('/:userId/:itemId', async (req, res) => {
 router.post('/:userId/confirm/:orderNumber', async (req, res) => {
   try {
     const { userId, orderNumber } = req.params;
-    
+
     console.log(`📦 Confirming order ${orderNumber} for user ${userId}`);
-    
+
     const result = await inventoryOperations.confirmPendingOrder(orderNumber, userId);
-    
-    if (result.success) {
+
+    if (result && result.success) {
       res.json({
         success: true,
         message: `Confirmed ${result.updatedCount} items with enrichment`,
@@ -89,7 +89,7 @@ router.post('/:userId/confirm/:orderNumber', async (req, res) => {
     } else {
       res.status(404).json({
         success: false,
-        error: result.error
+        error: result?.error || result?.message || 'Order not found or no pending items'
       });
     }
   } catch (error) {

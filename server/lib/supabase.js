@@ -354,6 +354,7 @@ const inventoryOperations = {
       return { success: true, message: `Confirmed ${updatedItems.length} items`, updatedCount: updatedItems.length };
     } catch (error) {
       handleSupabaseError(error, 'confirmPendingOrder');
+      return { success: false, error: error.message || 'Unknown error confirming order' };
     }
   },
 
