@@ -236,6 +236,25 @@ const inventoryOperations = {
         // If order doesn't exist in orders table, look for pending inventory items directly
         console.log(`⚠️ Order ${orderNumber} not found in orders table, searching inventory items directly`);
 
+        // DEBUG: Check if items exist with ANY status for this order number
+        const { data: anyStatusItems } = await supabase
+          .from('inventory')
+          .select('id, status, enriched_data')
+          .eq('account_id', userId);
+
+        const matchingAnyStatus = anyStatusItems?.filter(item =>
+          item.enriched_data?.order_number === orderNumber ||
+          item.enriched_data?.order?.order_number === orderNumber
+        ) || [];
+
+        console.log(`🔍 DEBUG: Found ${matchingAnyStatus.length} items with ANY status for order ${orderNumber}`);
+        if (matchingAnyStatus.length > 0) {
+          console.log(`📊 Status breakdown:`, matchingAnyStatus.reduce((acc, item) => {
+            acc[item.status] = (acc[item.status] || 0) + 1;
+            return acc;
+          }, {}));
+        }
+
         // Get all pending items for this user and filter in JavaScript
         // since we can't easily query the enriched_data JSONB field with Supabase
         const { data: allPendingItems, error: inventoryError } = await supabase
