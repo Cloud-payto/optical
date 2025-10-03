@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { parseModernOpticalHtml } = require('../parsers/modernOpticalParser');
+const { parseModernOpticalHtml } = require('../parsers/modernopticalparser');
 
 /**
  * POST /api/parse/modernoptical
