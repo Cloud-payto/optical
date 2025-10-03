@@ -105,6 +105,25 @@ const Inventory: React.FC = () => {
       setInventory(inventoryResponse.inventory || []);
       setOrders(ordersResponse.orders || []);
 
+      // Debug: Log inventory items with order relationships
+      if (inventoryResponse.inventory && inventoryResponse.inventory.length > 0) {
+        const pendingItems = inventoryResponse.inventory.filter((i: any) => i.status === 'pending');
+        console.log('📦 INVENTORY DEBUG:');
+        console.log(`  Total inventory items: ${inventoryResponse.inventory.length}`);
+        console.log(`  Pending items: ${pendingItems.length}`);
+        if (pendingItems.length > 0) {
+          console.log('  Sample pending item:', {
+            id: pendingItems[0].id,
+            brand: pendingItems[0].brand,
+            model: pendingItems[0].model,
+            status: pendingItems[0].status,
+            order_id: pendingItems[0].order_id,
+            order: pendingItems[0].order,
+            vendor: pendingItems[0].vendor
+          });
+        }
+      }
+
       // Debug: Log order dates received from API
       if (ordersResponse.orders && ordersResponse.orders.length > 0) {
         console.log('📅 FRONTEND: Orders received from API');
