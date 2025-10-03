@@ -1043,25 +1043,15 @@ const Inventory: React.FC = () => {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       <AnimatePresence mode="popLayout">
-                        {pendingOrdersList.map((order, index) => {
-                          const isParsed = email.parse_status === 'parsed' && email.parsed_data;
-                          const vendorName = isParsed ? email.parsed_data!.vendor : extractVendorFromEmail(email.from_email);
+                        {filteredEmails.map((email, index) => {
+                          const isParsed = email.spam_status === 'parsed' && email.parsed_data;
+                          const vendorName = isParsed && email.parsed_data?.vendor
+                            ? email.parsed_data.vendor.replace(/_/g, ' ').split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+                            : extractVendorFromEmail(email.from_email);
 
-                          // Extract brands from items if brands array is missing
-                          const getBrands = () => {
-                            if (!isParsed || !email.parsed_data) return [];
-                            if (email.parsed_data.brands && email.parsed_data.brands.length > 0) {
-                              return email.parsed_data.brands;
-                            }
-                            // Fallback: extract unique brands from items
-                            if (email.parsed_data.items && email.parsed_data.items.length > 0) {
-                              const uniqueBrands = [...new Set(email.parsed_data.items.map(item => item.brand).filter(Boolean))];
-                              return uniqueBrands;
-                            }
-                            return [];
-                          };
-
-                          const brands = getBrands();
+                          const brands = isParsed && email.parsed_data?.items
+                            ? [...new Set(email.parsed_data.items.map((item: any) => item.brand).filter(Boolean))]
+                            : [];
 
                           return (
                             <motion.tr
