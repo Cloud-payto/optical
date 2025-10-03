@@ -608,6 +608,23 @@ const Inventory: React.FC = () => {
     );
   });
 
+  // Filter orders by search term
+  const filteredOrders = orders.filter(order => {
+    const orderNumber = order.order_number || '';
+    const customerName = order.customer_name || '';
+    const vendor = order.vendor || '';
+
+    return (
+      orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vendor.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
+
+  // Separate orders by status
+  const pendingOrdersList = filteredOrders.filter(order => order.status === 'pending');
+  const confirmedOrdersList = filteredOrders.filter(order => order.status === 'confirmed');
+
   // Separate inventory by status
   const pendingInventory = filteredInventory.filter(item => item.status === 'pending');
   const currentInventory = filteredInventory.filter(item => item.status === 'confirmed');
@@ -991,12 +1008,12 @@ const Inventory: React.FC = () => {
               {/* Pending Orders Content */}
               {ordersSubTab === 'pending' && (
             <div>
-              {filteredEmails.length === 0 ? (
+              {pendingOrdersList.length === 0 ? (
                 <div className="text-center py-12">
                   <MailIcon className="mx-auto h-12 w-12 text-gray-400" />
                   <h3 className="mt-2 text-sm font-medium text-gray-900">No pending orders</h3>
                   <p className="mt-1 text-sm text-gray-500">
-                    {searchTerm ? 'No orders match your search.' : 'No order emails have been received yet.'}
+                    {searchTerm ? 'No orders match your search.' : 'No pending orders yet.'}
                   </p>
                 </div>
               ) : (
@@ -1026,7 +1043,7 @@ const Inventory: React.FC = () => {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       <AnimatePresence mode="popLayout">
-                        {filteredEmails.map((email, index) => {
+                        {pendingOrdersList.map((order, index) => {
                           const isParsed = email.parse_status === 'parsed' && email.parsed_data;
                           const vendorName = isParsed ? email.parsed_data!.vendor : extractVendorFromEmail(email.from_email);
 
