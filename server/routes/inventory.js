@@ -1,7 +1,195 @@
 const express = require('express');
 const router = express.Router();
-const { inventoryOperations } = require('../lib/supabase');
+const { inventoryOperations, orderOperations, emailOperations, checkDuplicateOrder, supabase } = require('../lib/supabase');
 const parserRegistry = require('../parsers');
+
+/**
+ * POST /api/inventory/bulk-add
+ * Add parsed order and items to database
+ *
+ * Body: {
+ *   accountId: string (UUID),
+ *   vendor: string,
+ *   order: { order_number, customer_name, order_date, etc. },
+ *   items: [ { sku, brand, model, color, quantity, etc. } ],
+ *   emailId?: number (optional - for tracking which email this came from)
+ * }
+ */
+router.post('/bulk-add', async (req, res) => {
+  try {
+    const { accountId, vendor, order, items, emailId } = req.body;
+
+    console.log('[BULK-ADD] Received request to add order and items');
+    console.log('  Account ID:', accountId);
+    console.log('  Vendor:', vendor);
+    console.log('  Order Number:', order?.order_number);
+    console.log('  Items count:', items?.length || 0);
+    console.log('  Email ID:', emailId || 'none');
+
+    // Validate required fields
+    if (!accountId || !vendor || !order || !items || items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: accountId, vendor, order, and items are required'
+      });
+    }
+
+    // Validate account exists
+    const { data: accountExists, error: accountError } = await supabase
+      .from('accounts')
+      .select('id')
+      .eq('id', accountId)
+      .single();
+
+    if (accountError || !accountExists) {
+      console.error(`Unknown account: ${accountId}`, accountError);
+      return res.status(404).json({
+        success: false,
+        error: `Account not found: ${accountId}`
+      });
+    }
+
+    // Look up vendor UUID by name
+    let vendorId = null;
+    if (vendor) {
+      const { data: vendorData, error: vendorError } = await supabase
+        .from('vendors')
+        .select('id')
+        .ilike('name', vendor)
+        .single();
+
+      if (vendorData && !vendorError) {
+        vendorId = vendorData.id;
+        console.log(`✓ Found vendor ID: ${vendorId} for ${vendor}`);
+
+        // Save or update vendor account number if available
+        if (order.account_number) {
+          try {
+            await emailOperations.saveOrUpdateVendorAccountNumber(
+              accountId,
+              vendorId,
+              order.account_number
+            );
+            console.log(`✓ Saved vendor account #${order.account_number} for ${vendor}`);
+          } catch (vendorAccountError) {
+            console.warn('Failed to save vendor account number:', vendorAccountError.message);
+            // Don't fail the entire process if this fails
+          }
+        }
+      } else {
+        console.warn(`Vendor '${vendor}' not found in vendors table`);
+      }
+    }
+
+    // Check for duplicate order
+    const orderNumber = order.order_number;
+    if (orderNumber) {
+      const duplicateCheck = await checkDuplicateOrder(orderNumber, accountId);
+      console.log('Duplicate check result:', duplicateCheck);
+
+      if (duplicateCheck) {
+        console.log(`Duplicate order detected: ${orderNumber}`);
+        return res.status(409).json({
+          success: false,
+          error: 'Duplicate order',
+          message: `Order ${orderNumber} already exists for this account`
+        });
+      }
+    }
+
+    // Create order record first
+    let orderId = null;
+    try {
+      const orderRecord = await orderOperations.saveOrder({
+        account_id: accountId,
+        vendor_id: vendorId,
+        email_id: emailId || null,
+        order_number: order.order_number,
+        reference_number: order.reference_number || null,
+        customer_name: order.customer_name || null,
+        customer_code: order.customer_code || null,
+        placed_by: order.placed_by || order.rep_name || null,
+        order_date: order.order_date || null,
+        total_pieces: order.total_pieces || items.length,
+        status: 'pending'
+      });
+      orderId = orderRecord.id;
+      console.log(`✓ Created order record with ID: ${orderId}`);
+    } catch (orderError) {
+      console.error('Failed to create order record:', orderError);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to create order record',
+        message: orderError.message
+      });
+    }
+
+    // Prepare inventory items with "pending" status and link to order
+    const inventoryItems = items.map(item => ({
+      account_id: accountId,
+      order_id: orderId,
+      sku: item.sku,
+      brand: item.brand,
+      model: item.model,
+      color: item.color,
+      color_code: item.color_code || null,
+      color_name: item.color_name || null,
+      size: item.size || null,
+      full_size: item.full_size || null,
+      temple_length: item.temple_length || null,
+      quantity: item.quantity || 1,
+      vendor_id: vendorId,
+      status: 'pending',
+      email_id: emailId || null,
+      wholesale_price: item.wholesale_price || null,
+      upc: item.upc || null,
+      in_stock: item.in_stock || null,
+      api_verified: item.api_verified || false,
+      enriched_data: item.enriched_data || {
+        order_number: order.order_number,
+        order: order
+      }
+    }));
+
+    // Save inventory items
+    try {
+      const savedItems = await inventoryOperations.saveInventoryItems(inventoryItems);
+      console.log(`✓ Saved ${savedItems.length} inventory items`);
+
+      return res.status(201).json({
+        success: true,
+        message: `Successfully added order ${orderNumber} with ${savedItems.length} items`,
+        orderId: orderId,
+        itemsCount: savedItems.length,
+        items: savedItems
+      });
+    } catch (inventoryError) {
+      console.error('Failed to save inventory items:', inventoryError);
+
+      // Try to clean up the order record if items failed to save
+      try {
+        await supabase.from('orders').delete().eq('id', orderId);
+        console.log('✓ Rolled back order record');
+      } catch (rollbackError) {
+        console.error('Failed to rollback order:', rollbackError);
+      }
+
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to save inventory items',
+        message: inventoryError.message
+      });
+    }
+
+  } catch (error) {
+    console.error('[BULK-ADD] Error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      message: error.message
+    });
+  }
+});
 
 // GET /api/inventory/:userId - Get inventory for a user
 router.get('/:userId', async (req, res) => {
