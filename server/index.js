@@ -12,6 +12,7 @@ const ordersRoutes = require('./routes/orders');
 const safiloRoutes = require('./routes/safilo');
 const vendorRoutes = require('./routes/vendors');
 const healthRoutes = require('./routes/health');
+const parseRoutes = require('./routes/parse');
 
 // Import Supabase client
 const { supabase } = require('./lib/supabase');
@@ -64,6 +65,7 @@ app.use('/api/emails', emailsRoutes);
 app.use('/api/orders', ordersRoutes);
 app.use('/api/safilo', safiloRoutes);
 app.use('/api/vendors', vendorRoutes);
+app.use('/api/parse', parseRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
