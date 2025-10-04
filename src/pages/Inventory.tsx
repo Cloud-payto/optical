@@ -1044,7 +1044,7 @@ const Inventory: React.FC = () => {
                     <tbody className="bg-white divide-y divide-gray-200">
                       <AnimatePresence mode="popLayout">
                         {filteredEmails.map((email, index) => {
-                          const isParsed = email.spam_status === 'parsed' && email.parsed_data;
+                          const isParsed = (email.spam_status === 'parsed' || email.spam_status === 'n8n') && email.parsed_data;
                           const vendorName = isParsed && email.parsed_data?.vendor
                             ? email.parsed_data.vendor.replace(/_/g, ' ').split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
                             : extractVendorFromEmail(email.from_email);
@@ -2492,7 +2492,11 @@ const Inventory: React.FC = () => {
                           </div>
                           <div>
                             <span className="text-gray-500">Vendor:</span>
-                            <span className="ml-2 text-gray-900">{selectedEmailDetails.parsed_data.vendor}</span>
+                            <span className="ml-2 text-gray-900">
+                              {selectedEmailDetails.parsed_data.vendor
+                                ? selectedEmailDetails.parsed_data.vendor.replace(/_/g, ' ').split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+                                : 'Unknown'}
+                            </span>
                           </div>
                           <div>
                             <span className="text-gray-500">Customer:</span>
@@ -2616,7 +2620,11 @@ const Inventory: React.FC = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                         <div>
                           <span className="text-blue-700">Vendor:</span>
-                          <span className="ml-2 text-blue-900 font-medium">{groupedPendingOrders[confirmingOrderKey].vendor}</span>
+                          <span className="ml-2 text-blue-900 font-medium">
+                            {groupedPendingOrders[confirmingOrderKey].vendor
+                              ? groupedPendingOrders[confirmingOrderKey].vendor.replace(/_/g, ' ').split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+                              : 'Unknown'}
+                          </span>
                         </div>
                         <div>
                           <span className="text-blue-700">Order Number:</span>
