@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { parseModernOpticalHtml } = require('../parsers/modernopticalparser');
+const SafiloService = require('../parsers/SafiloService');
 
 /**
  * POST /api/parse/modernoptical
@@ -49,6 +50,78 @@ router.post('/modernoptical', async (req, res) => {
     return res.status(500).json({
       success: false,
       error: 'Failed to parse Modern Optical email',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/parse/safilo
+ * Parse Safilo PDF order content
+ *
+ * Body: { pdfBase64, accountId }
+ * Returns: { success, accountId, vendor, order, items }
+ */
+router.post('/safilo', async (req, res) => {
+  try {
+    const { pdfBase64, accountId } = req.body;
+
+    console.log('[PARSE] Safilo parse request received');
+    console.log('  Account ID:', accountId);
+    console.log('  PDF base64 length:', pdfBase64?.length || 0);
+
+    // Validate input
+    if (!pdfBase64) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required field: pdfBase64'
+      });
+    }
+
+    // Convert base64 to buffer
+    const pdfBuffer = Buffer.from(pdfBase64, 'base64');
+    console.log('  PDF buffer size:', pdfBuffer.length, 'bytes');
+
+    // Parse the PDF
+    const safiloService = new SafiloService();
+    const result = await safiloService.processOrder(pdfBuffer);
+
+    console.log('[PARSE] Parse completed successfully');
+    console.log('  Order number:', result.orderInfo?.orderNumber);
+    console.log('  Frames found:', result.frames?.length || 0);
+    console.log('  Total pieces:', result.statistics?.totalFrames || 0);
+
+    // Return the parsed data
+    return res.status(200).json({
+      success: true,
+      accountId: accountId,
+      vendor: 'safilo',
+      order: {
+        order_number: result.orderInfo.orderNumber,
+        customer_name: result.orderInfo.customerName,
+        order_date: result.orderInfo.orderDate,
+        total_pieces: result.statistics.totalFrames,
+        reference_number: result.orderInfo.referenceNumber,
+        account_number: result.orderInfo.accountNumber
+      },
+      items: result.frames.map(frame => ({
+        brand: frame.brand,
+        model: frame.model,
+        color: frame.colorName,
+        color_code: frame.colorCode,
+        size: frame.size,
+        quantity: frame.quantity || 1,
+        upc: frame.enrichedData?.upc,
+        wholesale_price: frame.enrichedData?.wholesale,
+        msrp: frame.enrichedData?.msrp
+      }))
+    });
+
+  } catch (error) {
+    console.error('[PARSE] Error parsing Safilo PDF:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to parse Safilo PDF',
       message: error.message
     });
   }
