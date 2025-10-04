@@ -296,10 +296,14 @@ const Inventory: React.FC = () => {
 
     try {
       const result = await confirmPendingOrder(orderNumber);
-      await loadData(); // Refresh the data
 
       // Show success message
       toast.success(`Successfully confirmed order ${orderNumber}. ${result.updatedCount} items moved to current inventory.`);
+
+      // Wait a brief moment for the animation to be visible
+      await new Promise(resolve => setTimeout(resolve, 600));
+
+      await loadData(); // Refresh the data
 
       // Auto-switch to inventory tab and current subtab to show the confirmed items
       setActiveTab('inventory');
