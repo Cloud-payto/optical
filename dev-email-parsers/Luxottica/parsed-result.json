@@ -1,0 +1,661 @@
+{
+  "vendor": "luxottica",
+  "account_number": "0001247652",
+  "order": {
+    "order_number": "1757452162354",
+    "customer_name": "TATUM EYECARE 7070 TATUM EYECARE",
+    "order_date": "09-09-2025",
+    "total_pieces": 36,
+    "rep_name": "Risa Shaver",
+    "payment_terms": "2%/10 EOM",
+    "promo_code": "116319",
+    "total_value": 4894.44
+  },
+  "items": [
+    {
+      "brand": "BURBERRY",
+      "model": "0BE3080",
+      "collection": null,
+      "color_code": "114513",
+      "color": "LIGHT GOLD / BROWN GRADIENT",
+      "size": "59",
+      "upc": "8053672321005",
+      "wholesale_price": 136.52,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "BURBERRY-0BE3080-114513-59"
+    },
+    {
+      "brand": "BURBERRY",
+      "model": "0BE1375",
+      "collection": "DOUGLAS",
+      "color_code": "1007",
+      "color": "BLACK / DEMO LENS",
+      "size": "56",
+      "upc": "8056597834803",
+      "wholesale_price": 121.11,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "BURBERRY-0BE1375-1007-56"
+    },
+    {
+      "brand": "BURBERRY",
+      "model": "0BE1389",
+      "collection": null,
+      "color_code": "1109",
+      "color": "LIGHT GOLD / DEMO LENS",
+      "size": "56",
+      "upc": "8056262221969",
+      "wholesale_price": 144.44,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "BURBERRY-0BE1389-1109-56"
+    },
+    {
+      "brand": "BURBERRY",
+      "model": "0BE2073",
+      "collection": null,
+      "color_code": "3164",
+      "color": "BLACK / DEMO LENS",
+      "size": "53",
+      "upc": "713132321928",
+      "wholesale_price": 92.22,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "BURBERRY-0BE2073-3164-53"
+    },
+    {
+      "brand": "BURBERRY",
+      "model": "0BE2172",
+      "collection": null,
+      "color_code": "3002",
+      "color": "DARK HAVANA / DEMO LENS",
+      "size": "52",
+      "upc": "8053672320749",
+      "wholesale_price": 121.11,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "BURBERRY-0BE2172-3002-52"
+    },
+    {
+      "brand": "BURBERRY",
+      "model": "0BE2334F",
+      "collection": "ELM",
+      "color_code": "3001",
+      "color": "BLACK / DEMO LENS",
+      "size": "57",
+      "upc": "8056597337199",
+      "wholesale_price": 109.63,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "BURBERRY-0BE2334F-3001-57"
+    },
+    {
+      "brand": "BURBERRY",
+      "model": "0BE2410",
+      "collection": null,
+      "color_code": "4121",
+      "color": "TOP BLACK ON VINTAGE CHECK / DEMO LENS",
+      "size": "53",
+      "upc": "8056262079157",
+      "wholesale_price": 115.19,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "BURBERRY-0BE2410-4121-53"
+    },
+    {
+      "brand": "BURBERRY",
+      "model": "0BE2420",
+      "collection": null,
+      "color_code": "4146",
+      "color": "CHECK SAND / DEMO LENS",
+      "size": "52",
+      "upc": "8056262220375",
+      "wholesale_price": 155.93,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "BURBERRY-0BE2420-4146-52"
+    },
+    {
+      "brand": "BURBERRY",
+      "model": "0BE2425D",
+      "collection": null,
+      "color_code": "4121",
+      "color": "TOP BLACK ON VINTAGE CHECK / DEMO LENS",
+      "size": "54",
+      "upc": "8056262281376",
+      "wholesale_price": 121.11,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "BURBERRY-0BE2425D-4121-54"
+    },
+    {
+      "brand": "BURBERRY",
+      "model": "0BE2435D",
+      "collection": null,
+      "color_code": "4161",
+      "color": "BLACK / DEMO LENS",
+      "size": "50",
+      "upc": "8056262464779",
+      "wholesale_price": 121.11,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "BURBERRY-0BE2435D-4161-50"
+    },
+    {
+      "brand": "BURBERRY",
+      "model": "0BE2443",
+      "collection": null,
+      "color_code": "3002",
+      "color": "DARK HAVANA / DEMO LENS",
+      "size": "53",
+      "upc": "8056262554104",
+      "wholesale_price": 132.59,
+      "quantity": 1,
+      "shipping_date": "09-12-2025",
+      "sku": "BURBERRY-0BE2443-3002-53"
+    },
+    {
+      "brand": "BURBERRY",
+      "model": "0BE2444U",
+      "collection": null,
+      "color_code": "3002",
+      "color": "DARK HAVANA / DEMO LENS",
+      "size": "51",
+      "upc": "8056262558140",
+      "wholesale_price": 121.11,
+      "quantity": 1,
+      "shipping_date": "09-12-2025",
+      "sku": "BURBERRY-0BE2444U-3002-51"
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG1355",
+      "collection": null,
+      "color_code": "1364",
+      "color": "GOLD/LEO / DEMO LENS",
+      "size": "55",
+      "upc": "8056262064078",
+      "wholesale_price": 145.56,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "DOLCE_E_GABBANA-0DG1355-1364-55"
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG1356",
+      "collection": null,
+      "color_code": "488",
+      "color": "PALE GOLD/BLUE / DEMO LENS",
+      "size": "55",
+      "upc": "8056262256886",
+      "wholesale_price": 145.56,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "DOLCE_E_GABBANA-0DG1356-488-55"
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG3352",
+      "collection": null,
+      "color_code": "3200",
+      "color": "STRIPED TOBACCO / DEMO LENS",
+      "size": "57",
+      "upc": "8056262675397",
+      "wholesale_price": 113.33,
+      "quantity": 1,
+      "shipping_date": "09-12-2025",
+      "sku": "DOLCE_E_GABBANA-0DG3352-3200-57"
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG3363",
+      "collection": null,
+      "color_code": "3442",
+      "color": "LACE BORDEAUX / DEMO LENS",
+      "size": "54",
+      "upc": "8056262478813",
+      "wholesale_price": 113.33,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "DOLCE_E_GABBANA-0DG3363-3442-54"
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG3395",
+      "collection": null,
+      "color_code": "3439",
+      "color": "HAVANA BLUE PEARL / DEMO LENS",
+      "size": "51",
+      "upc": "8056262056813",
+      "wholesale_price": 156.3,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "DOLCE_E_GABBANA-0DG3395-3439-51"
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG3424",
+      "collection": null,
+      "color_code": "3445",
+      "color": "HAVANA GREY / DEMO LENS",
+      "size": "54",
+      "upc": "8056262673966",
+      "wholesale_price": 113.33,
+      "quantity": 1,
+      "shipping_date": "09-12-2025",
+      "sku": "DOLCE_E_GABBANA-0DG3424-3445-54"
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG3425",
+      "collection": null,
+      "color_code": "3443",
+      "color": "HAVANA BLUE / DEMO LENS",
+      "size": "52",
+      "upc": "8056262674307",
+      "wholesale_price": 113.33,
+      "quantity": 1,
+      "shipping_date": "09-12-2025",
+      "sku": "DOLCE_E_GABBANA-0DG3425-3443-52"
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG3426",
+      "collection": null,
+      "color_code": "3009",
+      "color": "TRANSPARENT BLUE / DEMO LENS",
+      "size": "53",
+      "upc": "8056262450611",
+      "wholesale_price": 113.33,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "DOLCE_E_GABBANA-0DG3426-3009-53"
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG3430",
+      "collection": null,
+      "color_code": "3222",
+      "color": "DARK RED HAVANA / DEMO LENS",
+      "size": "55",
+      "upc": "8056262579183",
+      "wholesale_price": 124.07,
+      "quantity": 1,
+      "shipping_date": "09-12-2025",
+      "sku": "DOLCE_E_GABBANA-0DG3430-3222-55"
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG3435B",
+      "collection": null,
+      "color_code": "501",
+      "color": "BLACK / DEMO LENS",
+      "size": "53",
+      "upc": "8056262577387",
+      "wholesale_price": 167.04,
+      "quantity": 1,
+      "shipping_date": "09-12-2025",
+      "sku": "DOLCE_E_GABBANA-0DG3435B-501-53"
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG5026",
+      "collection": null,
+      "color_code": "3133",
+      "color": "CRYSTAL / DEMO LENS",
+      "size": "54",
+      "upc": "8053672822182",
+      "wholesale_price": 113.33,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "DOLCE_E_GABBANA-0DG5026-3133-54"
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG5071",
+      "collection": null,
+      "color_code": "3303",
+      "color": "PINK PASTEL GRADIENT CRYSTAL / DEMO LENS",
+      "size": "52",
+      "upc": "8056597417235",
+      "wholesale_price": 113.33,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "DOLCE_E_GABBANA-0DG5071-3303-52"
+    },
+    {
+      "brand": "PRADA",
+      "model": "0PR 02ZV",
+      "collection": null,
+      "color_code": "2AZ1O1",
+      "color": "CRYSTAL / DEMO LENS",
+      "size": "52",
+      "upc": "8056597745093",
+      "wholesale_price": 120.37,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "PRADA-0PR_02ZV-2AZ1O1-52"
+    },
+    {
+      "brand": "PRADA",
+      "model": "0PR 14WV",
+      "collection": null,
+      "color_code": "10J1O1",
+      "color": "HEMATITE / DEMO LENS",
+      "size": "56",
+      "upc": "8056262571514",
+      "wholesale_price": 126.3,
+      "quantity": 1,
+      "shipping_date": "09-12-2025",
+      "sku": "PRADA-0PR_14WV-10J1O1-56"
+    },
+    {
+      "brand": "PRADA",
+      "model": "0PR 15ZV",
+      "collection": null,
+      "color_code": "17N1O1",
+      "color": "ROOT TORTOISE / DEMO LENS",
+      "size": "55",
+      "upc": "8056262569122",
+      "wholesale_price": 126.3,
+      "quantity": 1,
+      "shipping_date": "09-12-2025",
+      "sku": "PRADA-0PR_15ZV-17N1O1-55"
+    },
+    {
+      "brand": "PRADA",
+      "model": "0PR 15ZV",
+      "collection": null,
+      "color_code": "23A1O1",
+      "color": "MAUVE TORTOISE / DEMO LENS",
+      "size": "53",
+      "upc": "8056262569092",
+      "wholesale_price": 126.3,
+      "quantity": 1,
+      "shipping_date": "09-12-2025",
+      "sku": "PRADA-0PR_15ZV-23A1O1-53"
+    },
+    {
+      "brand": "PRADA",
+      "model": "0PR 17ZV",
+      "collection": null,
+      "color_code": "15J1O1",
+      "color": "CRYSTAL PINK / DEMO LENS",
+      "size": "54",
+      "upc": "8056597877114",
+      "wholesale_price": 137.15,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "PRADA-0PR_17ZV-15J1O1-54"
+    },
+    {
+      "brand": "PRADA",
+      "model": "0PR A03V",
+      "collection": null,
+      "color_code": "18Z1O1",
+      "color": "ROOT TORTOISE / DEMO LENS",
+      "size": "52",
+      "upc": "8056262346082",
+      "wholesale_price": 170,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "PRADA-0PR_A03V-18Z1O1-52"
+    },
+    {
+      "brand": "PRADA",
+      "model": "0PR A15V",
+      "collection": null,
+      "color_code": "16K1O1",
+      "color": "BLACK / DEMO LENS",
+      "size": "52",
+      "upc": "8056262132036",
+      "wholesale_price": 137.04,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "PRADA-0PR_A15V-16K1O1-52"
+    },
+    {
+      "brand": "PRADA",
+      "model": "0PR B03V",
+      "collection": null,
+      "color_code": "3891O1",
+      "color": "BLACK / DEMO LENS",
+      "size": "52",
+      "upc": "8056262366141",
+      "wholesale_price": 137.04,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "PRADA-0PR_B03V-3891O1-52"
+    },
+    {
+      "brand": "PRADA",
+      "model": "0PR B09V",
+      "collection": null,
+      "color_code": "12P1O1",
+      "color": "MATTE BLACK / DEMO LENS",
+      "size": "55",
+      "upc": "8056262361863",
+      "wholesale_price": 181.11,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "PRADA-0PR_B09V-12P1O1-55"
+    },
+    {
+      "brand": "PRADA",
+      "model": "0PR B11V",
+      "collection": null,
+      "color_code": "29D1O1",
+      "color": "COLD MAUVE / DEMO LENS",
+      "size": "52",
+      "upc": "8056262505373",
+      "wholesale_price": 191.85,
+      "quantity": 1,
+      "shipping_date": "09-10-2025",
+      "sku": "PRADA-0PR_B11V-29D1O1-52"
+    },
+    {
+      "brand": "PRADA",
+      "model": "0PR C06V",
+      "collection": null,
+      "color_code": "17N1O1",
+      "color": "ROOT TORTOISE / DEMO LENS",
+      "size": "52",
+      "upc": "8056262574362",
+      "wholesale_price": 191.85,
+      "quantity": 1,
+      "shipping_date": "09-12-2025",
+      "sku": "PRADA-0PR_C06V-17N1O1-52"
+    },
+    {
+      "brand": "PRADA",
+      "model": "0PR A02S",
+      "collection": null,
+      "color_code": "17N09Z",
+      "color": "ROOT TORTOISE / DARK BROWN",
+      "size": "52",
+      "upc": "8056262570180",
+      "wholesale_price": 225.22,
+      "quantity": 1,
+      "shipping_date": "09-12-2025",
+      "sku": "PRADA-0PR_A02S-17N09Z-52"
+    }
+  ],
+  "unique_frames": [
+    {
+      "brand": "BURBERRY",
+      "model": "0BE3080",
+      "collection": null
+    },
+    {
+      "brand": "BURBERRY",
+      "model": "0BE1375",
+      "collection": "DOUGLAS"
+    },
+    {
+      "brand": "BURBERRY",
+      "model": "0BE1389",
+      "collection": null
+    },
+    {
+      "brand": "BURBERRY",
+      "model": "0BE2073",
+      "collection": null
+    },
+    {
+      "brand": "BURBERRY",
+      "model": "0BE2172",
+      "collection": null
+    },
+    {
+      "brand": "BURBERRY",
+      "model": "0BE2334F",
+      "collection": "ELM"
+    },
+    {
+      "brand": "BURBERRY",
+      "model": "0BE2410",
+      "collection": null
+    },
+    {
+      "brand": "BURBERRY",
+      "model": "0BE2420",
+      "collection": null
+    },
+    {
+      "brand": "BURBERRY",
+      "model": "0BE2425D",
+      "collection": null
+    },
+    {
+      "brand": "BURBERRY",
+      "model": "0BE2435D",
+      "collection": null
+    },
+    {
+      "brand": "BURBERRY",
+      "model": "0BE2443",
+      "collection": null
+    },
+    {
+      "brand": "BURBERRY",
+      "model": "0BE2444U",
+      "collection": null
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG1355",
+      "collection": null
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG1356",
+      "collection": null
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG3352",
+      "collection": null
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG3363",
+      "collection": null
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG3395",
+      "collection": null
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG3424",
+      "collection": null
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG3425",
+      "collection": null
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG3426",
+      "collection": null
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG3430",
+      "collection": null
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG3435B",
+      "collection": null
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG5026",
+      "collection": null
+    },
+    {
+      "brand": "DOLCE E GABBANA",
+      "model": "0DG5071",
+      "collection": null
+    },
+    {
+      "brand": "PRADA",
+      "model": "0PR 02ZV",
+      "collection": null
+    },
+    {
+      "brand": "PRADA",
+      "model": "0PR 14WV",
+      "collection": null
+    },
+    {
+      "brand": "PRADA",
+      "model": "0PR 15ZV",
+      "collection": null
+    },
+    {
+      "brand": "PRADA",
+      "model": "0PR 17ZV",
+      "collection": null
+    },
+    {
+      "brand": "PRADA",
+      "model": "0PR A03V",
+      "collection": null
+    },
+    {
+      "brand": "PRADA",
+      "model": "0PR A15V",
+      "collection": null
+    },
+    {
+      "brand": "PRADA",
+      "model": "0PR B03V",
+      "collection": null
+    },
+    {
+      "brand": "PRADA",
+      "model": "0PR B09V",
+      "collection": null
+    },
+    {
+      "brand": "PRADA",
+      "model": "0PR B11V",
+      "collection": null
+    },
+    {
+      "brand": "PRADA",
+      "model": "0PR C06V",
+      "collection": null
+    },
+    {
+      "brand": "PRADA",
+      "model": "0PR A02S",
+      "collection": null
+    }
+  ]
+}

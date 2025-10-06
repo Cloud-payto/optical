@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { parseModernOpticalHtml } = require('../parsers/modernopticalparser');
 const SafiloService = require('../parsers/SafiloService');
+const { parseLuxotticaHtml } = require('../parsers/luxotticaParser');
 
 /**
  * POST /api/parse/modernoptical
@@ -122,6 +123,58 @@ router.post('/safilo', async (req, res) => {
     return res.status(500).json({
       success: false,
       error: 'Failed to parse Safilo PDF',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/parse/luxottica
+ * Parse Luxottica HTML email content
+ *
+ * Body: { html, plainText, accountId }
+ * Returns: { success, accountId, vendor, order, items, unique_frames }
+ */
+router.post('/luxottica', async (req, res) => {
+  try {
+    const { html, plainText, accountId } = req.body;
+
+    console.log('[PARSE] Luxottica parse request received');
+    console.log('  Account ID:', accountId);
+    console.log('  HTML length:', html?.length || 0);
+    console.log('  Plain text length:', plainText?.length || 0);
+
+    // Validate input
+    if (!html && !plainText) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: html or plainText must be provided'
+      });
+    }
+
+    // Parse the email content
+    const parseResult = parseLuxotticaHtml(html, plainText);
+
+    console.log('[PARSE] Parse completed successfully');
+    console.log('  Cart number:', parseResult.order?.order_number);
+    console.log('  Items found:', parseResult.items?.length || 0);
+    console.log('  Unique frames:', parseResult.unique_frames?.length || 0);
+
+    // Return the parsed data
+    return res.status(200).json({
+      success: true,
+      accountId: accountId,
+      vendor: parseResult.vendor || 'luxottica',
+      order: parseResult.order,
+      items: parseResult.items,
+      unique_frames: parseResult.unique_frames
+    });
+
+  } catch (error) {
+    console.error('[PARSE] Error parsing Luxottica email:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to parse Luxottica email',
       message: error.message
     });
   }
