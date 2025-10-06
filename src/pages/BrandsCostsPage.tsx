@@ -6,8 +6,10 @@ import CompanyCard from '../components/brands/CompanyCard';
 import BrandDetailsModal from '../components/brands/BrandDetailsModal';
 import CompanyDetailsModal from '../components/brands/CompanyDetailsModal';
 import AddCompanyModal from '../components/brands/AddCompanyModal';
+import MissingBrands from '../components/brands/MissingBrands';
 import { Company, Brand } from '../types';
 import { fetchCompaniesWithPricing, saveAccountBrand } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 // Function to load companies with account-specific brand data from Supabase
 const loadCompaniesFromSupabase = async (): Promise<Company[]> => {
@@ -21,6 +23,7 @@ const loadCompaniesFromSupabase = async (): Promise<Company[]> => {
 };
 
 const BrandsCostsPage: React.FC = () => {
+  const { user } = useAuth();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -33,22 +36,23 @@ const BrandsCostsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const itemsPerPage = 6;
 
+  // Load companies function
+  const loadCompanies = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const companiesData = await loadCompaniesFromSupabase();
+      setCompanies(companiesData);
+    } catch (err) {
+      console.error('Error loading companies:', err);
+      setError('Failed to load company data. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Load companies from Supabase on component mount
   useEffect(() => {
-    const loadCompanies = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const companiesData = await loadCompaniesFromSupabase();
-        setCompanies(companiesData);
-      } catch (err) {
-        console.error('Error loading companies:', err);
-        setError('Failed to load company data. Please try again.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadCompanies();
   }, []);
 
@@ -282,12 +286,21 @@ const BrandsCostsPage: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.1 }}
                     data-demo={index === 0 ? "company-card" : undefined}
+                    className="space-y-3"
                   >
                     <CompanyCard
                       company={company}
                       onViewBrandDetails={handleViewBrandDetails}
                       onEditCompany={handleEditCompany}
                     />
+                    {user?.id && (
+                      <MissingBrands
+                        vendorId={company.id}
+                        vendorName={company.name}
+                        userId={user.id}
+                        onBrandsAdded={loadCompanies}
+                      />
+                    )}
                   </motion.div>
                 ))
               ) : (

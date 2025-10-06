@@ -939,43 +939,43 @@ const vendorOperations = {
             notes
           )
         `);
-      
+
       if (error) throw error;
-      
+
       // Get user-specific pricing for each vendor/brand combination
       const vendorIds = data?.map(v => v.id) || [];
       const brandIds = data?.flatMap(v => v.brands?.map(b => b.id) || []) || [];
-      
+
       let accountBrands = [];
       if (vendorIds.length > 0) {
         console.log('🔥 DEBUG: Fetching account_brands for userId:', userId, 'vendorIds:', vendorIds);
-        
+
         const { data: accountBrandData, error: accountBrandError } = await supabase
           .from('account_brands')
           .select('*')
           .eq('account_id', userId)
           .in('vendor_id', vendorIds);
-        
+
         if (accountBrandError) throw accountBrandError;
         accountBrands = accountBrandData || [];
-        
+
         console.log('🔥 DEBUG: Found account_brands data:', accountBrands.length, 'records');
         console.log('🔥 DEBUG: Account brands:', accountBrands);
       }
-      
+
       // Merge vendor data with user pricing
       const vendorsWithPricing = (data || []).map(vendor => {
         const brandsWithAccountData = (vendor.brands || []).map(brand => {
-          const accountBrand = accountBrands.find(ab => 
+          const accountBrand = accountBrands.find(ab =>
             ab.vendor_id === vendor.id && ab.brand_id === brand.id
           );
-          
+
           if (accountBrand) {
             console.log('🔥 DEBUG: Found account_brand for brand:', brand.name, 'data:', accountBrand);
           } else {
             console.log('🔥 DEBUG: No account_brand found for brand:', brand.name, 'vendor:', vendor.id, 'brand:', brand.id);
           }
-          
+
           return {
             ...brand,
             // Use COALESCE logic: account wholesale cost OR global brand default
@@ -983,18 +983,129 @@ const vendorOperations = {
             account_brand: accountBrand
           };
         });
-        
+
         return {
           ...vendor,
           brands: brandsWithAccountData
         };
       });
-      
+
       console.log('Function completed, returning:', vendorsWithPricing?.length, 'vendors');
       return vendorsWithPricing;
     } catch (error) {
       console.error(`Supabase error during getVendorsWithAccountBrands:`, error);
       throw error; // This will be caught by the route handler
+    }
+  },
+
+  async getMissingVendorsForUser(userId) {
+    try {
+      // Get all vendor IDs from user's inventory
+      const { data: inventoryVendors, error: inventoryError } = await supabase
+        .from('inventory')
+        .select('vendor_id')
+        .eq('account_id', userId)
+        .not('vendor_id', 'is', null);
+
+      if (inventoryError) throw inventoryError;
+
+      // Get unique vendor IDs from inventory
+      const inventoryVendorIds = [...new Set(inventoryVendors?.map(item => item.vendor_id) || [])];
+
+      if (inventoryVendorIds.length === 0) {
+        return [];
+      }
+
+      // Get vendor IDs that user already has in account_brands
+      const { data: accountVendors, error: accountError } = await supabase
+        .from('account_brands')
+        .select('vendor_id')
+        .eq('account_id', userId)
+        .in('vendor_id', inventoryVendorIds);
+
+      if (accountError) throw accountError;
+
+      const accountVendorIds = [...new Set(accountVendors?.map(ab => ab.vendor_id) || [])];
+
+      // Find vendor IDs that are in inventory but not in account_brands
+      const missingVendorIds = inventoryVendorIds.filter(vid => !accountVendorIds.includes(vid));
+
+      if (missingVendorIds.length === 0) {
+        return [];
+      }
+
+      // Get full vendor details for missing vendors
+      const { data: vendors, error: vendorsError } = await supabase
+        .from('vendors')
+        .select('*')
+        .in('id', missingVendorIds);
+
+      if (vendorsError) throw vendorsError;
+
+      return vendors || [];
+    } catch (error) {
+      handleSupabaseError(error, 'getMissingVendorsForUser');
+    }
+  },
+
+  async getMissingBrandsForVendor(userId, vendorId) {
+    try {
+      // Get all brands for this vendor from the global brands table
+      const { data: allBrands, error: brandsError } = await supabase
+        .from('brands')
+        .select('*')
+        .eq('vendor_id', vendorId)
+        .eq('is_active', true);
+
+      if (brandsError) throw brandsError;
+
+      // Get brand IDs that user already has for this vendor
+      const { data: accountBrands, error: accountError } = await supabase
+        .from('account_brands')
+        .select('brand_id')
+        .eq('account_id', userId)
+        .eq('vendor_id', vendorId);
+
+      if (accountError) throw accountError;
+
+      const accountBrandIds = accountBrands?.map(ab => ab.brand_id) || [];
+
+      // Filter out brands the user already has
+      const missingBrands = (allBrands || []).filter(brand => !accountBrandIds.includes(brand.id));
+
+      return missingBrands;
+    } catch (error) {
+      handleSupabaseError(error, 'getMissingBrandsForVendor');
+    }
+  },
+
+  async addAccountBrandsBulk(userId, vendorId, brandIds) {
+    try {
+      // Prepare account_brands entries
+      const accountBrandsData = brandIds.map(brandId => ({
+        account_id: userId,
+        vendor_id: vendorId,
+        brand_id: brandId,
+        discount_percentage: 45, // Default 45% discount
+        tariff_tax: 0,
+        notes: '',
+        updated_at: new Date().toISOString()
+      }));
+
+      // Use upsert to handle any duplicates gracefully
+      const { data, error } = await supabase
+        .from('account_brands')
+        .upsert(accountBrandsData, {
+          onConflict: 'account_id,brand_id',
+          ignoreDuplicates: false
+        })
+        .select();
+
+      if (error) throw error;
+
+      return { success: true, addedCount: data?.length || 0, data };
+    } catch (error) {
+      handleSupabaseError(error, 'addAccountBrandsBulk');
     }
   }
 };

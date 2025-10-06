@@ -4,6 +4,7 @@ import { fetchEmails, fetchInventory, fetchOrders, deleteEmail, deleteInventoryI
 import { useAuth } from '../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import VendorSuggestionModal from '../components/vendors/VendorSuggestionModal';
 import toast from 'react-hot-toast';
 
 // Helper function to extract vendor name from email address
@@ -59,6 +60,8 @@ const Inventory: React.FC = () => {
   const [deletingBrands, setDeletingBrands] = useState<Set<string>>(new Set());
   const [deletingVendors, setDeletingVendors] = useState<Set<string>>(new Set());
   const [copied, setCopied] = useState(false);
+  const [vendorSuggestion, setVendorSuggestion] = useState<any>(null);
+  const [showVendorSuggestion, setShowVendorSuggestion] = useState(false);
 
   // Copy email to clipboard
   const copyToClipboard = async () => {
@@ -156,6 +159,32 @@ const Inventory: React.FC = () => {
     }
   };
 
+  // Check for missing vendors after data loads
+  const checkForMissingVendors = async () => {
+    if (!user?.id) return;
+
+    try {
+      const response = await fetch(`/api/vendors/missing/${user.id}`);
+      if (!response.ok) throw new Error('Failed to fetch missing vendors');
+
+      const missingVendors = await response.json();
+
+      if (missingVendors.length > 0) {
+        // Check if user has dismissed this vendor before
+        const dismissedVendors = JSON.parse(localStorage.getItem('dismissedVendors') || '[]');
+        const vendorToSuggest = missingVendors.find((v: any) => !dismissedVendors.includes(v.id));
+
+        if (vendorToSuggest) {
+          setVendorSuggestion(vendorToSuggest);
+          setShowVendorSuggestion(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error checking for missing vendors:', error);
+      // Don't show error to user - this is a background check
+    }
+  };
+
   useEffect(() => {
     if (isAuthenticated && user) {
       loadData();
@@ -165,6 +194,13 @@ const Inventory: React.FC = () => {
       setError('Please log in to view inventory data');
     }
   }, [isAuthenticated, user]);
+
+  // Check for missing vendors after inventory loads
+  useEffect(() => {
+    if (inventory.length > 0 && user) {
+      checkForMissingVendors();
+    }
+  }, [inventory, user]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -2799,6 +2835,18 @@ const Inventory: React.FC = () => {
         confirmText="Delete"
         cancelText="Cancel"
         variant="danger"
+      />
+
+      {/* Vendor Suggestion Modal */}
+      <VendorSuggestionModal
+        isOpen={showVendorSuggestion}
+        onClose={() => setShowVendorSuggestion(false)}
+        vendor={vendorSuggestion}
+        userId={user?.id || ''}
+        onVendorAdded={() => {
+          loadData();
+          setShowVendorSuggestion(false);
+        }}
       />
     </div>
   );

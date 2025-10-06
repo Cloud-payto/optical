@@ -114,7 +114,7 @@ router.get('/companies/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
     const vendorsWithAccountBrands = await vendorOperations.getVendorsWithAccountBrands(userId);
-    
+
     // Transform vendors to Company format expected by frontend
     const companies = vendorsWithAccountBrands.map(vendor => ({
       id: vendor.id,
@@ -139,11 +139,53 @@ router.get('/companies/:userId', async (req, res) => {
         repPhone: ''
       }
     }));
-    
+
     res.json(companies);
   } catch (error) {
     console.error('Error fetching vendors with pricing:', error);
     res.status(500).json({ error: 'Failed to fetch vendors with pricing' });
+  }
+});
+
+// Get missing vendors for a user (vendors in inventory but not in account_brands)
+router.get('/missing/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const missingVendors = await vendorOperations.getMissingVendorsForUser(userId);
+    res.json(missingVendors);
+  } catch (error) {
+    console.error('Error fetching missing vendors:', error);
+    res.status(500).json({ error: 'Failed to fetch missing vendors' });
+  }
+});
+
+// Get missing brands for a specific vendor
+router.get('/missing/:userId/:vendorId/brands', async (req, res) => {
+  try {
+    const { userId, vendorId } = req.params;
+    const missingBrands = await vendorOperations.getMissingBrandsForVendor(userId, vendorId);
+    res.json(missingBrands);
+  } catch (error) {
+    console.error('Error fetching missing brands:', error);
+    res.status(500).json({ error: 'Failed to fetch missing brands' });
+  }
+});
+
+// Add multiple account-brand relationships at once
+router.post('/account-brands/:userId/bulk', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { vendorId, brandIds } = req.body;
+
+    if (!vendorId || !brandIds || !Array.isArray(brandIds)) {
+      return res.status(400).json({ error: 'vendorId and brandIds array are required' });
+    }
+
+    const result = await vendorOperations.addAccountBrandsBulk(userId, vendorId, brandIds);
+    res.json(result);
+  } catch (error) {
+    console.error('Error adding account brands in bulk:', error);
+    res.status(500).json({ error: 'Failed to add account brands' });
   }
 });
 
