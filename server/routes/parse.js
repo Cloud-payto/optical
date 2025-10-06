@@ -185,41 +185,32 @@ router.post('/luxottica', async (req, res) => {
  * POST /api/parse/etnia-barcelona
  * Parse Etnia Barcelona PDF order
  *
- * Body: { pdfBuffer (base64), accountId }
+ * Body: { pdfBase64, accountId }
  * Returns: { success, accountId, vendor, order, items, unique_frames }
  */
 router.post('/etnia-barcelona', async (req, res) => {
   try {
-    const { pdfBuffer, accountId } = req.body;
+    const { pdfBase64, accountId } = req.body;
 
     console.log('[PARSE] Etnia Barcelona parse request received');
     console.log('  Account ID:', accountId);
-    console.log('  PDF buffer length:', pdfBuffer?.length || 0);
+    console.log('  PDF base64 length:', pdfBase64?.length || 0);
 
     // Validate input
-    if (!pdfBuffer) {
+    if (!pdfBase64) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required field: pdfBuffer must be provided'
+        error: 'Missing required field: pdfBase64'
       });
     }
 
-    // Convert base64 to buffer if needed
-    let buffer;
-    if (typeof pdfBuffer === 'string') {
-      buffer = Buffer.from(pdfBuffer, 'base64');
-    } else if (Buffer.isBuffer(pdfBuffer)) {
-      buffer = pdfBuffer;
-    } else {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid pdfBuffer format'
-      });
-    }
+    // Convert base64 to buffer
+    const pdfBuffer = Buffer.from(pdfBase64, 'base64');
+    console.log('  PDF buffer size:', pdfBuffer.length, 'bytes');
 
     // Parse the PDF using Etnia Barcelona service
     const etniaService = new EtniaBarcelonaService({ debug: false });
-    const result = await etniaService.processOrder(buffer);
+    const result = await etniaService.processOrder(pdfBuffer);
 
     console.log('[PARSE] Parse completed successfully');
     console.log('  Order number:', result.orderInfo?.orderNumber);
