@@ -10,18 +10,32 @@ const cheerio = require('cheerio');
 function parseLuxotticaHtml(html, plainText) {
     console.log('📧 Starting Luxottica email parsing...');
 
-    // Extract content from HTML - we need the HTML within <pre> tag, not just text
-    let contentToUse = html;
+    // Extract and convert content to plain text for easier parsing
+    let contentToUse = '';
 
     if (html) {
         try {
             const $ = cheerio.load(html);
-            // Luxottica emails have content in <pre> tags - get the HTML content
+            // Luxottica emails have content in <pre> tags
             const preElement = $('pre');
             if (preElement.length > 0) {
-                // Get HTML content, not text
-                contentToUse = preElement.html() || html;
-                console.log('📄 Extracted HTML from <pre> tag, length:', contentToUse.length);
+                // Get HTML content from <pre> tag
+                let htmlContent = preElement.html() || html;
+
+                // Convert HTML to plain text:
+                // 1. Replace <br> tags with newlines
+                // 2. Strip all HTML tags
+                // 3. Replace HTML entities
+                contentToUse = htmlContent
+                    .replace(/<br\s*\/?>/gi, '\n')
+                    .replace(/<[^>]+>/g, '')
+                    .replace(/&nbsp;/g, ' ')
+                    .replace(/&amp;/g, '&')
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/&quot;/g, '"');
+
+                console.log('📄 Converted HTML to plain text, length:', contentToUse.length);
             }
         } catch (error) {
             console.error('❌ Error extracting from HTML:', error);
@@ -132,31 +146,38 @@ function extractOrderInfo(text) {
 
 /**
  * Extract all items from the email, grouped by brand
- * @param {string} text - HTML content with <br> tags
- * @param {string} vendor - Vendor name
- * @param {string} orderNumber - Order/cart number
+ * @param {string} text - Plain text content
+ * @param {string} vendor - Vendor name (not used but kept for compatibility)
+ * @param {string} orderNumber - Order/cart number (not used but kept for compatibility)
  * @returns {Array} Array of item objects
  */
 function extractItems(text, vendor, orderNumber) {
     const items = [];
 
-    // Look for brand headers like "BURBERRY (12)" or "DOLCE E GABBANA (12)"
-    // These are in <font size="5"><b><i>BRAND NAME (count)</i></b></font>
-    const brandPattern = /<font size="5"><b><i>([A-Z\s&]+)\s*\((\d+)\)\s*<\/i><\/b>\s*<\/font>/g;
-    const brands = [];
-    let match;
+    // Split into lines for line-by-line parsing
+    const lines = text.split('\n').map(line => line.trim());
 
-    while ((match = brandPattern.exec(text)) !== null) {
-        const brandName = match[1].trim();
-        // Skip if it looks like a model number (starts with digit or 0)
-        if (/^\d/.test(brandName)) {
-            continue;
+    // Look for brand headers like "BURBERRY (12)" on their own line
+    // Pattern: All caps brand name followed by (count)
+    const brandPattern = /^([A-Z][A-Z\s&E]+)\s+\((\d+)\)\s*$/;
+    const brands = [];
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const match = line.match(brandPattern);
+
+        if (match) {
+            const brandName = match[1].trim();
+            // Skip if it looks like a model number (starts with 0)
+            if (/^0/.test(brandName)) {
+                continue;
+            }
+            brands.push({
+                name: brandName,
+                count: parseInt(match[2]),
+                lineIndex: i
+            });
         }
-        brands.push({
-            name: brandName,
-            count: parseInt(match[2]),
-            startIndex: match.index
-        });
     }
 
     console.log('🏷️  Found brands:', brands.map(b => `${b.name} (${b.count})`).join(', '));
@@ -166,13 +187,13 @@ function extractItems(text, vendor, orderNumber) {
         const brand = brands[i];
         const nextBrand = brands[i + 1];
 
-        // Get text section for this brand
-        const sectionStart = brand.startIndex;
-        const sectionEnd = nextBrand ? nextBrand.startIndex : text.indexOf('Total Number of Items');
-        const brandText = text.substring(sectionStart, sectionEnd);
+        // Get lines for this brand section
+        const startLine = brand.lineIndex;
+        const endLine = nextBrand ? nextBrand.lineIndex : lines.findIndex(l => l.includes('Total Number of Items'));
+        const brandLines = lines.slice(startLine, endLine > 0 ? endLine : lines.length);
 
         // Extract items from this brand section
-        const brandItems = extractBrandItems(brandText, brand.name, vendor, orderNumber);
+        const brandItems = extractBrandItems(brandLines, brand.name);
         items.push(...brandItems);
     }
 
@@ -235,30 +256,30 @@ function normalizeBrandName(brand) {
 
 /**
  * Extract items from a brand section
- * @param {string} section - HTML section for one brand
+ * @param {Array} lines - Array of text lines for one brand
  * @param {string} brandName - Name of the brand
  * @returns {Array} Array of item objects
  */
-function extractBrandItems(section, brandName) {
+function extractBrandItems(lines, brandName) {
     const items = [];
 
-    // Pattern to match model headers (they look like products: 0BE3080, 0DG1355, 0PR 02ZV)
-    // These are in <font size="5"><b><i>MODEL (count)</i></b></font>
-    const modelPattern = /<font size="5"><b><i>([^<]+)<\/i><\/b><\/font>/g;
+    // Pattern to match model headers: "0BE3080 (1)", "0PR 02ZV (1)", or "0BE1375 - DOUGLAS (1)"
+    // Models start with 0 and end with (count), may include " - NAME"
+    const modelPattern = /^(0[A-Z0-9\s\-]+?)\s+\((\d+)\)\s*$/;
     const models = [];
-    let modelMatch;
 
-    while ((modelMatch = modelPattern.exec(section)) !== null) {
-        const header = modelMatch[1].trim();
-        // Skip the brand header itself
-        if (header === brandName || header.includes(brandName)) {
-            continue;
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const match = line.match(modelPattern);
+
+        if (match) {
+            const header = match[1].trim();
+            models.push({
+                header: header,
+                count: parseInt(match[2]),
+                lineIndex: i
+            });
         }
-        models.push({
-            header: header,
-            startIndex: modelMatch.index,
-            endIndex: modelMatch.index + modelMatch[0].length
-        });
     }
 
     console.log(`  📦 Found ${models.length} models for ${brandName}`);
@@ -268,15 +289,16 @@ function extractBrandItems(section, brandName) {
         const model = models[i];
         const nextModel = models[i + 1];
 
-        const modelStart = model.endIndex;
-        const modelEnd = nextModel ? nextModel.startIndex : section.length;
-        const modelText = section.substring(modelStart, modelEnd);
+        // Get lines for this model
+        const startLine = model.lineIndex + 1; // Start after model header
+        const endLine = nextModel ? nextModel.lineIndex : lines.length;
+        const modelLines = lines.slice(startLine, endLine);
 
         // Extract model name and optional collection/tag
-        const modelInfo = parseModelHeader(model.header);
+        const modelInfo = parseModelHeader(model.header + ` (${model.count})`);
 
         // Extract individual items (variants) for this model
-        const variants = extractModelVariants(modelText, brandName, modelInfo);
+        const variants = extractModelVariants(modelLines, brandName, modelInfo);
         items.push(...variants);
     }
 
@@ -322,19 +344,13 @@ function parseModelHeader(header) {
 
 /**
  * Extract individual variants (color/size combinations) for a model
- * @param {string} text - HTML text for one model (with <br> tags)
+ * @param {Array} lines - Array of text lines for one model
  * @param {string} brandName - Brand name
  * @param {object} modelInfo - Model information
  * @returns {Array} Array of item objects
  */
-function extractModelVariants(text, brandName, modelInfo) {
+function extractModelVariants(lines, brandName, modelInfo) {
     const items = [];
-
-    // Split by <br> tags to get individual lines
-    const lines = text.split(/<br\s*\/?>/i).map(line => {
-        // Strip any remaining HTML tags and trim
-        return line.replace(/<[^>]*>/g, '').trim();
-    }).filter(line => line);
 
     let currentColorCode = null;
     let currentColorDesc = null;
