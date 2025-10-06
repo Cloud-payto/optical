@@ -13,19 +13,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get vendor by ID
-router.get('/:vendorId', async (req, res) => {
-  try {
-    const { vendorId } = req.params;
-    const vendor = await vendorOperations.getVendorById(vendorId);
-    res.json(vendor);
-  } catch (error) {
-    console.error('Error fetching vendor:', error);
-    res.status(500).json({ error: 'Failed to fetch vendor' });
-  }
-});
-
-// Get all brands
+// Get all brands (BEFORE /:vendorId to avoid conflict)
 router.get('/brands/all', async (req, res) => {
   try {
     const brands = await vendorOperations.getAllBrands();
@@ -36,19 +24,7 @@ router.get('/brands/all', async (req, res) => {
   }
 });
 
-// Get brands by vendor
-router.get('/:vendorId/brands', async (req, res) => {
-  try {
-    const { vendorId } = req.params;
-    const brands = await vendorOperations.getBrandsByVendor(vendorId);
-    res.json(brands);
-  } catch (error) {
-    console.error('Error fetching vendor brands:', error);
-    res.status(500).json({ error: 'Failed to fetch vendor brands' });
-  }
-});
-
-// Get user-specific account brands
+// Get user-specific account brands (BEFORE /:vendorId to avoid conflict)
 router.get('/pricing/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
@@ -60,56 +36,7 @@ router.get('/pricing/:userId', async (req, res) => {
   }
 });
 
-// Save account-specific brand data
-router.post('/pricing/:userId', async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const brandData = {
-      ...req.body,
-      brand_name: req.body.brand_name, // Ensure this is passed for new brands
-    };
-    
-    console.log('🔥 DEBUG: POST /pricing/:userId called');
-    console.log('🔥 DEBUG: Account ID (userId):', userId);
-    console.log('🔥 DEBUG: Received from frontend:', brandData);
-    
-    // Validate required fields - either brand_id (existing) OR brand_name (new) + vendor_id
-    if ((!brandData.brand_id && !brandData.brand_name) || !brandData.vendor_id) {
-      console.log('🔥 DEBUG: Missing required fields');
-      return res.status(400).json({ 
-        error: 'Missing required fields: (brand_id OR brand_name) AND vendor_id are required' 
-      });
-    }
-    
-    console.log('🔥 DEBUG: Calling saveAccountBrand with userId:', userId, 'brandData:', brandData);
-    
-    const result = await vendorOperations.saveAccountBrand(userId, brandData);
-    
-    console.log('🔥 DEBUG: saveAccountBrand result:', result);
-    
-    if (result.success) {
-      res.json({
-        success: true,
-        message: 'Account brand data saved successfully',
-        data: result
-      });
-    } else {
-      res.status(500).json({ 
-        error: 'Failed to save account brand data', 
-        details: result 
-      });
-    }
-  } catch (error) {
-    console.error('Error saving account brand data:', error);
-    res.status(500).json({ 
-      error: 'Failed to save account brand data',
-      message: error.message,
-      details: error.stack 
-    });
-  }
-});
-
-// Get vendors with user pricing (for BrandsCostsPage)
+// Get vendors with user pricing (BEFORE /:vendorId to avoid conflict)
 router.get('/companies/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
@@ -147,7 +74,7 @@ router.get('/companies/:userId', async (req, res) => {
   }
 });
 
-// Get missing vendors for a user (vendors in inventory but not in account_brands)
+// Get missing vendors for a user (BEFORE /:vendorId to avoid conflict)
 router.get('/missing/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
@@ -159,7 +86,7 @@ router.get('/missing/:userId', async (req, res) => {
   }
 });
 
-// Get missing brands for a specific vendor
+// Get missing brands for a specific vendor (BEFORE /:vendorId to avoid conflict)
 router.get('/missing/:userId/:vendorId/brands', async (req, res) => {
   try {
     const { userId, vendorId } = req.params;
@@ -172,6 +99,79 @@ router.get('/missing/:userId/:vendorId/brands', async (req, res) => {
   } catch (error) {
     console.error('❌ Error fetching missing brands:', error);
     res.status(500).json({ error: 'Failed to fetch missing brands', details: error.message });
+  }
+});
+
+// Get vendor by ID (AFTER specific routes)
+router.get('/:vendorId', async (req, res) => {
+  try {
+    const { vendorId } = req.params;
+    const vendor = await vendorOperations.getVendorById(vendorId);
+    res.json(vendor);
+  } catch (error) {
+    console.error('Error fetching vendor:', error);
+    res.status(500).json({ error: 'Failed to fetch vendor' });
+  }
+});
+
+// Get brands by vendor (AFTER specific routes)
+router.get('/:vendorId/brands', async (req, res) => {
+  try {
+    const { vendorId } = req.params;
+    const brands = await vendorOperations.getBrandsByVendor(vendorId);
+    res.json(brands);
+  } catch (error) {
+    console.error('Error fetching vendor brands:', error);
+    res.status(500).json({ error: 'Failed to fetch vendor brands' });
+  }
+});
+
+// Save account-specific brand data
+router.post('/pricing/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const brandData = {
+      ...req.body,
+      brand_name: req.body.brand_name, // Ensure this is passed for new brands
+    };
+
+    console.log('🔥 DEBUG: POST /pricing/:userId called');
+    console.log('🔥 DEBUG: Account ID (userId):', userId);
+    console.log('🔥 DEBUG: Received from frontend:', brandData);
+
+    // Validate required fields - either brand_id (existing) OR brand_name (new) + vendor_id
+    if ((!brandData.brand_id && !brandData.brand_name) || !brandData.vendor_id) {
+      console.log('🔥 DEBUG: Missing required fields');
+      return res.status(400).json({
+        error: 'Missing required fields: (brand_id OR brand_name) AND vendor_id are required'
+      });
+    }
+
+    console.log('🔥 DEBUG: Calling saveAccountBrand with userId:', userId, 'brandData:', brandData);
+
+    const result = await vendorOperations.saveAccountBrand(userId, brandData);
+
+    console.log('🔥 DEBUG: saveAccountBrand result:', result);
+
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Account brand data saved successfully',
+        data: result
+      });
+    } else {
+      res.status(500).json({
+        error: 'Failed to save account brand data',
+        details: result
+      });
+    }
+  } catch (error) {
+    console.error('Error saving account brand data:', error);
+    res.status(500).json({
+      error: 'Failed to save account brand data',
+      message: error.message,
+      details: error.stack
+    });
   }
 });
 
