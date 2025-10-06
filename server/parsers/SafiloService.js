@@ -326,7 +326,7 @@ class SafiloService {
             }
             
             // Look for frame start patterns
-            if (!line.match(/^\s*(CARRERA|VICTORY|CARDUC|CH\s|KS\s|CATRINA|JOLIET|MIS\s)/)) {
+            if (!line.match(/^\s*(CARRERA|VICTORY|CARDUC|CH\s|KS\s|CATRINA|JOLIET|MIS\s|HER\s|BOSS\s)/)) {
                 continue;
             }
             
@@ -338,7 +338,7 @@ class SafiloService {
                 const nextLine = lines[nextIndex].trim();
                 
                 // Stop if we hit another frame or section
-                if (nextLine.match(/^\s*(CARRERA|VICTORY|CARDUC|CH\s|KS\s|CATRINA|JOLIET|MIS\s|KSP\s|Total)/)) {
+                if (nextLine.match(/^\s*(CARRERA|VICTORY|CARDUC|CH\s|KS\s|CATRINA|JOLIET|MIS\s|KSP\s|HER\s|BOSS\s|Total)/)) {
                     break;
                 }
                 
@@ -405,55 +405,48 @@ class SafiloService {
         if (parts.length < 3) {
             return null;
         }
-        
-        let brand = '';
+
+        // Simple extraction - let API determine the actual brand
+        // Model is typically first 1-3 parts before color code
         let model = '';
         let colorCode = '';
         let colorName = '';
-        
-        // Brand-specific parsing
-        if (beforeSize.startsWith('CARRERA ')) {
-            brand = 'CARRERA';
-            model = parts[1];
-            colorCode = parts[2];
-            colorName = parts.slice(3).join(' ');
-        } else if (beforeSize.startsWith('VICTORY ')) {
-            brand = 'CARRERA';
-            model = parts.slice(0, 3).join(' ');
-            colorCode = parts[3];
-            colorName = parts.slice(4).join(' ');
-        } else if (beforeSize.startsWith('CARDUC ')) {
-            brand = 'CARRERA DUCATI';
-            model = parts.slice(0, 2).join(' ');
-            colorCode = parts[2];
-            colorName = parts.slice(3).join(' ');
-        } else if (beforeSize.startsWith('CH ')) {
-            brand = 'CHESTERFIELD';
-            model = parts.slice(0, 2).join(' ');
-            colorCode = parts[2];
-            colorName = parts.slice(3).join(' ');
-        } else if (beforeSize.startsWith('KS ')) {
-            brand = 'KATE SPADE';
-            model = parts.slice(0, 3).join(' ');
-            colorCode = parts[3];
-            colorName = parts.slice(4).join(' ');
-        } else if (beforeSize.startsWith('CATRINA') || beforeSize.startsWith('JOLIET')) {
-            brand = 'KATE SPADE';
-            model = parts[0];
-            colorCode = parts[1];
-            colorName = parts.slice(2).join(' ');
-        } else if (beforeSize.startsWith('MIS ')) {
-            brand = 'MISSONI';
-            model = parts.slice(0, 2).join(' ');
-            colorCode = parts[2];
-            colorName = parts.slice(3).join(' ');
+
+        // Model names can be:
+        // - Single word: "CARRERA" + color
+        // - Two words: "HER 0167" + color
+        // - Three words: "KS LUCYANN 3" + color
+        // - Multi-word: "VICTORY LANE" + color
+
+        // Strategy: The color code is typically 3-4 alphanumeric characters
+        // But NOT starting with 0 (that's a model number like "0167", "0280")
+        // Everything before it is the model, everything after is color name
+        let colorIndex = -1;
+        for (let i = 1; i < parts.length; i++) {
+            // Color codes are typically 3-4 chars, alphanumeric (e.g., "807", "L93", "2M2", "B1P", "PEF")
+            // Skip if it starts with 0 and is all digits (likely model number like "0167")
+            if (parts[i].match(/^0\d+$/)) {
+                continue;
+            }
+            if (parts[i].match(/^[A-Z0-9]{3,4}$/) && parts[i].length <= 4) {
+                colorIndex = i;
+                break;
+            }
+        }
+
+        if (colorIndex > 0) {
+            model = parts.slice(0, colorIndex).join(' ');
+            colorCode = parts[colorIndex];
+            colorName = parts.slice(colorIndex + 1).join(' ');
         } else {
-            // Fallback
-            brand = parts[0];
+            // Fallback if no clear color code found
             model = parts.slice(0, 2).join(' ');
-            colorCode = parts[2];
+            colorCode = parts[2] || '';
             colorName = parts.slice(3).join(' ');
         }
+
+        // Brand will be determined by API, just use first word as placeholder
+        const brand = parts[0];
         
         // Clean up color name
         colorName = colorName.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
@@ -620,8 +613,12 @@ class SafiloService {
             fitting: validation.bestMatch.fitting
         } : null;
         
+        // Use API brand as the source of truth if validated
+        const finalBrand = (validation.validated && apiData.brand) ? apiData.brand : frame.brand;
+
         return {
             ...frame,
+            brand: finalBrand,  // Override with API brand
             apiData: apiData,
             validation: validation,
             enrichedData: enrichedData

@@ -163,11 +163,15 @@ router.get('/missing/:userId', async (req, res) => {
 router.get('/missing/:userId/:vendorId/brands', async (req, res) => {
   try {
     const { userId, vendorId } = req.params;
+    console.log('🔍 GET /missing/:userId/:vendorId/brands called with:', { userId, vendorId });
+
     const missingBrands = await vendorOperations.getMissingBrandsForVendor(userId, vendorId);
+    console.log(`✅ Found ${missingBrands?.length || 0} missing brands for vendor ${vendorId}`);
+
     res.json(missingBrands);
   } catch (error) {
-    console.error('Error fetching missing brands:', error);
-    res.status(500).json({ error: 'Failed to fetch missing brands' });
+    console.error('❌ Error fetching missing brands:', error);
+    res.status(500).json({ error: 'Failed to fetch missing brands', details: error.message });
   }
 });
 

@@ -34,16 +34,35 @@ const MissingBrands: React.FC<MissingBrandsProps> = ({
   }, [vendorId, userId]);
 
   const fetchMissingBrands = async () => {
+    if (!userId || !vendorId) {
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await fetch(`/api/vendors/missing/${userId}/${vendorId}/brands`);
-      if (!response.ok) throw new Error('Failed to fetch missing brands');
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Failed to fetch missing brands:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorText,
+          vendorId,
+          userId
+        });
+        setMissingBrands([]);
+        return;
+      }
 
       const brands = await response.json();
-      setMissingBrands(brands);
+      console.log(`✅ Fetched ${brands?.length || 0} missing brands for vendor ${vendorId}`);
+      setMissingBrands(brands || []);
     } catch (error) {
       console.error('Error fetching missing brands:', error);
-      toast.error('Failed to load missing brands');
+      setMissingBrands([]);
+      // Don't show toast error - this is a background check
     } finally {
       setIsLoading(false);
     }
