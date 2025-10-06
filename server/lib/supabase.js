@@ -579,6 +579,23 @@ const orderOperations = {
 
   async deleteOrder(orderId, userId) {
     try {
+      // First, delete all inventory items associated with this order
+      console.log(`🗑️  Deleting inventory items for order ${orderId}...`);
+      const { error: inventoryError, data: deletedItems } = await supabase
+        .from('inventory')
+        .delete()
+        .eq('order_id', orderId)
+        .eq('account_id', userId)
+        .select();
+
+      if (inventoryError) {
+        console.error('❌ Error deleting inventory items:', inventoryError);
+        throw inventoryError;
+      }
+
+      console.log(`✅ Deleted ${deletedItems?.length || 0} inventory items`);
+
+      // Then, delete the order itself
       const { error } = await supabase
         .from('orders')
         .delete()
@@ -586,7 +603,9 @@ const orderOperations = {
         .eq('account_id', userId);
 
       if (error) throw error;
-      return { success: true };
+
+      console.log(`✅ Order ${orderId} deleted successfully`);
+      return { success: true, deletedInventoryCount: deletedItems?.length || 0 };
     } catch (error) {
       handleSupabaseError(error, 'deleteOrder');
     }
