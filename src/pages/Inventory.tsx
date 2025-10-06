@@ -1021,26 +1021,26 @@ const Inventory: React.FC = () => {
                   </p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
+                <div>
+                  <table className="w-full divide-y divide-gray-200 table-fixed">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="w-[12%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Vendor
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="w-[25%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Order Details
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="w-[10%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Items
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="w-[13%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Email Received
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="w-[10%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Status
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="w-[30%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Actions
                         </th>
                       </tr>
@@ -1067,58 +1067,62 @@ const Inventory: React.FC = () => {
                               transition={{ duration: 0.3, delay: index * 0.05 }}
                               className="hover:bg-gray-50"
                             >
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                              <div className="flex items-center">
-                                <span>{vendorName}</span>
-                                {isParsed && (
-                                  <span className="ml-2 inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-                                    Parsed
-                                  </span>
+                            <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                              <div className="flex flex-col">
+                                <div className="flex items-center gap-1 flex-wrap">
+                                  <span className="truncate">{vendorName}</span>
+                                  {isParsed && (
+                                    <span className="inline-flex px-1.5 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800 shrink-0">
+                                      Parsed
+                                    </span>
+                                  )}
+                                </div>
+                                {isParsed && brands.length > 0 && (
+                                  <div className="text-xs text-gray-500 mt-1 truncate" title={`Brands: ${brands.join(', ')}`}>
+                                    {brands.slice(0, 2).join(', ')}{brands.length > 2 ? ` +${brands.length - 2}` : ''}
+                                  </div>
                                 )}
                               </div>
-                              {isParsed && brands.length > 0 && (
-                                <div className="text-xs text-gray-500 mt-1">
-                                  Brands: {brands.join(', ')}
-                                </div>
-                              )}
                             </td>
-                            <td className="px-6 py-4 text-sm text-gray-500">
+                            <td className="px-4 py-4 text-sm text-gray-500">
                               {isParsed ? (
-                                <div>
-                                  <div className="font-medium">Order #{email.parsed_data!.order.order_number}</div>
-                                  <div className="text-xs text-gray-500 mt-1">
-                                    Customer: {email.parsed_data!.order.customer_name}
+                                <div className="space-y-0.5">
+                                  <div className="font-medium text-gray-900">Order #{email.parsed_data!.order.order_number}</div>
+                                  <div className="text-xs text-gray-600 truncate" title={email.parsed_data!.order.customer_name}>
+                                    {email.parsed_data!.order.customer_name}
                                   </div>
                                   <div className="text-xs text-gray-500">
-                                    Account: {email.parsed_data!.account_number}
+                                    Acct: {email.parsed_data!.account_number}
                                   </div>
                                   {email.parsed_data!.order.order_date && (
                                     <div className="text-xs text-gray-500">
-                                      Date: {formatDateOnly(email.parsed_data!.order.order_date)}
+                                      {formatDateOnly(email.parsed_data!.order.order_date)}
                                     </div>
                                   )}
                                 </div>
                               ) : (
-                                <div className="truncate max-w-xs">{email.subject}</div>
+                                <div className="truncate" title={email.subject}>{email.subject}</div>
                               )}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-4 py-4 text-sm text-gray-500">
                               {isParsed ? (
                                 <div>
-                                  <div className="font-medium">{email.parsed_data!.items.length} items</div>
-                                  <div className="text-xs text-gray-500 mt-1">
-                                    Total: {email.parsed_data!.order.total_pieces} pieces
+                                  <div className="font-medium text-gray-900">{email.parsed_data!.items.length} items</div>
+                                  <div className="text-xs text-gray-500 mt-0.5">
+                                    {email.parsed_data!.order.total_pieces} pcs
                                   </div>
                                 </div>
                               ) : (
                                 <span className="text-gray-400">Not parsed</span>
                               )}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {formatDate(email.received_at)}
+                            <td className="px-4 py-4 text-sm text-gray-500">
+                              <div className="text-xs">
+                                {formatDate(email.received_at)}
+                              </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                            <td className="px-4 py-4">
+                              <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${
                                 isParsed
                                   ? 'bg-green-100 text-green-800'
                                   : 'bg-yellow-100 text-yellow-800'
@@ -1126,7 +1130,7 @@ const Inventory: React.FC = () => {
                                 {isParsed ? 'Parsed' : 'Pending'}
                               </span>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td className="px-4 py-4 text-sm text-gray-500">
                               <div className="flex flex-col space-y-2">
                                 <button
                                   onClick={() => handleViewOrderDetails(email)}

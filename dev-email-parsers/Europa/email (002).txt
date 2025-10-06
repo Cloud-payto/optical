@@ -1,0 +1,460 @@
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
+<style type="text/css" style="display:none;"> P {margin-top:0;margin-bottom:0;} </style>
+</head>
+<body dir="ltr">
+<div style="font-family: Arial, Helvetica, sans-serif; font-size: 14pt; color: rgb(0, 0, 0);" class="elementToProof">
+<br>
+</div>
+<div class="elementToProof" id="Signature">
+<div style="font-family: Arial, Helvetica, sans-serif; font-size: 14pt; color: rgb(0, 0, 0);" class="elementToProof">
+<br>
+</div>
+<div style="background-color: rgb(255, 255, 255); font-size: 14pt; color: rgb(0, 0, 0);" class="elementToProof">
+<span style="font-family: &quot;Lucida Handwriting&quot;, &quot;Apple Chancery&quot;, cursive;">Kaila Bucher</span><span style="font-family: Arial, Helvetica, sans-serif;">&nbsp;</span></div>
+<div style="font-family: &quot;Franklin Gothic Demi&quot;, &quot;Avenir Next Condensed Demi Bold&quot;, sans-serif; font-size: 12pt; color: rgb(0, 0, 0);" class="elementToProof">
+<b>Practice Manager</b></div>
+<div style="font-family: &quot;Franklin Gothic Demi&quot;, &quot;Avenir Next Condensed Demi Bold&quot;, sans-serif; font-size: 12pt; color: rgb(0, 0, 0);" class="elementToProof">
+<i><u>Paradise Valley Eye Care</u></i></div>
+<div style="font-family: &quot;Franklin Gothic Demi&quot;, &quot;Avenir Next Condensed Demi Bold&quot;, sans-serif; font-size: 12pt; color: rgb(0, 0, 0);" class="elementToProof">
+<i>12450 N 32nd Street</i></div>
+<div style="font-family: &quot;Franklin Gothic Demi&quot;, &quot;Avenir Next Condensed Demi Bold&quot;, sans-serif; font-size: 12pt; color: rgb(0, 0, 0);" class="elementToProof">
+<i>Phoenix, AZ 85032</i></div>
+<div style="font-family: &quot;Franklin Gothic Demi&quot;, &quot;Avenir Next Condensed Demi Bold&quot;, sans-serif; font-size: 12pt; color: rgb(0, 0, 0);" class="elementToProof">
+<span style="background-color: rgb(255, 255, 255);"><i>(602) 494-0054 office</i></span><i><br>
+</i><span style="background-color: rgb(255, 255, 255);"><i>(602) 788-8431 fax</i></span></div>
+<div style="font-family: &quot;Franklin Gothic Demi&quot;, &quot;Avenir Next Condensed Demi Bold&quot;, sans-serif; font-size: 12pt; color: rgb(0, 0, 0);" class="elementToProof">
+<i>manager@pveyecare.com</i></div>
+</div>
+<div id="appendonsend"></div>
+<hr style="display:inline-block;width:98%" tabindex="-1">
+<div id="divRplyFwdMsg" dir="ltr"><font face="Calibri, sans-serif" style="font-size:11pt" color="#000000"><b>From:</b> noreply@europaeye.com &lt;noreply@europaeye.com&gt;<br>
+<b>Sent:</b> Tuesday, June 24, 2025 1:13 PM<br>
+<b>To:</b> Kaila Bucher &lt;manager@pveyecare.com&gt;<br>
+<b>Subject:</b> Customer Receipt: Your Receipt for Order #1484047</font>
+<div>&nbsp;</div>
+</div>
+<style type="text/css">
+<!--
+td
+	{font-family:Arial,Helvetica,sans-serif;
+	font-size:12px;
+	font-style:normal;
+	line-height:normal;
+	font-weight:normal;
+	color:#000000}
+.x_tableheader
+	{font-family:Arial,Helvetica,sans-serif;
+	font-size:12px;
+	color:#FFFFFF;
+	background-color:#0B1B57}
+.x_secondaryheader
+	{font-family:Arial,Helvetica,sans-serif;
+	font-size:12px;
+	color:#000000;
+	background-color:#CCCCCC}
+.x_boldtext
+	{font-family:Arial,Helvetica,sans-serif;
+	font-size:12px;
+	font-style:normal;
+	line-height:normal;
+	font-weight:bold;
+	text-decoration:none;
+	color:#000000}
+-->
+</style>
+<div>
+<table align="center" border="0" cellspacing="0" cellpadding="3">
+<tbody>
+<tr>
+<td colspan="2" class="x_boldtext" align="center">PLEASE DO NOT REPLY TO THIS EMAIL<br>
+If you have questions or need to comment on an order, please contact your Europa sales representative
+</td>
+</tr>
+<tr>
+<td colspan="2">&nbsp;</td>
+</tr>
+<tr>
+<td>
+<table border="0" cellpadding="3" cellspacing="1">
+<tbody>
+<tr>
+<td align="left" class="x_boldtext">Order #:</td>
+<td align="left">1484047</td>
+</tr>
+<tr>
+<td align="left" class="x_boldtext">Order Placed By Rep:</td>
+<td align="left">NATALIE NELSON</td>
+</tr>
+<tr>
+<td align="left" class="x_boldtext">Date:</td>
+<td align="left">6/24/2025</td>
+</tr>
+<tr>
+<td colspan="2">&nbsp;</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td>
+<table border="0" cellpadding="3" cellspacing="1" width="100%">
+<tbody>
+<tr>
+<td class="x_tableheader" colspan="8" align="center"><strong>Customer</strong></td>
+</tr>
+<tr>
+<td class="x_secondaryheader" align="center">Account</td>
+<td class="x_secondaryheader" align="left">Name</td>
+<td class="x_secondaryheader" align="left">Address</td>
+<td class="x_secondaryheader" align="left">Address 2</td>
+<td class="x_secondaryheader" align="left">City</td>
+<td class="x_secondaryheader" align="center">Province</td>
+<td class="x_secondaryheader" align="center">Postal Code</td>
+<td class="x_secondaryheader" align="center">Phone</td>
+</tr>
+<tr>
+<td align="center">AZ6372</td>
+<td align="left">PARADISE VALLEY EYECARE</td>
+<td align="left">12450 N. 32ND ST.</td>
+<td align="left">UNIT 1</td>
+<td align="left">PHOENIX</td>
+<td align="center">AZ</td>
+<td align="center">85032</td>
+<td align="center" nowrap="">602-494-0054</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>
+<table border="0" cellpadding="3" cellspacing="1" width="100%">
+<tbody>
+<tr>
+<td class="x_tableheader" colspan="6" align="center"><strong>Ship Address</strong></td>
+</tr>
+<tr>
+<td class="x_secondaryheader" align="left">Name</td>
+<td class="x_secondaryheader" align="left">Address</td>
+<td class="x_secondaryheader" align="left">Address 2</td>
+<td class="x_secondaryheader" align="left">City</td>
+<td class="x_secondaryheader" align="center">Province</td>
+<td class="x_secondaryheader" align="center">Postal Code</td>
+</tr>
+<tr>
+<td align="left">PARADISE VALLEY EYECARE</td>
+<td align="left">12450 N. 32ND ST.</td>
+<td align="left">UNIT 1</td>
+<td align="left">PHOENIX</td>
+<td align="center">AZ</td>
+<td align="center">85032</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>
+<table border="0" cellpadding="3" cellspacing="1" width="100%">
+<tbody>
+<tr>
+<td class="x_tableheader" colspan="6" align="center"><strong>Order Items</strong></td>
+</tr>
+<tr>
+<td class="x_secondaryheader" align="center">Order Type</td>
+<td class="x_secondaryheader" align="center">Model</td>
+<td class="x_secondaryheader" align="center">Color</td>
+<td class="x_secondaryheader" align="center">Size</td>
+<td class="x_secondaryheader" align="center">Qty</td>
+<td class="x_secondaryheader" align="center">Available Status</td>
+</tr>
+<tr>
+<td class="" align="center"></td>
+<td class="" align="center">American Optical - Adams</td>
+<td class="" align="center">1 Black - Green Nylon Polarized - ST</td>
+<td class="" align="center">52</td>
+<td class="" align="center">1</td>
+<td class="" align="center">Available</td>
+</tr>
+<tr>
+<td class="" colspan="6" align="center"></td>
+</tr>
+<tr>
+<td class="" align="center"></td>
+<td class="" align="center">American Optical - Blair</td>
+<td class="" align="center">3 Burlwood Pearl - Demo - ST</td>
+<td class="" align="center">51</td>
+<td class="" align="center">1</td>
+<td class="" align="center">Available</td>
+</tr>
+<tr>
+<td class="" colspan="6" align="center"></td>
+</tr>
+<tr>
+<td class="" align="center"></td>
+<td class="" align="center">American Optical - Margot</td>
+<td class="" align="center">2 Rose Gold - Brown Nylon Polarized - ST</td>
+<td class="" align="center">58</td>
+<td class="" align="center">1</td>
+<td class="" align="center">Available</td>
+</tr>
+<tr>
+<td class="" colspan="6" align="center"></td>
+</tr>
+<tr>
+<td class="" align="center"></td>
+<td class="" align="center">American Optical - Original Pilot</td>
+<td class="" align="center">1 Gold - Gold Mirror Glass Polarized - BT</td>
+<td class="" align="center">55</td>
+<td class="" align="center">1</td>
+<td class="" align="center">BACK-ORDERED</td>
+</tr>
+<tr>
+<td class="" colspan="6" align="center"></td>
+</tr>
+<tr>
+<td class="" align="center"></td>
+<td class="" align="center">American Optical - Saratoga</td>
+<td class="" align="center">10 Ebony - Gray Nylon Polarized - ST</td>
+<td class="" align="center">54</td>
+<td class="" align="center">1</td>
+<td class="" align="center">Available</td>
+</tr>
+<tr>
+<td class="" colspan="6" align="center"></td>
+</tr>
+<tr>
+<td class="" align="center">FF</td>
+<td class="" align="center">Cinzia - CIN-5080</td>
+<td class="" align="center">1 Peacock Demi</td>
+<td class="" align="center">53</td>
+<td class="" align="center">1</td>
+<td class="" align="center">Available</td>
+</tr>
+<tr>
+<td class="" colspan="6" align="center">Kaitlyn Covington warranty </td>
+</tr>
+<tr>
+<td class="" align="center"></td>
+<td class="" align="center">Cinzia - CIN-5164</td>
+<td class="" align="center">1 Shadow</td>
+<td class="" align="center">53</td>
+<td class="" align="center">1</td>
+<td class="" align="center">Available</td>
+</tr>
+<tr>
+<td class="" colspan="6" align="center"></td>
+</tr>
+<tr>
+<td class="" align="center"></td>
+<td class="" align="center">Cinzia - CIN-5180</td>
+<td class="" align="center">1 Teal</td>
+<td class="" align="center">52</td>
+<td class="" align="center">1</td>
+<td class="" align="center">Available</td>
+</tr>
+<tr>
+<td class="" colspan="6" align="center"></td>
+</tr>
+<tr>
+<td class="" align="center"></td>
+<td class="" align="center">Cinzia - CIN-5184</td>
+<td class="" align="center">3 Shadow</td>
+<td class="" align="center">51</td>
+<td class="" align="center">1</td>
+<td class="" align="center">Available</td>
+</tr>
+<tr>
+<td class="" colspan="6" align="center"></td>
+</tr>
+<tr>
+<td class="" align="center"></td>
+<td class="" align="center">Cinzia - CIN-5186</td>
+<td class="" align="center">3 Navy Tortoise</td>
+<td class="" align="center">50</td>
+<td class="" align="center">1</td>
+<td class="" align="center">Available</td>
+</tr>
+<tr>
+<td class="" colspan="6" align="center"></td>
+</tr>
+<tr>
+<td class="" align="center"></td>
+<td class="" align="center">Cinzia - CIN-5187</td>
+<td class="" align="center">1 Sand / Gold</td>
+<td class="" align="center">53</td>
+<td class="" align="center">1</td>
+<td class="" align="center">Available</td>
+</tr>
+<tr>
+<td class="" colspan="6" align="center"></td>
+</tr>
+<tr>
+<td class="" align="center"></td>
+<td class="" align="center">Displays / POP - CINZIA COUNTER CARD 5137</td>
+<td class="" align="center">None</td>
+<td class="" align="center"></td>
+<td class="" align="center">6</td>
+<td class="" align="center">Available</td>
+</tr>
+<tr>
+<td class="" colspan="6" align="center"></td>
+</tr>
+<tr>
+<td class="" align="center"></td>
+<td class="" align="center">Displays / POP - Cinzia Mirror 1-pc Logo Block</td>
+<td class="" align="center">None</td>
+<td class="" align="center"></td>
+<td class="" align="center">8</td>
+<td class="" align="center">Available</td>
+</tr>
+<tr>
+<td class="" colspan="6" align="center"></td>
+</tr>
+<tr>
+<td class="" align="center"></td>
+<td class="" align="center">Michael Ryen - MR-314</td>
+<td class="" align="center">1 Matte Black / Gunmetal</td>
+<td class="" align="center">60</td>
+<td class="" align="center">1</td>
+<td class="" align="center">Available</td>
+</tr>
+<tr>
+<td class="" colspan="6" align="center"></td>
+</tr>
+<tr>
+<td class="" align="center"></td>
+<td class="" align="center">Michael Ryen - MR-380</td>
+<td class="" align="center">1 Tortoise</td>
+<td class="" align="center">58</td>
+<td class="" align="center">1</td>
+<td class="" align="center">Available</td>
+</tr>
+<tr>
+<td class="" colspan="6" align="center"></td>
+</tr>
+<tr>
+<td class="" align="center"></td>
+<td class="" align="center">Michael Ryen - MR-412</td>
+<td class="" align="center">3 Crystal / Gunmetal</td>
+<td class="" align="center">49</td>
+<td class="" align="center">1</td>
+<td class="" align="center">Available</td>
+</tr>
+<tr>
+<td class="" colspan="6" align="center"></td>
+</tr>
+<tr>
+<td class="" align="center"></td>
+<td class="" align="center">Michael Ryen - MR-430</td>
+<td class="" align="center">3 Sand / Gold</td>
+<td class="" align="center">50</td>
+<td class="" align="center">1</td>
+<td class="" align="center">Available</td>
+</tr>
+<tr>
+<td class="" colspan="6" align="center"></td>
+</tr>
+<tr>
+<td class="" align="center"></td>
+<td class="" align="center">Michael Ryen - MR-442</td>
+<td class="" align="center">1 Black / Crystal</td>
+<td class="" align="center">52</td>
+<td class="" align="center">1</td>
+<td class="" align="center">Available</td>
+</tr>
+<tr>
+<td class="" colspan="6" align="center"></td>
+</tr>
+<tr>
+<td class="" align="center"></td>
+<td class="" align="center">Michael Ryen - MR-446</td>
+<td class="" align="center">1 Gunmetal</td>
+<td class="" align="center">55</td>
+<td class="" align="center">1</td>
+<td class="" align="center">Available</td>
+</tr>
+<tr>
+<td class="" colspan="6" align="center"></td>
+</tr>
+<tr>
+<td class="" align="center"></td>
+<td class="" align="center">Michael Ryen - MR-450</td>
+<td class="" align="center">1 Chocolate / Black</td>
+<td class="" align="center">53</td>
+<td class="" align="center">1</td>
+<td class="" align="center">Available</td>
+</tr>
+<tr>
+<td class="" colspan="6" align="center"></td>
+</tr>
+<tr>
+<td class="" align="center"></td>
+<td class="" align="center">Michael Ryen - MR-450</td>
+<td class="" align="center">2 Gunmetal / Navy</td>
+<td class="" align="center">53</td>
+<td class="" align="center">1</td>
+<td class="" align="center">Available</td>
+</tr>
+<tr>
+<td class="" colspan="6" align="center"></td>
+</tr>
+<tr>
+<td class="" align="center"></td>
+<td class="" align="center">Michael Ryen - MRM-132</td>
+<td class="" align="center">2 Black</td>
+<td class="" align="center">59</td>
+<td class="" align="center">1</td>
+<td class="" align="center">Available</td>
+</tr>
+<tr>
+<td class="" colspan="6" align="center"></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td>
+<table border="0" cellpadding="3" cellspacing="1">
+<tbody>
+<tr>
+<td class="x_boldtext">Total Pieces:</td>
+<td align="right">34</td>
+</tr>
+<tr>
+<td class="x_boldtext">Terms:</td>
+<td align="right">NET 60</td>
+</tr>
+<tr>
+<td class="x_boldtext">Ship Method:</td>
+<td align="right">UPS GROUND</td>
+</tr>
+<tr>
+<td class="x_boldtext">Special Instructions:</td>
+<td align="right">&nbsp;</td>
+</tr>
+<tr>
+<td colspan="2">Please add Cin block pop would not add! </td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+<img alt="" width="1" height="1" border="0" style="height:1px!important; width:1px!important; border-width:0!important; margin-top:0!important; margin-bottom:0!important; margin-right:0!important; margin-left:0!important; padding-top:0!important; padding-bottom:0!important; padding-right:0!important; padding-left:0!important" src="https://linkprotect.cudasvc.com/url?a=http%3a%2f%2furl3276.europaeye.com%2fwf%2fopen%3fupn%3du001.JXi-2Bl-2BGk2lIbNsGRdihv98pgOM-2BnkUCj0-2B-2BMnYx-2Fa1CYwSFfPmU30eWKxZnfkhBcuq4BOIiKmf94SX3nkm-2BH5ODV19JnNjxwLMNto-2BD0c-2FvpgiWCg4OjciKZzaWnsVmGxgS5ewOBlHqtwP0-2FSiI-2BRm0RKSZWDJRoBkjCi93-2FlF9KGa-2FM4IvBrsz2xxlo-2BEXxR7s-2F-2FYNbHqALQL-2FDvj-2BI3tXyL4Mj6AHNnmHMa9abrZUT47DVvBf0BFpRF7l959GT1StxZa0hP7mkLGzE-2BWhdZ5p5uMqEum2NyHfWDGK2yKQdbS0N3suHIuuQm60AbsB9&amp;c=E,1,FVSZwUADH5uV7oZuEPA-y7ZD38BDX6CIxLcbvY4nh-flrBLvGVorjFZLhffxUJTs_xEb39cCvLrtZDkOiSQR9ap6Gn8UjpkeTiJVODnCQCGyh4MlCm9sBg,,&amp;typo=1">
+</div>
+</body>
+</html>
