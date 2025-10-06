@@ -131,20 +131,34 @@ class EtniaBarcelonaService {
         }
 
         // Parse Date - format: 09/15/2025
-        const dateMatch = text.match(/Date\s+(\d{2}\/\d{2}\/\d{4})/);
+        // The date can appear in different ways:
+        // 1. In table format: "Date                09/15/2025" (with multiple spaces/tabs)
+        // 2. On line items: "09/15/2025" at the start after reference
+        const dateMatch = text.match(/Date[\s\t]+(\d{2}\/\d{2}\/\d{4})/i) ||
+                          text.match(/\n(\d{2}\/\d{2}\/\d{4})\n/);
         if (dateMatch) {
             orderInfo.orderDate = dateMatch[1];
         }
 
-        // Parse Customer ID
-        const customerIDMatch = text.match(/Customer ID\s+(\d+)/);
+        // Parse Customer ID - can have multiple spaces/tabs like the date
+        // Also try matching across lines
+        let customerIDMatch = text.match(/Customer ID[\s\t]+(\d+)/i);
+        if (!customerIDMatch) {
+            // Try matching across newlines
+            customerIDMatch = text.match(/Customer ID[\s\t\n]+(\d+)/i);
+        }
         if (customerIDMatch) {
             orderInfo.customerID = customerIDMatch[1];
             orderInfo.accountNumber = customerIDMatch[1]; // Use Customer ID as account number
         }
 
-        // Parse Customer Reference
-        const refMatch = text.match(/Customer Reference\s+([\w\-]+)/);
+        // Parse Customer Reference - can have multiple spaces/tabs
+        // Also try matching across lines
+        let refMatch = text.match(/Customer Reference[\s\t]+([\w\-]+)/i);
+        if (!refMatch) {
+            // Try matching across newlines
+            refMatch = text.match(/Customer Reference[\s\t\n]+([\w\-]+)/i);
+        }
         if (refMatch) {
             orderInfo.customerReference = refMatch[1];
         }

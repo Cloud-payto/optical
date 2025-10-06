@@ -414,3 +414,37 @@ export interface HealthResponse {
 export async function checkHealth(): Promise<HealthResponse> {
   return apiRequest<HealthResponse>('/health');
 }
+
+// Dashboard Stats API functions
+export interface DashboardStats {
+  totalOrders: number;
+  totalInventory: number;
+  totalValue: number;
+  pendingItems: number;
+}
+
+export interface BrandStats {
+  brandName: string;
+  itemCount: number;
+  totalValue: number;
+}
+
+export interface VendorInventoryStats {
+  vendorId: string;
+  vendorName: string;
+  totalItems: number;
+  totalValue: number;
+  brands: BrandStats[];
+}
+
+export async function fetchDashboardStats(userId?: string): Promise<DashboardStats> {
+  const currentUserId = userId || await getCurrentUserIdFromSession();
+  const response = await apiRequest<{ success: boolean; stats: DashboardStats }>(`/stats/${currentUserId}`);
+  return response.stats;
+}
+
+export async function fetchInventoryByVendor(userId?: string): Promise<VendorInventoryStats[]> {
+  const currentUserId = userId || await getCurrentUserIdFromSession();
+  const response = await apiRequest<{ success: boolean; vendors: VendorInventoryStats[] }>(`/stats/${currentUserId}/inventory-by-vendor`);
+  return response.vendors;
+}

@@ -656,6 +656,86 @@ const statsOperations = {
     } catch (error) {
       handleSupabaseError(error, 'getDashboardStats');
     }
+  },
+
+  async getInventoryByVendorAndBrand(userId) {
+    try {
+      // Get all confirmed inventory with vendor and brand info
+      const { data: inventory, error } = await supabase
+        .from('inventory')
+        .select(`
+          id,
+          brand,
+          model,
+          quantity,
+          wholesale_price,
+          status,
+          vendor:vendors(id, name),
+          enriched_data
+        `)
+        .eq('account_id', userId)
+        .eq('status', 'confirmed')
+        .order('vendor_id');
+
+      if (error) throw error;
+
+      // Group by vendor, then by brand
+      const vendorMap = new Map();
+
+      (inventory || []).forEach(item => {
+        const vendorName = item.vendor?.name || 'Unknown Vendor';
+        const vendorId = item.vendor?.id || 'unknown';
+        const brandName = item.brand || 'Unknown Brand';
+
+        if (!vendorMap.has(vendorId)) {
+          vendorMap.set(vendorId, {
+            vendorId,
+            vendorName,
+            totalItems: 0,
+            totalValue: 0,
+            brands: new Map()
+          });
+        }
+
+        const vendor = vendorMap.get(vendorId);
+
+        if (!vendor.brands.has(brandName)) {
+          vendor.brands.set(brandName, {
+            brandName,
+            itemCount: 0,
+            totalValue: 0,
+            items: []
+          });
+        }
+
+        const brand = vendor.brands.get(brandName);
+        const itemValue = (item.wholesale_price || 0) * (item.quantity || 1);
+
+        brand.itemCount += item.quantity || 1;
+        brand.totalValue += itemValue;
+        brand.items.push(item);
+
+        vendor.totalItems += item.quantity || 1;
+        vendor.totalValue += itemValue;
+      });
+
+      // Convert maps to arrays
+      const vendorStats = Array.from(vendorMap.values()).map(vendor => ({
+        vendorId: vendor.vendorId,
+        vendorName: vendor.vendorName,
+        totalItems: vendor.totalItems,
+        totalValue: vendor.totalValue,
+        brands: Array.from(vendor.brands.values()).map(brand => ({
+          brandName: brand.brandName,
+          itemCount: brand.itemCount,
+          totalValue: brand.totalValue
+        }))
+      }));
+
+      return vendorStats;
+    } catch (error) {
+      handleSupabaseError(error, 'getInventoryByVendorAndBrand');
+    }
   }
 };
 
