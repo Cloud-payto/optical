@@ -3,6 +3,7 @@ const router = express.Router();
 const { parseModernOpticalHtml } = require('../parsers/modernopticalparser');
 const SafiloService = require('../parsers/SafiloService');
 const { parseLuxotticaHtml } = require('../parsers/luxotticaParser');
+const EtniaBarcelonaService = require('../parsers/EtniaBarcelonaService');
 
 /**
  * POST /api/parse/modernoptical
@@ -175,6 +176,108 @@ router.post('/luxottica', async (req, res) => {
     return res.status(500).json({
       success: false,
       error: 'Failed to parse Luxottica email',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/parse/etnia-barcelona
+ * Parse Etnia Barcelona PDF order
+ *
+ * Body: { pdfBuffer (base64), accountId }
+ * Returns: { success, accountId, vendor, order, items, unique_frames }
+ */
+router.post('/etnia-barcelona', async (req, res) => {
+  try {
+    const { pdfBuffer, accountId } = req.body;
+
+    console.log('[PARSE] Etnia Barcelona parse request received');
+    console.log('  Account ID:', accountId);
+    console.log('  PDF buffer length:', pdfBuffer?.length || 0);
+
+    // Validate input
+    if (!pdfBuffer) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required field: pdfBuffer must be provided'
+      });
+    }
+
+    // Convert base64 to buffer if needed
+    let buffer;
+    if (typeof pdfBuffer === 'string') {
+      buffer = Buffer.from(pdfBuffer, 'base64');
+    } else if (Buffer.isBuffer(pdfBuffer)) {
+      buffer = pdfBuffer;
+    } else {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid pdfBuffer format'
+      });
+    }
+
+    // Parse the PDF using Etnia Barcelona service
+    const etniaService = new EtniaBarcelonaService({ debug: false });
+    const result = await etniaService.processOrder(buffer);
+
+    console.log('[PARSE] Parse completed successfully');
+    console.log('  Order number:', result.orderInfo?.orderNumber);
+    console.log('  Items found:', result.frames?.length || 0);
+
+    // Map to standard format
+    const items = result.frames.map(frame => ({
+      brand: frame.brand,
+      model: frame.model,
+      color: frame.colorName,
+      color_code: frame.colorCode,
+      size: frame.size,
+      quantity: frame.quantity || 1,
+      upc: frame.upc,
+      wholesale_price: frame.wholesalePrice,
+      sku: frame.sku,
+      full_size: frame.fullSize,
+      temple_length: frame.temple,
+      material: frame.material,
+      frame_type: frame.frameType
+    }));
+
+    // Get unique frames (brand + model combinations)
+    const uniqueFramesSet = new Set();
+    const uniqueFrames = [];
+    result.frames.forEach(frame => {
+      const key = `${frame.brand}-${frame.model}`;
+      if (!uniqueFramesSet.has(key)) {
+        uniqueFramesSet.add(key);
+        uniqueFrames.push({
+          brand: frame.brand,
+          model: frame.model
+        });
+      }
+    });
+
+    // Return the parsed data
+    return res.status(200).json({
+      success: true,
+      accountId: accountId,
+      vendor: 'etnia_barcelona',
+      order: {
+        order_number: result.orderInfo.orderNumber,
+        customer_name: result.orderInfo.customerName,
+        order_date: result.orderInfo.orderDate,
+        total_pieces: result.statistics.totalPieces,
+        account_number: result.orderInfo.accountNumber,
+        reference_number: result.orderInfo.customerReference
+      },
+      items: items,
+      unique_frames: uniqueFrames
+    });
+
+  } catch (error) {
+    console.error('[PARSE] Error parsing Etnia Barcelona PDF:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to parse Etnia Barcelona PDF',
       message: error.message
     });
   }
