@@ -1,0 +1,226 @@
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body dir="auto"><br id="lineBreakAtBeginningOfSignature"><div dir="ltr">Sent from my iPhone</div><div dir="ltr"><br>Begin forwarded message:<br><br></div><blockquote type="cite"><div dir="ltr"><b>From:</b> noreply@modernoptical.com<br><b>Date:</b> September 5, 2025 at 11:07:20 AM MST<br><b>To:</b> amrohabib@yahoo.com<br><b>Subject:</b> <b>Your Receipt for Order Number 6817</b><br><b>Reply-To:</b> noreply@modernoptical.com<br><br></div></blockquote><blockquote type="cite"><div dir="ltr">﻿
+
+
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
+	<link href="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2ffonts.googleapis.com%2fcss%3ffamily%3dRoboto&amp;c=E,1,1xzs91pMD74wT0lVRe5FAp2zzbedp9687fPeBFH4t82aMjJ7wIeWS8yF0sIom3SPM1DY9kgxiDBIqO5tfzrpdy-taGZjq4JUEwrz3rP4&amp;typo=1" rel="stylesheet">
+        <link rel="stylesheet" href="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fmaxcdn.bootstrapcdn.com%2fbootstrap%2f4.0.0%2fcss%2fbootstrap.min.css&amp;c=E,1,7tIT0smcTn1QsdpYsU1RlOs4it1YvRe_byGl_KkybhOOhXr12VhmXCzMnmPlHeDLP1RXEZjPWMMX7qfqX3BOkR-9tLeEg8uD1ZW3vgSli_XvSZNScLIt8A,,&amp;typo=1" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> 
+         
+     
+
+	<div class="container">
+    	<!-- <div align="center"><img width="250" src="[logo url]" /></div> 
+		<div align="center">[sub title]                  
+			<br /> Tel: [company phone]                 
+			<br /> Fax: [company fax]                 
+			<br /> email:<a href="mailto: [company email]"> [company email]</a>                 
+			<br /> Web: <a href="[company web]">[company web]]</a>             
+		</div> <br/>  -->
+		<div align="center">PLEASE DO NOT REPLY TO THIS EMAIL<br>If you have questions or need to comment on an order, send email to 
+				<a href="mailto:custsvc@modernoptical.com?subject=Rep Order:6817">custsvc@modernoptical.com</a></div><br>
+		<div class="card">
+			<div class="card-header">
+				<h3>Order</h3>
+			</div>
+            <div class="card-body">
+            	<p class="card-text">
+					Order Number: 6817
+					<br> Placed By Rep: Payton Millet
+					<br> Date: 9/5/2025
+					<br>PO/Reference:
+				</p>
+			</div>
+		</div><br>
+		<div class="row">
+			<div class="col">
+				<div class="card">
+					<h3 class="card-header">Customer</h3>
+					<div class="card-body">
+						<p class="card-text">
+							MARANA EYE CARE (93277)
+							<br> 4340 W INA RD 
+							<br>TUCSON , AZ 85741-2232 
+							<br> Phone: 520-833-6337
+						</p>
+					</div>
+				</div>
+			</div>
+			<div class="col">
+				<div class="card">
+					<h3 class="card-header">Ship To</h3>
+					<div class="card-body">
+						<p class="card-text">
+							MARANA EYE CARE
+							<br> 4340 W INA RD 
+							<br> TUCSON, AZ 85741-2232
+							<br> Phone: 
+                                                       <br>Ship Method: DEFAULT
+						</p>
+					</div>
+				</div>
+			</div>
+		</div><br>
+		<div class="card">
+			<div class="card-header">
+				<h3>
+					<i class="glyphicon glyphicon-list-alt"></i> Order Items
+				</h3>
+			</div>
+			<div class="card-body">
+				<div class="table-responsive">
+					<table class="table">
+						<thead>
+							<tr>
+                            	<th>Image</th> 
+								<th>Model</th>
+								<th>Color</th>
+								<th>Size</th>
+								<th>Qty</th>
+							</tr>
+						</thead>
+						<tbody> <tr>
+<td><img src="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fimageserver.jiecosystem.net%2fimage%2fmodernoptical%2f675254228656&amp;c=E,1,SsWtfR7Cq-mxFQNfDMdBC7nERnJvIrjFRfNR7cujYzqPlbg3QMw58Pp_XyhM_VKx5HDynmLVTtK2zG1fFxXQCY9HiO2-blgHeNOOi0YbFTXfZuzDElc2&amp;typo=1" class="img-responsive" alt="No Image" height="52" width="100" data-unique-identifier=""></td>
+<td>B.M.E.C. - BIG AIR</td>
+<td>BLACK</td>
+<td>54</td>
+<td>1</td>
+</tr>
+<tr><td colspan="5"></td></tr><tr>
+<td><img src="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fimageserver.jiecosystem.net%2fimage%2fmodernoptical%2f675254179613&amp;c=E,1,Ky8ch1DSUh-CPl4nUaw1gMertYeyE7Ytpeb3P9fnHXeJxUa1b-xDF096WQEAVCL4zKxDceci17J8aqWlanHiXCdmQkn9Tl3vq8b4ln0rmxjmd3iDDJzKKSuw&amp;typo=1" class="img-responsive" alt="No Image" height="52" width="100" data-unique-identifier=""></td>
+<td>B.M.E.C. - BIG BEAT</td>
+<td>BLACK/BROWN</td>
+<td>60</td>
+<td>1</td>
+</tr>
+<tr><td colspan="5"></td></tr><tr>
+<td><img src="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fimageserver.jiecosystem.net%2fimage%2fmodernoptical%2f675254222883&amp;c=E,1,_6mBF1YUTP0NGWsrK7Z-7geE3nJkvxh3llZuDeRMmLOBbsTpqc3BitQcJbJDxUm79CSELxIZ2GMwNnZ5GxLSENwwBFagzYHD5kHrXPat8osIV6N4I3hVQkhh&amp;typo=1" class="img-responsive" alt="No Image" height="52" width="100" data-unique-identifier=""></td>
+<td>B.M.E.C. - BIG BOLT</td>
+<td>NAVY FADE</td>
+<td>58</td>
+<td>1</td>
+</tr>
+<tr><td colspan="5"></td></tr><tr>
+<td><img src="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fimageserver.jiecosystem.net%2fimage%2fmodernoptical%2f675254231328&amp;c=E,1,nVHgDSuwvMoPYE8hVOD_w_opI5sNWh9gCBGQ8SG13QbsaJRONAIy9incueQeviXF_QYd8qb8y2N-NfvFagn8LQcarOo17OOn0rT40KQmOlbFaeEGzHX-22bE5J-x&amp;typo=1" class="img-responsive" alt="No Image" height="52" width="100" data-unique-identifier=""></td>
+<td>B.M.E.C. - BIG DUDE</td>
+<td>RUST/BROWN</td>
+<td>57</td>
+<td>1</td>
+</tr>
+<tr><td colspan="5"></td></tr><tr>
+<td><img src="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fimageserver.jiecosystem.net%2fimage%2fmodernoptical%2f675254299588&amp;c=E,1,Q__x-W8GGymFFeFZhBYhbdo3KSQ4ApncJ7casBtF7oAY_Bp6-2vibiQjSbbnJTfMvcmqXxcajmjy7nmugout6pIfmyguraOf7IhzbZ8HABOS7w,,&amp;typo=1" class="img-responsive" alt="No Image" height="52" width="100" data-unique-identifier=""></td>
+<td>B.M.E.C. - BIG FLOW</td>
+<td>NAVY/GUN/NAVY</td>
+<td>58</td>
+<td>1</td>
+</tr>
+<tr><td colspan="5"></td></tr><tr>
+<td><img src="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fimageserver.jiecosystem.net%2fimage%2fmodernoptical%2f675254304657&amp;c=E,1,Fz1FYCkaWBlzHjEP7TJo8_svA7oZ1DetCOu2La4bQPrGiooRxL5q5gp3_-jB2c2koQbKzZ3XEdhZlLUZpy59RHyD4YG4s5bzKADFNyn4ETMqJ2iMSWs,&amp;typo=1" class="img-responsive" alt="No Image" height="52" width="100" data-unique-identifier=""></td>
+<td>B.M.E.C. - BIG FRONT</td>
+<td>AQUA/BROWN DEMI</td>
+<td>57</td>
+<td>1</td>
+</tr>
+<tr><td colspan="5"></td></tr><tr>
+<td><img src="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fimageserver.jiecosystem.net%2fimage%2fmodernoptical%2f675254305487&amp;c=E,1,9Cbwv52kFOVPPrxAXIrD7Ae5OZHCYvAbBSp1HkIu8J9sJZbBvpunyxfadsSV08799cYs9f7dsaw154dfg1LQ-Qbe-vJ3sj6UqQItaak67oPi&amp;typo=1" class="img-responsive" alt="No Image" height="52" width="100" data-unique-identifier=""></td>
+<td>B.M.E.C. - BIG RIVER</td>
+<td>GREY/GUNMETAL</td>
+<td>55</td>
+<td>1</td>
+</tr>
+<tr><td colspan="5"></td></tr><tr>
+<td><img src="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fimageserver.jiecosystem.net%2fimage%2fmodernoptical%2f675254228748&amp;c=E,1,IJnlsf8RcGheLp6N-Xc0S79zfkXndsidaZ2Tx9EjmnTTxeuzAElfqWMmK0l-kM006YlesLy30ZiwgLaxyqA3Sb86OSAsoMYjoCHXmJkSSm6b02JG_V_4UW1i&amp;typo=1" class="img-responsive" alt="No Image" height="52" width="100" data-unique-identifier=""></td>
+<td>GB+ COLLECTION - BEAUTIFUL</td>
+<td>BLACK/GOLD</td>
+<td>56</td>
+<td>1</td>
+</tr>
+<tr><td colspan="5"></td></tr><tr>
+<td><img src="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fimageserver.jiecosystem.net%2fimage%2fmodernoptical%2f675254243062&amp;c=E,1,6P3Nrao8jIxjBJT3PIH5UU-KtQmoH_F9ri8E2AOiZasSUgcW2xNAKRqbgSINdGuMA8R5o_lKMWZIxp-eRfu3KXSuL9IKfPtRgK26tiqNS5t06BriM49PK-c,&amp;typo=1" class="img-responsive" alt="No Image" height="52" width="100" data-unique-identifier=""></td>
+<td>GB+ COLLECTION - DETERMINED</td>
+<td>TEAL/PINK</td>
+<td>58</td>
+<td>1</td>
+</tr>
+<tr><td colspan="5"></td></tr><tr>
+<td><img src="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fimageserver.jiecosystem.net%2fimage%2fmodernoptical%2f675254313710&amp;c=E,1,OwD2Hbbw8BfMwRy_wDElwg8rAZdKh1XvQ7Y5Jh2JyjDuJvYw8qXgY_ns1L9VgwaJ3KXbYG_Bm7TjSMZKFwcxJ6B8WcWClca_KGTPnnyy5BkJlyyLdATp&amp;typo=1" class="img-responsive" alt="No Image" height="52" width="100" data-unique-identifier=""></td>
+<td>GB+ COLLECTION - WONDROUS</td>
+<td>PINK CRYST/PK</td>
+<td>54</td>
+<td>1</td>
+</tr>
+<tr><td colspan="5"></td></tr><tr>
+<td><img src="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fimageserver.jiecosystem.net%2fimage%2fmodernoptical%2f675254300505&amp;c=E,1,Y03hOlPSMmE0kyOe6ttaNbBNlMGsclkqTK12vHJVIb_OSoXCeAG_uxrWdCDw4n1-1zK27Bwn_RDFKFyHbL4NNVdDPBejup3EYDJv13Xw&amp;typo=1" class="img-responsive" alt="No Image" height="52" width="100" data-unique-identifier=""></td>
+<td>MODERN PLASTICS II - CLEO</td>
+<td>CLEO BLACK CRY</td>
+<td>52</td>
+<td>1</td>
+</tr>
+<tr><td colspan="5"></td></tr><tr>
+<td><img src="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fimageserver.jiecosystem.net%2fimage%2fmodernoptical%2f675254314236&amp;c=E,1,BVybWCAPiWopcgacJ_KdMzVO2w-NT6PGjd-6ZImIehibDlN8LxRaoQrUT6vpua6x5PEkLob1hc4Bk5aH5YLivKsLk4PkN0v9fSlgtXJNwDCXX3SOyjvGl06E&amp;typo=1" class="img-responsive" alt="No Image" height="52" width="100" data-unique-identifier=""></td>
+<td>MODERN PLASTICS II - CONGENIAL</td>
+<td>BLUE/PINK CRYST</td>
+<td>54</td>
+<td>1</td>
+</tr>
+<tr><td colspan="5"></td></tr><tr>
+<td><img src="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fimageserver.jiecosystem.net%2fimage%2fmodernoptical%2f675254321807&amp;c=E,1,3AW87h58Yj5B6ziqIMj2iRkpZABJGcRXuY8b4e8vdLEbphrkIlsMA7l7bjDgMQ79OzEnjzhXIwf9QkNp0mSBc-3qH14wc8YlQ6xbsTFoT-qYPyVQSSPFZY60lg,,&amp;typo=1" class="img-responsive" alt="No Image" height="52" width="100" data-unique-identifier=""></td>
+<td>MODERN PLASTICS II - ESTIMATE</td>
+<td>BLACK/BURG CRY</td>
+<td>54</td>
+<td>1</td>
+</tr>
+<tr><td colspan="5"></td></tr><tr>
+<td><img src="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fimageserver.jiecosystem.net%2fimage%2fmodernoptical%2f675254321814&amp;c=E,1,pSN3ozuj-OJc0OddpV_TLeN_w_7wOtaquYLEckw2IODJgKjJk4VafHKAViv1mHltGv0Tno8mgLP56Rm35sQxvnqDMVGHbTL5RnIrg-uwPYpKxjxmcEPK&amp;typo=1" class="img-responsive" alt="No Image" height="52" width="100" data-unique-identifier=""></td>
+<td>MODERN PLASTICS II - ESTIMATE</td>
+<td>BLACK/GREY CRY</td>
+<td>54</td>
+<td>1</td>
+</tr>
+<tr><td colspan="5"></td></tr><tr>
+<td><img src="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fimageserver.jiecosystem.net%2fimage%2fmodernoptical%2f675254303308&amp;c=E,1,npjcFDbuspU6EJBmwyYUMboWWzUNIELCq3OnjijSGVv2_IR5e78vnJTtcZE2_yCpKtcu_zwPkAGLeSIE2KgXjvsPFlkCypS9QUwKGidYYx1Y&amp;typo=1" class="img-responsive" alt="No Image" height="52" width="100" data-unique-identifier=""></td>
+<td>MODERN PLASTICS II - FICTION</td>
+<td>BLACK/CRYST GRY</td>
+<td>53</td>
+<td>1</td>
+</tr>
+<tr><td colspan="5"></td></tr><tr>
+<td><img src="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fimageserver.jiecosystem.net%2fimage%2fmodernoptical%2f675254314342&amp;c=E,1,eVUPUm0o0DwdFMo0qZ4ypmTkGncbAGcoq_40mwj3uFcTBIpOPPyTlqN6QDtVjtXaThrkJ-r3SECgYyCRUOHBA2f-dT1EW8bT1E5-roYUls7gg6g,&amp;typo=1" class="img-responsive" alt="No Image" height="52" width="100" data-unique-identifier=""></td>
+<td>MODERN PLASTICS II - GRADIENT</td>
+<td>NAVY CRYST/BRN</td>
+<td>52</td>
+<td>1</td>
+</tr>
+<tr><td colspan="5"></td></tr><tr>
+<td><img src="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fimageserver.jiecosystem.net%2fimage%2fmodernoptical%2f675254314656&amp;c=E,1,id1qyJ5zofhPovqk2_a7UZeq88_EcFemj-k4dQm2bYDT-bdC02poubgAv9bX4kovmT5l3Ye6Bg4ZwW7IrpNIYQw8jMQ593TeyHl0CtyLpuTNx6eMpjUrkVx6Og,,&amp;typo=1" class="img-responsive" alt="No Image" height="52" width="100" data-unique-identifier=""></td>
+<td>MODERN PLASTICS II - PATRICK</td>
+<td>BLACK</td>
+<td>55</td>
+<td>1</td>
+</tr>
+<tr><td colspan="5"></td></tr><tr>
+<td><img src="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fimageserver.jiecosystem.net%2fimage%2fmodernoptical%2f675254314663&amp;c=E,1,DHrwGlKtj0MXzq7J51d6wshxw-nLCL8p9KzCh92cb9BGy8ApwbDECIEaaA4EyCSlzzKY0kGhJuPmsBIEctJnCQ-Bx_T8u_YyurAZBwmSzx1TaeWWXW56GIuS6Q,,&amp;typo=1" class="img-responsive" alt="No Image" height="52" width="100" data-unique-identifier=""></td>
+<td>MODERN PLASTICS II - PATRICK</td>
+<td>CRYSTAL</td>
+<td>55</td>
+<td>1</td>
+</tr>
+<tr><td colspan="5"></td></tr> </tbody>
+					</table>
+				</div>
+			</div>
+			<div class="card-footer"> Total Pieces: 18 </div>
+		</div><br>
+		<div class="card">
+			<h3 class="card-header">Notes</h3>
+			<div class="card-body">
+				<p class="card-text">
+					Terms: STANDARD
+					<br> Promotion Codes: 
+					<br> Special Instructions: 
+				</p>
+			</div>
+		</div><br>
+	</div>	
+<img src="https://linkprotect.cudasvc.com/url?a=http%3a%2f%2furl9215.modernoptical.com%2fwf%2fopen%3fupn%3du001.BM6K-2BkhRSCqHbzIY1RF0e8rrgltXfUW0J4GTi5T3RSLE6O4bDuS-2Be8OMke6DA7I5TllKQg0If-2FVMUgkWQ-2FejLF-2FdJEJ7mvymWxw-2FZwPMJ5UvBikLb7X-2FikO7h9uVNp2H-2B4g6z4-2FFdlg4kihf8GhdVR9RXl0dDn2HLHpmGMXhBjl-2B7XxdSDF99uBXbeBIWsCFZ-2BKxJyCGBudLgdz1OX6CwCVUpafzmwl6Kq-2BTd0fY4d9fsA1-2By-2FTmSHTgQ63dQhnpgVZrzK5C7saHXs2XCqjRdTc2yjGx7UbeWK4EhN4WzzkfdT-2B-2BOhij4X55wAyRbjca&amp;c=E,1,tzx5gUhR9yNNh5J2emizb3LiILrYSEL7nLfzPs0ikxCufk-z7g_DVJUhXRitNPt83-iwnsa-a-lS046RqMhhzKvQwAYnbEjx9wqwKmW7IZU,&amp;typo=1" alt="" width="1" height="1" border="0" style="height:1px !important;width:1px !important;border-width:0 !important;margin-top:0 !important;margin-bottom:0 !important;margin-right:0 !important;margin-left:0 !important;padding-top:0 !important;padding-bottom:0 !important;padding-right:0 !important;padding-left:0 !important;" data-unique-identifier="">
+ </div></blockquote></body></html>

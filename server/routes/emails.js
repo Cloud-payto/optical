@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { emailOperations, supabase } = require('../lib/supabase');
+const vendorDetectionService = require('../services/vendorDetection');
 
 /**
  * POST /api/emails/create
@@ -86,6 +87,83 @@ router.post('/create', async (req, res) => {
     return res.status(500).json({
       success: false,
       error: 'Failed to create email record',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/emails/detect-vendor
+ * Detect which vendor sent an email using hierarchical pattern matching
+ *
+ * Body: {
+ *   from: string (required) - Email sender address
+ *   subject: string - Email subject line
+ *   html: string - HTML email body
+ *   plainText: string - Plain text email body
+ * }
+ *
+ * Response (Success): {
+ *   success: true,
+ *   vendor: string - vendor code (e.g., "safilo")
+ *   vendorId: string - vendor UUID
+ *   vendorName: string - vendor name (e.g., "Safilo")
+ *   confidence: number - confidence score (0-100)
+ *   method: string - detection method used ("domain", "body_signature", "weak_patterns")
+ *   signals: object - matched patterns
+ *   executionTime: number - milliseconds
+ * }
+ *
+ * Response (Unknown): {
+ *   success: false,
+ *   vendor: "unknown",
+ *   confidence: number,
+ *   needsManualReview: true,
+ *   message: string,
+ *   debug: object - all vendor scores for debugging
+ *   executionTime: number
+ * }
+ */
+router.post('/detect-vendor', async (req, res) => {
+  try {
+    const { from, subject, html, plainText } = req.body;
+
+    console.log('\n🚀 [DETECT-VENDOR] Request received');
+    console.log('  From:', from);
+    console.log('  Subject:', subject);
+
+    // Validate required field
+    if (!from) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required field: from'
+      });
+    }
+
+    // Call vendor detection service
+    const result = await vendorDetectionService.detectVendor({
+      from,
+      subject,
+      html,
+      plainText
+    });
+
+    // Return appropriate status code based on result
+    const statusCode = result.success ? 200 : 200; // Always 200 for valid requests
+
+    console.log(`\n✅ [DETECT-VENDOR] Response: ${result.vendor} (${result.confidence}%)`);
+    console.log(`  Execution time: ${result.executionTime}ms\n`);
+
+    return res.status(statusCode).json(result);
+
+  } catch (error) {
+    console.error('\n❌ [DETECT-VENDOR] Error:', error);
+    return res.status(500).json({
+      success: false,
+      vendor: 'unknown',
+      confidence: 0,
+      needsManualReview: true,
+      error: 'Internal server error during vendor detection',
       message: error.message
     });
   }
