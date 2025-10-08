@@ -559,22 +559,13 @@ const orderOperations = {
 
   async archiveOrder(orderId, userId) {
     try {
-      // First, archive all inventory items associated with this order
-      console.log(`📦 Archiving inventory items for order ${orderId}...`);
-      const { error: inventoryError } = await supabase
-        .from('inventory')
-        .update({ status: 'archived' })
-        .eq('order_id', orderId)
-        .eq('account_id', userId);
+      // Note: We don't update inventory items status because 'archived' is not in the database constraint
+      // The inventory items will be filtered out on the frontend by checking if their parent order is archived
+      // This is handled by checking order.metadata.archived
 
-      if (inventoryError) {
-        console.error('❌ Error archiving inventory items:', inventoryError);
-        throw inventoryError;
-      }
+      console.log(`📦 Archiving order ${orderId}...`);
 
-      console.log(`✅ Archived inventory items for order ${orderId}`);
-
-      // Then, archive the order itself
+      // Archive the order itself
       const { data, error } = await supabase
         .from('orders')
         .update({
@@ -587,6 +578,8 @@ const orderOperations = {
         .single();
 
       if (error) throw error;
+
+      console.log(`✅ Order ${orderId} archived successfully`);
       return data;
     } catch (error) {
       handleSupabaseError(error, 'archiveOrder');
