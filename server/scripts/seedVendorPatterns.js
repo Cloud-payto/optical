@@ -16,7 +16,8 @@ const { supabase } = require('../lib/supabase');
  */
 
 const vendorPatterns = {
-  safilo: {
+  // Use uppercase codes to match your database
+  SAFILO: {
     tier1: {
       domains: ['safilo.com', 'mysafilo.com'],
       weight: 95
@@ -38,7 +39,7 @@ const vendorPatterns = {
     }
   },
 
-  luxottica: {
+  LUX: {
     tier1: {
       domains: ['luxottica.com', 'us.luxottica.com'],
       weight: 95
@@ -60,7 +61,7 @@ const vendorPatterns = {
     }
   },
 
-  modern_optical: {
+  MODERN: {
     tier1: {
       domains: ['modernoptical.com'],
       weight: 95
@@ -81,7 +82,7 @@ const vendorPatterns = {
     }
   },
 
-  etnia_barcelona: {
+  ETNIA: {
     tier1: {
       domains: ['etniabarcelona.com', 'etnia.es'],
       weight: 95
@@ -104,7 +105,7 @@ const vendorPatterns = {
     }
   },
 
-  europa: {
+  EUROPA: {
     tier1: {
       domains: ['europaeye.com'],
       weight: 95
