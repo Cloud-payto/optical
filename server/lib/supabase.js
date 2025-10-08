@@ -1032,7 +1032,26 @@ const vendorOperations = {
   async getVendorsWithAccountBrands(userId) {
     try {
       console.log('Starting getVendorsWithAccountBrands for userId:', userId);
-      // Get all vendors with their brands and user-specific pricing
+
+      // FIRST: Get vendor IDs that the user has explicitly added to their account
+      const { data: accountVendors, error: accountVendorsError } = await supabase
+        .from('account_vendors')
+        .select('vendor_id')
+        .eq('account_id', userId);
+
+      if (accountVendorsError) throw accountVendorsError;
+
+      // If user has no vendors added, return empty array
+      if (!accountVendors || accountVendors.length === 0) {
+        console.log('No account_vendors found for user, returning empty array');
+        return [];
+      }
+
+      // Get unique vendor IDs
+      const userVendorIds = [...new Set(accountVendors.map(av => av.vendor_id))];
+      console.log('User has', userVendorIds.length, 'vendors added:', userVendorIds);
+
+      // THEN: Get only those vendors with their brands
       const { data, error } = await supabase
         .from('vendors')
         .select(`
@@ -1053,7 +1072,8 @@ const vendorOperations = {
             is_active,
             notes
           )
-        `);
+        `)
+        .in('id', userVendorIds);
 
       if (error) throw error;
 
@@ -1196,6 +1216,9 @@ const vendorOperations = {
 
   async addAccountBrandsBulk(userId, vendorId, brandIds) {
     try {
+      // First, ensure vendor is added to account_vendors
+      await this.addAccountVendor(userId, vendorId);
+
       // Prepare account_brands entries
       const accountBrandsData = brandIds.map(brandId => ({
         account_id: userId,
@@ -1221,6 +1244,50 @@ const vendorOperations = {
       return { success: true, addedCount: data?.length || 0, data };
     } catch (error) {
       handleSupabaseError(error, 'addAccountBrandsBulk');
+    }
+  },
+
+  // Add vendor to user's account
+  async addAccountVendor(userId, vendorId, vendorAccountNumber = null) {
+    try {
+      const { data, error } = await supabase
+        .from('account_vendors')
+        .upsert({
+          account_id: userId,
+          vendor_id: vendorId,
+          vendor_account_number: vendorAccountNumber,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'account_id,vendor_id',
+          ignoreDuplicates: false
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      console.log(`✅ Added vendor ${vendorId} to account ${userId}`);
+      return { success: true, data };
+    } catch (error) {
+      handleSupabaseError(error, 'addAccountVendor');
+    }
+  },
+
+  // Remove vendor from user's account
+  async removeAccountVendor(userId, vendorId) {
+    try {
+      const { error } = await supabase
+        .from('account_vendors')
+        .delete()
+        .eq('account_id', userId)
+        .eq('vendor_id', vendorId);
+
+      if (error) throw error;
+
+      console.log(`✅ Removed vendor ${vendorId} from account ${userId}`);
+      return { success: true };
+    } catch (error) {
+      handleSupabaseError(error, 'removeAccountVendor');
     }
   }
 };

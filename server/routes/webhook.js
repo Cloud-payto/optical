@@ -327,6 +327,15 @@ router.post('/email', async (req, res) => {
           if (parsedData.brands && parsedData.brands.length > 0 && vendorIdForInventory) {
             console.log(`📦 Processing ${parsedData.brands.length} brands from order...`);
 
+            // First, ensure vendor is added to user's account
+            try {
+              await vendorOperations.addAccountVendor(accountId, vendorIdForInventory, parsedData.account_number);
+              console.log(`✅ Ensured vendor is added to account`);
+            } catch (error) {
+              console.error('❌ Error adding vendor to account:', error);
+              // Continue anyway - the vendor operations will handle duplicates gracefully
+            }
+
             for (const brandName of parsedData.brands) {
               try {
                 // Check if brand exists in global brands table

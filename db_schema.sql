@@ -25,6 +25,18 @@ CREATE TABLE public.account_brands (
   CONSTRAINT account_brands_vendor_id_fkey FOREIGN KEY (vendor_id) REFERENCES public.vendors(id),
   CONSTRAINT account_brands_brand_id_fkey FOREIGN KEY (brand_id) REFERENCES public.brands(id)
 );
+CREATE TABLE public.account_vendors (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  account_id uuid NOT NULL,
+  vendor_id uuid NOT NULL,
+  vendor_account_number character varying,
+  notes text,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT account_vendors_pkey PRIMARY KEY (id),
+  CONSTRAINT account_vendors_account_id_fkey FOREIGN KEY (account_id) REFERENCES public.accounts(id),
+  CONSTRAINT account_vendors_vendor_id_fkey FOREIGN KEY (vendor_id) REFERENCES public.vendors(id)
+);
 CREATE TABLE public.accounts (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
   name character varying NOT NULL,

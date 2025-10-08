@@ -325,38 +325,57 @@ class SafiloService {
                 continue;
             }
             
-            // Look for frame start patterns
-            if (!line.match(/^\s*(CARRERA|VICTORY|CARDUC|CH\s|KS\s|CATRINA|JOLIET|MIS\s|HER\s|BOSS\s)/)) {
+            // Look for frame start patterns - expanded to include all brands
+            if (!line.match(/^\s*(CARRERA|VICTORY|CARDUC|CH\s|KS\s|CATRINA|JOLIET|MIS\s|HER\s|BOSS\s|ADRIE|CLAUDIE|CLIO|GAIA|HELKA|YOLANDA)/)) {
                 continue;
             }
             
             // Collect multi-line frame data
             let frameLine = line;
             let nextIndex = i + 1;
-            
-            while (nextIndex < lines.length && nextIndex < i + 4) {
+            let hasSize = line.match(/\d{2}\/\d{2}\s+\d{3}/);
+
+            while (nextIndex < lines.length && nextIndex < i + 5) {
                 const nextLine = lines[nextIndex].trim();
-                
-                // Stop if we hit another frame or section
-                if (nextLine.match(/^\s*(CARRERA|VICTORY|CARDUC|CH\s|KS\s|CATRINA|JOLIET|MIS\s|KSP\s|HER\s|BOSS\s|Total)/)) {
-                    break;
-                }
-                
-                // Stop if we hit a date line
-                if (nextLine.match(/^\d+\/\d+\/\d+/)) {
-                    break;
-                }
-                
-                // Add temple size if it's just 3 digits
-                if (nextLine.match(/^\d{3}$/)) {
-                    frameLine += ' ' + nextLine;
+
+                // Skip empty lines
+                if (!nextLine) {
                     nextIndex++;
                     continue;
                 }
-                
-                // Add line if it looks like continuation
-                if (nextLine && nextLine.length > 3 && !nextLine.match(/^\d+$/)) {
+
+                // Stop if we hit another frame or section
+                if (nextLine.match(/^\s*(CARRERA|VICTORY|CARDUC|CH\s|KS\s|CATRINA|JOLIET|MIS\s|KSP\s|HER\s|BOSS\s|ADRIE|CLAUDIE|CLIO|GAIA|HELKA|YOLANDA|Total)/)) {
+                    break;
+                }
+
+                // Stop if we hit a date line (but only after we have size)
+                if (hasSize && nextLine.match(/^\d+\/\d+\/\d+/)) {
+                    break;
+                }
+
+                // Stop if we hit quantity columns (1 0 1 or similar)
+                if (hasSize && nextLine.match(/^\d+\s+\d+\s+\d+/)) {
+                    break;
+                }
+
+                // Stop if we hit tray identifiers (9O, HA, UC, etc.)
+                if (hasSize && nextLine.match(/^[A-Z0-9]{2}$/)) {
+                    break;
+                }
+
+                // Add temple size if it's just 3 digits and we don't have complete size yet
+                if (!hasSize && nextLine.match(/^\d{3}$/)) {
                     frameLine += ' ' + nextLine;
+                    hasSize = frameLine.match(/\d{2}\/\d{2}\s+\d{3}/);
+                    nextIndex++;
+                    continue;
+                }
+
+                // Add line if it looks like continuation (color name, size, etc.)
+                if (nextLine.length > 0 && !nextLine.match(/^[\d\s]+$/)) {
+                    frameLine += ' ' + nextLine;
+                    hasSize = frameLine.match(/\d{2}\/\d{2}\s+\d{3}/);
                     nextIndex++;
                 } else {
                     break;
@@ -415,20 +434,44 @@ class SafiloService {
         // Model names can be:
         // - Single word: "CARRERA" + color
         // - Two words: "HER 0167" + color
+        // - Two words: "BOSS 1764" + color (4-digit model)
         // - Three words: "KS LUCYANN 3" + color
         // - Multi-word: "VICTORY LANE" + color
 
         // Strategy: The color code is typically 3-4 alphanumeric characters
-        // But NOT starting with 0 (that's a model number like "0167", "0280")
-        // Everything before it is the model, everything after is color name
+        // Model numbers can be 4 digits (0167, 1764) or combinations (0167/G)
+        // Everything before color code is the model, everything after is color name
         let colorIndex = -1;
         for (let i = 1; i < parts.length; i++) {
-            // Color codes are typically 3-4 chars, alphanumeric (e.g., "807", "L93", "2M2", "B1P", "PEF")
-            // Skip if it starts with 0 and is all digits (likely model number like "0167")
-            if (parts[i].match(/^0\d+$/)) {
+            const part = parts[i];
+            const nextPart = i + 1 < parts.length ? parts[i + 1] : '';
+
+            // Skip model number patterns:
+            // - Starts with 0 and all digits (0167, 0324, etc.)
+            // - 4 digits (1764, 1833, 1850, etc.)
+            // - Contains slash (0167/G, 0334/C, etc.)
+            // - Single digit (2, 3) as part of model name (TAYA 2, HERMIONE 2)
+            if (part.match(/^0\d+$/) || part.match(/^\d{4}$/) || part.includes('/') || part.match(/^\d$/)) {
                 continue;
             }
-            if (parts[i].match(/^[A-Z0-9]{3,4}$/) && parts[i].length <= 4) {
+
+            // Skip if this looks like a model name followed by a variant number
+            // (e.g., "TAYA 2", "HERMIONE 2", "TEYA" with no number)
+            // Check if next part is a single digit - if so, this is likely model name
+            if (nextPart.match(/^\d$/) && part.match(/^[A-Z]{4,}$/)) {
+                continue;
+            }
+
+            // Color codes are typically 3-4 alphanumeric chars
+            // Examples: "807", "L93", "2M2", "B1P", "PEF", "RHL", "1ED", "I46", "09Q", "F8X", "HKZ"
+            // But NOT purely letter 4-char words (those might be model names like TAYA, TEYA)
+            // Must have at least one digit OR be exactly 3 characters
+            if (part.match(/^[A-Z0-9]{3,4}$/) && part.length <= 4) {
+                // If it's 4 letters with no digits, skip (likely model name)
+                if (part.match(/^[A-Z]{4}$/)) {
+                    continue;
+                }
+                // Otherwise it's a valid color code
                 colorIndex = i;
                 break;
             }
