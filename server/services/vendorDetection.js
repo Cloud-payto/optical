@@ -76,52 +76,73 @@ class VendorDetectionService {
   }
 
   /**
-   * Extract original sender from forwarded email
-   * Looks for patterns like:
-   * - "From: Safilo <noreply@safilo.com>"
-   * - "From: noreply@safilo.com"
-   * - "**From:** noreply@safilo.com"
-   * - "Begin forwarded message:"
+   * Extract ALL email addresses from email body and find the most likely vendor
+   * Handles multiple forwarding layers and prioritizes vendor domains
    */
-  extractOriginalSender(emailBody) {
+  extractOriginalSender(emailBody, vendors) {
     if (!emailBody || typeof emailBody !== 'string') return null;
 
     console.log('  🔍 Checking for forwarded email patterns...');
 
-    // Pattern 1: "From: Name <email@domain.com>" or "From: email@domain.com"
-    const fromPattern1 = /(?:^|\n|\r)[\s*]*from[\s*]*:[\s*]*(?:.*?<)?([a-z0-9._+-]+@[a-z0-9.-]+\.[a-z]{2,})>?/im;
-    const match1 = emailBody.match(fromPattern1);
-    if (match1 && match1[1]) {
-      console.log(`  ✅ Found original sender (From: header): ${match1[1]}`);
-      return match1[1].toLowerCase().trim();
+    // Extract ALL email addresses from the entire email body
+    const emailPattern = /([a-z0-9._+-]+@[a-z0-9.-]+\.[a-z]{2,})/gi;
+    const allEmails = emailBody.match(emailPattern) || [];
+
+    if (allEmails.length === 0) {
+      console.log('  ❌ No email addresses found in body');
+      return null;
     }
 
-    // Pattern 2: Look for email addresses in first 1000 characters (usually forwarded header)
-    const emailPattern = /([a-z0-9._+-]+@[a-z0-9.-]+\.[a-z]{2,})/gi;
-    const firstPart = emailBody.substring(0, 1000);
-    const emails = firstPart.match(emailPattern);
+    console.log(`  📧 Found ${allEmails.length} email addresses in body`);
 
-    if (emails && emails.length > 0) {
-      // Filter out common non-vendor emails
-      const filtered = emails.filter(email => {
-        const lowerEmail = email.toLowerCase();
-        return !lowerEmail.includes('gmail.com') &&
-               !lowerEmail.includes('yahoo.com') &&
-               !lowerEmail.includes('outlook.com') &&
-               !lowerEmail.includes('hotmail.com') &&
-               !lowerEmail.includes('icloud.com') &&
-               !lowerEmail.includes('aol.com') &&
-               !lowerEmail.includes('@system.local') &&
-               !lowerEmail.match(/^(no-?reply|noreply|do-?not-?reply)@/);
-      });
+    // Deduplicate emails (case-insensitive)
+    const uniqueEmails = [...new Set(allEmails.map(e => e.toLowerCase()))];
 
-      if (filtered.length > 0) {
-        console.log(`  ✅ Found original sender (Email extraction): ${filtered[0]}`);
-        return filtered[0].toLowerCase().trim();
+    // Filter out personal/non-vendor emails
+    const personalDomains = [
+      'gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com',
+      'icloud.com', 'aol.com', 'live.com', 'me.com',
+      'yesnickvision.com', 'tatumeyecare.com', 'pveyecare.com',
+      'mohaveeyecenter.com', 'opticalshop.com', 'myshop.com',
+      '@system.local'
+    ];
+
+    const filteredEmails = uniqueEmails.filter(email => {
+      const domain = this.extractDomain(email);
+      return domain && !personalDomains.some(pd => domain.includes(pd));
+    });
+
+    console.log(`  📧 After filtering personal emails: ${filteredEmails.length} candidates`);
+    if (filteredEmails.length > 0) {
+      console.log(`     Candidates: ${filteredEmails.join(', ')}`);
+    }
+
+    // Strategy 1: Check if any email matches a known vendor domain
+    if (vendors && filteredEmails.length > 0) {
+      for (const email of filteredEmails) {
+        const domain = this.extractDomain(email);
+
+        for (const vendor of vendors) {
+          const vendorDomains = vendor.email_patterns?.tier1?.domains || [];
+          const matchedDomain = vendorDomains.find(vd =>
+            domain.toLowerCase().includes(vd.toLowerCase())
+          );
+
+          if (matchedDomain) {
+            console.log(`  ✅ Found vendor email: ${email} (matches ${vendor.name})`);
+            return email;
+          }
+        }
       }
     }
 
-    console.log('  ❌ No original sender found in forwarded email');
+    // Strategy 2: Return first filtered email if no vendor match
+    if (filteredEmails.length > 0) {
+      console.log(`  ⚠️  Using first filtered email: ${filteredEmails[0]} (no vendor domain match)`);
+      return filteredEmails[0];
+    }
+
+    console.log('  ❌ No suitable email found after filtering');
     return null;
   }
 
@@ -313,7 +334,7 @@ class VendorDetectionService {
 
     // Try to extract original sender from forwarded email
     let actualSender = from;
-    const originalSender = this.extractOriginalSender(emailBody);
+    const originalSender = this.extractOriginalSender(emailBody, vendors);
     if (originalSender) {
       console.log(`\n📧 FORWARDED EMAIL DETECTED`);
       console.log(`  Outer sender: ${from}`);
