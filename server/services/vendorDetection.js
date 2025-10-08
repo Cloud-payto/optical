@@ -76,6 +76,56 @@ class VendorDetectionService {
   }
 
   /**
+   * Extract original sender from forwarded email
+   * Looks for patterns like:
+   * - "From: Safilo <noreply@safilo.com>"
+   * - "From: noreply@safilo.com"
+   * - "**From:** noreply@safilo.com"
+   * - "Begin forwarded message:"
+   */
+  extractOriginalSender(emailBody) {
+    if (!emailBody || typeof emailBody !== 'string') return null;
+
+    console.log('  🔍 Checking for forwarded email patterns...');
+
+    // Pattern 1: "From: Name <email@domain.com>" or "From: email@domain.com"
+    const fromPattern1 = /(?:^|\n|\r)[\s*]*from[\s*]*:[\s*]*(?:.*?<)?([a-z0-9._+-]+@[a-z0-9.-]+\.[a-z]{2,})>?/im;
+    const match1 = emailBody.match(fromPattern1);
+    if (match1 && match1[1]) {
+      console.log(`  ✅ Found original sender (From: header): ${match1[1]}`);
+      return match1[1].toLowerCase().trim();
+    }
+
+    // Pattern 2: Look for email addresses in first 1000 characters (usually forwarded header)
+    const emailPattern = /([a-z0-9._+-]+@[a-z0-9.-]+\.[a-z]{2,})/gi;
+    const firstPart = emailBody.substring(0, 1000);
+    const emails = firstPart.match(emailPattern);
+
+    if (emails && emails.length > 0) {
+      // Filter out common non-vendor emails
+      const filtered = emails.filter(email => {
+        const lowerEmail = email.toLowerCase();
+        return !lowerEmail.includes('gmail.com') &&
+               !lowerEmail.includes('yahoo.com') &&
+               !lowerEmail.includes('outlook.com') &&
+               !lowerEmail.includes('hotmail.com') &&
+               !lowerEmail.includes('icloud.com') &&
+               !lowerEmail.includes('aol.com') &&
+               !lowerEmail.includes('@system.local') &&
+               !lowerEmail.match(/^(no-?reply|noreply|do-?not-?reply)@/);
+      });
+
+      if (filtered.length > 0) {
+        console.log(`  ✅ Found original sender (Email extraction): ${filtered[0]}`);
+        return filtered[0].toLowerCase().trim();
+      }
+    }
+
+    console.log('  ❌ No original sender found in forwarded email');
+    return null;
+  }
+
+  /**
    * Tier 1: Domain Matching
    * Highest confidence (95%), short-circuits if matched
    */
@@ -261,18 +311,36 @@ class VendorDetectionService {
     // Prepare email body (prefer plainText, fallback to html)
     const emailBody = plainText || html || '';
 
+    // Try to extract original sender from forwarded email
+    let actualSender = from;
+    const originalSender = this.extractOriginalSender(emailBody);
+    if (originalSender) {
+      console.log(`\n📧 FORWARDED EMAIL DETECTED`);
+      console.log(`  Outer sender: ${from}`);
+      console.log(`  Original sender: ${originalSender}`);
+      actualSender = originalSender; // Use original sender for detection
+    }
+
     // Store all vendor scores for debugging
     const allScores = [];
 
     // TIER 1: Domain Matching (SHORT CIRCUITS)
     console.log('\n📊 TIER 1: Domain Matching');
+    console.log(`  Using sender: ${actualSender}`);
     for (const vendor of vendors) {
-      const result = this.checkDomainMatch(from, vendor);
+      const result = this.checkDomainMatch(actualSender, vendor);
       if (result) {
         const executionTime = Date.now() - startTime;
         console.log(`\n✅ DOMAIN MATCH FOUND: ${result.vendorName}`);
         console.log(`  Confidence: ${result.confidence}%`);
         console.log(`  Execution time: ${executionTime}ms`);
+
+        // Add forwarding info to signals if applicable
+        if (originalSender) {
+          result.signals.forwarded = true;
+          result.signals.outerSender = from;
+          result.signals.originalSender = originalSender;
+        }
 
         return {
           success: true,

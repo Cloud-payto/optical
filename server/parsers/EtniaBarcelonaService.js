@@ -318,44 +318,77 @@ class EtniaBarcelonaService {
             let colorDescription = '';
             let sizeString = '';
 
-            // Pattern 1: Standard format with material and type
+            // Pattern 1: Standard format with ALL-CAPS material and type
             // "RANIA 53O TQGR - METAL OPTICAL TURQUOISE. GREEN 53-19-142 (O)"
-            const pattern1 = /^([A-Z\s]+\d+\w+)\s+-\s+([A-Z]+)\s+(OPTICAL|SUN)\s+(.+?)\s+(\d{2}-\d{2}-\d{3})/i;
+            // Material must be ALL CAPS, and there should NOT be "Frame" keyword after OPTICAL/SUN
+            const pattern1 = /^.+?\s+-\s+([A-Z]+)\s+(OPTICAL|SUN)\s+(?!Frame\s)(.+?)\s+(\d{2}-\d{2}-\d{3})/i;
             const match1 = fullDescription.match(pattern1);
 
             if (match1) {
-                modelName = match1[1].trim();
-                material = match1[2].trim();
-                frameType = match1[3].trim();
-                colorDescription = match1[4].trim();
-                sizeString = match1[5].trim();
+                material = match1[1].trim();
+                frameType = match1[2].trim();
+                // Extract just the color part (everything between frame type and size)
+                colorDescription = match1[3].trim()
+                    .replace(/\s*\(\w\)\s*$/, '') // Remove trailing (O) or (S)
+                    .replace(/\.$/, '') // Remove trailing period
+                    .trim();
+                sizeString = match1[4].trim();
+
+                // Extract model name from fullModel instead
+                modelName = fullModel.split(/\s+\d+/)[0]; // Get the model name before the size code
             } else {
-                // Pattern 2: Alternative format
+                // Pattern 2: Alternative format with "Frame" keyword
                 // "COCO Grey Havana - Acetate Optical Frame 51-16-140"
-                const pattern2 = /^([A-Z\s]+)\s+-\s+([A-Za-z]+)\s+(Optical|Sun)\s+Frame\s+(.+?)\s+(\d{2}-\d{2}-\d{3})/i;
+                const pattern2 = /^(.+?)\s+-\s+([A-Za-z]+)\s+(Optical|Sun)\s+Frame\s+(\d{2}-\d{2}-\d{3})/i;
                 const match2 = fullDescription.match(pattern2);
 
                 if (match2) {
-                    modelName = match2[1].trim();
+                    const fullModelAndColor = match2[1].trim();
                     material = match2[2].trim();
                     frameType = match2[3].trim().toUpperCase();
-                    colorDescription = match2[4].trim();
-                    sizeString = match2[5].trim();
-                } else {
-                    // Fallback: just extract size
-                    const sizeOnlyMatch = fullDescription.match(/(\d{2}-\d{2}-\d{3})/);
-                    if (sizeOnlyMatch) {
-                        sizeString = sizeOnlyMatch[1];
+                    sizeString = match2[4].trim();
+
+                    // For "COCO Grey Havana", extract "Grey Havana" as color
+                    // Split by the model code pattern (e.g., "51O", "54S")
+                    const modelColorSplit = fullModelAndColor.match(/^([A-Z]+)\s+(.+)$/);
+                    if (modelColorSplit) {
+                        modelName = modelColorSplit[1];
+                        colorDescription = modelColorSplit[2];
+                    } else {
+                        // Fallback: first word is model
+                        const parts = fullModelAndColor.split(/\s+/);
+                        modelName = parts[0];
+                        colorDescription = parts.slice(1).join(' ');
                     }
+                } else {
+                    // Pattern 3: Lowercase format
+                    // "ROADRUNNER 56O HVGR - acetate optical frame havana verde 56-16-148"
+                    const pattern3 = /^.+?\s+-\s+([a-z]+)\s+(optical|sun)\s+frame\s+(.+?)\s+(\d{2}-\d{2}-\d{3})/i;
+                    const match3 = fullDescription.match(pattern3);
 
-                    // Use full description as color
-                    colorDescription = fullDescription.replace(/\s*\(\w\)\s*$/, '').trim();
+                    if (match3) {
+                        material = match3[1].trim().toUpperCase();
+                        frameType = match3[2].trim().toUpperCase();
+                        colorDescription = match3[3].trim();
+                        sizeString = match3[4].trim();
+                        // Extract model name from fullModel instead
+                        modelName = fullModel.split(/\s+\d+/)[0];
+                    } else {
+                        // Fallback: just extract size
+                        const sizeOnlyMatch = fullDescription.match(/(\d{2}-\d{2}-\d{3})/);
+                        if (sizeOnlyMatch) {
+                            sizeString = sizeOnlyMatch[1];
+                        }
 
-                    // Try to extract material and type from anywhere in description
-                    if (fullDescription.match(/ACETATE/i)) material = 'ACETATE';
-                    if (fullDescription.match(/METAL/i)) material = 'METAL';
-                    if (fullDescription.match(/OPTICAL/i)) frameType = 'OPTICAL';
-                    if (fullDescription.match(/SUN/i)) frameType = 'SUN';
+                        // Use full description as color
+                        colorDescription = fullDescription.replace(/\s*\(\w\)\s*$/, '').trim();
+
+                        // Try to extract material and type from anywhere in description
+                        if (fullDescription.match(/ACETATE/i)) material = 'ACETATE';
+                        if (fullDescription.match(/METAL/i)) material = 'METAL';
+                        if (fullDescription.match(/OPTICAL/i)) frameType = 'OPTICAL';
+                        if (fullDescription.match(/SUN/i)) frameType = 'SUN';
+                    }
                 }
             }
 
