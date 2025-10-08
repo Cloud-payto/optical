@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { setupDemoData } from '../utils/demoData';
 
 export interface DemoStep {
   id: string;
@@ -219,7 +218,7 @@ export const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
   const currentStepData = isDemo && currentStep < demoSteps.length ? demoSteps[currentStep] : null;
 
   const startDemo = () => {
-    setupDemoData(); // Setup demo data in localStorage
+    // Demo mode no longer uses localStorage - all data comes from Supabase
     setIsDemo(true);
     setCurrentStep(0);
     navigate('/');

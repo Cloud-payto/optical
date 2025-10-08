@@ -193,4 +193,30 @@ router.post('/account-brands/:userId/bulk', async (req, res) => {
   }
 });
 
+// GET /api/vendors/pending-imports/:userId - Get vendors/brands from inventory that can be imported
+router.get('/pending-imports/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const result = await vendorOperations.getPendingVendorImports(userId);
+    res.json(result);
+  } catch (error) {
+    console.error('Error getting pending vendor imports:', error);
+    res.status(500).json({ error: 'Failed to get pending imports' });
+  }
+});
+
+// POST /api/vendors/import-from-inventory/:userId - Import vendors and brands from inventory
+router.post('/import-from-inventory/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { vendorIds, brandData } = req.body;
+
+    const result = await vendorOperations.importVendorsAndBrandsFromInventory(userId, vendorIds, brandData);
+    res.json(result);
+  } catch (error) {
+    console.error('Error importing from inventory:', error);
+    res.status(500).json({ error: 'Failed to import from inventory' });
+  }
+});
+
 module.exports = router;

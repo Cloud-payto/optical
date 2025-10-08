@@ -361,6 +361,74 @@ const inventoryOperations = {
         console.log(`⚠️ No order record found in orders table for order number ${orderNumber}`);
       }
 
+      // DETECT VENDORS AND BRANDS FOR IMPORT
+      console.log(`🔍 Checking for vendors/brands to suggest for import...`);
+
+      // Extract unique vendor IDs and brands from the confirmed items
+      const vendorIds = [...new Set(pendingItems.map(item => item.vendor_id).filter(Boolean))];
+      const brandNames = [...new Set(pendingItems.map(item => item.brand).filter(Boolean))];
+
+      console.log(`📦 Found ${vendorIds.length} unique vendors and ${brandNames.length} unique brands in this order`);
+
+      for (const vendorId of vendorIds) {
+        try {
+          // Check if user has this vendor in account_vendors
+          const { data: existingAccountVendor } = await supabase
+            .from('account_vendors')
+            .select('id')
+            .eq('account_id', userId)
+            .eq('vendor_id', vendorId)
+            .single();
+
+          if (!existingAccountVendor) {
+            console.log(`📌 Vendor ${vendorId} not in account_vendors - will be available for import`);
+          } else {
+            console.log(`✓ Vendor ${vendorId} already in account_vendors`);
+          }
+        } catch (error) {
+          console.error(`Error checking vendor ${vendorId}:`, error);
+        }
+      }
+
+      // Check brands
+      for (const brandName of brandNames) {
+        try {
+          // Find the brand in the global brands table
+          const vendorId = pendingItems.find(item => item.brand === brandName)?.vendor_id;
+
+          if (!vendorId) continue;
+
+          const { data: globalBrand } = await supabase
+            .from('brands')
+            .select('id')
+            .eq('vendor_id', vendorId)
+            .ilike('name', brandName)
+            .single();
+
+          if (globalBrand) {
+            // Check if user has this brand in account_brands
+            const { data: existingAccountBrand } = await supabase
+              .from('account_brands')
+              .select('id')
+              .eq('account_id', userId)
+              .eq('brand_id', globalBrand.id)
+              .single();
+
+            if (!existingAccountBrand) {
+              console.log(`📌 Brand "${brandName}" not in account_brands - will be available for import`);
+            } else {
+              console.log(`✓ Brand "${brandName}" already in account_brands`);
+            }
+          } else {
+            console.log(`📌 Brand "${brandName}" not in global brands table - will be created on import`);
+          }
+        } catch (error) {
+          console.error(`Error checking brand ${brandName}:`, error);
+        }
+      }
+
+      console.log(`✅ Vendor/brand detection complete`);
+
       return { success: true, message: `Confirmed ${updatedItems.length} items`, updatedCount: updatedItems.length };
     } catch (error) {
       handleSupabaseError(error, 'confirmPendingOrder');
@@ -1281,6 +1349,174 @@ const vendorOperations = {
       return { success: true };
     } catch (error) {
       handleSupabaseError(error, 'removeAccountVendor');
+    }
+  },
+
+  // Get vendors and brands from user's inventory that aren't in their account yet
+  async getPendingVendorImports(userId) {
+    try {
+      console.log(`🔍 Getting pending vendor/brand imports for user ${userId}...`);
+
+      // Get all confirmed inventory items for this user
+      const { data: inventoryItems, error: inventoryError } = await supabase
+        .from('inventory')
+        .select('vendor_id, brand, vendors(id, name)')
+        .eq('account_id', userId)
+        .eq('status', 'confirmed')
+        .not('vendor_id', 'is', null);
+
+      if (inventoryError) throw inventoryError;
+
+      if (!inventoryItems || inventoryItems.length === 0) {
+        return { vendors: [], brands: [] };
+      }
+
+      // Extract unique vendors and brands
+      const uniqueVendorIds = [...new Set(inventoryItems.map(item => item.vendor_id).filter(Boolean))];
+      const brandsByVendor = {};
+
+      inventoryItems.forEach(item => {
+        if (item.brand && item.vendor_id) {
+          if (!brandsByVendor[item.vendor_id]) {
+            brandsByVendor[item.vendor_id] = new Set();
+          }
+          brandsByVendor[item.vendor_id].add(item.brand);
+        }
+      });
+
+      console.log(`📦 Found ${uniqueVendorIds.length} unique vendors in inventory`);
+
+      // Check which vendors are NOT in account_vendors
+      const { data: existingAccountVendors, error: accountVendorsError } = await supabase
+        .from('account_vendors')
+        .select('vendor_id')
+        .eq('account_id', userId)
+        .in('vendor_id', uniqueVendorIds);
+
+      if (accountVendorsError) throw accountVendorsError;
+
+      const existingVendorIds = existingAccountVendors?.map(av => av.vendor_id) || [];
+      const missingVendorIds = uniqueVendorIds.filter(vid => !existingVendorIds.includes(vid));
+
+      console.log(`📌 ${missingVendorIds.length} vendors not yet added to account`);
+
+      // Get vendor details for missing vendors
+      const vendorsToImport = [];
+      for (const vendorId of missingVendorIds) {
+        const vendorItem = inventoryItems.find(item => item.vendor_id === vendorId);
+        if (vendorItem?.vendors) {
+          const brandCount = brandsByVendor[vendorId]?.size || 0;
+          vendorsToImport.push({
+            id: vendorId,
+            name: vendorItem.vendors.name,
+            brandCount: brandCount
+          });
+        }
+      }
+
+      // Check which brands are NOT in account_brands
+      const brandsToImport = [];
+
+      for (const [vendorId, brandNamesSet] of Object.entries(brandsByVendor)) {
+        const brandNames = Array.from(brandNamesSet);
+
+        for (const brandName of brandNames) {
+          // Find brand in global brands table
+          const { data: globalBrand } = await supabase
+            .from('brands')
+            .select('id, name')
+            .eq('vendor_id', vendorId)
+            .ilike('name', brandName)
+            .single();
+
+          if (globalBrand) {
+            // Check if it's in account_brands
+            const { data: accountBrand } = await supabase
+              .from('account_brands')
+              .select('id')
+              .eq('account_id', userId)
+              .eq('brand_id', globalBrand.id)
+              .single();
+
+            if (!accountBrand) {
+              const vendorInfo = inventoryItems.find(item => item.vendor_id === vendorId);
+              brandsToImport.push({
+                brand_id: globalBrand.id,
+                brand_name: globalBrand.name,
+                vendor_id: vendorId,
+                vendor_name: vendorInfo?.vendors?.name || 'Unknown'
+              });
+            }
+          } else {
+            // Brand doesn't exist in global table - will be created on import
+            const vendorInfo = inventoryItems.find(item => item.vendor_id === vendorId);
+            brandsToImport.push({
+              brand_id: null, // Will be created
+              brand_name: brandName,
+              vendor_id: vendorId,
+              vendor_name: vendorInfo?.vendors?.name || 'Unknown'
+            });
+          }
+        }
+      }
+
+      console.log(`📌 ${brandsToImport.length} brands not yet added to account`);
+
+      return {
+        vendors: vendorsToImport,
+        brands: brandsToImport
+      };
+    } catch (error) {
+      handleSupabaseError(error, 'getPendingVendorImports');
+      return { vendors: [], brands: [] };
+    }
+  },
+
+  // Import vendors and brands from inventory
+  async importVendorsAndBrandsFromInventory(userId, vendorIds, brandData) {
+    try {
+      console.log(`📥 Importing vendors and brands for user ${userId}...`);
+      console.log(`  Vendors: ${vendorIds?.length || 0}`);
+      console.log(`  Brands: ${brandData?.length || 0}`);
+
+      // Add vendors to account_vendors
+      for (const vendorId of vendorIds || []) {
+        await this.addAccountVendor(userId, vendorId);
+      }
+
+      // Add brands to account_brands (creating them in brands table if needed)
+      for (const brand of brandData || []) {
+        if (brand.brand_id) {
+          // Brand exists in global table, just add to account_brands
+          await this.saveAccountBrand(userId, {
+            brand_id: brand.brand_id,
+            vendor_id: brand.vendor_id,
+            wholesale_cost: 0,
+            discount_percentage: 45,
+            tariff_tax: 0
+          });
+        } else {
+          // Brand doesn't exist, create it first
+          await this.saveAccountBrand(userId, {
+            brand_name: brand.brand_name,
+            vendor_id: brand.vendor_id,
+            wholesale_cost: 0,
+            discount_percentage: 45,
+            tariff_tax: 0
+          });
+        }
+      }
+
+      console.log(`✅ Import complete`);
+
+      return {
+        success: true,
+        vendorsAdded: vendorIds?.length || 0,
+        brandsAdded: brandData?.length || 0
+      };
+    } catch (error) {
+      handleSupabaseError(error, 'importVendorsAndBrandsFromInventory');
+      return { success: false, error: error.message };
     }
   }
 };
