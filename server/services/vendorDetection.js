@@ -84,9 +84,17 @@ class VendorDetectionService {
 
     console.log('  🔍 Checking for forwarded email patterns...');
 
+    // Clean up the email body first - remove mailto: tags and HTML artifacts
+    let cleanedBody = emailBody
+      .replace(/<mailto:/gi, '<')
+      .replace(/mailto:/gi, '')
+      .replace(/&lt;/gi, '<')
+      .replace(/&gt;/gi, '>');
+
     // Extract ALL email addresses from the entire email body
+    // More comprehensive pattern that handles edge cases
     const emailPattern = /([a-z0-9._+-]+@[a-z0-9.-]+\.[a-z]{2,})/gi;
-    const allEmails = emailBody.match(emailPattern) || [];
+    const allEmails = cleanedBody.match(emailPattern) || [];
 
     if (allEmails.length === 0) {
       console.log('  ❌ No email addresses found in body');
@@ -96,28 +104,39 @@ class VendorDetectionService {
     console.log(`  📧 Found ${allEmails.length} email addresses in body`);
 
     // Deduplicate emails (case-insensitive)
-    const uniqueEmails = [...new Set(allEmails.map(e => e.toLowerCase()))];
+    const uniqueEmails = [...new Set(allEmails.map(e => e.toLowerCase().trim()))];
 
-    // Filter out personal/non-vendor emails
+    // Filter out personal/non-vendor emails and common system addresses
     const personalDomains = [
       'gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com',
       'icloud.com', 'aol.com', 'live.com', 'me.com',
       'yesnickvision.com', 'tatumeyecare.com', 'pveyecare.com',
       'mohaveeyecenter.com', 'opticalshop.com', 'myshop.com',
+      'modernoptical.com', // Add your own domain to filter
+      'cloudmailin.net', // CloudMailin webhook addresses
       '@system.local'
     ];
 
     const filteredEmails = uniqueEmails.filter(email => {
       const domain = this.extractDomain(email);
-      return domain && !personalDomains.some(pd => domain.includes(pd));
+      if (!domain) return false;
+
+      // Filter out personal domains
+      const isPersonal = personalDomains.some(pd => domain.includes(pd));
+      if (isPersonal) return false;
+
+      // Filter out obvious non-vendor patterns
+      if (email.startsWith('a48947dbd077')) return false; // CloudMailin
+
+      return true;
     });
 
-    console.log(`  📧 After filtering personal emails: ${filteredEmails.length} candidates`);
+    console.log(`  📧 After filtering: ${filteredEmails.length} vendor candidates`);
     if (filteredEmails.length > 0) {
-      console.log(`     Candidates: ${filteredEmails.join(', ')}`);
+      console.log(`     Candidates: ${filteredEmails.slice(0, 5).join(', ')}${filteredEmails.length > 5 ? '...' : ''}`);
     }
 
-    // Strategy 1: Check if any email matches a known vendor domain
+    // Strategy 1: Check if any email matches a known vendor domain (PRIORITY)
     if (vendors && filteredEmails.length > 0) {
       for (const email of filteredEmails) {
         const domain = this.extractDomain(email);
@@ -129,7 +148,7 @@ class VendorDetectionService {
           );
 
           if (matchedDomain) {
-            console.log(`  ✅ Found vendor email: ${email} (matches ${vendor.name})`);
+            console.log(`  ✅ Found vendor email: ${email} (matches ${vendor.name} - ${matchedDomain})`);
             return email;
           }
         }
