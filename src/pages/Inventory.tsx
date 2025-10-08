@@ -661,9 +661,9 @@ const Inventory: React.FC = () => {
     );
   });
 
-  // Separate orders by status
-  const pendingOrdersList = filteredOrders.filter(order => order.status === 'pending');
-  const confirmedOrdersList = filteredOrders.filter(order => order.status === 'confirmed');
+  // Separate orders by status (exclude archived orders from all lists)
+  const pendingOrdersList = filteredOrders.filter(order => order.status === 'pending' && !order.metadata?.archived);
+  const confirmedOrdersList = filteredOrders.filter(order => order.status === 'confirmed' && !order.metadata?.archived);
 
   // Separate inventory by status
   const pendingInventory = filteredInventory.filter(item => item.status === 'pending');
