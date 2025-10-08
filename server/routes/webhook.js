@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { emailOperations, inventoryOperations, orderOperations, checkDuplicateOrder, supabase } = require('../lib/supabase');
+const { emailOperations, inventoryOperations, orderOperations, vendorOperations, checkDuplicateOrder, supabase } = require('../lib/supabase');
 const parserRegistry = require('../parsers');
 
 /**
@@ -322,7 +322,77 @@ router.post('/email', async (req, res) => {
           
           // Update email with parsed data
           await emailOperations.updateEmailWithParsedData(result.id, parsedData);
-          
+
+          // Auto-import brands from parsed data
+          if (parsedData.brands && parsedData.brands.length > 0 && vendorIdForInventory) {
+            console.log(`📦 Processing ${parsedData.brands.length} brands from order...`);
+
+            for (const brandName of parsedData.brands) {
+              try {
+                // Check if brand exists in global brands table
+                const { data: existingBrand } = await supabase
+                  .from('brands')
+                  .select('id')
+                  .eq('vendor_id', vendorIdForInventory)
+                  .ilike('name', brandName)
+                  .single();
+
+                let brandId = existingBrand?.id;
+
+                // Create brand if it doesn't exist in global brands table
+                if (!brandId) {
+                  const { data: newBrand, error: createBrandError } = await supabase
+                    .from('brands')
+                    .insert({
+                      name: brandName,
+                      vendor_id: vendorIdForInventory,
+                      wholesale_cost: 0,
+                      msrp: 0,
+                      is_active: true
+                    })
+                    .select()
+                    .single();
+
+                  if (createBrandError) {
+                    console.error(`❌ Error creating brand ${brandName}:`, createBrandError);
+                    continue; // Skip to next brand
+                  }
+
+                  brandId = newBrand.id;
+                  console.log(`✅ Created new brand: ${brandName} (ID: ${brandId})`);
+                }
+
+                // Check if user has account_brands entry
+                const { data: accountBrand } = await supabase
+                  .from('account_brands')
+                  .select('id')
+                  .eq('account_id', accountId)
+                  .eq('brand_id', brandId)
+                  .single();
+
+                // Create account_brands entry if missing
+                if (!accountBrand) {
+                  await vendorOperations.saveAccountBrand(accountId, {
+                    brand_id: brandId,
+                    vendor_id: vendorIdForInventory,
+                    wholesale_cost: 0,
+                    discount_percentage: 45, // Default discount
+                    tariff_tax: 0
+                  });
+                  console.log(`✅ Added ${brandName} to account brands`);
+                } else {
+                  console.log(`ℹ️  ${brandName} already in account brands`);
+                }
+
+              } catch (error) {
+                console.error(`❌ Error processing brand ${brandName}:`, error);
+                // Continue with other brands even if one fails
+              }
+            }
+
+            console.log('✅ Brand import processing complete');
+          }
+
           // Create order record first
           let orderId = null;
           if (parsedData.order) {

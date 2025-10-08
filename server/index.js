@@ -44,9 +44,10 @@ const corsOptions = {
 // Middleware
 app.use(cors(corsOptions));
 
-// Parse JSON bodies
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// Parse JSON bodies with increased limit for email content
+// Vendor emails with HTML can be large (up to 10MB)
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
 // Health check endpoint for Render.com monitoring
 app.get('/health', (req, res) => {

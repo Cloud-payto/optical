@@ -1252,28 +1252,59 @@ const Inventory: React.FC = () => {
                         (order.account_number || '').toLowerCase().includes(searchTerm.toLowerCase())
                       );
                     })
-                    .map((order) => (
-                      <div key={order.id} className="bg-white rounded-lg border border-gray-200 shadow-sm">
+                    .map((order) => {
+                      const isExpanded = expandedOrders.has(order.id);
+                      return (
+                      <motion.div
+                        key={order.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+                      >
                         <div className="px-6 py-4">
                           <div className="flex items-center justify-between">
-                            <div>
-                              <h3 className="text-lg font-semibold text-gray-900">Order #{order.order_number}</h3>
-                              <p className="text-sm text-gray-600 mt-1">
-                                {order.vendor} • {order.customer_name || 'Unknown Customer'}
-                              </p>
-                              {order.account_number && (
-                                <p className="text-sm text-gray-500">Account: {order.account_number}</p>
-                              )}
+                            <div className="flex items-center space-x-3 flex-1">
+                              {/* Expand/Collapse Button */}
+                              <button
+                                onClick={() => {
+                                  setExpandedOrders(prev => {
+                                    const newSet = new Set(prev);
+                                    if (newSet.has(order.id)) {
+                                      newSet.delete(order.id);
+                                    } else {
+                                      newSet.add(order.id);
+                                    }
+                                    return newSet;
+                                  });
+                                }}
+                                className="flex-shrink-0 p-1 hover:bg-gray-100 rounded-md transition-colors"
+                              >
+                                {isExpanded ? (
+                                  <ChevronDownIcon className="h-5 w-5 text-gray-500" />
+                                ) : (
+                                  <ChevronRightIcon className="h-5 w-5 text-gray-500" />
+                                )}
+                              </button>
+
+                              <div className="flex-1">
+                                <h3 className="text-lg font-semibold text-gray-900">Order #{order.order_number}</h3>
+                                <p className="text-sm text-gray-600 mt-1">
+                                  {order.vendor} • {order.customer_name || 'Unknown Customer'}
+                                </p>
+                                {order.account_number && (
+                                  <p className="text-sm text-gray-500">Account: {order.account_number}</p>
+                                )}
+                              </div>
                             </div>
                             <div className="text-right">
                               <div className="flex items-center space-x-4">
                                 <div>
-                                  <p className="text-sm font-medium text-gray-900">{order.total_items} items</p>
+                                  <p className="text-sm font-medium text-gray-900">{order.items?.length || order.total_items || 0} items</p>
                                   <p className="text-xs text-gray-500">
-                                    Order Date: {formatDateOnly(order.order_date)}
+                                    {formatDateOnly(order.order_date)}
                                   </p>
                                 </div>
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                   Confirmed
                                 </span>
                                 <button
@@ -1297,42 +1328,77 @@ const Inventory: React.FC = () => {
                             </div>
                           </div>
 
-                          {/* Order Details */}
-                          <div className="mt-4 pt-4 border-t border-gray-200">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                              <div>
-                                <span className="font-medium text-gray-600">Rep:</span>
-                                <span className="ml-2 text-gray-900">{order.rep_name || 'Not specified'}</span>
-                              </div>
-                              <div>
-                                <span className="font-medium text-gray-600">Order Date:</span>
-                                <span className="ml-2 text-gray-900" title={`Raw: ${order.order_date}`}>
-                                  {formatDateOnly(order.order_date)}
-                                </span>
-                              </div>
-                              <div>
-                                <span className="font-medium text-gray-600">Email ID:</span>
-                                <span className="ml-2 text-gray-900">#{order.email_id}</span>
-                              </div>
-                            </div>
-
-                            {/* Items List */}
-                            <div className="mt-4">
-                              <h4 className="text-sm font-medium text-gray-900 mb-2">Items ({order.items.length}):</h4>
-                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                                {order.items.map((item) => (
-                                  <div key={item.id} className="text-xs bg-gray-50 rounded px-2 py-1">
-                                    <span className="font-medium">{item.brand} - {item.model}</span>
-                                    <br />
-                                    <span className="text-gray-600">{item.color} • Size {item.size} • Qty: {item.quantity}</span>
+                          {/* Collapsible Order Details */}
+                          <AnimatePresence>
+                            {isExpanded && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="overflow-hidden"
+                              >
+                                <div className="mt-4 pt-4 border-t border-gray-200">
+                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                    <div>
+                                      <span className="font-medium text-gray-600">Rep:</span>
+                                      <span className="ml-2 text-gray-900">{order.placed_by || 'Not specified'}</span>
+                                    </div>
+                                    <div>
+                                      <span className="font-medium text-gray-600">Order Date:</span>
+                                      <span className="ml-2 text-gray-900" title={`Raw: ${order.order_date}`}>
+                                        {formatDateOnly(order.order_date)}
+                                      </span>
+                                    </div>
+                                    <div>
+                                      <span className="font-medium text-gray-600">Total Pieces:</span>
+                                      <span className="ml-2 text-gray-900">{order.total_pieces || order.items?.length || 0}</span>
+                                    </div>
                                   </div>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
+
+                                  {/* Items List */}
+                                  {order.items && order.items.length > 0 && (
+                                    <div className="mt-4">
+                                      <h4 className="text-sm font-medium text-gray-900 mb-3">Frame Details:</h4>
+                                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                        {order.items.map((item) => (
+                                          <motion.div
+                                            key={item.id}
+                                            initial={{ opacity: 0, scale: 0.95 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            transition={{ duration: 0.2 }}
+                                            className="text-xs bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg px-3 py-2 border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all"
+                                          >
+                                            <div className="flex items-start justify-between mb-1">
+                                              <span className="font-semibold text-gray-900">{item.brand}</span>
+                                              {item.quantity > 1 && (
+                                                <span className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs font-medium">
+                                                  x{item.quantity}
+                                                </span>
+                                              )}
+                                            </div>
+                                            <div className="space-y-0.5 text-gray-700">
+                                              <div className="font-medium">{item.model}</div>
+                                              <div>{item.color}</div>
+                                              <div className="flex items-center justify-between pt-1">
+                                                <span className="text-gray-600">Size {item.size}</span>
+                                                {item.upc && (
+                                                  <span className="text-gray-500 text-[10px]">UPC: {item.upc.slice(-6)}</span>
+                                                )}
+                                              </div>
+                                            </div>
+                                          </motion.div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
-                      </div>
-                    ))}
+                      </motion.div>
+                    )})}
                 </div>
               )}
             </div>
