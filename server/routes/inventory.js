@@ -267,7 +267,7 @@ router.post('/:userId/confirm/:orderNumber', async (req, res) => {
         updatedCount: result.updatedCount
       });
     } else {
-      res.status(404).json({
+      res.status(200).json({
         success: false,
         error: result?.error || result?.message || 'Order not found or no pending items'
       });

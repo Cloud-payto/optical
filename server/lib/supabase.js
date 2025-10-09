@@ -222,6 +222,8 @@ const inventoryOperations = {
 
   async confirmPendingOrder(orderNumber, userId) {
     try {
+      console.log(`🔍 confirmPendingOrder called with orderNumber: "${orderNumber}", userId: "${userId}"`);
+
       // First, try to find the order with vendor information
       const { data: order, error: orderError } = await supabase
         .from('orders')
@@ -229,6 +231,8 @@ const inventoryOperations = {
         .eq('order_number', orderNumber)
         .eq('account_id', userId)
         .single();
+
+      console.log(`📋 Order lookup result:`, { found: !!order, orderId: order?.id, error: orderError?.message });
 
       let pendingItems;
       let vendorName;

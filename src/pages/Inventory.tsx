@@ -226,8 +226,29 @@ const Inventory: React.FC = () => {
       setDeletingItems(prev => new Set(prev).add(emailId));
 
       try {
+        // Find the email to get its parsed order number
+        const email = emails.find(e => e.id === emailId);
+        const orderNumber = email?.parsed_data?.order?.order_number;
+
+        // Delete the email first
         await deleteEmail(emailId);
-        toast.success('Email deleted successfully');
+
+        // If there's an order number, also delete the associated order and inventory items
+        if (orderNumber) {
+          // Find the order in the orders table
+          const order = orders.find(o => o.order_number === orderNumber);
+
+          if (order) {
+            // Delete the order (which will cascade delete inventory items)
+            await deleteOrder(order.id);
+            toast.success('Email, order, and associated inventory deleted successfully');
+          } else {
+            toast.success('Email deleted successfully');
+          }
+        } else {
+          toast.success('Email deleted successfully');
+        }
+
         await loadData(); // Refresh the data
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Failed to delete email');
