@@ -679,21 +679,75 @@ const orderOperations = {
 
   async deleteOrder(orderId, userId) {
     try {
-      // First, delete all inventory items associated with this order
-      console.log(`🗑️  Deleting inventory items for order ${orderId}...`);
-      const { error: inventoryError, data: deletedItems } = await supabase
+      console.log(`🗑️  Deleting order ${orderId}...`);
+
+      // First, get the order to find its order_number
+      const { data: order, error: orderFetchError } = await supabase
+        .from('orders')
+        .select('order_number')
+        .eq('id', orderId)
+        .eq('account_id', userId)
+        .single();
+
+      if (orderFetchError) {
+        console.error('❌ Error fetching order:', orderFetchError);
+        throw orderFetchError;
+      }
+
+      const orderNumber = order?.order_number;
+      console.log(`📋 Order number: ${orderNumber}`);
+
+      // Delete inventory items with order_id foreign key
+      console.log(`🗑️  Deleting inventory items with order_id = ${orderId}...`);
+      const { error: inventoryError1, data: deletedItemsByOrderId } = await supabase
         .from('inventory')
         .delete()
         .eq('order_id', orderId)
         .eq('account_id', userId)
         .select();
 
-      if (inventoryError) {
-        console.error('❌ Error deleting inventory items:', inventoryError);
-        throw inventoryError;
+      if (inventoryError1) {
+        console.error('❌ Error deleting inventory items by order_id:', inventoryError1);
+        throw inventoryError1;
       }
 
-      console.log(`✅ Deleted ${deletedItems?.length || 0} inventory items`);
+      console.log(`✅ Deleted ${deletedItemsByOrderId?.length || 0} inventory items by order_id`);
+
+      // Also delete inventory items where enriched_data contains this order number
+      // (for items that don't have order_id set but have the order number in enriched_data)
+      if (orderNumber) {
+        console.log(`🗑️  Deleting inventory items with order number ${orderNumber} in enriched_data...`);
+
+        // Get all inventory items for this user and filter by order number in enriched_data
+        const { data: allItems } = await supabase
+          .from('inventory')
+          .select('*')
+          .eq('account_id', userId)
+          .eq('status', 'pending'); // Only check pending items
+
+        const itemsToDelete = allItems?.filter(item => {
+          const enrichedOrderNumber = item.enriched_data?.order_number || item.enriched_data?.order?.order_number;
+          return enrichedOrderNumber === orderNumber;
+        }) || [];
+
+        console.log(`📝 Found ${itemsToDelete.length} additional items to delete by order number`);
+
+        if (itemsToDelete.length > 0) {
+          const itemIds = itemsToDelete.map(item => item.id);
+          const { error: inventoryError2, data: deletedItemsByOrderNumber } = await supabase
+            .from('inventory')
+            .delete()
+            .in('id', itemIds)
+            .select();
+
+          if (inventoryError2) {
+            console.error('❌ Error deleting inventory items by order number:', inventoryError2);
+            throw inventoryError2;
+          }
+
+          console.log(`✅ Deleted ${deletedItemsByOrderNumber?.length || 0} inventory items by order number`);
+        }
+      }
 
       // Then, delete the order itself
       const { error } = await supabase
@@ -705,7 +759,8 @@ const orderOperations = {
       if (error) throw error;
 
       console.log(`✅ Order ${orderId} deleted successfully`);
-      return { success: true, deletedInventoryCount: deletedItems?.length || 0 };
+      const totalDeleted = (deletedItemsByOrderId?.length || 0) + (orderNumber ? itemsToDelete?.length || 0 : 0);
+      return { success: true, deletedInventoryCount: totalDeleted };
     } catch (error) {
       handleSupabaseError(error, 'deleteOrder');
     }

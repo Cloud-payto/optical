@@ -333,8 +333,49 @@ const Inventory: React.FC = () => {
     try {
       const result = await confirmPendingOrder(orderNumber);
 
-      // Show success message
-      toast.success(`Successfully confirmed order ${orderNumber}. ${result.updatedCount} items moved to current inventory.`);
+      // Show custom success toast with animation
+      toast.success(
+        (t) => (
+          <div className="flex items-center space-x-3">
+            <div className="flex-shrink-0">
+              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-gray-900">
+                Order Confirmed! 🎉
+              </p>
+              <p className="text-xs text-gray-600 mt-0.5">
+                Order #{orderNumber} • {result.updatedCount} item{result.updatedCount !== 1 ? 's' : ''} added to inventory
+              </p>
+            </div>
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="flex-shrink-0 text-gray-400 hover:text-gray-600"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        ),
+        {
+          duration: 4000,
+          style: {
+            background: '#fff',
+            color: '#111',
+            border: '1px solid #e5e7eb',
+            padding: '16px',
+            borderRadius: '12px',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            maxWidth: '500px',
+          },
+          icon: null, // We're using custom icon
+        }
+      );
 
       // Wait a brief moment for the animation to be visible
       await new Promise(resolve => setTimeout(resolve, 600));
