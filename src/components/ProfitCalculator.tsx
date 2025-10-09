@@ -63,6 +63,7 @@ const ProfitCalculator: React.FC = () => {
   const [yourCost, setYourCost] = useState<number>(5);
   const [wholesaleCost, setWholesaleCost] = useState<number>(50);
   const [tariffTax, setTariffTax] = useState<number>(0);
+  const [discountPercentage, setDiscountPercentage] = useState<number>(10); // Default 10% discount
   const [retailPrice, setRetailPrice] = useState<number>(150);
   const [insuranceMultiplier, setInsuranceMultiplier] = useState<number>(2.5);
   const [useManualRetailPrice, setUseManualRetailPrice] = useState<boolean>(false);
@@ -140,6 +141,23 @@ const ProfitCalculator: React.FC = () => {
 
     loadCompanies();
   }, []);
+
+  // Helper function to calculate Your Cost from Wholesale Cost and Discount %
+  const calculateYourCostFromDiscount = (wholesale: number, discount: number): number => {
+    return wholesale * (1 - discount / 100);
+  };
+
+  // Helper function to calculate Discount % from Wholesale Cost and Your Cost
+  const calculateDiscountFromYourCost = (wholesale: number, yourCost: number): number => {
+    if (wholesale === 0) return 0;
+    return ((wholesale - yourCost) / wholesale) * 100;
+  };
+
+  // Update Your Cost when wholesale cost or discount % changes
+  useEffect(() => {
+    const newYourCost = calculateYourCostFromDiscount(wholesaleCost, discountPercentage);
+    setYourCost(newYourCost);
+  }, [wholesaleCost, discountPercentage]);
 
   // Calculate retail price based on multiplier when not using manual price
   useEffect(() => {
@@ -231,12 +249,8 @@ const ProfitCalculator: React.FC = () => {
     console.log('🔥 DEBUG: Brand selected in calculator:', brand);
     setSelectedBrand(brand);
     setShowBrandDropdown(false);
-    
-    // Auto-populate fields from brand data (using camelCase properties from frontend API)
-    if (brand.yourCost !== undefined && brand.yourCost !== null) {
-      console.log('🔥 DEBUG: Setting yourCost from brand:', brand.yourCost);
-      setYourCost(brand.yourCost);
-    }
+
+    // Auto-populate wholesale cost and tariff tax
     if (brand.wholesaleCost !== undefined && brand.wholesaleCost !== null) {
       console.log('🔥 DEBUG: Setting wholesaleCost from brand:', brand.wholesaleCost);
       setWholesaleCost(brand.wholesaleCost);
@@ -245,7 +259,15 @@ const ProfitCalculator: React.FC = () => {
       console.log('🔥 DEBUG: Setting tariffTax from brand:', brand.tariffTax);
       setTariffTax(brand.tariffTax);
     }
-    
+
+    // Calculate discount % from brand's yourCost if available
+    if (brand.yourCost !== undefined && brand.yourCost !== null && brand.wholesaleCost) {
+      const calculatedDiscount = calculateDiscountFromYourCost(brand.wholesaleCost, brand.yourCost);
+      console.log('🔥 DEBUG: Calculated discount from brand yourCost:', calculatedDiscount);
+      setDiscountPercentage(calculatedDiscount);
+      // Your Cost will auto-update via useEffect
+    }
+
     // Set retail price from brand MSRP if available
     if (brand.retailPrice !== undefined && brand.retailPrice !== null && brand.retailPrice > 0) {
       console.log('🔥 DEBUG: Setting retailPrice from brand MSRP:', brand.retailPrice);
@@ -784,25 +806,66 @@ const ProfitCalculator: React.FC = () => {
               </div>
             )}
             
-            <div className="space-y-2" data-demo="cost-fields">
-              <label htmlFor="yourCost" className="block text-sm font-medium text-gray-700">
-                Your Actual Cost
-              </label>
-              <div className="relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <DollarSignIcon className="h-4 w-4 text-gray-400" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4" data-demo="cost-fields">
+              {/* Your Actual Cost */}
+              <div className="space-y-2">
+                <label htmlFor="yourCost" className="block text-sm font-medium text-gray-700">
+                  Your Actual Cost
+                </label>
+                <div className="relative rounded-md shadow-sm">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <DollarSignIcon className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    inputMode="decimal"
+                    id="yourCost"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    value={yourCost.toFixed(2)}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      setYourCost(value);
+                      // Update discount % based on new Your Cost
+                      const newDiscount = calculateDiscountFromYourCost(wholesaleCost, value);
+                      setDiscountPercentage(newDiscount);
+                    }}
+                  />
                 </div>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  id="yourCost"
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  value={yourCost}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/^0+(?=\d)/, '');
-                    setYourCost(parseFloat(value) || 0);
-                  }}
-                />
+                <p className="text-xs text-gray-500 italic">
+                  Calculated from wholesale cost - {discountPercentage.toFixed(1)}% discount
+                </p>
+              </div>
+
+              {/* Discount Percentage */}
+              <div className="space-y-2">
+                <label htmlFor="discountPercentage" className="block text-sm font-medium text-gray-700">
+                  Discount %
+                </label>
+                <div className="relative rounded-md shadow-sm">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span className="text-gray-400 text-sm">%</span>
+                  </div>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    inputMode="decimal"
+                    id="discountPercentage"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    value={discountPercentage.toFixed(1)}
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value) || 0;
+                      setDiscountPercentage(Math.min(100, Math.max(0, value))); // Clamp between 0-100
+                      // Your Cost will auto-update via useEffect
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-gray-500 italic">
+                  Your cost = ${calculateYourCostFromDiscount(wholesaleCost, discountPercentage).toFixed(2)}
+                </p>
               </div>
             </div>
             
