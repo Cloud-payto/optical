@@ -815,15 +815,8 @@ const statsOperations = {
 
   async getInventoryByVendorAndBrand(userId, options = {}) {
     try {
-      // First, get total count for pagination metadata
-      const { count: totalCount } = await supabase
-        .from('inventory')
-        .select('*', { count: 'exact', head: true })
-        .eq('account_id', userId)
-        .eq('status', 'confirmed');
-
-      // Build query with sorting and pagination
-      let query = supabase
+      // Fetch ALL confirmed inventory items (no pagination at item level)
+      const { data: inventory, error } = await supabase
         .from('inventory')
         .select(`
           id,
@@ -839,16 +832,8 @@ const statsOperations = {
           enriched_data
         `)
         .eq('account_id', userId)
-        .eq('status', 'confirmed');
-
-      // Apply sorting and pagination
-      query = applySortingAndPagination(query, {
-        ...options,
-        defaultSort: 'created_at',
-        defaultOrder: 'desc'
-      });
-
-      const { data: inventory, error } = await query;
+        .eq('status', 'confirmed')
+        .order('created_at', { ascending: false }); // Basic ordering for consistency
 
       if (error) throw error;
 
@@ -866,11 +851,26 @@ const statsOperations = {
             vendorName,
             totalItems: 0,
             totalValue: 0,
-            brands: new Map()
+            brands: new Map(),
+            // Track latest dates for sorting
+            latestCreatedAt: item.created_at,
+            latestReceivedDate: item.received_date,
+            latestUpdatedAt: item.updated_at
           });
         }
 
         const vendor = vendorMap.get(vendorId);
+
+        // Update latest dates
+        if (item.created_at && item.created_at > vendor.latestCreatedAt) {
+          vendor.latestCreatedAt = item.created_at;
+        }
+        if (item.received_date && item.received_date > vendor.latestReceivedDate) {
+          vendor.latestReceivedDate = item.received_date;
+        }
+        if (item.updated_at && item.updated_at > vendor.latestUpdatedAt) {
+          vendor.latestUpdatedAt = item.updated_at;
+        }
 
         if (!vendor.brands.has(brandName)) {
           vendor.brands.set(brandName, {
@@ -893,11 +893,14 @@ const statsOperations = {
       });
 
       // Convert maps to arrays
-      const vendorStats = Array.from(vendorMap.values()).map(vendor => ({
+      let vendorStats = Array.from(vendorMap.values()).map(vendor => ({
         vendorId: vendor.vendorId,
         vendorName: vendor.vendorName,
         totalItems: vendor.totalItems,
         totalValue: vendor.totalValue,
+        latestCreatedAt: vendor.latestCreatedAt,
+        latestReceivedDate: vendor.latestReceivedDate,
+        latestUpdatedAt: vendor.latestUpdatedAt,
         brands: Array.from(vendor.brands.values()).map(brand => ({
           brandName: brand.brandName,
           itemCount: brand.itemCount,
@@ -905,15 +908,77 @@ const statsOperations = {
         }))
       }));
 
-      // Calculate pagination metadata
+      // Sort vendors based on options
+      const sortBy = options.sortBy || 'created_at';
+      const sortOrder = options.sortOrder || 'desc';
+
+      vendorStats.sort((a, b) => {
+        let aValue, bValue;
+
+        switch (sortBy) {
+          case 'brand':
+            // Sort by first brand name alphabetically
+            aValue = a.brands[0]?.brandName || '';
+            bValue = b.brands[0]?.brandName || '';
+            break;
+          case 'quantity':
+            aValue = a.totalItems;
+            bValue = b.totalItems;
+            break;
+          case 'wholesale_price':
+            aValue = a.totalValue;
+            bValue = b.totalValue;
+            break;
+          case 'received_date':
+            aValue = a.latestReceivedDate || '';
+            bValue = b.latestReceivedDate || '';
+            break;
+          case 'updated_at':
+            aValue = a.latestUpdatedAt || '';
+            bValue = b.latestUpdatedAt || '';
+            break;
+          case 'model':
+            // For model, sort by vendor name as fallback
+            aValue = a.vendorName;
+            bValue = b.vendorName;
+            break;
+          case 'created_at':
+          default:
+            aValue = a.latestCreatedAt || '';
+            bValue = b.latestCreatedAt || '';
+            break;
+        }
+
+        // Compare values
+        let comparison = 0;
+        if (aValue < bValue) comparison = -1;
+        if (aValue > bValue) comparison = 1;
+
+        // Apply sort order
+        return sortOrder === 'asc' ? comparison : -comparison;
+      });
+
+      // Apply pagination to vendor array (NOT individual items)
+      const totalVendors = vendorStats.length;
+      const page = Math.max(1, parseInt(options.page) || 1);
+      const pageSize = Math.min(Math.max(1, parseInt(options.pageSize) || 50), 100);
+      const startIndex = (page - 1) * pageSize;
+      const endIndex = startIndex + pageSize;
+
+      const paginatedVendors = vendorStats.slice(startIndex, endIndex);
+
+      // Remove temporary sorting fields from response
+      const cleanedVendors = paginatedVendors.map(({ latestCreatedAt, latestReceivedDate, latestUpdatedAt, ...vendor }) => vendor);
+
+      // Calculate pagination metadata based on VENDOR count
       const pagination = getPaginationMetadata(
-        totalCount || 0,
-        options.page || 1,
-        options.pageSize || 50
+        totalVendors,
+        page,
+        pageSize
       );
 
       return {
-        vendors: vendorStats,
+        vendors: cleanedVendors,
         pagination
       };
     } catch (error) {

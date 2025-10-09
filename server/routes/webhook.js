@@ -327,14 +327,8 @@ router.post('/email', async (req, res) => {
           if (parsedData.brands && parsedData.brands.length > 0 && vendorIdForInventory) {
             console.log(`📦 Processing ${parsedData.brands.length} brands from order...`);
 
-            // First, ensure vendor is added to user's account
-            try {
-              await vendorOperations.addAccountVendor(accountId, vendorIdForInventory, parsedData.account_number);
-              console.log(`✅ Ensured vendor is added to account`);
-            } catch (error) {
-              console.error('❌ Error adding vendor to account:', error);
-              // Continue anyway - the vendor operations will handle duplicates gracefully
-            }
+            // NOTE: Vendor is NOT auto-added here - user must explicitly import via the "Import from Inventory" button
+            // Brands are still created in the global brands table for future use
 
             for (const brandName of parsedData.brands) {
               try {
@@ -368,30 +362,13 @@ router.post('/email', async (req, res) => {
                   }
 
                   brandId = newBrand.id;
-                  console.log(`✅ Created new brand: ${brandName} (ID: ${brandId})`);
-                }
-
-                // Check if user has account_brands entry
-                const { data: accountBrand } = await supabase
-                  .from('account_brands')
-                  .select('id')
-                  .eq('account_id', accountId)
-                  .eq('brand_id', brandId)
-                  .single();
-
-                // Create account_brands entry if missing
-                if (!accountBrand) {
-                  await vendorOperations.saveAccountBrand(accountId, {
-                    brand_id: brandId,
-                    vendor_id: vendorIdForInventory,
-                    wholesale_cost: 0,
-                    discount_percentage: 45, // Default discount
-                    tariff_tax: 0
-                  });
-                  console.log(`✅ Added ${brandName} to account brands`);
+                  console.log(`✅ Created new brand: ${brandName} (ID: ${brandId}) - added to global brands table`);
                 } else {
-                  console.log(`ℹ️  ${brandName} already in account brands`);
+                  console.log(`✓ Brand ${brandName} already exists in global brands table`);
                 }
+
+                // NOTE: We do NOT add to account_brands here
+                // User must explicitly import via "Import from Inventory" button
 
               } catch (error) {
                 console.error(`❌ Error processing brand ${brandName}:`, error);

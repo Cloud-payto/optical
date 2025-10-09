@@ -401,25 +401,25 @@ class SafiloService {
     parseFrameLine(line, lineNumber) {
         // Clean up the line
         line = line.replace(/\s+/g, ' ').trim();
-        
+
         // Remove date stamps that might interfere
         line = line.replace(/\d{5}\/\d{2}\/\d{4}\.?/g, '');
         line = line.replace(/\s+/g, ' ').trim();
-        
+
         // Look for size pattern (XX/XX XXX)
         const sizeMatch = line.match(/(\d{2})\/(\d{2})\s+(\d{3})/);
         if (!sizeMatch) {
             return null;
         }
-        
+
         const eyeSize = sizeMatch[1];
-        const bridge = sizeMatch[2];  
+        const bridge = sizeMatch[2];
         const temple = sizeMatch[3];
-        
+
         // Split at the size pattern
         const sizeIndex = line.indexOf(sizeMatch[0]);
         const beforeSize = line.substring(0, sizeIndex).trim();
-        
+
         const parts = beforeSize.split(/\s+/);
         if (parts.length < 3) {
             return null;
@@ -490,10 +490,15 @@ class SafiloService {
 
         // Brand will be determined by API, just use first word as placeholder
         const brand = parts[0];
-        
+
         // Clean up color name
         colorName = colorName.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
-        
+
+        // CRITICAL FIX: Remove variant suffixes from model names
+        // Examples: CHERETTE2/US → CHERETTE2, POLINA2/G/S → POLINA2, JAILENE2/FJ → JAILENE2
+        // These suffixes interfere with API lookups and brand detection
+        model = model.replace(/\/[A-Z]+(?:\/[A-Z]+)*$/g, '');
+
         return {
             lineNumber: lineNumber,
             originalLine: line,
@@ -883,34 +888,45 @@ class SafiloService {
      */
     generateSearchVariations(frame) {
         const variations = new Set();
-        
+
+        // Clean model name (already done in parseFrameLine, but ensure it's clean)
+        const cleanModel = frame.model.replace(/\/[A-Z]+(?:\/[A-Z]+)*$/g, '');
+
         // Primary searches
-        variations.add(frame.model);
-        variations.add(`${frame.brand} ${frame.model}`);
-        
+        variations.add(cleanModel);
+        variations.add(`${frame.brand} ${cleanModel}`);
+
         // Remove brand prefix if redundant
-        if (frame.model.startsWith(frame.brand.split(' ')[0])) {
-            variations.add(frame.model);
+        if (cleanModel.startsWith(frame.brand.split(' ')[0])) {
+            variations.add(cleanModel);
         } else {
-            variations.add(`${frame.brand.split(' ')[0]} ${frame.model}`);
+            variations.add(`${frame.brand.split(' ')[0]} ${cleanModel}`);
         }
-        
-        // Handle special cases
-        if (frame.model.startsWith('CH ')) {
-            variations.add(`CHESTERFIELD ${frame.model}`);
-            variations.add(`CHESTERFIELD ${frame.model.substring(3)}`);
+
+        // Handle special cases - Kate Spade (KS prefix)
+        if (cleanModel.startsWith('KS ')) {
+            const modelWithoutPrefix = cleanModel.substring(3).trim();
+            variations.add(`KATE SPADE ${modelWithoutPrefix}`);
+            variations.add(`kate spade ${modelWithoutPrefix}`);
+            variations.add(modelWithoutPrefix);
+            // Also try with full KS prefix
+            variations.add(`KATE SPADE ${cleanModel}`);
         }
-        
-        if (frame.model.startsWith('KS ')) {
-            variations.add(`KATE SPADE ${frame.model}`);
-            variations.add(`KATE SPADE ${frame.model.substring(3)}`);
+
+        // Handle Chesterfield (CH prefix)
+        if (cleanModel.startsWith('CH ')) {
+            const modelWithoutPrefix = cleanModel.substring(3).trim();
+            variations.add(`CHESTERFIELD ${modelWithoutPrefix}`);
+            variations.add(`CHESTERFIELD ${cleanModel}`);
         }
-        
-        if (frame.model.startsWith('MIS ')) {
-            variations.add(`MISSONI ${frame.model}`);
-            variations.add(`MISSONI ${frame.model.substring(4)}`);
+
+        // Handle Missoni (MIS prefix)
+        if (cleanModel.startsWith('MIS ')) {
+            const modelWithoutPrefix = cleanModel.substring(4).trim();
+            variations.add(`MISSONI ${modelWithoutPrefix}`);
+            variations.add(`MISSONI ${cleanModel}`);
         }
-        
+
         return Array.from(variations);
     }
 }
