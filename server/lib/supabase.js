@@ -131,6 +131,56 @@ const emailOperations = {
   }
 };
 
+// Helper function to calculate median wholesale price for a brand
+async function calculateMedianWholesalePrice(accountId, vendorId, brandName) {
+  try {
+    console.log(`📊 Calculating median wholesale price for brand "${brandName}" (vendor: ${vendorId}, account: ${accountId})`);
+
+    // Get all confirmed inventory items for this brand
+    const { data: items, error } = await supabase
+      .from('inventory')
+      .select('wholesale_price')
+      .eq('account_id', accountId)
+      .eq('vendor_id', vendorId)
+      .ilike('brand', brandName)
+      .eq('status', 'confirmed')
+      .not('wholesale_price', 'is', null)
+      .gt('wholesale_price', 0);
+
+    if (error) throw error;
+
+    if (!items || items.length === 0) {
+      console.log(`  ℹ️  No wholesale prices found for "${brandName}"`);
+      return null;
+    }
+
+    // Extract prices and sort them
+    const prices = items.map(item => parseFloat(item.wholesale_price)).sort((a, b) => a - b);
+
+    console.log(`  📈 Found ${prices.length} wholesale prices for "${brandName}"`);
+    console.log(`  💰 Price range: $${Math.min(...prices).toFixed(2)} - $${Math.max(...prices).toFixed(2)}`);
+
+    // Calculate median
+    const middle = Math.floor(prices.length / 2);
+    let median;
+
+    if (prices.length % 2 === 0) {
+      // Even number of items - average the two middle values
+      median = (prices[middle - 1] + prices[middle]) / 2;
+    } else {
+      // Odd number of items - take the middle value
+      median = prices[middle];
+    }
+
+    console.log(`  ✅ Calculated median: $${median.toFixed(2)}`);
+
+    return median;
+  } catch (error) {
+    console.error(`Error calculating median wholesale price:`, error);
+    return null;
+  }
+}
+
 // Database operations for inventory
 const inventoryOperations = {
   async saveInventoryItems(items) {
@@ -139,7 +189,7 @@ const inventoryOperations = {
         .from('inventory')
         .insert(items)
         .select();
-      
+
       if (error) throw error;
       return data;
     } catch (error) {
@@ -433,6 +483,63 @@ const inventoryOperations = {
       }
 
       console.log(`✅ Vendor/brand detection complete`);
+
+      // CALCULATE MEDIAN WHOLESALE PRICES FOR BRANDS
+      console.log(`\n📊 Calculating median wholesale prices for brands...`);
+
+      // Get unique brand/vendor combinations from the confirmed items
+      const brandVendorPairs = new Map();
+      pendingItems.forEach(item => {
+        if (item.brand && item.vendor_id) {
+          const key = `${item.vendor_id}:${item.brand}`;
+          if (!brandVendorPairs.has(key)) {
+            brandVendorPairs.set(key, {
+              vendorId: item.vendor_id,
+              brandName: item.brand
+            });
+          }
+        }
+      });
+
+      console.log(`  Found ${brandVendorPairs.size} unique brand/vendor pairs to calculate medians for`);
+
+      // Calculate and update median for each brand
+      for (const [key, { vendorId, brandName }] of brandVendorPairs) {
+        try {
+          const median = await calculateMedianWholesalePrice(userId, vendorId, brandName);
+
+          if (median !== null) {
+            // Update the brand's wholesale_cost in the brands table
+            const { data: globalBrand } = await supabase
+              .from('brands')
+              .select('id, wholesale_cost')
+              .eq('vendor_id', vendorId)
+              .ilike('name', brandName)
+              .single();
+
+            if (globalBrand) {
+              // Update the brand's wholesale_cost with the calculated median
+              await supabase
+                .from('brands')
+                .update({
+                  wholesale_cost: median,
+                  price_last_updated: new Date().toISOString(),
+                  price_source: 'auto_calculated_median'
+                })
+                .eq('id', globalBrand.id);
+
+              console.log(`  ✅ Updated "${brandName}" wholesale_cost to $${median.toFixed(2)} (median from confirmed inventory)`);
+            } else {
+              console.log(`  ℹ️  Brand "${brandName}" not found in global brands table yet`);
+            }
+          }
+        } catch (error) {
+          console.error(`  ❌ Error calculating median for "${brandName}":`, error.message);
+          // Continue with other brands even if one fails
+        }
+      }
+
+      console.log(`✅ Median calculation complete\n`);
 
       return { success: true, message: `Confirmed ${updatedItems.length} items`, updatedCount: updatedItems.length };
     } catch (error) {
@@ -1710,23 +1817,31 @@ const vendorOperations = {
 
       // Add brands to account_brands (creating them in brands table if needed)
       for (const brand of brandData || []) {
+        // Calculate median wholesale price for this brand from user's confirmed inventory
+        const median = await calculateMedianWholesalePrice(userId, brand.vendor_id, brand.brand_name);
+
+        console.log(`  📊 Brand "${brand.brand_name}": ${median ? `Using calculated median $${median.toFixed(2)}` : 'No median available, using 0'}`);
+
         if (brand.brand_id) {
           // Brand exists in global table, just add to account_brands
           await this.saveAccountBrand(userId, {
             brand_id: brand.brand_id,
             vendor_id: brand.vendor_id,
-            wholesale_cost: 0,
+            wholesale_cost: median || 0, // Use calculated median or 0
             discount_percentage: 45,
-            tariff_tax: 0
+            tariff_tax: 0,
+            notes: median ? `Auto-calculated from ${brand.brand_name} inventory median` : ''
           });
         } else {
-          // Brand doesn't exist, create it first
+          // Brand doesn't exist, create it first with the median
           await this.saveAccountBrand(userId, {
             brand_name: brand.brand_name,
             vendor_id: brand.vendor_id,
-            wholesale_cost: 0,
+            wholesale_cost: median || 0, // Use calculated median or 0
+            global_wholesale_cost: median || 0, // Also set global wholesale cost
             discount_percentage: 45,
-            tariff_tax: 0
+            tariff_tax: 0,
+            notes: median ? `Auto-calculated from ${brand.brand_name} inventory median` : ''
           });
         }
       }
