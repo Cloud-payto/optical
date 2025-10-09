@@ -715,26 +715,43 @@ const orderOperations = {
 
       // Also delete inventory items where enriched_data contains this order number
       // (for items that don't have order_id set but have the order number in enriched_data)
+      let deletedItemsByOrderNumber = [];
       if (orderNumber) {
         console.log(`🗑️  Deleting inventory items with order number ${orderNumber} in enriched_data...`);
 
-        // Get all inventory items for this user and filter by order number in enriched_data
+        // Get all inventory items for this user (all statuses, not just pending)
         const { data: allItems } = await supabase
           .from('inventory')
-          .select('*')
-          .eq('account_id', userId)
-          .eq('status', 'pending'); // Only check pending items
+          .select('id, status, order_id, enriched_data')
+          .eq('account_id', userId);
 
+        console.log(`📊 Total items for user: ${allItems?.length || 0}`);
+
+        // Filter items that match this order number in enriched_data
         const itemsToDelete = allItems?.filter(item => {
+          // Skip items that were already deleted by order_id
+          if (item.order_id === orderId) {
+            console.log(`  ⏭️  Skipping item ${item.id} (already deleted via order_id)`);
+            return false;
+          }
+
           const enrichedOrderNumber = item.enriched_data?.order_number || item.enriched_data?.order?.order_number;
-          return enrichedOrderNumber === orderNumber;
+          const matches = enrichedOrderNumber === orderNumber;
+
+          if (matches) {
+            console.log(`  🎯 MATCH: Item ${item.id} has order number ${enrichedOrderNumber} in enriched_data`);
+          }
+
+          return matches;
         }) || [];
 
-        console.log(`📝 Found ${itemsToDelete.length} additional items to delete by order number`);
+        console.log(`📝 Found ${itemsToDelete.length} additional items to delete by order number in enriched_data`);
 
         if (itemsToDelete.length > 0) {
+          console.log(`Items to delete:`, itemsToDelete.map(i => ({ id: i.id, status: i.status })));
+
           const itemIds = itemsToDelete.map(item => item.id);
-          const { error: inventoryError2, data: deletedItemsByOrderNumber } = await supabase
+          const { error: inventoryError2, data: deletedItems } = await supabase
             .from('inventory')
             .delete()
             .in('id', itemIds)
@@ -745,7 +762,8 @@ const orderOperations = {
             throw inventoryError2;
           }
 
-          console.log(`✅ Deleted ${deletedItemsByOrderNumber?.length || 0} inventory items by order number`);
+          deletedItemsByOrderNumber = deletedItems || [];
+          console.log(`✅ Deleted ${deletedItemsByOrderNumber.length} inventory items by order number`);
         }
       }
 

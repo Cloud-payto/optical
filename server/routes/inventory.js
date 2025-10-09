@@ -62,19 +62,11 @@ router.post('/bulk-add', async (req, res) => {
         vendorId = vendorData.id;
         console.log(`✓ Found vendor ID: ${vendorId} for ${vendor}`);
 
-        // Save or update vendor account number if available
+        // NOTE: Vendor is NOT auto-added to account_vendors here
+        // User must explicitly import via "Import from Inventory" button
+        // We just track the vendor_id for inventory records
         if (order.account_number) {
-          try {
-            await emailOperations.saveOrUpdateVendorAccountNumber(
-              accountId,
-              vendorId,
-              order.account_number
-            );
-            console.log(`✓ Saved vendor account #${order.account_number} for ${vendor}`);
-          } catch (vendorAccountError) {
-            console.warn('Failed to save vendor account number:', vendorAccountError.message);
-            // Don't fail the entire process if this fails
-          }
+          console.log(`ℹ️  Vendor account #${order.account_number} detected for ${vendor} (not auto-added to account)`);
         }
       } else {
         console.warn(`Vendor '${vendor}' not found in vendors table`);
