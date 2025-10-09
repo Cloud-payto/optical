@@ -160,7 +160,7 @@ const DashboardPage: React.FC = () => {
                       setSortBy(e.target.value);
                       setCurrentPage(1); // Reset to page 1 when sorting changes
                     }}
-                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="px-3 py-1.5 pr-8 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white appearance-auto min-w-[160px]"
                   >
                     <option value="created_at">Date Added</option>
                     <option value="brand">Brand Name</option>
@@ -176,7 +176,7 @@ const DashboardPage: React.FC = () => {
                   <select
                     value={sortOrder}
                     onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
-                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="px-3 py-1.5 pr-8 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white appearance-auto min-w-[130px]"
                   >
                     <option value="asc">Ascending</option>
                     <option value="desc">Descending</option>
@@ -191,7 +191,7 @@ const DashboardPage: React.FC = () => {
                       setPageSize(Number(e.target.value));
                       setCurrentPage(1); // Reset to page 1 when page size changes
                     }}
-                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="px-3 py-1.5 pr-8 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white appearance-auto min-w-[80px]"
                   >
                     <option value="10">10</option>
                     <option value="25">25</option>

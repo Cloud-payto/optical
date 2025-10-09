@@ -19,10 +19,33 @@ const ImportFromInventory: React.FC<ImportFromInventoryProps> = ({ onImportCompl
   const loadPendingImports = async () => {
     try {
       setLoading(true);
+      console.log('🔄 [FRONTEND] Fetching pending imports...');
       const data = await fetchPendingImports();
+
+      console.log('📥 [FRONTEND] Received pending imports:', {
+        vendors: data.vendors.length,
+        brands: data.brands.length,
+        vendorDetails: data.vendors,
+        brandDetails: data.brands
+      });
+
+      if (data.vendors.length > 0) {
+        console.log('🆕 [FRONTEND] NEW VENDORS DETECTED:');
+        data.vendors.forEach(v => console.log(`   - ${v.name} (${v.brandCount} brands)`));
+      }
+
+      if (data.brands.length > 0) {
+        console.log('🆕 [FRONTEND] NEW BRANDS DETECTED:');
+        data.brands.forEach(b => console.log(`   - ${b.brand_name} (${b.vendor_name})`));
+      }
+
+      if (data.vendors.length === 0 && data.brands.length === 0) {
+        console.log('✅ [FRONTEND] No new vendors or brands to import');
+      }
+
       setPendingImports(data);
     } catch (error) {
-      console.error('Error loading pending imports:', error);
+      console.error('❌ [FRONTEND] Error loading pending imports:', error);
       toast.error('Failed to check for pending imports');
     } finally {
       setLoading(false);

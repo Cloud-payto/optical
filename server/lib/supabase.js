@@ -450,6 +450,8 @@ const inventoryOperations = {
         return { success: false, error: `Vendor '${vendorName}' not found` };
       }
 
+      console.log(`📦 Archiving all items for brand ${brandName} from vendor ${vendorName}...`);
+
       // Update all items matching the brand and vendor to archived status
       const { data, error } = await supabase
         .from('inventory')
@@ -460,7 +462,12 @@ const inventoryOperations = {
         .neq('status', 'archived') // Only update items not already archived
         .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error(`❌ Error archiving items:`, error);
+        throw error;
+      }
+
+      console.log(`✅ Archived ${data?.length || 0} items from ${brandName}`);
 
       return {
         success: true,
@@ -1430,19 +1437,35 @@ const vendorOperations = {
 
       console.log(`📦 Found ${uniqueVendorIds.length} unique vendors in inventory`);
 
+      // Log vendor details from inventory
+      const vendorNamesInInventory = inventoryItems
+        .filter(item => item.vendor_id)
+        .map(item => ({ id: item.vendor_id, name: item.vendors?.name }))
+        .filter((v, i, arr) => arr.findIndex(x => x.id === v.id) === i);
+
+      console.log('📋 Vendors in confirmed inventory:');
+      vendorNamesInInventory.forEach(v => console.log(`   - ${v.name} (${v.id})`));
+
       // Check which vendors are NOT in account_vendors
       const { data: existingAccountVendors, error: accountVendorsError } = await supabase
         .from('account_vendors')
-        .select('vendor_id')
+        .select('vendor_id, vendors(name)')
         .eq('account_id', userId)
         .in('vendor_id', uniqueVendorIds);
 
       if (accountVendorsError) throw accountVendorsError;
 
+      console.log('✅ Vendors already in account_vendors:');
+      existingAccountVendors?.forEach(av => console.log(`   - ${av.vendors?.name} (${av.vendor_id})`));
+
       const existingVendorIds = existingAccountVendors?.map(av => av.vendor_id) || [];
       const missingVendorIds = uniqueVendorIds.filter(vid => !existingVendorIds.includes(vid));
 
-      console.log(`📌 ${missingVendorIds.length} vendors not yet added to account`);
+      console.log(`\n🆕 ${missingVendorIds.length} NEW vendors detected (not in account):`);
+      missingVendorIds.forEach(vid => {
+        const vendorName = inventoryItems.find(item => item.vendor_id === vid)?.vendors?.name;
+        console.log(`   - ${vendorName} (${vid})`);
+      });
 
       // Get vendor details for missing vendors
       const vendorsToImport = [];
@@ -1461,8 +1484,15 @@ const vendorOperations = {
       // Check which brands are NOT in account_brands
       const brandsToImport = [];
 
+      console.log('\n🔍 Checking brands from inventory...');
+
       for (const [vendorId, brandNamesSet] of Object.entries(brandsByVendor)) {
         const brandNames = Array.from(brandNamesSet);
+        const vendorInfo = inventoryItems.find(item => item.vendor_id === vendorId);
+        const vendorName = vendorInfo?.vendors?.name || 'Unknown';
+
+        console.log(`\n  Vendor: ${vendorName}`);
+        console.log(`  Brands found in inventory: ${brandNames.join(', ')}`);
 
         for (const brandName of brandNames) {
           // Find brand in global brands table
@@ -1474,6 +1504,8 @@ const vendorOperations = {
             .single();
 
           if (globalBrand) {
+            console.log(`    ✓ "${brandName}" exists in global brands table (${globalBrand.id})`);
+
             // Check if it's in account_brands
             const { data: accountBrand } = await supabase
               .from('account_brands')
@@ -1483,28 +1515,33 @@ const vendorOperations = {
               .single();
 
             if (!accountBrand) {
-              const vendorInfo = inventoryItems.find(item => item.vendor_id === vendorId);
+              console.log(`      🆕 NEW: "${brandName}" not in user's account_brands - will be imported`);
               brandsToImport.push({
                 brand_id: globalBrand.id,
                 brand_name: globalBrand.name,
                 vendor_id: vendorId,
-                vendor_name: vendorInfo?.vendors?.name || 'Unknown'
+                vendor_name: vendorName
               });
+            } else {
+              console.log(`      ✅ "${brandName}" already in user's account_brands`);
             }
           } else {
-            // Brand doesn't exist in global table - will be created on import
-            const vendorInfo = inventoryItems.find(item => item.vendor_id === vendorId);
+            console.log(`    🆕 NEW: "${brandName}" doesn't exist in global brands table - will be created and imported`);
             brandsToImport.push({
               brand_id: null, // Will be created
               brand_name: brandName,
               vendor_id: vendorId,
-              vendor_name: vendorInfo?.vendors?.name || 'Unknown'
+              vendor_name: vendorName
             });
           }
         }
       }
 
-      console.log(`📌 ${brandsToImport.length} brands not yet added to account`);
+      console.log(`\n📊 SUMMARY: ${brandsToImport.length} brands ready to import`);
+      if (brandsToImport.length > 0) {
+        console.log('Brands to import:');
+        brandsToImport.forEach(b => console.log(`   - ${b.brand_name} (${b.vendor_name})`));
+      }
 
       return {
         vendors: vendorsToImport,
