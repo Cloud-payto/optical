@@ -324,10 +324,6 @@ const Inventory: React.FC = () => {
 
   // Confirm pending order
   const handleConfirmOrder = async (orderNumber: string) => {
-    if (!confirm(`Are you sure you want to confirm order ${orderNumber}? All pending items will be moved to current inventory.`)) {
-      return;
-    }
-
     setConfirmingOrders(prev => new Set(prev).add(orderNumber));
 
     try {
