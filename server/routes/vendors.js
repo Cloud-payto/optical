@@ -219,4 +219,28 @@ router.post('/import-from-inventory/:userId', async (req, res) => {
   }
 });
 
+// DEBUG: GET /api/vendors/debug-account-vendors/:userId - Check account_vendors for a user
+router.get('/debug-account-vendors/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { supabase } = require('../lib/supabase');
+
+    const { data, error } = await supabase
+      .from('account_vendors')
+      .select('*, vendors(name)')
+      .eq('account_id', userId);
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      count: data?.length || 0,
+      vendors: data || []
+    });
+  } catch (error) {
+    console.error('Error checking account_vendors:', error);
+    res.status(500).json({ error: 'Failed to check account_vendors' });
+  }
+});
+
 module.exports = router;

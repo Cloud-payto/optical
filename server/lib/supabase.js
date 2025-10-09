@@ -634,12 +634,27 @@ const orderOperations = {
 
       console.log(`📦 Archiving order ${orderId}...`);
 
-      // Archive the order itself
+      // First, get the current order to preserve its status
+      const { data: currentOrder, error: fetchError } = await supabase
+        .from('orders')
+        .select('status, metadata')
+        .eq('id', orderId)
+        .eq('account_id', userId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Archive the order itself - preserve current status, just add archived flag to metadata
       const { data, error } = await supabase
         .from('orders')
         .update({
-          status: 'cancelled',  // Database only allows: pending, confirmed, shipped, delivered, cancelled
-          metadata: { archived: true, archived_at: new Date().toISOString() }
+          // Keep the current status (e.g., 'confirmed') instead of changing to 'cancelled'
+          // This prevents archived orders from appearing in the wrong tabs
+          metadata: {
+            ...(currentOrder.metadata || {}),
+            archived: true,
+            archived_at: new Date().toISOString()
+          }
         })
         .eq('id', orderId)
         .eq('account_id', userId)
@@ -648,7 +663,7 @@ const orderOperations = {
 
       if (error) throw error;
 
-      console.log(`✅ Order ${orderId} archived successfully`);
+      console.log(`✅ Order ${orderId} archived successfully (status preserved as '${currentOrder.status}')`);
       return data;
     } catch (error) {
       handleSupabaseError(error, 'archiveOrder');

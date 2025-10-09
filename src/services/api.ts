@@ -404,6 +404,34 @@ export async function fetchCompaniesWithPricing(userId?: string): Promise<Compan
   return apiRequest<Company[]>(`/vendors/companies/${currentUserId}`);
 }
 
+// Pending vendor/brand imports from inventory
+export interface PendingImport {
+  vendors: Array<{
+    id: string;
+    name: string;
+    brandCount: number;
+  }>;
+  brands: Array<{
+    brand_id: string | null;
+    brand_name: string;
+    vendor_id: string;
+    vendor_name: string;
+  }>;
+}
+
+export async function fetchPendingImports(userId?: string): Promise<PendingImport> {
+  const currentUserId = userId || await getCurrentUserIdFromSession();
+  return apiRequest<PendingImport>(`/vendors/pending-imports/${currentUserId}`);
+}
+
+export async function importFromInventory(vendorIds: string[], brandData: any[], userId?: string): Promise<{ success: boolean; vendorsAdded: number; brandsAdded: number }> {
+  const currentUserId = userId || await getCurrentUserIdFromSession();
+  return apiRequest<{ success: boolean; vendorsAdded: number; brandsAdded: number }>(`/vendors/import-from-inventory/${currentUserId}`, {
+    method: 'POST',
+    body: JSON.stringify({ vendorIds, brandData }),
+  });
+}
+
 // Health check
 export interface HealthResponse {
   status: string;
@@ -437,14 +465,57 @@ export interface VendorInventoryStats {
   brands: BrandStats[];
 }
 
+export interface PaginationMetadata {
+  totalCount: number;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+export interface SortOptions {
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  page?: number;
+  pageSize?: number;
+}
+
+export interface InventoryByVendorResponse {
+  vendors: VendorInventoryStats[];
+  pagination: PaginationMetadata;
+}
+
 export async function fetchDashboardStats(userId?: string): Promise<DashboardStats> {
   const currentUserId = userId || await getCurrentUserIdFromSession();
   const response = await apiRequest<{ success: boolean; stats: DashboardStats }>(`/stats/${currentUserId}`);
   return response.stats;
 }
 
-export async function fetchInventoryByVendor(userId?: string): Promise<VendorInventoryStats[]> {
+export async function fetchInventoryByVendor(
+  userId?: string,
+  options?: SortOptions
+): Promise<InventoryByVendorResponse> {
   const currentUserId = userId || await getCurrentUserIdFromSession();
-  const response = await apiRequest<{ success: boolean; vendors: VendorInventoryStats[] }>(`/stats/${currentUserId}/inventory-by-vendor`);
-  return response.vendors;
+
+  // Build query string from options
+  const params = new URLSearchParams();
+  if (options?.sortBy) params.append('sortBy', options.sortBy);
+  if (options?.sortOrder) params.append('sortOrder', options.sortOrder);
+  if (options?.page) params.append('page', options.page.toString());
+  if (options?.pageSize) params.append('pageSize', options.pageSize.toString());
+
+  const queryString = params.toString();
+  const endpoint = `/stats/${currentUserId}/inventory-by-vendor${queryString ? `?${queryString}` : ''}`;
+
+  const response = await apiRequest<{
+    success: boolean;
+    vendors: VendorInventoryStats[];
+    pagination: PaginationMetadata;
+  }>(endpoint);
+
+  return {
+    vendors: response.vendors,
+    pagination: response.pagination
+  };
 }

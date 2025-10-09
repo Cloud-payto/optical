@@ -7,6 +7,7 @@ import BrandDetailsModal from '../components/brands/BrandDetailsModal';
 import CompanyDetailsModal from '../components/brands/CompanyDetailsModal';
 import AddCompanyModal from '../components/brands/AddCompanyModal';
 import MissingBrands from '../components/brands/MissingBrands';
+import ImportFromInventory from '../components/brands/ImportFromInventory';
 import { Company, Brand } from '../types';
 import { fetchCompaniesWithPricing, saveAccountBrand } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -234,6 +235,9 @@ const BrandsCostsPage: React.FC = () => {
               Add New Company
             </button>
           </div>
+
+          {/* Import from Inventory Section */}
+          {user?.id && <ImportFromInventory onImportComplete={loadCompanies} />}
 
           {/* Search Bar */}
           <div className="mb-8">

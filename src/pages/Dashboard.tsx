@@ -1,34 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import { Container } from '../components/ui/Container';
-import { fetchDashboardStats, fetchInventoryByVendor, DashboardStats, VendorInventoryStats } from '../services/api';
-import { PackageIcon, DollarSignIcon, ShoppingCartIcon, ClockIcon, ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
+import { fetchDashboardStats, fetchInventoryByVendor, DashboardStats, VendorInventoryStats, PaginationMetadata } from '../services/api';
+import { PackageIcon, DollarSignIcon, ShoppingCartIcon, ClockIcon, ChevronDownIcon, ChevronRightIcon, ArrowUpDown } from 'lucide-react';
 
 const DashboardPage: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [vendorStats, setVendorStats] = useState<VendorInventoryStats[]>([]);
+  const [pagination, setPagination] = useState<PaginationMetadata | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedVendors, setExpandedVendors] = useState<Set<string>>(new Set());
+
+  // Sorting and pagination state
+  const [sortBy, setSortBy] = useState<string>('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(50);
 
   useEffect(() => {
     loadDashboardData();
   }, []);
 
+  // Reload when sort/page changes
+  useEffect(() => {
+    loadVendorData();
+  }, [sortBy, sortOrder, currentPage, pageSize]);
+
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const [statsData, vendorData] = await Promise.all([
+      const [statsData, vendorResponse] = await Promise.all([
         fetchDashboardStats(),
-        fetchInventoryByVendor()
+        fetchInventoryByVendor(undefined, { sortBy, sortOrder, page: currentPage, pageSize })
       ]);
       setStats(statsData);
-      setVendorStats(vendorData);
+      setVendorStats(vendorResponse.vendors);
+      setPagination(vendorResponse.pagination);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
       console.error('Dashboard error:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadVendorData = async () => {
+    try {
+      const vendorResponse = await fetchInventoryByVendor(undefined, { sortBy, sortOrder, page: currentPage, pageSize });
+      setVendorStats(vendorResponse.vendors);
+      setPagination(vendorResponse.pagination);
+    } catch (err) {
+      console.error('Error loading vendor data:', err);
     }
   };
 
@@ -122,7 +145,61 @@ const DashboardPage: React.FC = () => {
           {/* Inventory by Vendor */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">Inventory by Vendor & Brand</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900">Inventory by Vendor & Brand</h2>
+              </div>
+
+              {/* Sort and Filter Controls */}
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <ArrowUpDown className="w-4 h-4 text-gray-500" />
+                  <label className="text-sm font-medium text-gray-700">Sort by:</label>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => {
+                      setSortBy(e.target.value);
+                      setCurrentPage(1); // Reset to page 1 when sorting changes
+                    }}
+                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="created_at">Date Added</option>
+                    <option value="brand">Brand Name</option>
+                    <option value="model">Model</option>
+                    <option value="quantity">Quantity</option>
+                    <option value="wholesale_price">Wholesale Price</option>
+                    <option value="received_date">Received Date</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-gray-700">Order:</label>
+                  <select
+                    value={sortOrder}
+                    onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
+                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="asc">Ascending</option>
+                    <option value="desc">Descending</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-gray-700">Items per page:</label>
+                  <select
+                    value={pageSize}
+                    onChange={(e) => {
+                      setPageSize(Number(e.target.value));
+                      setCurrentPage(1); // Reset to page 1 when page size changes
+                    }}
+                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                  </select>
+                </div>
+              </div>
             </div>
             <div className="divide-y divide-gray-200">
               {vendorStats.length === 0 ? (
@@ -176,6 +253,82 @@ const DashboardPage: React.FC = () => {
                 ))
               )}
             </div>
+
+            {/* Pagination Controls */}
+            {pagination && pagination.totalPages > 1 && (
+              <div className="p-4 border-t border-gray-200 bg-gray-50">
+                <div className="flex items-center justify-between">
+                  {/* Pagination Info */}
+                  <div className="text-sm text-gray-600">
+                    Showing page {pagination.currentPage} of {pagination.totalPages} ({pagination.totalCount} total items)
+                  </div>
+
+                  {/* Pagination Buttons */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setCurrentPage(1)}
+                      disabled={!pagination.hasPreviousPage}
+                      className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      First
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={!pagination.hasPreviousPage}
+                      className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Previous
+                    </button>
+
+                    {/* Page Numbers */}
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                        // Show pages around current page
+                        let pageNum: number;
+                        if (pagination.totalPages <= 5) {
+                          pageNum = i + 1;
+                        } else if (pagination.currentPage <= 3) {
+                          pageNum = i + 1;
+                        } else if (pagination.currentPage >= pagination.totalPages - 2) {
+                          pageNum = pagination.totalPages - 4 + i;
+                        } else {
+                          pageNum = pagination.currentPage - 2 + i;
+                        }
+
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => setCurrentPage(pageNum)}
+                            className={`px-3 py-1.5 text-sm border rounded-lg ${
+                              pageNum === pagination.currentPage
+                                ? 'bg-blue-600 text-white border-blue-600'
+                                : 'border-gray-300 hover:bg-gray-100'
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(pagination.totalPages, prev + 1))}
+                      disabled={!pagination.hasNextPage}
+                      className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage(pagination.totalPages)}
+                      disabled={!pagination.hasNextPage}
+                      className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Last
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </Container>
       </div>
