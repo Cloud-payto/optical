@@ -720,6 +720,7 @@ const orderOperations = {
       // Also delete inventory items where enriched_data contains this order number
       // (for items that don't have order_id set but have the order number in enriched_data)
       let deletedItemsByOrderNumber = [];
+      let itemsToDelete = []; // Declare outside the if block to avoid ReferenceError
       if (orderNumber) {
         console.log(`🗑️  Deleting inventory items with order number ${orderNumber} in enriched_data...`);
 
@@ -732,7 +733,7 @@ const orderOperations = {
         console.log(`📊 Total items for user: ${allItems?.length || 0}`);
 
         // Filter items that match this order number in enriched_data
-        const itemsToDelete = allItems?.filter(item => {
+        itemsToDelete = allItems?.filter(item => {
           // Skip items that were already deleted by order_id
           if (item.order_id === orderId) {
             console.log(`  ⏭️  Skipping item ${item.id} (already deleted via order_id)`);
@@ -781,7 +782,7 @@ const orderOperations = {
       if (error) throw error;
 
       console.log(`✅ Order ${orderId} deleted successfully`);
-      const totalDeleted = (deletedItemsByOrderId?.length || 0) + (orderNumber ? itemsToDelete?.length || 0 : 0);
+      const totalDeleted = (deletedItemsByOrderId?.length || 0) + itemsToDelete.length;
       return { success: true, deletedInventoryCount: totalDeleted };
     } catch (error) {
       handleSupabaseError(error, 'deleteOrder');
