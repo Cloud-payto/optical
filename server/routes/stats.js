@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { statsOperations } = require('../lib/supabase');
+const { extractQueryParams } = require('../lib/queryBuilder');
+const { getAllowedSortColumns } = require('../utils/sortingConfig');
 
 // GET /api/stats/:userId - Get dashboard stats for a user
 router.get('/:userId', async (req, res) => {
@@ -25,11 +27,23 @@ router.get('/:userId', async (req, res) => {
 router.get('/:userId/inventory-by-vendor', async (req, res) => {
   try {
     const { userId } = req.params;
-    const vendorStats = await statsOperations.getInventoryByVendorAndBrand(userId);
+
+    // Extract query parameters for sorting/pagination
+    const queryParams = extractQueryParams(req);
+    const allowedColumns = getAllowedSortColumns('dashboard');
+
+    const result = await statsOperations.getInventoryByVendorAndBrand(
+      userId,
+      {
+        ...queryParams,
+        allowedColumns
+      }
+    );
 
     res.json({
       success: true,
-      vendors: vendorStats
+      vendors: result.vendors,
+      pagination: result.pagination
     });
   } catch (error) {
     console.error('Error fetching inventory by vendor:', error);

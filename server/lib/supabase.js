@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
+const { applySortingAndPagination, getPaginationMetadata } = require('./queryBuilder');
 
 // Initialize Supabase client for server-side operations
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -735,10 +736,17 @@ const statsOperations = {
     }
   },
 
-  async getInventoryByVendorAndBrand(userId) {
+  async getInventoryByVendorAndBrand(userId, options = {}) {
     try {
-      // Get all confirmed inventory with vendor and brand info
-      const { data: inventory, error } = await supabase
+      // First, get total count for pagination metadata
+      const { count: totalCount } = await supabase
+        .from('inventory')
+        .select('*', { count: 'exact', head: true })
+        .eq('account_id', userId)
+        .eq('status', 'confirmed');
+
+      // Build query with sorting and pagination
+      let query = supabase
         .from('inventory')
         .select(`
           id,
@@ -747,12 +755,23 @@ const statsOperations = {
           quantity,
           wholesale_price,
           status,
+          created_at,
+          updated_at,
+          received_date,
           vendor:vendors(id, name),
           enriched_data
         `)
         .eq('account_id', userId)
-        .eq('status', 'confirmed')
-        .order('vendor_id');
+        .eq('status', 'confirmed');
+
+      // Apply sorting and pagination
+      query = applySortingAndPagination(query, {
+        ...options,
+        defaultSort: 'created_at',
+        defaultOrder: 'desc'
+      });
+
+      const { data: inventory, error } = await query;
 
       if (error) throw error;
 
@@ -809,7 +828,17 @@ const statsOperations = {
         }))
       }));
 
-      return vendorStats;
+      // Calculate pagination metadata
+      const pagination = getPaginationMetadata(
+        totalCount || 0,
+        options.page || 1,
+        options.pageSize || 50
+      );
+
+      return {
+        vendors: vendorStats,
+        pagination
+      };
     } catch (error) {
       handleSupabaseError(error, 'getInventoryByVendorAndBrand');
     }
