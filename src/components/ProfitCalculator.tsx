@@ -64,6 +64,8 @@ const ProfitCalculator: React.FC = () => {
   const [wholesaleCost, setWholesaleCost] = useState<number>(50);
   const [tariffTax, setTariffTax] = useState<number>(0);
   const [discountPercentage, setDiscountPercentage] = useState<number>(10); // Default 10% discount
+  const [isEditingDiscount, setIsEditingDiscount] = useState<boolean>(false); // Track if user is manually editing discount
+  const [isEditingYourCost, setIsEditingYourCost] = useState<boolean>(false); // Track if user is manually editing your cost
   const [retailPrice, setRetailPrice] = useState<number>(150);
   const [insuranceMultiplier, setInsuranceMultiplier] = useState<number>(2.5);
   const [useManualRetailPrice, setUseManualRetailPrice] = useState<boolean>(false);
@@ -153,11 +155,13 @@ const ProfitCalculator: React.FC = () => {
     return ((wholesale - yourCost) / wholesale) * 100;
   };
 
-  // Update Your Cost when wholesale cost or discount % changes
+  // Update Your Cost when wholesale cost or discount % changes (but not when user is manually editing Your Cost)
   useEffect(() => {
-    const newYourCost = calculateYourCostFromDiscount(wholesaleCost, discountPercentage);
-    setYourCost(newYourCost);
-  }, [wholesaleCost, discountPercentage]);
+    if (!isEditingYourCost) {
+      const newYourCost = calculateYourCostFromDiscount(wholesaleCost, discountPercentage);
+      setYourCost(newYourCost);
+    }
+  }, [wholesaleCost, discountPercentage, isEditingYourCost]);
 
   // Calculate retail price based on multiplier when not using manual price
   useEffect(() => {
@@ -824,13 +828,16 @@ const ProfitCalculator: React.FC = () => {
                     id="yourCost"
                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     value={yourCost.toFixed(2)}
+                    onFocus={() => setIsEditingYourCost(true)}
                     onChange={(e) => {
                       const value = parseFloat(e.target.value) || 0;
                       setYourCost(value);
+                      setIsEditingDiscount(false);
                       // Update discount % based on new Your Cost
                       const newDiscount = calculateDiscountFromYourCost(wholesaleCost, value);
                       setDiscountPercentage(newDiscount);
                     }}
+                    onBlur={() => setIsEditingYourCost(false)}
                   />
                 </div>
                 <p className="text-xs text-gray-500 italic">
@@ -856,11 +863,14 @@ const ProfitCalculator: React.FC = () => {
                     id="discountPercentage"
                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                     value={discountPercentage.toFixed(1)}
+                    onFocus={() => setIsEditingDiscount(true)}
                     onChange={(e) => {
                       const value = parseFloat(e.target.value) || 0;
                       setDiscountPercentage(Math.min(100, Math.max(0, value))); // Clamp between 0-100
+                      setIsEditingYourCost(false);
                       // Your Cost will auto-update via useEffect
                     }}
+                    onBlur={() => setIsEditingDiscount(false)}
                   />
                 </div>
                 <p className="text-xs text-gray-500 italic">

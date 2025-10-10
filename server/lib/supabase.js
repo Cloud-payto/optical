@@ -1820,7 +1820,13 @@ const vendorOperations = {
         // Calculate median wholesale price for this brand from user's confirmed inventory
         const median = await calculateMedianWholesalePrice(userId, brand.vendor_id, brand.brand_name);
 
+        // Calculate retail price (MSRP) as 2.5x the wholesale cost for insurance purposes
+        const calculatedRetailPrice = median ? median * 2.5 : 0;
+
         console.log(`  📊 Brand "${brand.brand_name}": ${median ? `Using calculated median $${median.toFixed(2)}` : 'No median available, using 0'}`);
+        if (calculatedRetailPrice > 0) {
+          console.log(`  💰 Calculated retail price (2.5x): $${calculatedRetailPrice.toFixed(2)}`);
+        }
 
         if (brand.brand_id) {
           // Brand exists in global table, just add to account_brands
@@ -1832,13 +1838,24 @@ const vendorOperations = {
             tariff_tax: 0,
             notes: median ? `Auto-calculated from ${brand.brand_name} inventory median` : ''
           });
+
+          // Also update the global brand with calculated retail price if median exists
+          if (median && calculatedRetailPrice > 0) {
+            await supabase
+              .from('brands')
+              .update({
+                msrp: calculatedRetailPrice
+              })
+              .eq('id', brand.brand_id);
+          }
         } else {
-          // Brand doesn't exist, create it first with the median
+          // Brand doesn't exist, create it first with the median and calculated retail price
           await this.saveAccountBrand(userId, {
             brand_name: brand.brand_name,
             vendor_id: brand.vendor_id,
             wholesale_cost: median || 0, // Use calculated median or 0
             global_wholesale_cost: median || 0, // Also set global wholesale cost
+            msrp: calculatedRetailPrice, // Set calculated retail price
             discount_percentage: 45,
             tariff_tax: 0,
             notes: median ? `Auto-calculated from ${brand.brand_name} inventory median` : ''

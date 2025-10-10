@@ -106,21 +106,21 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company, onViewBrandDetails, 
                       <div className="flex-1">
                         <h5 className="text-sm font-medium text-gray-900">{brand.name}</h5>
                         <div className="flex items-center space-x-4 mt-1">
-                          {brand.wholesaleCost && (
-                            <p className="text-xs text-gray-500">
-                              Wholesale: ${brand.wholesaleCost.toFixed(2)}
-                            </p>
-                          )}
-                          {brand.yourCost && (
-                            <p className="text-xs text-gray-500">
-                              Your Cost: ${brand.yourCost.toFixed(2)}
-                            </p>
-                          )}
-                          {brand.retailPrice && (
-                            <p className="text-xs text-blue-600 font-medium">
-                              Retail: ${brand.retailPrice.toFixed(2)}
-                            </p>
-                          )}
+                          <p className="text-xs text-gray-500">
+                            Wholesale: {brand.wholesaleCost && brand.wholesaleCost > 0
+                              ? `$${brand.wholesaleCost.toFixed(2)}`
+                              : 'N/A'}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            Your Cost: {brand.yourCost && brand.yourCost > 0
+                              ? `$${brand.yourCost.toFixed(2)}`
+                              : 'N/A'}
+                          </p>
+                          <p className="text-xs text-blue-600 font-medium">
+                            Retail Price (MSRP): {brand.retailPrice && brand.retailPrice > 0
+                              ? `$${brand.retailPrice.toFixed(2)}`
+                              : 'N/A'}
+                          </p>
                           {discountPercentage > 0 && (
                             <div className="flex items-center space-x-1">
                               <Percent className="h-3 w-3 text-green-600" />
