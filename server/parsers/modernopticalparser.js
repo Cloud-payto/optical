@@ -249,17 +249,31 @@ function parseModernOpticalHtml(html, plainText) {
             // Skip empty separator rows
             if (cells.length >= 5) {
                 // Extract data from each cell
-                const imageCell = $(cells[0]).text().trim();
+                const imageCell = $(cells[0]);
                 const modelCell = $(cells[1]).text().trim();
                 const colorCell = $(cells[2]).text().trim();
                 const sizeCell = $(cells[3]).text().trim();
                 const qtyCell = $(cells[4]).text().trim();
-                
+
                 // Check if this row contains actual frame data
-                if (modelCell && colorCell && sizeCell && qtyCell && 
+                if (modelCell && colorCell && sizeCell && qtyCell &&
                     !modelCell.includes('Model') && !modelCell.includes('Image') &&
                     modelCell.includes(' - ')) {
-                    
+
+                    // Extract UPC from image URL (SAME AS L'AMYAMERICA!)
+                    let upc = '';
+                    const imgSrc = imageCell.find('img').attr('src');
+                    if (imgSrc) {
+                        // Decode URL first (handles %2f encoding)
+                        const decodedSrc = decodeURIComponent(imgSrc);
+                        // Extract UPC from URL: https://imageserver.jiecosystem.net/image/modernoptical/675254228656
+                        // Try both encoded and decoded patterns
+                        const upcMatch = decodedSrc.match(/\/modernoptical\/(\d+)/) || imgSrc.match(/modernoptical%2f(\d+)/i);
+                        if (upcMatch) {
+                            upc = upcMatch[1];
+                        }
+                    }
+
                     // Parse the model field which contains "BRAND - MODEL"
                     const [brandPart, modelPart] = modelCell.split(' - ');
                     
@@ -306,6 +320,7 @@ function parseModernOpticalHtml(html, plainText) {
                             color_normalized: normalizedColor,
                             size: size,
                             quantity: quantity,
+                            upc: upc, // Add UPC from image URL!
                             vendor,
                             status: 'pending',
                             order_number: orderNumber,

@@ -4,6 +4,8 @@ const { parseModernOpticalHtml } = require('../parsers/modernopticalparser');
 const SafiloService = require('../parsers/SafiloService');
 const { parseLuxotticaHtml } = require('../parsers/luxotticaParser');
 const EtniaBarcelonaService = require('../parsers/EtniaBarcelonaService');
+const { parseLamyamericaHtml, validateParsedData } = require('../parsers/lamyamericaParser');
+const LamyamericaService = require('../parsers/LamyamericaService');
 
 /**
  * POST /api/parse/modernoptical
@@ -269,6 +271,147 @@ router.post('/etnia-barcelona', async (req, res) => {
     return res.status(500).json({
       success: false,
       error: 'Failed to parse Etnia Barcelona PDF',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/parse/lamy
+ * Parse L'amyamerica HTML email content with UPC-based API enrichment
+ *
+ * Body: { html, plainText, accountId }
+ * Returns: { success, accountId, vendor, order, items, unique_frames, enrichment }
+ */
+router.post('/lamy', async (req, res) => {
+  try {
+    const { html, plainText, accountId } = req.body;
+
+    console.log('[PARSE] L\'amyamerica parse request received');
+    console.log('  Account ID:', accountId);
+    console.log('  HTML length:', html?.length || 0);
+    console.log('  Plain text length:', plainText?.length || 0);
+
+    // Validate input
+    if (!html && !plainText) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: html or plainText must be provided'
+      });
+    }
+
+    // Phase 1: Parse the email content
+    const parsedData = parseLamyamericaHtml(html, plainText);
+
+    // Validate parsed data
+    const validation = validateParsedData(parsedData);
+    if (!validation.valid) {
+      console.error('[PARSE] Validation failed:', validation.errors);
+      return res.status(400).json({
+        success: false,
+        error: 'Email parsing validation failed',
+        errors: validation.errors,
+        warnings: validation.warnings
+      });
+    }
+
+    if (validation.warnings.length > 0) {
+      console.warn('[PARSE] Warnings:', validation.warnings);
+    }
+
+    console.log('[PARSE] Email parsed successfully');
+    console.log('  Order number:', parsedData.orderNumber);
+    console.log('  Items found:', parsedData.items?.length || 0);
+
+    // Phase 2: Enrich with API data using UPCs
+    let enrichedData = parsedData;
+    try {
+      const lamyService = new LamyamericaService({ debug: false });
+      enrichedData = await lamyService.enrichOrderData(parsedData);
+      console.log('[PARSE] API enrichment completed');
+    } catch (enrichmentError) {
+      console.error('[PARSE] API enrichment failed:', enrichmentError.message);
+      // Continue with non-enriched data
+      console.log('[PARSE] Continuing with non-enriched data');
+    }
+
+    // Get unique frames (brand + model combinations)
+    const uniqueFramesSet = new Set();
+    const uniqueFrames = [];
+    enrichedData.items.forEach(item => {
+      const key = `${item.brand}-${item.model}`;
+      if (!uniqueFramesSet.has(key)) {
+        uniqueFramesSet.add(key);
+        uniqueFrames.push({
+          brand: item.brand,
+          model: item.model
+        });
+      }
+    });
+
+    // Map items to standard format
+    const items = enrichedData.items.map(item => ({
+      brand: item.brand,
+      model: item.model,
+      color: item.color,
+      color_code: item.colorCode,
+      color_name: item.colorName,
+      size: item.size,
+      eye_size: item.eyeSize,
+      bridge: item.bridge,
+      temple: item.temple,
+      quantity: item.quantity,
+      upc: item.upc,
+      image_url: item.imageUrl,
+      // Enriched data from API
+      wholesale_price: item.enrichedData?.wholesale,
+      msrp: item.enrichedData?.msrp,
+      in_stock: item.enrichedData?.inStock,
+      availability: item.enrichedData?.availability,
+      material: item.enrichedData?.material,
+      frame_type: item.enrichedData?.frameType,
+      shape: item.enrichedData?.shape,
+      gender: item.enrichedData?.gender,
+      country_of_origin: item.enrichedData?.countryOfOrigin,
+      // Validation info
+      validated: item.validation?.validated,
+      validation_confidence: item.validation?.confidence
+    }));
+
+    // Calculate total pieces and wholesale total
+    const totalPieces = items.reduce((sum, item) => sum + item.quantity, 0);
+    const totalWholesale = items.reduce((sum, item) => {
+      const price = item.wholesale_price || 0;
+      return sum + (price * item.quantity);
+    }, 0);
+
+    // Return the parsed and enriched data
+    return res.status(200).json({
+      success: true,
+      accountId: accountId,
+      vendor: 'lamyamerica',
+      order: {
+        order_number: enrichedData.orderNumber,
+        customer_name: enrichedData.customerName,
+        order_date: enrichedData.orderDate,
+        rep_name: enrichedData.repName,
+        account_number: enrichedData.accountNumber,
+        total_pieces: totalPieces,
+        total_wholesale: totalWholesale > 0 ? totalWholesale : null
+      },
+      items: items,
+      unique_frames: uniqueFrames,
+      enrichment: enrichedData.enrichment || null,
+      validation: {
+        warnings: validation.warnings
+      }
+    });
+
+  } catch (error) {
+    console.error('[PARSE] Error parsing L\'amyamerica email:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to parse L\'amyamerica email',
       message: error.message
     });
   }

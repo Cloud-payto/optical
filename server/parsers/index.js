@@ -1,5 +1,8 @@
 const SafiloService = require('./SafiloService');
 const ModernOpticalService = require('./ModernOpticalService');
+const IdealOpticsService = require('./IdealOpticsService');
+const { parseLamyamericaHtml } = require('./lamyamericaParser');
+const LamyamericaService = require('./LamyamericaService');
 
 /**
  * Parser Registry - Maps vendor domains to their parsers
@@ -14,10 +17,12 @@ class ParserRegistry {
             ['safilo.com', { parser: this.processSafiloWithService.bind(this), type: 'pdf' }],
             ['safilogroup.com', { parser: this.processSafiloWithService.bind(this), type: 'pdf' }],
             ['noreply@safilo.com', { parser: this.processSafiloWithService.bind(this), type: 'pdf' }], // Add full email format
+            ['i-dealoptics.com', this.processIdealOpticsWithService.bind(this)],
+            ['lamyamerica.com', this.processLamyamericaWithService.bind(this)],
             // Add more vendor parsers here as needed
             // Example: ['luxottica.com', parseLuxotticaHtml],
         ]);
-        
+
         // Initialize SafiloService instance
         this.safiloService = new SafiloService({
             debug: process.env.NODE_ENV !== 'production',
@@ -25,13 +30,29 @@ class ParserRegistry {
             batchSize: 5,
             timeout: 15000
         });
-        
+
         // Initialize ModernOpticalService instance
         this.modernOpticalService = new ModernOpticalService({
             debug: process.env.NODE_ENV !== 'production',
             timeout: 15000,
             maxRetries: 3,
             enableWebEnrichment: true
+        });
+
+        // Initialize IdealOpticsService instance
+        this.idealOpticsService = new IdealOpticsService({
+            debug: process.env.NODE_ENV !== 'production',
+            timeout: 15000,
+            maxRetries: 3,
+            enableWebEnrichment: true
+        });
+
+        // Initialize LamyamericaService instance
+        this.lamyamericaService = new LamyamericaService({
+            debug: process.env.NODE_ENV !== 'production',
+            timeout: 15000,
+            maxRetries: 3,
+            batchSize: 5
         });
     }
 
@@ -79,23 +100,151 @@ class ParserRegistry {
     processModernOpticalWithService(html, plainText) {
         try {
             console.log('🚀 Processing Modern Optical email with ModernOpticalService...');
-            
+
             // Use ModernOpticalService to parse the email
             const parsedResult = this.modernOpticalService.parseEmail(html, plainText);
-            
+
             console.log('📊 ModernOpticalService Result:');
             console.log('- Vendor:', parsedResult.vendor);
             console.log('- Order Number:', parsedResult.order?.order_number);
             console.log('- Customer:', parsedResult.order?.customer_name);
             console.log('- Items Count:', parsedResult.items?.length);
             console.log('- Unique Frames:', parsedResult.unique_frames?.length);
-            
+
             return parsedResult;
-            
+
         } catch (error) {
             console.error('ModernOpticalService processing failed:', error);
             throw error;
         }
+    }
+
+    /**
+     * Process Ideal Optics HTML using IdealOpticsService
+     * @param {string} html - HTML content
+     * @param {string} plainText - Plain text content
+     * @returns {object} Processed order data
+     */
+    processIdealOpticsWithService(html, plainText) {
+        try {
+            console.log('🚀 Processing Ideal Optics email with IdealOpticsService...');
+
+            // Use IdealOpticsService to parse the email
+            const parsedResult = this.idealOpticsService.parseEmail(html, plainText);
+
+            console.log('📊 IdealOpticsService Result:');
+            console.log('- Vendor:', parsedResult.vendor);
+            console.log('- Order Number:', parsedResult.order?.order_number);
+            console.log('- Customer:', parsedResult.order?.customer_name);
+            console.log('- Items Count:', parsedResult.items?.length);
+            console.log('- Unique Frames:', parsedResult.unique_frames?.length);
+
+            return parsedResult;
+
+        } catch (error) {
+            console.error('IdealOpticsService processing failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Process L'amyamerica HTML using LamyamericaService
+     * @param {string} html - HTML content
+     * @param {string} plainText - Plain text content
+     * @returns {Promise<object>} Processed order data
+     */
+    async processLamyamericaWithService(html, plainText) {
+        try {
+            console.log('🚀 Processing L\'amyamerica email with LamyamericaService...');
+
+            // Parse the email first
+            const parsedResult = parseLamyamericaHtml(html, plainText);
+
+            console.log('📊 Initial Parse Result:');
+            console.log('- Vendor:', parsedResult.vendor);
+            console.log('- Order Number:', parsedResult.orderNumber);
+            console.log('- Customer:', parsedResult.customerName);
+            console.log('- Items Count:', parsedResult.items?.length);
+
+            // Enrich with API data using UPCs
+            const enrichedResult = await this.lamyamericaService.enrichOrderData(parsedResult);
+
+            console.log('📊 Enrichment Complete:');
+            console.log('- Enriched Items:', enrichedResult.enrichment?.enrichedItems || 0);
+            console.log('- Failed Items:', enrichedResult.enrichment?.failedItems || 0);
+
+            // Transform to standard format
+            return this.transformLamyamericaResult(enrichedResult);
+
+        } catch (error) {
+            console.error('LamyamericaService processing failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Transform L'amyamerica result to match existing database schema
+     * @param {object} lamyResult - Result from LamyamericaService
+     * @returns {object} Transformed data for database
+     */
+    transformLamyamericaResult(lamyResult) {
+        const items = lamyResult.items.map(item => ({
+            sku: `${item.brand.replace(/\s+/g, '_')}-${item.model.replace(/\s+/g, '_')}-${item.colorCode || item.color.replace(/\s+/g, '_')}`,
+            brand: item.brand,
+            model: item.model,
+            color: item.colorName || item.color,
+            color_code: item.colorCode,
+            color_name: item.colorName,
+            size: item.size,
+            full_size: item.size,
+            temple_length: item.temple,
+            quantity: item.quantity || 1,
+            vendor: 'L\'amyamerica',
+
+            // UPC from email image URL
+            upc: item.upc || null,
+
+            // Enriched API data
+            ean: item.enrichedData?.ean || null,
+            wholesale_price: item.enrichedData?.wholesale || null,
+            msrp: item.enrichedData?.msrp || null,
+            in_stock: item.enrichedData?.inStock || null,
+            availability: item.enrichedData?.availability || null,
+            material: item.enrichedData?.material || null,
+            frame_type: item.enrichedData?.frameType || null,
+            shape: item.enrichedData?.shape || null,
+            gender: item.enrichedData?.gender || null,
+            country_of_origin: item.enrichedData?.countryOfOrigin || null,
+
+            // Validation data
+            api_verified: item.validation?.validated || false,
+            confidence_score: item.validation?.confidence || 0
+        }));
+
+        return {
+            vendor: 'L\'amyamerica',
+            account_number: lamyResult.accountNumber,
+            brands: [...new Set(items.map(i => i.brand))],
+            order: {
+                order_number: lamyResult.orderNumber,
+                vendor: 'L\'amyamerica',
+                account_number: lamyResult.accountNumber,
+                rep_name: lamyResult.repName,
+                order_date: lamyResult.orderDate,
+                customer_name: lamyResult.customerName,
+                phone: lamyResult.customerPhone,
+                total_pieces: items.reduce((sum, item) => sum + item.quantity, 0),
+                parse_status: 'parsed'
+            },
+            items: items,
+            unique_frames: [...new Set(items.map(i => `${i.brand}-${i.model}`))].map(key => {
+                const [brand, model] = key.split('-');
+                return { brand, model };
+            }),
+            parsed_at: new Date().toISOString(),
+            parser_version: 'LamyamericaService-1.0',
+            enrichment_stats: lamyResult.enrichment
+        };
     }
 
     /**
@@ -336,6 +485,22 @@ class ParserRegistry {
      */
     getSafiloService() {
         return this.safiloService;
+    }
+
+    /**
+     * Get Ideal Optics service instance for enrichment
+     * @returns {IdealOpticsService} Service instance
+     */
+    getIdealOpticsService() {
+        return this.idealOpticsService;
+    }
+
+    /**
+     * Get L'amyamerica service instance for enrichment
+     * @returns {LamyamericaService} Service instance
+     */
+    getLamyamericaService() {
+        return this.lamyamericaService;
     }
 }
 
