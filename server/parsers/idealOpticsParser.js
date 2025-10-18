@@ -113,26 +113,31 @@ function extractOrderInfo($) {
     };
 
     try {
-        // Find "Web Order #" row
-        $('td.x_boldtext').each((i, elem) => {
+        // Find all table cells and check for bold labels
+        $('td').each((i, elem) => {
             const $elem = $(elem);
             const text = $elem.text().trim();
+
+            // Check if this cell contains a bold label (either with class or <b> tag)
+            const isBold = $elem.hasClass('x_boldtext') || $elem.find('b').length > 0;
+
+            if (!isBold) return;
+
             const $nextTd = $elem.next('td');
 
-            if (text === 'Web Order # :') {
+            if (text.includes('Web Order #')) {
                 orderInfo.webOrderNumber = $nextTd.text().trim();
-            } else if (text === 'Order Date :') {
+            } else if (text.includes('Order Date')) {
                 orderInfo.orderDate = $nextTd.text().trim();
-            } else if (text === 'Ordered By :') {
+            } else if (text.includes('Ordered By')) {
                 orderInfo.orderedBy = $nextTd.text().trim();
-            } else if (text === 'Purchase Order :') {
+            } else if (text.includes('Purchase Order')) {
                 orderInfo.purchaseOrder = $nextTd.text().trim();
-            } else if (text === 'Notes :') {
+            } else if (text.includes('Notes') && !text.includes('Style')) {
                 orderInfo.notes = $nextTd.text().trim();
-            } else if (text === 'Ship Method :') {
-                // Ship method might have multiple td elements
+            } else if (text.includes('Ship Method')) {
                 orderInfo.shipMethod = $nextTd.text().trim();
-            } else if (text === 'Promotional Code:') {
+            } else if (text.includes('Promotional Code')) {
                 orderInfo.promotionalCode = $nextTd.text().trim();
             }
         });
@@ -160,22 +165,47 @@ function extractAccountInfo($) {
     };
 
     try {
-        // Find the Account Information table
-        const accountTable = $('td.x_tableheader').filter((i, elem) => {
+        // Find the Account Information table (works with both old CSS classes and new <strong> tags)
+        let accountTable = $('td.x_tableheader').filter((i, elem) => {
             return $(elem).text().trim() === 'Account Information';
         }).closest('table');
 
-        if (accountTable.length) {
-            // Extract account number and contact name from the data row
-            const dataRow = accountTable.find('tr').eq(2); // Third row contains data
-            const cells = dataRow.find('td');
+        // If not found with old method, try finding with strong/bold tags
+        if (!accountTable.length) {
+            accountTable = $('td').filter((i, elem) => {
+                const $elem = $(elem);
+                const text = $elem.text().trim();
+                const hasStrong = $elem.find('strong').length > 0;
+                return hasStrong && text.includes('Account Information');
+            }).closest('table');
+        }
 
-            accountInfo.accountNumber = cells.eq(0).text().trim(); // Account column
-            accountInfo.contactName = cells.eq(1).text().trim(); // Contact Name column
-            accountInfo.address = cells.eq(2).text().trim(); // Address column
-            accountInfo.city = cells.eq(3).text().trim(); // City column
-            accountInfo.state = cells.eq(4).text().trim(); // State column
-            accountInfo.postalCode = cells.eq(5).text().trim(); // Postal Code column
+        if (accountTable.length) {
+            // Find the data row (skip header rows with gray background or strong tags)
+            accountTable.find('tr').each((i, row) => {
+                const $row = $(row);
+                const cells = $row.find('td');
+
+                // Skip if this is a header row
+                if (cells.length < 5) return;
+                if (cells.eq(0).css('background').includes('CCCCCC')) return;
+                if (cells.eq(0).find('strong').length > 0) return;
+
+                // This should be the data row
+                const account = cells.eq(0).text().trim();
+                const contact = cells.eq(1).text().trim();
+
+                // Check if this looks like data (not empty, not header text)
+                if (account && !account.includes('Account') && account.length < 20) {
+                    accountInfo.accountNumber = account;
+                    accountInfo.contactName = contact;
+                    accountInfo.address = cells.eq(2).text().trim();
+                    accountInfo.city = cells.eq(3).text().trim();
+                    accountInfo.state = cells.eq(4).text().trim();
+                    accountInfo.postalCode = cells.eq(5).text().trim();
+                    return false; // Break out of loop
+                }
+            });
         }
 
         console.log(`🏢 Account: ${accountInfo.accountNumber} - ${accountInfo.contactName}`);
@@ -200,19 +230,43 @@ function extractShippingAddress($) {
 
     try {
         // Find the Shipping Address table
-        const shippingTable = $('td.x_tableheader').filter((i, elem) => {
+        let shippingTable = $('td.x_tableheader').filter((i, elem) => {
             return $(elem).text().trim() === 'Shipping Address';
         }).closest('table');
 
-        if (shippingTable.length) {
-            // Extract shipping data from the data row
-            const dataRow = shippingTable.find('tr').eq(2); // Third row contains data
-            const cells = dataRow.find('td');
+        // If not found, try with strong tags
+        if (!shippingTable.length) {
+            shippingTable = $('td').filter((i, elem) => {
+                const $elem = $(elem);
+                const text = $elem.text().trim();
+                const hasStrong = $elem.find('strong').length > 0;
+                return hasStrong && text.includes('Shipping Address');
+            }).closest('table');
+        }
 
-            shipping.address = cells.eq(0).text().trim();
-            shipping.city = cells.eq(1).text().trim();
-            shipping.state = cells.eq(2).text().trim();
-            shipping.postal_code = cells.eq(3).text().trim();
+        if (shippingTable.length) {
+            // Find the data row (skip header rows)
+            shippingTable.find('tr').each((i, row) => {
+                const $row = $(row);
+                const cells = $row.find('td');
+
+                // Skip if this is a header row
+                if (cells.length < 4) return;
+                if (cells.eq(0).css('background').includes('CCCCCC')) return;
+                if (cells.eq(0).find('strong').length > 0) return;
+
+                // This should be the data row
+                const address = cells.eq(0).text().trim();
+
+                // Check if this looks like an address
+                if (address && address.length > 5 && !address.includes('Shipping Address')) {
+                    shipping.address = address;
+                    shipping.city = cells.eq(1).text().trim();
+                    shipping.state = cells.eq(2).text().trim();
+                    shipping.postal_code = cells.eq(3).text().trim();
+                    return false; // Break out of loop
+                }
+            });
         }
 
         console.log(`📦 Shipping: ${shipping.city}, ${shipping.state} ${shipping.postal_code}`);
@@ -232,14 +286,26 @@ function extractOrderItems($) {
 
     try {
         // Find the items table (has headers: Style Name, Color, Size, Quantity, Notes)
-        const itemsTable = $('td.x_secondaryheader').filter((i, elem) => {
+        let itemsTable = $('td.x_secondaryheader').filter((i, elem) => {
             return $(elem).text().trim() === 'Style Name';
         }).closest('table');
+
+        // If not found with old method, try finding table with "Style Name" header in gray background
+        if (!itemsTable.length) {
+            itemsTable = $('td').filter((i, elem) => {
+                const $elem = $(elem);
+                const text = $elem.text().trim();
+                const hasGrayBG = $elem.css('background').includes('CCCCCC') || $elem.attr('style')?.includes('background:#CCCCCC');
+                return text === 'Style Name' && hasGrayBG;
+            }).closest('table');
+        }
 
         if (!itemsTable.length) {
             console.warn('⚠️  Items table not found');
             return items;
         }
+
+        console.log('✅ Items table found');
 
         // Process each data row
         itemsTable.find('tr').each((i, row) => {
@@ -249,6 +315,7 @@ function extractOrderItems($) {
             // Skip header rows and empty rows
             if (cells.length < 4) return;
             if (cells.eq(0).hasClass('x_secondaryheader')) return;
+            if (cells.eq(0).css('background').includes('CCCCCC')) return;
 
             const styleName = cells.eq(0).text().trim();
             const color = cells.eq(1).text().trim();
@@ -257,7 +324,7 @@ function extractOrderItems($) {
             const notes = cells.eq(4) ? cells.eq(4).text().trim() : '';
 
             // Skip if style name is empty or is a total/summary row
-            if (!styleName || styleName.toLowerCase().includes('total')) return;
+            if (!styleName || styleName.toLowerCase().includes('total') || styleName.includes('&nbsp;')) return;
 
             const quantity = parseInt(quantityText) || 1;
 
