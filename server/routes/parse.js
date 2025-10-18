@@ -447,7 +447,7 @@ router.post('/idealoptics', async (req, res) => {
     const parsedData = parseIdealOpticsHtml(html, plainText);
 
     console.log('[PARSE] Email parsed successfully');
-    console.log('  Order number:', parsedData.orderNumber);
+    console.log('  Order number:', parsedData.order?.order_number);
     console.log('  Items found:', parsedData.items?.length || 0);
 
     // Phase 2: Enrich with web scraping (optional)
@@ -481,18 +481,24 @@ router.post('/idealoptics', async (req, res) => {
       brand: item.brand,
       model: item.model,
       color: item.color,
-      color_code: item.colorCode,
-      color_name: item.colorName,
-      size: item.size,
+      color_code: item.colorCode || item.color_code,
+      color_name: item.colorName || item.color_name,
+      size: item.full_size || item.size,
+      eye_size: item.eye_size,
+      bridge: item.bridge,
+      temple_length: item.temple_length,
       quantity: item.quantity,
       upc: item.upc,
+      sku: item.sku,
       // Enriched data from web scraping
       wholesale_price: item.enrichedData?.wholesale,
       msrp: item.enrichedData?.msrp,
-      in_stock: item.enrichedData?.inStock,
+      in_stock: item.in_stock !== undefined ? item.in_stock : item.enrichedData?.inStock,
+      material: item.material || item.enrichedData?.material,
+      gender: item.gender || item.enrichedData?.gender,
       // Validation info
-      validated: item.validation?.validated,
-      validation_confidence: item.validation?.confidence
+      validated: item.validation?.validated || item.api_verified,
+      validation_confidence: item.validation?.confidence || item.confidence_score
     }));
 
     // Calculate total pieces and wholesale total
@@ -508,14 +514,18 @@ router.post('/idealoptics', async (req, res) => {
       accountId: accountId,
       vendor: 'ideal_optics',
       order: {
-        order_number: enrichedData.orderNumber,
-        customer_name: enrichedData.customerName,
-        order_date: enrichedData.orderDate,
-        rep_name: enrichedData.repName,
-        account_number: enrichedData.accountNumber,
+        order_number: enrichedData.order?.order_number,
+        customer_name: enrichedData.order?.customer_name,
+        order_date: enrichedData.order?.order_date,
+        rep_name: enrichedData.order?.rep_name,
+        account_number: enrichedData.account_number,
         total_pieces: totalPieces,
-        total_wholesale: totalWholesale > 0 ? totalWholesale : null
+        total_wholesale: totalWholesale > 0 ? totalWholesale : null,
+        ship_method: enrichedData.order?.ship_method,
+        purchase_order: enrichedData.order?.purchase_order,
+        notes: enrichedData.order?.notes
       },
+      shipping_address: enrichedData.shipping_address,
       items: items,
       unique_frames: uniqueFrames,
       enrichment: enrichedData.enrichment || null
