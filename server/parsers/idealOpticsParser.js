@@ -297,13 +297,30 @@ function extractOrderItems($) {
             itemsTable = $('td').filter((i, elem) => {
                 const $elem = $(elem);
                 const text = $elem.text().trim();
-                const hasGrayBG = $elem.css('background').includes('CCCCCC') || $elem.attr('style')?.includes('background:#CCCCCC');
+                const bg = $elem.css('background') || '';
+                const style = $elem.attr('style') || '';
+                const hasGrayBG = bg.includes('CCCCCC') || style.includes('background:#CCCCCC') || style.includes('background-color:#CCCCCC');
                 return text === 'Style Name' && hasGrayBG;
+            }).closest('table');
+        }
+
+        // If still not found, try finding table with just "Style Name" text (less strict)
+        if (!itemsTable.length) {
+            console.log('⚠️  Trying less strict Style Name search...');
+            itemsTable = $('td').filter((i, elem) => {
+                return $(elem).text().trim() === 'Style Name';
             }).closest('table');
         }
 
         if (!itemsTable.length) {
             console.warn('⚠️  Items table not found');
+            console.log('🔍 Debugging: Looking for all td elements containing "Style"...');
+            $('td').each((i, elem) => {
+                const text = $(elem).text().trim();
+                if (text.toLowerCase().includes('style')) {
+                    console.log(`   Found td with "style": "${text}"`);
+                }
+            });
             return items;
         }
 
