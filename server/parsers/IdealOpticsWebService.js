@@ -124,7 +124,7 @@ class IdealOpticsWebService {
 
     /**
      * Build all possible product URL variations
-     * Ideal Optics URL structure: https://www.i-dealoptics.com/{collection}/{model}
+     * Ideal Optics URL structure: https://www.i-dealoptics.com/catalog/{collection}/{collection}/{model}
      *
      * Collections include: casino, elegante, elevate, focus-eyewear, haggar, jbx,
      * jelly-bean, rafaella, reflections, rio-ray, suntrends, clearance
@@ -159,8 +159,13 @@ class IdealOpticsWebService {
         const uniqueModels = [...new Set(modelVariations)];
 
         // Build URLs - try each collection with each model variation
+        // Ideal Optics uses structure: /catalog/{collection}/{collection}/{model}
         collections.forEach(collection => {
             uniqueModels.forEach(modelVar => {
+                // New format: /catalog/{collection}/{collection}/{model}
+                urls.push(`${this.baseUrl}/catalog/${collection}/${collection}/${modelVar}`);
+
+                // Also try old format as fallback: /{collection}/{model}
                 urls.push(`${this.baseUrl}/${collection}/${modelVar}`);
             });
         });
