@@ -23,63 +23,54 @@ function parseIdealOpticsHtml(html, plainText) {
     try {
         const $ = cheerio.load(html);
 
-        // Initialize result structure
-        const result = {
-            vendor: 'ideal_optics',
-            vendor_name: 'Ideal Optics',
-            account_number: '',
-            order: {
-                order_number: '',
-                order_date: '',
-                customer_name: '',
-                purchase_order: '',
-                notes: '',
-                ship_method: '',
-                promotional_code: ''
-            },
-            shipping_address: {
-                address: '',
-                city: '',
-                state: '',
-                postal_code: ''
-            },
-            items: [],
-            unique_frames: [],
-            raw_html: html,
-            parsed_at: new Date().toISOString()
-        };
-
         // Extract Web Order Number and Order Date
         const orderInfo = extractOrderInfo($);
-        result.order.order_number = orderInfo.webOrderNumber;
-        result.order.order_date = orderInfo.orderDate;
-        result.order.purchase_order = orderInfo.purchaseOrder || '';
-        result.order.notes = orderInfo.notes || '';
-        result.order.ship_method = orderInfo.shipMethod || '';
-        result.order.promotional_code = orderInfo.promotionalCode || '';
 
         // Extract Account Information
         const accountInfo = extractAccountInfo($);
-        result.account_number = accountInfo.accountNumber;
-        result.order.customer_name = accountInfo.contactName;
 
         // Extract Shipping Address
         const shippingInfo = extractShippingAddress($);
-        result.shipping_address = shippingInfo;
 
         // Extract Order Items
         const items = extractOrderItems($);
-        result.items = items;
 
-        // Generate unique frames list (brand + model combinations)
-        result.unique_frames = generateUniqueFrames(items);
+        // Calculate total quantity
+        const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
+
+        // FLAT STRUCTURE - matches L'amyamerica, Modern Optical, etc.
+        const result = {
+            vendor: 'Ideal Optics',
+            vendorCode: 'ideal_optics',
+            orderNumber: orderInfo.webOrderNumber,
+            orderDate: orderInfo.orderDate,
+            orderedBy: orderInfo.orderedBy,
+            accountNumber: accountInfo.accountNumber,
+            customerName: accountInfo.contactName,
+            purchaseOrder: orderInfo.purchaseOrder || '',
+            notes: orderInfo.notes || '',
+            shipMethod: orderInfo.shipMethod || '',
+            promotionalCode: orderInfo.promotionalCode || '',
+            shippingAddress: shippingInfo.address,
+            shippingCity: shippingInfo.city,
+            shippingState: shippingInfo.state,
+            shippingPostalCode: shippingInfo.postal_code,
+            items: items,
+            totalQuantity: totalQuantity,
+            totalItems: items.length,
+            metadata: {
+                parsedAt: new Date().toISOString(),
+                parserVersion: '1.0',
+                source: 'email'
+            }
+        };
 
         console.log('✅ Ideal Optics parse complete');
-        console.log(`   Order: ${result.order.order_number}`);
-        console.log(`   Customer: ${result.order.customer_name}`);
-        console.log(`   Account: ${result.account_number}`);
+        console.log(`   Order: ${result.orderNumber}`);
+        console.log(`   Customer: ${result.customerName}`);
+        console.log(`   Account: ${result.accountNumber}`);
         console.log(`   Items: ${result.items.length}`);
-        console.log(`   Unique Frames: ${result.unique_frames.length}`);
+        console.log(`   Unique Frames: ${result.totalItems}`);
 
         return result;
 

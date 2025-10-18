@@ -447,7 +447,7 @@ router.post('/idealoptics', async (req, res) => {
     const parsedData = parseIdealOpticsHtml(html, plainText);
 
     console.log('[PARSE] Email parsed successfully');
-    console.log('  Order number:', parsedData.order?.order_number);
+    console.log('  Order number:', parsedData.orderNumber);
     console.log('  Items found:', parsedData.items?.length || 0);
 
     // Phase 2: Enrich with web scraping (optional)
@@ -514,18 +514,24 @@ router.post('/idealoptics', async (req, res) => {
       accountId: accountId,
       vendor: 'ideal_optics',
       order: {
-        order_number: enrichedData.order?.order_number,
-        customer_name: enrichedData.order?.customer_name,
-        order_date: enrichedData.order?.order_date,
-        rep_name: enrichedData.order?.rep_name,
-        account_number: enrichedData.account_number,
+        order_number: enrichedData.orderNumber,
+        customer_name: enrichedData.customerName,
+        order_date: enrichedData.orderDate,
+        ordered_by: enrichedData.orderedBy,
+        account_number: enrichedData.accountNumber,
         total_pieces: totalPieces,
         total_wholesale: totalWholesale > 0 ? totalWholesale : null,
-        ship_method: enrichedData.order?.ship_method,
-        purchase_order: enrichedData.order?.purchase_order,
-        notes: enrichedData.order?.notes
+        ship_method: enrichedData.shipMethod,
+        purchase_order: enrichedData.purchaseOrder,
+        notes: enrichedData.notes,
+        promotional_code: enrichedData.promotionalCode
       },
-      shipping_address: enrichedData.shipping_address,
+      shipping_address: {
+        address: enrichedData.shippingAddress,
+        city: enrichedData.shippingCity,
+        state: enrichedData.shippingState,
+        postal_code: enrichedData.shippingPostalCode
+      },
       items: items,
       unique_frames: uniqueFrames,
       enrichment: enrichedData.enrichment || null
