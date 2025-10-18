@@ -450,17 +450,10 @@ router.post('/idealoptics', async (req, res) => {
     console.log('  Order number:', parsedData.orderNumber);
     console.log('  Items found:', parsedData.items?.length || 0);
 
-    // Phase 2: Enrich with web scraping (optional)
-    let enrichedData = parsedData;
-    try {
-      const idealService = new IdealOpticsService({ debug: false });
-      enrichedData = await idealService.enrichOrderData(parsedData);
-      console.log('[PARSE] Web enrichment completed');
-    } catch (enrichmentError) {
-      console.error('[PARSE] Web enrichment failed:', enrichmentError.message);
-      // Continue with non-enriched data
-      console.log('[PARSE] Continuing with non-enriched data');
-    }
+    // Phase 2: Web enrichment is handled separately during confirmation
+    // Not during initial parsing to keep webhook fast
+    const enrichedData = parsedData;
+    console.log('[PARSE] Skipping web enrichment (done during confirmation)');
 
     // Get unique frames (brand + model combinations)
     const uniqueFramesSet = new Set();

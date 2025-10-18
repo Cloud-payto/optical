@@ -21,7 +21,25 @@ function parseIdealOpticsHtml(html, plainText) {
     console.log('📧 Starting Ideal Optics HTML parse...');
 
     try {
-        const $ = cheerio.load(html);
+        // Handle forwarded emails - extract the actual email content
+        let cleanHtml = html;
+
+        // Look for the I-Deal Optics logo or header to find the actual email
+        const idealMarker = html.indexOf('i-deal-optics-logo-mail.png');
+        if (idealMarker > -1) {
+            // Find the nearest opening div/table before the logo
+            const beforeLogo = html.substring(0, idealMarker);
+            const lastDiv = Math.max(
+                beforeLogo.lastIndexOf('<div'),
+                beforeLogo.lastIndexOf('<table')
+            );
+            if (lastDiv > -1) {
+                cleanHtml = html.substring(lastDiv);
+                console.log('📧 Extracted forwarded email content (cleaned from forwarding wrapper)');
+            }
+        }
+
+        const $ = cheerio.load(cleanHtml);
 
         // Extract Web Order Number and Order Date
         const orderInfo = extractOrderInfo($);
