@@ -188,7 +188,8 @@ function extractAccountInfo($) {
 
                 // Skip if this is a header row
                 if (cells.length < 5) return;
-                if (cells.eq(0).css('background').includes('CCCCCC')) return;
+                const bg = cells.eq(0).css('background') || cells.eq(0).attr('style') || '';
+                if (bg.includes('CCCCCC') || bg.includes('#CCCCCC')) return;
                 if (cells.eq(0).find('strong').length > 0) return;
 
                 // This should be the data row
@@ -252,7 +253,8 @@ function extractShippingAddress($) {
 
                 // Skip if this is a header row
                 if (cells.length < 4) return;
-                if (cells.eq(0).css('background').includes('CCCCCC')) return;
+                const bg = cells.eq(0).css('background') || cells.eq(0).attr('style') || '';
+                if (bg.includes('CCCCCC') || bg.includes('#CCCCCC')) return;
                 if (cells.eq(0).find('strong').length > 0) return;
 
                 // This should be the data row
@@ -315,7 +317,8 @@ function extractOrderItems($) {
             // Skip header rows and empty rows
             if (cells.length < 4) return;
             if (cells.eq(0).hasClass('x_secondaryheader')) return;
-            if (cells.eq(0).css('background').includes('CCCCCC')) return;
+            const bg = cells.eq(0).css('background') || cells.eq(0).attr('style') || '';
+            if (bg.includes('CCCCCC') || bg.includes('#CCCCCC')) return;
 
             const styleName = cells.eq(0).text().trim();
             const color = cells.eq(1).text().trim();
