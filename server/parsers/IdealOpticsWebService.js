@@ -35,28 +35,52 @@ class IdealOpticsWebService {
         console.log(`🔍 Starting scrape for Ideal Optics: ${model}`);
 
         try {
-            // 1. Build URL variations
-            const urls = this.buildProductUrls(model);
-            console.log(`📋 Trying ${urls.length} URL variations`);
+            // 1. Try autocomplete API first to get the correct URL
+            console.log(`🔎 Using autocomplete API to find product URL...`);
+            const autocompleteResult = await this.getProductUrlFromAutocomplete(model);
 
-            // 2. Fetch page with retry logic
             let html = null;
             let successUrl = null;
 
-            for (const url of urls) {
-                console.log(`🌐 Attempting: ${url}`);
-                const fetchResult = await this.fetchPageWithRetry(url);
+            if (autocompleteResult && autocompleteResult.url) {
+                // Autocomplete found the URL - use it directly
+                console.log(`✅ Autocomplete found URL: ${autocompleteResult.url}`);
+                const fetchResult = await this.fetchPageWithRetry(autocompleteResult.url);
 
                 if (fetchResult && fetchResult.html && !this.isPageNotFound(fetchResult.html)) {
-                    successUrl = url;
+                    successUrl = autocompleteResult.url;
                     html = fetchResult.html;
-                    console.log(`✅ Success with URL: ${url}`);
+                    console.log(`✅ Successfully fetched product page`);
                     console.log(`   📊 Response: ${fetchResult.statusCode} ${fetchResult.statusText}`);
                     console.log(`   📄 Content length: ${fetchResult.html.length} characters`);
-                    break;
-                } else if (fetchResult) {
-                    console.log(`❌ Failed for: ${url}`);
-                    console.log(`   📊 Response: ${fetchResult.statusCode || 'No response'} ${fetchResult.statusText || ''}`);
+                } else {
+                    console.log(`⚠️  Autocomplete URL failed, falling back to brute force...`);
+                }
+            } else {
+                console.log(`⚠️  Autocomplete returned no results, falling back to brute force...`);
+            }
+
+            // 2. Fallback to brute force URL guessing if autocomplete failed
+            if (!html) {
+                console.log(`📋 Falling back to brute force URL search...`);
+                const urls = this.buildProductUrls(model);
+                console.log(`📋 Trying ${urls.length} URL variations`);
+
+                for (const url of urls) {
+                    console.log(`🌐 Attempting: ${url}`);
+                    const fetchResult = await this.fetchPageWithRetry(url);
+
+                    if (fetchResult && fetchResult.html && !this.isPageNotFound(fetchResult.html)) {
+                        successUrl = url;
+                        html = fetchResult.html;
+                        console.log(`✅ Success with URL: ${url}`);
+                        console.log(`   📊 Response: ${fetchResult.statusCode} ${fetchResult.statusText}`);
+                        console.log(`   📄 Content length: ${fetchResult.html.length} characters`);
+                        break;
+                    } else if (fetchResult) {
+                        console.log(`❌ Failed for: ${url}`);
+                        console.log(`   📊 Response: ${fetchResult.statusCode || 'No response'} ${fetchResult.statusText || ''}`);
+                    }
                 }
             }
 
@@ -123,7 +147,83 @@ class IdealOpticsWebService {
     }
 
     /**
-     * Build all possible product URL variations
+     * Use autocomplete API to find the correct product URL
+     * @param {string} model - Product model (e.g., "R1030")
+     * @returns {Promise<Object|null>} Object with url and metadata, or null if not found
+     */
+    async getProductUrlFromAutocomplete(model) {
+        try {
+            const autocompleteUrl = `${this.baseUrl}/Home/SearchFrames/?q=${encodeURIComponent(model)}`;
+
+            console.log(`📡 Calling autocomplete API: ${autocompleteUrl}`);
+
+            const headers = {
+                'User-Agent': this.userAgent,
+                'Accept': 'application/json, text/javascript, */*; q=0.01',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'X-Requested-With': 'XMLHttpRequest', // Important for AJAX requests
+                'Connection': 'keep-alive',
+                'Referer': this.baseUrl
+            };
+
+            const response = await axios({
+                method: 'GET',
+                url: autocompleteUrl,
+                headers: headers,
+                timeout: this.timeout,
+                validateStatus: function (status) {
+                    return status < 500;
+                }
+            });
+
+            if (response.status === 200 && response.data) {
+                console.log(`✅ Autocomplete API response received`);
+
+                const data = response.data;
+
+                // Check if we have suggestions
+                if (data.suggestions && data.suggestions.length > 0) {
+                    const suggestion = data.suggestions[0];
+                    console.log(`📋 Found suggestion: ${suggestion.value}`);
+
+                    if (suggestion.data && suggestion.data.BrandUrl && suggestion.data.CollectionUrl && suggestion.data.StyleUrl) {
+                        const { BrandUrl, CollectionUrl, StyleUrl } = suggestion.data;
+
+                        // Build the product URL from autocomplete data
+                        const productUrl = `${this.baseUrl}/catalog/${BrandUrl}/${CollectionUrl}/${StyleUrl}`;
+
+                        console.log(`🎯 Built product URL: ${productUrl}`);
+                        console.log(`   Brand: ${BrandUrl}`);
+                        console.log(`   Collection: ${CollectionUrl}`);
+                        console.log(`   Style: ${StyleUrl}`);
+
+                        return {
+                            url: productUrl,
+                            brandUrl: BrandUrl,
+                            collectionUrl: CollectionUrl,
+                            styleUrl: StyleUrl,
+                            displayName: suggestion.value
+                        };
+                    } else {
+                        console.log(`⚠️  Suggestion missing URL data:`, suggestion);
+                    }
+                } else {
+                    console.log(`⚠️  No suggestions returned for: ${model}`);
+                }
+            } else {
+                console.log(`⚠️  Autocomplete API returned status: ${response.status}`);
+            }
+
+            return null;
+
+        } catch (error) {
+            console.error(`❌ Autocomplete API error:`, error.message);
+            return null;
+        }
+    }
+
+    /**
+     * Build all possible product URL variations (FALLBACK METHOD)
      * Ideal Optics URL structure: https://www.i-dealoptics.com/catalog/{collection}/{collection}/{model}
      *
      * Collections include: casino, elegante, elevate, focus-eyewear, haggar, jbx,
