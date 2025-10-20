@@ -218,3 +218,77 @@ CREATE TABLE public.webhook_logs (
   CONSTRAINT webhook_logs_account_id_fkey FOREIGN KEY (account_id) REFERENCES public.accounts(id),
   CONSTRAINT webhook_logs_email_id_fkey FOREIGN KEY (email_id) REFERENCES public.emails(id)
 );
+
+-- ============================================================================
+-- VENDOR DATA INSERTS
+-- ============================================================================
+
+-- Add Kenmark vendor with comprehensive email detection patterns
+-- This vendor has very unique identifiers making detection highly reliable
+-- Domain: kenmarkeyewear.com | Image server: jiecosystem.net
+
+INSERT INTO public.vendors (
+  name,
+  code,
+  domain,
+  email_patterns,
+  parser_service,
+  is_active,
+  settings
+) VALUES (
+  'Kenmark',
+  'kenmark',
+  'kenmarkeyewear.com',
+  '{
+    "tier1": {
+      "weight": 95,
+      "domains": [
+        "kenmarkeyewear.com"
+      ]
+    },
+    "tier2": {
+      "weight": 90,
+      "body_signatures": [
+        "Kenmark Eyewear: Your Receipt for Order Number",
+        "Kenmark Eyewear",
+        "kenmarkeyewear.com",
+        "imageserver.jiecosystem.net/image/kenmark/",
+        "PLEASE DO NOT REPLY TO THIS EMAIL",
+        "noreply@kenmarkeyewear.com"
+      ]
+    },
+    "tier3": {
+      "weight": 75,
+      "required_matches": 2,
+      "subject_keywords": [
+        "Kenmark Eyewear",
+        "Receipt for Order Number",
+        "Your Receipt"
+      ],
+      "body_keywords": [
+        "Total Pieces:",
+        "Placed By Rep:",
+        "jiecosystem.net",
+        "Order Number:",
+        "Ship To",
+        "Order Items"
+      ]
+    }
+  }'::jsonb,
+  'kenmark_parser',
+  true,
+  '{
+    "supports_pdf": false,
+    "supports_html": true,
+    "order_confirmation_format": "html_table",
+    "image_server": "imageserver.jiecosystem.net"
+  }'::jsonb
+)
+ON CONFLICT (code) DO UPDATE SET
+  name = EXCLUDED.name,
+  domain = EXCLUDED.domain,
+  email_patterns = EXCLUDED.email_patterns,
+  parser_service = EXCLUDED.parser_service,
+  is_active = EXCLUDED.is_active,
+  settings = EXCLUDED.settings,
+  updated_at = CURRENT_TIMESTAMP;

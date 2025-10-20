@@ -3,6 +3,8 @@ const ModernOpticalService = require('./ModernOpticalService');
 const IdealOpticsService = require('./IdealOpticsService');
 const { parseLamyamericaHtml } = require('./lamyamericaParser');
 const LamyamericaService = require('./LamyamericaService');
+const { parseKenmarkHtml } = require('./kenmarkParser');
+const KenmarkService = require('./KenmarkService');
 
 /**
  * Parser Registry - Maps vendor domains to their parsers
@@ -19,6 +21,7 @@ class ParserRegistry {
             ['noreply@safilo.com', { parser: this.processSafiloWithService.bind(this), type: 'pdf' }], // Add full email format
             ['i-dealoptics.com', this.processIdealOpticsWithService.bind(this)],
             ['lamyamerica.com', this.processLamyamericaWithService.bind(this)],
+            ['kenmarkeyewear.com', this.processKenmarkWithService.bind(this)],
             // Add more vendor parsers here as needed
             // Example: ['luxottica.com', parseLuxotticaHtml],
         ]);
@@ -49,6 +52,14 @@ class ParserRegistry {
 
         // Initialize LamyamericaService instance
         this.lamyamericaService = new LamyamericaService({
+            debug: process.env.NODE_ENV !== 'production',
+            timeout: 15000,
+            maxRetries: 3,
+            batchSize: 5
+        });
+
+        // Initialize KenmarkService instance
+        this.kenmarkService = new KenmarkService({
             debug: process.env.NODE_ENV !== 'production',
             timeout: 15000,
             maxRetries: 3,
@@ -183,6 +194,42 @@ class ParserRegistry {
     }
 
     /**
+     * Process Kenmark HTML using KenmarkService
+     * @param {string} html - HTML content
+     * @param {string} plainText - Plain text content
+     * @returns {Promise<object>} Processed order data
+     */
+    async processKenmarkWithService(html, plainText) {
+        try {
+            console.log('🚀 Processing Kenmark email with KenmarkService...');
+
+            // Parse the email first
+            const parsedResult = parseKenmarkHtml(html, plainText);
+
+            console.log('📊 Initial Parse Result:');
+            console.log('- Vendor:', parsedResult.vendor);
+            console.log('- Order Number:', parsedResult.orderNumber);
+            console.log('- Account Number:', parsedResult.accountNumber);
+            console.log('- Customer:', parsedResult.customerName);
+            console.log('- Items Count:', parsedResult.items?.length);
+
+            // Enrich with API data using UPCs
+            const enrichedResult = await this.kenmarkService.enrichOrderData(parsedResult);
+
+            console.log('📊 Enrichment Complete:');
+            console.log('- Enriched Items:', enrichedResult.enrichment?.enrichedItems || 0);
+            console.log('- Failed Items:', enrichedResult.enrichment?.failedItems || 0);
+
+            // Transform to standard format
+            return this.transformKenmarkResult(enrichedResult);
+
+        } catch (error) {
+            console.error('KenmarkService processing failed:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Transform L'amyamerica result to match existing database schema
      * @param {object} lamyResult - Result from LamyamericaService
      * @returns {object} Transformed data for database
@@ -244,6 +291,71 @@ class ParserRegistry {
             parsed_at: new Date().toISOString(),
             parser_version: 'LamyamericaService-1.0',
             enrichment_stats: lamyResult.enrichment
+        };
+    }
+
+    /**
+     * Transform Kenmark result to match existing database schema
+     * @param {object} kenmarkResult - Result from KenmarkService
+     * @returns {object} Transformed data for database
+     */
+    transformKenmarkResult(kenmarkResult) {
+        const items = kenmarkResult.items.map(item => ({
+            sku: `${item.brand.replace(/\s+/g, '_')}-${item.model.replace(/\s+/g, '_')}-${item.colorCode || item.color.replace(/\s+/g, '_')}`,
+            brand: item.brand,
+            model: item.model,
+            color: item.colorName || item.color,
+            color_code: item.colorCode,
+            color_name: item.colorName,
+            size: item.size,
+            full_size: item.size,
+            temple_length: item.temple,
+            quantity: item.quantity || 1,
+            vendor: 'Kenmark',
+
+            // UPC from email image URL
+            upc: item.upc || null,
+
+            // Enriched API data
+            ean: item.enrichedData?.ean || null,
+            wholesale_price: item.enrichedData?.wholesale || null,
+            msrp: item.enrichedData?.msrp || null,
+            in_stock: item.enrichedData?.inStock || null,
+            availability: item.enrichedData?.availability || null,
+            material: item.enrichedData?.material || null,
+            frame_type: item.enrichedData?.frameType || null,
+            shape: item.enrichedData?.shape || null,
+            gender: item.enrichedData?.gender || null,
+            country_of_origin: item.enrichedData?.countryOfOrigin || null,
+
+            // Validation data
+            api_verified: item.validation?.validated || false,
+            confidence_score: item.validation?.confidence || 0
+        }));
+
+        return {
+            vendor: 'Kenmark',
+            account_number: kenmarkResult.accountNumber,
+            brands: [...new Set(items.map(i => i.brand))],
+            order: {
+                order_number: kenmarkResult.orderNumber,
+                vendor: 'Kenmark',
+                account_number: kenmarkResult.accountNumber,
+                rep_name: kenmarkResult.repName,
+                order_date: kenmarkResult.orderDate,
+                customer_name: kenmarkResult.customerName,
+                phone: kenmarkResult.customerPhone,
+                total_pieces: items.reduce((sum, item) => sum + item.quantity, 0),
+                parse_status: 'parsed'
+            },
+            items: items,
+            unique_frames: [...new Set(items.map(i => `${i.brand}-${i.model}`))].map(key => {
+                const [brand, model] = key.split('-');
+                return { brand, model };
+            }),
+            parsed_at: new Date().toISOString(),
+            parser_version: 'KenmarkService-1.0',
+            enrichment_stats: kenmarkResult.enrichment
         };
     }
 
@@ -501,6 +613,14 @@ class ParserRegistry {
      */
     getLamyamericaService() {
         return this.lamyamericaService;
+    }
+
+    /**
+     * Get Kenmark service instance for enrichment
+     * @returns {KenmarkService} Service instance
+     */
+    getKenmarkService() {
+        return this.kenmarkService;
     }
 }
 
