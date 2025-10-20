@@ -70,6 +70,7 @@ function parseLuxotticaHtml(html, plainText) {
         account_number: orderInfo.accountNumber,
         order: {
             order_number: orderInfo.cartNumber,
+            account_number: orderInfo.accountNumber,
             customer_name: orderInfo.customerName,
             order_date: orderInfo.orderDate,
             total_pieces: items.reduce((sum, item) => sum + item.quantity, 0),

@@ -5,6 +5,7 @@ const { parseLamyamericaHtml } = require('./lamyamericaParser');
 const LamyamericaService = require('./LamyamericaService');
 const { parseKenmarkHtml } = require('./kenmarkParser');
 const KenmarkService = require('./KenmarkService');
+const { parseLuxotticaHtml } = require('./luxotticaParser');
 
 /**
  * Parser Registry - Maps vendor domains to their parsers
@@ -22,8 +23,8 @@ class ParserRegistry {
             ['i-dealoptics.com', this.processIdealOpticsWithService.bind(this)],
             ['lamyamerica.com', this.processLamyamericaWithService.bind(this)],
             ['kenmarkeyewear.com', this.processKenmarkWithService.bind(this)],
+            ['luxottica.com', parseLuxotticaHtml],
             // Add more vendor parsers here as needed
-            // Example: ['luxottica.com', parseLuxotticaHtml],
         ]);
 
         // Initialize SafiloService instance

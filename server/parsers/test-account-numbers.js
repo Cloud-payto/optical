@@ -3,12 +3,13 @@ const path = require('path');
 const { parseKenmarkHtml } = require('./kenmarkParser');
 const { parseLamyamericaHtml } = require('./lamyamericaParser');
 const { parseIdealOpticsHtml } = require('./idealOpticsParser');
+const { parseLuxotticaHtml } = require('./luxotticaParser');
 
 /**
  * Test Account Number Extraction Across All Vendors
  *
  * This script verifies that account numbers are correctly extracted from emails
- * for Kenmark, L'amyamerica, and Ideal Optics
+ * for Kenmark, L'amyamerica, Ideal Optics, and Luxottica
  */
 
 function testAccountNumber(vendorName, emailPath, parser) {
@@ -145,6 +146,11 @@ async function runAllTests() {
             'Ideal Optics',
             path.join(basePath, 'Ideal Optics/email.txt'),
             parseIdealOpticsHtml
+        ),
+        testAccountNumber(
+            'Luxottica',
+            path.join(basePath, 'Luxottica/email.txt'),
+            parseLuxotticaHtml
         )
     ];
 
