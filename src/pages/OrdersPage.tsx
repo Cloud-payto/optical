@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, SortAsc, MoreHorizontal, Package } from 'lucide-react';
-import { fetchOrders, archiveOrder, deleteOrder, OrderData } from '../services/api';
+import { Search, Filter, SortAsc, MoreHorizontal, Package, Eye, CheckCircle, X } from 'lucide-react';
+import { fetchOrders, archiveOrder, deleteOrder, confirmPendingOrder, OrderData } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
-type TabType = 'All' | 'Draft' | 'Ordered' | 'Partial' | 'Received' | 'Closed';
+type TabType = 'All' | 'Pending' | 'Confirmed' | 'Archived';
 
 const OrdersPage: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
@@ -14,6 +14,9 @@ const OrdersPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<TabType>('All');
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<OrderData | null>(null);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [confirmingOrders, setConfirmingOrders] = useState<Set<number>>(new Set());
 
   // Load orders
   const loadOrders = async () => {
@@ -40,20 +43,31 @@ const OrdersPage: React.FC = () => {
     loadOrders();
   }, [isAuthenticated, user]);
 
-  // Filter orders by tab
-  const filteredOrders = orders.filter(order => {
-    // Search filter
-    const matchesSearch =
-      order.order_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.vendor.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customer_name?.toLowerCase().includes(searchTerm.toLowerCase());
+  // Filter and sort orders by tab
+  const filteredOrders = orders
+    .filter(order => {
+      // Search filter
+      const matchesSearch =
+        order.order_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.vendor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.customer_name?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    if (!matchesSearch) return false;
+      if (!matchesSearch) return false;
 
-    // Tab filter
-    if (activeTab === 'All') return true;
-    return order.status?.toLowerCase() === activeTab.toLowerCase();
-  });
+      // Tab filter
+      if (activeTab === 'All') return true;
+      if (activeTab === 'Pending') return order.status?.toLowerCase() === 'pending';
+      if (activeTab === 'Confirmed') return order.status?.toLowerCase() === 'confirmed';
+      if (activeTab === 'Archived') return order.status?.toLowerCase() === 'archived';
+      return false;
+    })
+    .sort((a, b) => {
+      // Sort by status: pending -> confirmed -> archived
+      const statusOrder = { pending: 0, confirmed: 1, archived: 2 };
+      const statusA = statusOrder[a.status?.toLowerCase() as keyof typeof statusOrder] ?? 3;
+      const statusB = statusOrder[b.status?.toLowerCase() as keyof typeof statusOrder] ?? 3;
+      return statusA - statusB;
+    });
 
   // Handle archive order
   const handleArchiveOrder = async (orderId: number) => {
@@ -87,23 +101,48 @@ const OrdersPage: React.FC = () => {
     setOpenDropdown(null);
   };
 
+  // Handle confirm order
+  const handleConfirmOrder = async (order: OrderData) => {
+    setConfirmingOrders(prev => new Set(prev).add(order.id));
+
+    try {
+      const response = await confirmPendingOrder(order.order_number, user?.id);
+      if (response.success) {
+        toast.success('Order confirmed successfully');
+        loadOrders();
+      }
+    } catch (error) {
+      console.error('Failed to confirm order:', error);
+      toast.error('Failed to confirm order');
+    } finally {
+      setConfirmingOrders(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(order.id);
+        return newSet;
+      });
+    }
+  };
+
+  // Handle preview order
+  const handlePreviewOrder = (order: OrderData) => {
+    setSelectedOrder(order);
+    setShowPreviewModal(true);
+  };
+
   // Get status badge
   const getStatusBadge = (status: string) => {
-    const statusMap: Record<string, { bg: string; text: string; dot: string }> = {
-      'closed': { bg: 'bg-red-50', text: 'text-red-700', dot: 'bg-red-500' },
-      'open': { bg: 'bg-green-50', text: 'text-green-700', dot: 'bg-green-500' },
-      'partial': { bg: 'bg-yellow-50', text: 'text-yellow-700', dot: 'bg-yellow-500' },
-      'received': { bg: 'bg-blue-50', text: 'text-blue-700', dot: 'bg-blue-500' },
-      'ordered': { bg: 'bg-purple-50', text: 'text-purple-700', dot: 'bg-purple-500' },
-      'draft': { bg: 'bg-gray-50', text: 'text-gray-700', dot: 'bg-gray-500' },
+    const statusMap: Record<string, { bg: string; text: string; dot: string; label: string }> = {
+      'pending': { bg: 'bg-yellow-50', text: 'text-yellow-700', dot: 'bg-yellow-500', label: 'Pending' },
+      'confirmed': { bg: 'bg-green-50', text: 'text-green-700', dot: 'bg-green-500', label: 'Confirmed' },
+      'archived': { bg: 'bg-gray-50', text: 'text-gray-700', dot: 'bg-gray-500', label: 'Archived' },
     };
 
-    const config = statusMap[status?.toLowerCase()] || statusMap['draft'];
+    const config = statusMap[status?.toLowerCase()] || statusMap['pending'];
 
     return (
       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
         <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`}></span>
-        {status || 'Draft'}
+        {config.label}
       </span>
     );
   };
@@ -121,7 +160,7 @@ const OrdersPage: React.FC = () => {
     return `${received} of ${order.total_items}`;
   };
 
-  const tabs: TabType[] = ['All', 'Draft', 'Ordered', 'Partial', 'Received', 'Closed'];
+  const tabs: TabType[] = ['All', 'Pending', 'Confirmed', 'Archived'];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -219,13 +258,16 @@ const OrdersPage: React.FC = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Order Date
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 <AnimatePresence>
                   {loading ? (
                     <tr>
-                      <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
+                      <td colSpan={9} className="px-6 py-12 text-center text-gray-500">
                         <div className="flex items-center justify-center gap-2">
                           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-violet-600"></div>
                           Loading orders...
@@ -234,7 +276,7 @@ const OrdersPage: React.FC = () => {
                     </tr>
                   ) : filteredOrders.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="px-6 py-12 text-center">
+                      <td colSpan={9} className="px-6 py-12 text-center">
                         <div className="flex flex-col items-center gap-3">
                           <Package className="h-12 w-12 text-gray-300" />
                           <p className="text-gray-500">No orders found</p>
@@ -267,6 +309,34 @@ const OrdersPage: React.FC = () => {
                           ${order.items.reduce((sum, item) => sum + (item.quantity || 0), 0).toFixed(2)}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-900">{formatDate(order.order_date)}</td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            {/* Preview Button */}
+                            <button
+                              onClick={() => handlePreviewOrder(order)}
+                              className="p-1.5 text-gray-600 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors"
+                              title="Preview order"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </button>
+
+                            {/* Confirm Button - only show for pending orders */}
+                            {order.status?.toLowerCase() === 'pending' && (
+                              <button
+                                onClick={() => handleConfirmOrder(order)}
+                                disabled={confirmingOrders.has(order.id)}
+                                className="p-1.5 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Confirm order"
+                              >
+                                {confirmingOrders.has(order.id) ? (
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+                                ) : (
+                                  <CheckCircle className="h-4 w-4" />
+                                )}
+                              </button>
+                            )}
+                          </div>
+                        </td>
                       </motion.tr>
                     ))
                   )}
@@ -275,6 +345,138 @@ const OrdersPage: React.FC = () => {
             </table>
           </div>
         </div>
+
+        {/* Preview Modal */}
+        <AnimatePresence>
+          {showPreviewModal && selectedOrder && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => setShowPreviewModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+              >
+                {/* Modal Header */}
+                <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-violet-50 to-blue-50">
+                  <div>
+                    <h2 className="text-2xl font-semibold text-gray-900">Order #{selectedOrder.order_number}</h2>
+                    <p className="text-sm text-gray-600 mt-1">{selectedOrder.vendor}</p>
+                  </div>
+                  <button
+                    onClick={() => setShowPreviewModal(false)}
+                    className="p-2 hover:bg-white/50 rounded-lg transition-colors"
+                  >
+                    <X className="h-5 w-5 text-gray-500" />
+                  </button>
+                </div>
+
+                {/* Modal Body */}
+                <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+                  {/* Order Details */}
+                  <div className="grid grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <label className="text-xs font-medium text-gray-500 uppercase">Customer</label>
+                      <p className="text-sm text-gray-900 mt-1">{selectedOrder.customer_name || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-gray-500 uppercase">Account Number</label>
+                      <p className="text-sm text-gray-900 mt-1">{selectedOrder.account_number || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-gray-500 uppercase">Order Date</label>
+                      <p className="text-sm text-gray-900 mt-1">{formatDate(selectedOrder.order_date)}</p>
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-gray-500 uppercase">Status</label>
+                      <div className="mt-1">{getStatusBadge(selectedOrder.status)}</div>
+                    </div>
+                    {selectedOrder.rep_name && (
+                      <div>
+                        <label className="text-xs font-medium text-gray-500 uppercase">Sales Rep</label>
+                        <p className="text-sm text-gray-900 mt-1">{selectedOrder.rep_name}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Items Table */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Items</h3>
+                    <div className="border border-gray-200 rounded-lg overflow-hidden">
+                      <table className="w-full">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Brand</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Model</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Color</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Size</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                          {selectedOrder.items.map((item, index) => (
+                            <tr key={index} className="hover:bg-gray-50">
+                              <td className="px-4 py-3 text-sm text-gray-900">{item.sku}</td>
+                              <td className="px-4 py-3 text-sm text-gray-900">{item.brand}</td>
+                              <td className="px-4 py-3 text-sm text-gray-900">{item.model}</td>
+                              <td className="px-4 py-3 text-sm text-gray-900">{item.color}</td>
+                              <td className="px-4 py-3 text-sm text-gray-900">{item.size}</td>
+                              <td className="px-4 py-3 text-sm text-gray-900">{item.quantity}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Modal Footer */}
+                <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
+                  <div className="text-sm text-gray-600">
+                    Total Items: <span className="font-semibold text-gray-900">{selectedOrder.total_items}</span>
+                  </div>
+                  <div className="flex gap-3">
+                    {selectedOrder.status?.toLowerCase() === 'pending' && (
+                      <button
+                        onClick={() => {
+                          handleConfirmOrder(selectedOrder);
+                          setShowPreviewModal(false);
+                        }}
+                        disabled={confirmingOrders.has(selectedOrder.id)}
+                        className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                      >
+                        {confirmingOrders.has(selectedOrder.id) ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            Confirming...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle className="h-4 w-4" />
+                            Confirm Order
+                          </>
+                        )}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setShowPreviewModal(false)}
+                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
