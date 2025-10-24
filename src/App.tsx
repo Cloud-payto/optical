@@ -39,10 +39,7 @@ function App() {
                         <Route path="/brands" element={<BrandsCostsPage />} />
                         <Route path="/vendor-comparison" element={<VendorComparisonPage />} />
                         <Route path="/time-saving" element={<TimeSavingPage />} />
-                        {/* Frames routes */}
-                        <Route path="/frames/orders" element={<Inventory />} /> {/* Placeholder - will be Orders page */}
                         <Route path="/inventory" element={<Inventory />} />
-                        <Route path="/frames/archive" element={<Inventory />} /> {/* Placeholder - will be Archive page */}
                         <Route path="/about" element={<AboutPage />} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                       </Routes>
