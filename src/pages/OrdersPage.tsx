@@ -142,12 +142,21 @@ const OrdersPage: React.FC = () => {
 
   // Handle preview order
   const handlePreviewOrder = (order: OrderData) => {
+    console.log('Preview clicked for order:', order.order_number);
+    console.log('Looking for email_id:', order.email_id);
+    console.log('Available emails:', emails.map(e => ({ id: e.id, subject: e.subject })));
+
     // Find the corresponding email using email_id
-    const email = emails.find(e => e.id === order.email_id.toString());
+    // email_id in order is a number, but email.id is a string (UUID)
+    const email = emails.find(e => parseInt(e.id) === order.email_id || e.id === order.email_id.toString());
+
+    console.log('Found email:', email);
+
     if (email) {
       setSelectedEmailDetails(email);
       setShowPreviewModal(true);
     } else {
+      console.error('Could not find email for order', order);
       toast.error('Could not find order details');
     }
   };
