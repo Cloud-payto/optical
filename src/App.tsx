@@ -16,6 +16,7 @@ import BrandsCostsPage from './pages/BrandsCostsPage';
 import TimeSavingPage from './pages/TimeSavingPage';
 import VendorComparisonPage from './pages/VendorComparisonPage';
 import Inventory from './pages/Inventory';
+import OrdersPage from './features/orders/OrdersPage';
 import Debug from './pages/Debug';
 
 // Configure React Query client
@@ -54,6 +55,7 @@ function App() {
                           <Route path="/vendor-comparison" element={<VendorComparisonPage />} />
                           <Route path="/time-saving" element={<TimeSavingPage />} />
                           <Route path="/inventory" element={<Inventory />} />
+                          <Route path="/orders" element={<OrdersPage />} />
                           <Route path="/about" element={<AboutPage />} />
                           <Route path="*" element={<Navigate to="/" replace />} />
                         </Routes>
