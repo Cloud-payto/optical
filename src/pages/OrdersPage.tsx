@@ -56,10 +56,10 @@ const OrdersPage: React.FC = () => {
       if (!matchesSearch) return false;
 
       // Tab filter
-      if (activeTab === 'All') return true;
-      if (activeTab === 'Pending') return order.status?.toLowerCase() === 'pending';
-      if (activeTab === 'Confirmed') return order.status?.toLowerCase() === 'confirmed';
-      if (activeTab === 'Archived') return order.status?.toLowerCase() === 'archived';
+      if (activeTab === 'All') return !order.metadata?.archived; // Don't show archived in "All"
+      if (activeTab === 'Pending') return order.status?.toLowerCase() === 'pending' && !order.metadata?.archived;
+      if (activeTab === 'Confirmed') return order.status?.toLowerCase() === 'confirmed' && !order.metadata?.archived;
+      if (activeTab === 'Archived') return order.metadata?.archived === true;
       return false;
     })
     .sort((a, b) => {
