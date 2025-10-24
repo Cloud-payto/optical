@@ -225,9 +225,6 @@ export interface OrderData {
   order_date?: string;
   confirmed_at: string;
   status: string;
-  metadata?: {
-    archived?: boolean;
-  };
   items: Array<{
     id: number;
     sku: string;

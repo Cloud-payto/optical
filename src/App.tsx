@@ -14,7 +14,6 @@ import BrandsCostsPage from './pages/BrandsCostsPage';
 import TimeSavingPage from './pages/TimeSavingPage';
 import VendorComparisonPage from './pages/VendorComparisonPage';
 import Inventory from './pages/Inventory';
-import OrdersPage from './pages/OrdersPage';
 import Debug from './pages/Debug';
 
 function App() {
@@ -41,7 +40,7 @@ function App() {
                         <Route path="/vendor-comparison" element={<VendorComparisonPage />} />
                         <Route path="/time-saving" element={<TimeSavingPage />} />
                         {/* Frames routes */}
-                        <Route path="/frames/orders" element={<OrdersPage />} />
+                        <Route path="/frames/orders" element={<Inventory />} /> {/* Placeholder - will be Orders page */}
                         <Route path="/inventory" element={<Inventory />} />
                         <Route path="/frames/archive" element={<Inventory />} /> {/* Placeholder - will be Archive page */}
                         <Route path="/about" element={<AboutPage />} />
