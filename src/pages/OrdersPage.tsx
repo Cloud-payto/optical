@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, SortAsc, MoreHorizontal, Package, Eye, CheckCircle, X, Archive } from 'lucide-react';
-import { fetchOrders, archiveOrder, deleteOrder, confirmPendingOrder, OrderData } from '../services/api';
+import { fetchOrders, fetchEmails, archiveOrder, deleteOrder, confirmPendingOrder, OrderData, EmailData } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,16 +10,17 @@ type TabType = 'All' | 'Pending' | 'Confirmed' | 'Archived';
 const OrdersPage: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
   const [orders, setOrders] = useState<OrderData[]>([]);
+  const [emails, setEmails] = useState<EmailData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<TabType>('All');
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
-  const [selectedOrder, setSelectedOrder] = useState<OrderData | null>(null);
+  const [selectedEmailDetails, setSelectedEmailDetails] = useState<EmailData | null>(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [confirmingOrders, setConfirmingOrders] = useState<Set<number>>(new Set());
   const [archivingOrders, setArchivingOrders] = useState<Set<number>>(new Set());
 
-  // Load orders
+  // Load orders and emails
   const loadOrders = async () => {
     if (!isAuthenticated || !user) {
       setLoading(false);
@@ -28,9 +29,16 @@ const OrdersPage: React.FC = () => {
 
     try {
       setLoading(true);
-      const response = await fetchOrders(user.id);
-      if (response.success && response.orders) {
-        setOrders(response.orders);
+      const [ordersResponse, emailsResponse] = await Promise.all([
+        fetchOrders(user.id),
+        fetchEmails()
+      ]);
+
+      if (ordersResponse.success && ordersResponse.orders) {
+        setOrders(ordersResponse.orders);
+      }
+      if (emailsResponse.emails) {
+        setEmails(emailsResponse.emails);
       }
     } catch (error) {
       console.error('Failed to load orders:', error);
@@ -134,8 +142,14 @@ const OrdersPage: React.FC = () => {
 
   // Handle preview order
   const handlePreviewOrder = (order: OrderData) => {
-    setSelectedOrder(order);
-    setShowPreviewModal(true);
+    // Find the corresponding email using email_id
+    const email = emails.find(e => e.id === order.email_id.toString());
+    if (email) {
+      setSelectedEmailDetails(email);
+      setShowPreviewModal(true);
+    } else {
+      toast.error('Could not find order details');
+    }
   };
 
   // Get status badge
@@ -156,11 +170,66 @@ const OrdersPage: React.FC = () => {
     );
   };
 
-  // Format date
-  const formatDate = (dateString?: string) => {
+  // Format date with time
+  const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    try {
+      let date: Date;
+      if (dateString.includes('T') || dateString.includes('Z')) {
+        date = new Date(dateString);
+      } else if (dateString.includes('/')) {
+        const [month, day, year] = dateString.split('/').map(Number);
+        date = new Date(year, month - 1, day);
+      } else if (dateString.includes('-')) {
+        date = new Date(dateString);
+      } else {
+        date = new Date(dateString);
+      }
+
+      if (isNaN(date.getTime())) {
+        return dateString;
+      }
+
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return dateString || 'Invalid date';
+    }
+  };
+
+  // Format date without time
+  const formatDateOnly = (dateString: string | null | undefined) => {
+    if (!dateString) return 'N/A';
+    try {
+      let date: Date;
+      if (dateString.includes('T') || dateString.includes('Z')) {
+        date = new Date(dateString);
+      } else if (dateString.includes('/')) {
+        const [month, day, year] = dateString.split('/').map(Number);
+        date = new Date(year, month - 1, day);
+      } else if (dateString.includes('-')) {
+        date = new Date(dateString);
+      } else {
+        date = new Date(dateString);
+      }
+
+      if (isNaN(date.getTime())) {
+        return dateString;
+      }
+
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch (error) {
+      return dateString || 'Invalid date';
+    }
   };
 
   // Get received count
@@ -373,143 +442,164 @@ const OrdersPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Preview Modal */}
-        <AnimatePresence>
-          {showPreviewModal && selectedOrder && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-gray-500/75 z-50 flex items-center justify-center p-4"
-              onClick={() => setShowPreviewModal(false)}
-            >
-              <motion.div
-                initial={{ scale: 0.95, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
-              >
-                {/* Modal Header */}
-                <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200">
-                  <h3 className="text-lg font-medium text-gray-900">Order Details</h3>
-                  <button
-                    onClick={() => setShowPreviewModal(false)}
-                    className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded-md"
-                  >
-                    <X className="h-6 w-6" />
-                  </button>
-                </div>
+        {/* Preview Modal - EXACT copy from old Inventory page */}
+        {showPreviewModal && selectedEmailDetails && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+              <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div className="absolute inset-0 bg-gray-500 opacity-75" onClick={() => setSelectedEmailDetails(null)}></div>
+              </div>
 
-                {/* Modal Body */}
-                <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-180px)]">
-                  {/* Order Summary Section */}
-                  <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                    <h4 className="text-sm font-medium text-gray-900 mb-3">Order Summary</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-gray-500">Order Number:</span>
-                        <span className="ml-2 text-gray-900 font-medium">{selectedOrder.order_number}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Vendor:</span>
-                        <span className="ml-2 text-gray-900">{selectedOrder.vendor}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Customer:</span>
-                        <span className="ml-2 text-gray-900">{selectedOrder.customer_name || 'N/A'}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Account:</span>
-                        <span className="ml-2 text-gray-900">{selectedOrder.account_number || 'N/A'}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Total Items:</span>
-                        <span className="ml-2 text-gray-900">{selectedOrder.items.length}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Total Pieces:</span>
-                        <span className="ml-2 text-gray-900">{selectedOrder.items.reduce((sum, item) => sum + (item.quantity || 0), 0)}</span>
-                      </div>
-                      {selectedOrder.order_date && (
-                        <div>
-                          <span className="text-gray-500">Order Date:</span>
-                          <span className="ml-2 text-gray-900">{formatDate(selectedOrder.order_date)}</span>
-                        </div>
-                      )}
-                      {selectedOrder.rep_name && (
-                        <div>
-                          <span className="text-gray-500">Sales Rep:</span>
-                          <span className="ml-2 text-gray-900">{selectedOrder.rep_name}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+              <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-                  {/* Items Table */}
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h4 className="text-sm font-medium text-gray-900 mb-3">Order Items</h4>
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-100">
-                          <tr>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">UPC</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brand</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Model</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Color</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {selectedOrder.items.map((item, index) => (
-                            <tr key={index}>
-                              <td className="px-4 py-2 text-sm text-gray-900">{item.sku || 'N/A'}</td>
-                              <td className="px-4 py-2 text-sm text-gray-900">{item.brand}</td>
-                              <td className="px-4 py-2 text-sm text-gray-900">{item.model}</td>
-                              <td className="px-4 py-2 text-sm text-gray-900">{item.color}</td>
-                              <td className="px-4 py-2 text-sm text-gray-900">{item.size}</td>
-                              <td className="px-4 py-2 text-sm text-gray-900">{item.quantity}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Modal Footer */}
-                <div className="bg-gray-50 px-6 py-3 border-t border-gray-200 flex justify-end">
-                  {selectedOrder.status?.toLowerCase() === 'pending' && (
+              <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900">
+                      Order Details
+                    </h3>
                     <button
-                      onClick={() => {
-                        handleConfirmOrder(selectedOrder);
-                        setShowPreviewModal(false);
-                      }}
-                      disabled={confirmingOrders.has(selectedOrder.id)}
-                      className="mr-3 inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() => { setSelectedEmailDetails(null); setShowPreviewModal(false); }}
+                      className="rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                     >
-                      {confirmingOrders.has(selectedOrder.id) ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          Confirming...
-                        </>
-                      ) : (
-                        'Confirm Order'
-                      )}
+                      <X className="h-6 w-6" />
                     </button>
-                  )}
+                  </div>
+
+                  <div className="mt-3">
+                    {/* Email Information */}
+                    <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                      <h4 className="text-sm font-medium text-gray-900 mb-3">Email Information</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-500">From:</span>
+                          <span className="ml-2 text-gray-900">{selectedEmailDetails.from_email}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Email Received:</span>
+                          <span className="ml-2 text-gray-900">{formatDate(selectedEmailDetails.received_at)}</span>
+                        </div>
+                        {selectedEmailDetails.parsed_data?.order?.order_date && (
+                          <div>
+                            <span className="text-gray-500">Order Date:</span>
+                            <span className="ml-2 text-gray-900">{formatDateOnly(selectedEmailDetails.parsed_data.order.order_date)}</span>
+                          </div>
+                        )}
+                        <div className="md:col-span-2">
+                          <span className="text-gray-500">Subject:</span>
+                          <span className="ml-2 text-gray-900">{selectedEmailDetails.subject}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Parsed Data */}
+                    {selectedEmailDetails.parse_status === 'parsed' && selectedEmailDetails.parsed_data ? (
+                      <>
+                        {/* Order Summary */}
+                        <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                          <h4 className="text-sm font-medium text-gray-900 mb-3">Order Summary</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <span className="text-gray-500">Order Number:</span>
+                              <span className="ml-2 text-gray-900 font-medium">{selectedEmailDetails.parsed_data.order.order_number}</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Vendor:</span>
+                              <span className="ml-2 text-gray-900">
+                                {selectedEmailDetails.parsed_data.vendor
+                                  ? selectedEmailDetails.parsed_data.vendor.replace(/_/g, ' ').split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+                                  : 'Unknown'}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Customer:</span>
+                              <span className="ml-2 text-gray-900">{selectedEmailDetails.parsed_data.order.customer_name}</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Account:</span>
+                              <span className="ml-2 text-gray-900">{selectedEmailDetails.parsed_data.account_number}</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Total Items:</span>
+                              <span className="ml-2 text-gray-900">{selectedEmailDetails.parsed_data.items.length}</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Total Pieces:</span>
+                              <span className="ml-2 text-gray-900">{selectedEmailDetails.parsed_data.order.total_pieces || selectedEmailDetails.parsed_data.items.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0)}</span>
+                            </div>
+                            {selectedEmailDetails.parsed_data.order.order_date && (
+                              <div>
+                                <span className="text-gray-500">Order Date:</span>
+                                <span className="ml-2 text-gray-900">{formatDateOnly(selectedEmailDetails.parsed_data.order.order_date)}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Items List */}
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <h4 className="text-sm font-medium text-gray-900 mb-3">Order Items</h4>
+                          <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                              <thead className="bg-gray-100">
+                                <tr>
+                                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    UPC
+                                  </th>
+                                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Brand
+                                  </th>
+                                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Model
+                                  </th>
+                                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Color
+                                  </th>
+                                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Size
+                                  </th>
+                                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Qty
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody className="bg-white divide-y divide-gray-200">
+                                {selectedEmailDetails.parsed_data.items.map((item: any, index: number) => (
+                                  <tr key={index}>
+                                    <td className="px-4 py-2 text-sm text-gray-900">{item.upc || 'N/A'}</td>
+                                    <td className="px-4 py-2 text-sm text-gray-900">{item.brand}</td>
+                                    <td className="px-4 py-2 text-sm text-gray-900">{item.model}</td>
+                                    <td className="px-4 py-2 text-sm text-gray-900">{item.color}</td>
+                                    <td className="px-4 py-2 text-sm text-gray-900">{item.size}</td>
+                                    <td className="px-4 py-2 text-sm text-gray-900">{item.quantity}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-center py-8">
+                        <p className="text-gray-500">This order has not been parsed yet.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                   <button
-                    onClick={() => setShowPreviewModal(false)}
-                    className="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm"
+                    type="button"
+                    onClick={() => { setSelectedEmailDetails(null); setShowPreviewModal(false); }}
+                    className="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
                   >
                     Close
                   </button>
                 </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
