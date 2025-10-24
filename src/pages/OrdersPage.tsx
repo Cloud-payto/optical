@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, SortAsc, MoreHorizontal, Package, Eye, CheckCircle, X } from 'lucide-react';
+import { Search, Filter, SortAsc, MoreHorizontal, Package, Eye, CheckCircle, X, Archive } from 'lucide-react';
 import { fetchOrders, archiveOrder, deleteOrder, confirmPendingOrder, OrderData } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
@@ -17,6 +17,7 @@ const OrdersPage: React.FC = () => {
   const [selectedOrder, setSelectedOrder] = useState<OrderData | null>(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [confirmingOrders, setConfirmingOrders] = useState<Set<number>>(new Set());
+  const [archivingOrders, setArchivingOrders] = useState<Set<number>>(new Set());
 
   // Load orders
   const loadOrders = async () => {
@@ -71,6 +72,8 @@ const OrdersPage: React.FC = () => {
 
   // Handle archive order
   const handleArchiveOrder = async (orderId: number) => {
+    setArchivingOrders(prev => new Set(prev).add(orderId));
+
     try {
       const response = await archiveOrder(orderId, user?.id);
       if (response.success) {
@@ -80,6 +83,12 @@ const OrdersPage: React.FC = () => {
     } catch (error) {
       console.error('Failed to archive order:', error);
       toast.error('Failed to archive order');
+    } finally {
+      setArchivingOrders(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(orderId);
+        return newSet;
+      });
     }
     setOpenDropdown(null);
   };
@@ -334,6 +343,22 @@ const OrdersPage: React.FC = () => {
                                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
                                 ) : (
                                   <CheckCircle className="h-4 w-4" />
+                                )}
+                              </button>
+                            )}
+
+                            {/* Archive Button - only show for confirmed orders */}
+                            {order.status?.toLowerCase() === 'confirmed' && (
+                              <button
+                                onClick={() => handleArchiveOrder(order.id)}
+                                disabled={archivingOrders.has(order.id)}
+                                className="p-1.5 text-gray-600 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Archive order"
+                              >
+                                {archivingOrders.has(order.id) ? (
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                                ) : (
+                                  <Archive className="h-4 w-4" />
                                 )}
                               </button>
                             )}
