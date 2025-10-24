@@ -298,7 +298,9 @@ const OrdersPage: React.FC = () => {
                         <td className="px-6 py-4">
                           <div className="flex flex-col">
                             <span className="text-sm font-medium text-gray-900">#{order.order_number}</span>
-                            <span className="text-xs text-gray-500">{order.account_number || 'N/A'}</span>
+                            {order.account_number && (
+                              <span className="text-xs text-gray-500">{order.account_number}</span>
+                            )}
                           </div>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-900">{order.vendor}</td>
