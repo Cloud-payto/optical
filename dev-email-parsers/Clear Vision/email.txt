@@ -1,0 +1,263 @@
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<style type="text/css" style="display:none;"> P {margin-top:0;margin-bottom:0;} </style>
+</head>
+<body dir="ltr">
+<div class="elementToProof" style="font-family: Calibri, Helvetica, sans-serif; font-size: 14pt; color: rgb(0, 0, 0);">
+<br>
+</div>
+<div class="elementToProof" id="Signature">
+<div style="font-family: Calibri, Helvetica, sans-serif; font-size: 14pt; color: rgb(0, 0, 0);">
+<br>
+</div>
+<div style="text-align: left; font-family: Calibri, Helvetica, sans-serif; font-size: 14pt; color: rgb(0, 0, 0);">
+<b>Arizona Vision Therapy Center</b></div>
+<div style="text-align: left; font-family: Calibri, Helvetica, sans-serif; font-size: 14pt; color: rgb(0, 0, 0);">
+(520) 886-8800</div>
+<div style="text-align: left; font-family: Calibri, Helvetica, sans-serif; font-size: 14pt; color: rgb(0, 0, 0);">
+Fax (520) 886-8805</div>
+<div style="text-align: left; font-family: Calibri, Helvetica, sans-serif; font-size: 14pt; color: rgb(0, 0, 0);">
+2312 N Rosemont Blvd #103</div>
+<div style="text-align: left; font-family: Calibri, Helvetica, sans-serif; font-size: 14pt; color: rgb(0, 0, 0);">
+Tucson, Arizona 85712</div>
+</div>
+<div>
+<div id="appendonsend"></div>
+<div style="font-family: Calibri, Helvetica, sans-serif; font-size: 14pt; color: rgb(0, 0, 0);">
+<br>
+</div>
+<hr style="display: inline-block; width: 98%;">
+<div id="divRplyFwdMsg">
+<div style="direction: ltr; font-family: Calibri, sans-serif; font-size: 11pt; color: rgb(0, 0, 0);">
+<b>From:</b>&nbsp;Samuelson, Preston &lt;psamuelson@cvoptical.com&gt;<br>
+<b>Sent:</b>&nbsp;Wednesday, September 10, 2025 4:39 PM<br>
+<b>To:</b>&nbsp;VisionTherapy@live.com &lt;VisionTherapy@live.com&gt;<br>
+<b>Subject:</b>&nbsp;Preston Samuelson - New CVOGo Order: 718492025023</div>
+<div style="direction: ltr;">&nbsp;</div>
+</div>
+<h1>ClearVision Optical Order Reference #718492025023</h1>
+<p>Thanks for placing an order with ClearVision Optical! Please find your order confirmation below:</p>
+<p>Date: 09/10/2025<br>
+Status: Confirmed<br>
+Customer ID: 060212<br>
+Ship To:<br>
+Customer: Arizona Vision Therapy Center<br>
+Customer Email:<br>
+Customer PO:<br>
+Promo ID:<br>
+Ship Via: Default<br>
+Scheduled Ship Date: ASAP<br>
+Terms: Default<br>
+Territory: 70718</p>
+<p>Order Notes: Stock order</p>
+<table style="border-width: 1px; border-style: solid; border-color: black; border-collapse: collapse; border-spacing: 0px; box-sizing: border-box;">
+<tbody>
+<tr>
+<th style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>Bill-to Address</div>
+</th>
+<th style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>Ship-to Address</div>
+</th>
+</tr>
+<tr>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%; vertical-align: top;">
+<div>Arizona Vision Therapy Center<br>
+<br>
+<br>
+2312 N Rosemont Blvd Ste 100,<br>
+Ste 103,<br>
+Tucson, AZ, 85712-6114<br>
+<br>
+Phone:<br>
+Customer Type: Customer<br>
+</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%; vertical-align: top;">
+<div>Arizona Vision Therapy Center<br>
+<br>
+<br>
+2312 N Rosemont Blvd Ste 100,<br>
+Ste 103,<br>
+Tucson, AZ, 85712-6114<br>
+<br>
+Phone:<br>
+Customer Type: Customer<br>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<table style="border-width: 1px; border-style: solid; border-color: black; width: 100%; border-collapse: collapse; border-spacing: 0px; box-sizing: border-box;">
+<tbody>
+<tr>
+<th style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>Line No.</div>
+</th>
+<th style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+</th>
+<th style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>SKU</div>
+</th>
+<th style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>Model</div>
+</th>
+<th style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>Description</div>
+</th>
+<th style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>Qty.</div>
+</th>
+<th style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>List Price ($)</div>
+</th>
+<th style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>Note</div>
+</th>
+</tr>
+<tr>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>1</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; width: 200px;">
+<img alt="SKU Image" width="200" height="100" style="width: 200px; height: 100px;" src="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fcvogo.com%2fapi%2fsku_image%2fthumbnail%3fpart_number%3dADMT69GUN5417&amp;c=E,1,lDcWeW8SSp2HPdve2DSL1ihlsoV928-5gBXd98ReBE8HzW835tzu7eRR1-lfV7MjN8hJRYSN64Qc9Db_G9JG6RutwyzB0JXrTjeFNjDCJC8UYOv7c9I,&amp;typo=1"></td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>ADMT69GUN5417</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>MT69</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>ADV MT69 GUNMETAL MATTE/GREEN 54/17/145</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>1</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>67.99</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+</td>
+</tr>
+<tr>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>2</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; width: 200px;">
+<img alt="SKU Image" width="200" height="100" style="width: 200px; height: 100px;" src="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fcvogo.com%2fapi%2fsku_image%2fthumbnail%3fpart_number%3dADMT71NAV5219&amp;c=E,1,9Xno7ib1KLqFtRHLN-XmFg37tKjhcZXTzEALloCEX8nfvf7zQjK873l9nQkFJYn4g0d06zh6nCSBzt6O53sadl85LPQcUe1GoYlE6qwpetw,&amp;typo=1"></td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>ADMT71NAV5219</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>MT71</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>ADV MT71 NAVY MATTE/GUNMETAL 52/19/145</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>1</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>67.99</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+</td>
+</tr>
+<tr>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>3</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; width: 200px;">
+<img alt="SKU Image" width="200" height="100" style="width: 200px; height: 100px;" src="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fcvogo.com%2fapi%2fsku_image%2fthumbnail%3fpart_number%3dADWT92BLU5418&amp;c=E,1,np1Z_JbVw5SU5Y1lDkev29bDq-4PvHF3-4H-mP6L-Gv-I0xl9H8wLSpddlzXXgvSeHqP-SlcfmiqXjjU9ktL6S7qJgGcTAOVBZFBlfaDsQ,,&amp;typo=1"></td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>ADWT92BLU5418</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>WT92</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>ADV WT92 BLUE MATTE 54/18/140</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>1</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>67.99</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+</td>
+</tr>
+<tr>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>4</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; width: 200px;">
+<img alt="SKU Image" width="200" height="100" style="width: 200px; height: 100px;" src="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fcvogo.com%2fapi%2fsku_image%2fthumbnail%3fpart_number%3dADMT60GUN5317&amp;c=E,1,LqTix_JQ-EhsovWA3GEfMrytPvuLHPq5rejcxHX6ejiL_BsmNkcH4bp4PoMiy9xXOk4yLiXpUI-5-RZ-jaMvsw-YyIvLPNkc3EnhtI2hVw,,&amp;typo=1"></td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>ADMT60GUN5317</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>MT60</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>ADV MT60 GUNMETAL MATTE 53/17/145</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>1</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>67.99</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+</td>
+</tr>
+<tr>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>5</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; width: 200px;">
+<img alt="SKU Image" width="200" height="100" style="width: 200px; height: 100px;" src="https://linkprotect.cudasvc.com/url?a=https%3a%2f%2fcvogo.com%2fapi%2fsku_image%2fthumbnail%3fpart_number%3dADMT60BLA5317&amp;c=E,1,qshJYPoD9ifNWRiMTgA3CtUBBXHjlrnRl5lPHVIiMz9-1QRmZNtdSLX0jZfVEf-RCxvpXN1jmbZRwymF4YOWIPZGkgfuj-xBuK9xZPN8uKzoTjcTv0mnJTNQ&amp;typo=1"></td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>ADMT60BLA5317</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>MT60</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>ADV MT60 BLACK MATTE 53/17/145</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>1</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>67.99</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+</td>
+</tr>
+<tr>
+<td colspan="5" style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>Total</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>5</div>
+</td>
+<td style="border-width: 1px; border-style: solid; border-color: black; padding: 0.5%;">
+<div>339.95</div>
+</td>
+</tr>
+</tbody>
+</table>
+<p><b>Payment terms:</b>&nbsp;Default<br>
+<b>Ship method:</b>&nbsp;Default</p>
+<p>If you have any questions about your order, please don't hesitate to contact us at 1-800-645-3733. If this order contains a return please send to:</p>
+<p>ClearVision Optical Company<br>
+Attn: Customer Returns<br>
+425 Rabro Drive, Suite 2<br>
+Hauppauge NY, 11788</p>
+<p>Kind regards,<br>
+Preston Samuelson<br>
+ClearVision Optical</p>
+</div>
+</body>
+</html>

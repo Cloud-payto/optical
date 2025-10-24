@@ -1,0 +1,679 @@
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="facebook-domain-verification" content="k4hjwz5iqkq9pfgpaw8c460z880o9f" />
+    <title>R1030 - I-Deal Optics</title>
+    <!-- Fonts -->
+    <!-- Bootstrap Core CSS -->
+    <link href="/Content/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Customizable CSS -->
+    <!-- Icons/Glyphs -->
+    <link href="/fonts/fontello.css" rel="stylesheet">
+    
+    <link href="/Content/main.css" rel="stylesheet">
+    <link href="/Content/owl.carousel.css" rel="stylesheet">
+    <link href="/Content/owl.transitions.css" rel="stylesheet">
+    <link href="/Content/animate.min.css" rel="stylesheet">
+    <link href="/Content/autocompletestyles.css" rel="stylesheet" />
+    <!-- AZ css file -->
+    <link href="/Content/Site.css" rel="stylesheet">
+    <!-- CUSTOM css file -->
+    <link href="/Content/custom.css" rel="stylesheet">
+    <link href="/Content/font-awesome.min.css" rel="stylesheet">
+
+    <!-- CUSTOM FONTS -->
+    
+    
+
+    <!-- Google Tag Manager -->
+    <script>
+        (function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-NH25WZL');</script>
+    <!-- End Google Tag Manager —>
+
+    
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-109081369-1"></script>
+
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'UA-109081369-1');
+        gtag('config', 'AW-441229050');
+    </script>
+
+    
+
+    
+    <!--2 scripts below are for facebook pixel tracking. Commented out in stage-->
+    <script type="text/javascript" id="RegularPixel">
+        //Facebook Pixel Code
+        function FacebookPixelRegular() {
+            !function (f, b, e, v, n, t, s) {
+                if (f.fbq) return; n = f.fbq = function () {
+                    n.callMethod ?
+                        n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+                };
+                if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+                n.queue = []; t = b.createElement(e); t.async = !0;
+                t.src = v; s = b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t, s);
+            }(window, document, 'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '623597924824506');
+            fbq('track', 'PageView');
+            fbq('track', 'ViewContent');
+        }
+    </script>
+    <noscript>
+        <img height="1" width="1" src="https://www.facebook.com/tr?id=623597924824506&ev=PageView&noscript=1" />
+    </noscript>
+
+    
+
+    
+    <script type="text/javascript" id="PurchasePixel">
+        function FacebookPixelPurchase() {
+            !function (f, b, e, v, n, t, s) {
+                if (f.fbq) return; n = f.fbq = function () {
+                    n.callMethod ?
+                        n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+                };
+                if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+                n.queue = []; t = b.createElement(e); t.async = !0;
+                t.src = v; s = b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t, s);
+            }(window, document, 'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '623597924824506');
+            fbq('track', 'PageView');
+            fbq('track', 'ViewContent');
+            fbq('track', 'Purchase', { value: 0.00, currency: 'USD' });
+        }
+    </script>
+    <noscript>
+        <img height="1" width="1" src="https://www.facebook.com/tr?id=623597924824506&ev=PageView&noscript=1" />
+    </noscript>
+
+    
+
+    <!-- Facebook Pixel Code -->
+    <script>
+        if (document.location.href.indexOf('/ShoppingCart/OrderConfirmation') > -1) {
+            FacebookPixelPurchase();
+            //$("#RegularPixel").remove();
+        }
+        else {
+            FacebookPixelRegular();
+            //$("#PurchasePixel").remove();
+        }
+    </script>
+    <!-- End Facebook Pixel Code -->
+</head>
+<body onunload="">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NH25WZL"
+                height="0" width="0" style="display:none;visibility:hidden"></iframe>
+    </noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    
+
+
+<header>
+    <div class="navbar">
+        <div class="navbar-header">
+            <div class="top-header">
+                <div class="container-fluid visible-xs visible-sm">
+                    <section id="headerpromotion">
+                        
+
+
+
+<div class="marquee">
+    
+
+    
+</div>
+
+
+
+                    </section>
+                </div>
+                <div class="container hidden-xs hidden-sm">
+                    <div class="row">
+                        
+                        <div class="col-md-8">
+                            <section id="headerpromotion">
+                                
+
+
+
+<div class="marquee">
+    
+
+    
+</div>
+
+
+
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container">
+                <!-- /.social -->
+                <!-- ============================================================= LOGO MOBILE ============================================================= -->
+
+                <a class="navbar-brand" href="/"><img src="/images/I-deal-logo.jpg" class="logo" alt=""></a>
+
+                <!-- ============================================================= LOGO MOBILE : END ============================================================= -->
+
+                <a class="btn responsive-menu pull-right" data-toggle="collapse" data-target=".navbar-collapse"><i class='icon-menu-1'></i></a>
+            </div><!-- /.container -->
+        </div><!-- /.navbar-header -->
+
+
+
+
+<div class="yamm">
+    <div class="navbar-collapse collapse">
+        <div class="container">
+
+            <!-- ============================================================= LOGO ============================================================= -->
+
+            <a class="navbar-brand" href="/"><img src="/images/I-deal-logo.jpg" class="logo" alt=""></a>
+
+            <!-- ============================================================= LOGO : END ============================================================= -->
+            <!-- ============================================================= MAIN NAVIGATION ============================================================= -->
+
+            <ul class="nav navbar-nav">
+
+                
+
+
+
+
+
+<li class="dropdown nav-item">
+    <a href="/Home/Collections" class="dropdown-toggle js-activated disabled">Collections</a>
+    <ul class="dropdown-menu">
+                <li>
+                    <a href="/catalog/casino">Casino</a>
+                </li><!-- /.dropdown-submenu -->
+                <li>
+                    <a href="/catalog/elegante">Elegante</a>
+                </li><!-- /.dropdown-submenu -->
+                <li>
+                    <a href="/catalog/elevate">Elevate</a>
+                </li><!-- /.dropdown-submenu -->
+                <li>
+                    <a href="/catalog/focus-eyewear">Focus Eyewear</a>
+                </li><!-- /.dropdown-submenu -->
+                <li>
+                    <a href="/catalog/haggar">Haggar</a>
+                </li><!-- /.dropdown-submenu -->
+                <li>
+                    <a href="/catalog/jbx">JBx</a>
+                </li><!-- /.dropdown-submenu -->
+                <li>
+                    <a href="/catalog/jelly-bean">Jelly Bean</a>
+                </li><!-- /.dropdown-submenu -->
+                <li>
+                    <a href="/catalog/rafaella">Rafaella</a>
+                </li><!-- /.dropdown-submenu -->
+                <li>
+                    <a href="/catalog/reflections">Reflections</a>
+                </li><!-- /.dropdown-submenu -->
+                <li>
+                    <a href="/catalog/rio-ray">Rio Ray</a>
+                </li><!-- /.dropdown-submenu -->
+                <li>
+                    <a href="/catalog/suntrends">SunTrends</a>
+                </li><!-- /.dropdown-submenu -->
+                <li>
+                    <a href="/catalog/clearance">Clearance</a>
+                </li><!-- /.dropdown-submenu -->
+            <li><a href='/Pdfs/i-dealoptics_web_catalog_04252025.pdf' target="_blank">DOWNLOAD CATALOG</a></li>
+    </ul><!-- /.dropdown-menu -->
+</li><!-- /.dropdown -->
+
+
+
+
+
+
+
+
+                <li class="dropdown nav-item">
+                    <a href="#" onclick="window.open('/home/AboutUs','_self')" target="_self" class="dropdown-toggle js-activated">About Us</a>
+
+                    <ul class="dropdown-menu">
+                        <li><a href="/About">OUR STORY</a></li>
+                        
+                        
+                        
+                        <li><a href="/Home/Contact">Contact</a></li>
+                        <li><a href="/ShowSchedule">Show Schedule</a></li>
+                        <li><a href="/ContactSales">Contact Sales</a></li>
+                        <li><a href="/OpticalPartners">Optical Partners</a></li>
+                        <li><a href="/Careers">Careers</a></li> 
+                        
+                    </ul><!-- /.dropdown-menu -->
+                </li><!-- /.dropdown -->
+                
+
+                <li class="nav-item">
+                    
+
+    <a href="\Account\Login">
+        Log In
+    </a>
+
+                </li>
+                
+                <li class="search-bar">
+                    <form id="search" class="navbar-form search" role="search">
+                        <input type="search" class="form-control" id="txtQuickSearch" placeholder="Quick Frame Search">
+                        <i class="icon-search"></i>
+                    </form>
+                    
+                    
+                    <div id="searchSuggestions"></div>
+                </li>
+            </ul><!-- /.nav -->
+            <!-- ============================================================= MAIN NAVIGATION : END ============================================================= -->
+        </div><!-- /.container -->
+    </div><!-- /.navbar-collapse -->
+</div><!-- /.yamm -->    </div><!-- /.navbar -->
+</header>
+    <main>
+        
+
+
+
+
+<style>
+    /* prevent the span text from wrapping and show ellipsis when too long */
+    #styleDescriptions .desc-column .text-small,
+    #styleDescriptions .desc-column .text-small span {
+        min-width: 0; /* helps overflow work inside flex/cols */
+    }
+
+        #styleDescriptions .desc-column .text-small span {
+            display: inline-block; /* allow width/overflow control */
+            white-space: nowrap; /* prevent wrapping inside span */
+            overflow: hidden;
+            text-overflow: ellipsis; /* show ... for clipped text */
+            vertical-align: middle;
+            max-width: 100%;
+        }
+</style>
+
+<section id="portfolio-post">
+    <div class="container-fluid inner">
+        <div class="row" id="stylePartial">
+            <div class="col-md-6">
+                <div id="frameDetailOwlCarousel" class="owl-carousel owl-inner-pagination owl-inner-nav owl-ui-md">
+                            <div class="item">
+                                <figure>
+                                    <img src="/Image/ShowImage?w=770&amp;sku=R1030EBY53&amp;upc=842691109583" alt="" data-upc="842691109583">
+                                </figure>
+                            </div><!-- /.item -->
+                            <div class="item">
+                                <figure>
+                                    <img src="/Image/ShowImage?w=770&amp;sku=R1030TAN53&amp;upc=842691109590" alt="" data-upc="842691109590">
+                                </figure>
+                            </div><!-- /.item -->
+                            <div class="item">
+                                <figure>
+                                    <img src="/Image/ShowImage?w=770&amp;sku=R1030WNE53&amp;upc=842691109606" alt="" data-upc="842691109606">
+                                </figure>
+                            </div><!-- /.item -->
+
+                </div><!-- /.owl-carousel -->
+            </div><!-- /.col -->
+
+            <div class="main-col col-md-5 inner-left-sm">
+                <header>
+                    <div class="smallspace visible-xs visible-sm"></div>
+
+                    <h2 class="text-uppercase">R1030</h2>
+                        <p style="color:red;" class="text-small">Clearance</p>
+
+                    <div class="style-detail">
+                        <p class="text-small text-border-bottom">
+                            <span><img src="/Images/EyeIcon.jpg" alt="" /></span>
+                            <span><img src="/Images/BridgeIcon.jpg" alt="" /></span>
+                            <span><img src="/Images/TempleIcon.jpg" alt="" /></span>
+                            <span><b>A</b></span>
+                            <span><b>B</b></span>
+                            <span><b>ED</b></span>
+                        </p>
+                            <p class="text-small">
+                                <span>53</span>
+                                <span>16</span>
+                                <span>140</span>
+                                <span>53</span>
+                                <span>41</span>
+                                <span>60</span>
+                            </p>
+                    </div>
+
+                    <p class="text-small text-uppercase top-margin">
+                        
+                            <a data-value="0" class="goTo">Ebony</a>
+                                |
+                            <a data-value="1" class="goTo">Tan</a>
+                                |
+                            <a data-value="2" class="goTo">Wine</a>
+                    </p>
+
+                    <div class="row" id="styleDescriptions">
+                        <div class="col-xs-12">
+                            <div class="row">
+                                <!-- Make this full width on xs, and sm -->
+                                <div class="col-xs-12 col-sm-12 desc-column">
+                                            <span class="text-small">Womens</span>
+                                                                                <br /><span class="text-small">Acetate / Stainless</span>
+                                                                                <br /><span class="text-small">Spring Hinge</span>
+                                    <br /><span class="text-small" id="fitTypeValue"></span>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+        
+        
+    </div><!-- /.container -->
+</section>
+
+<section id="more-works">
+    <div class="inner-bottom container-fluid">
+        <div class="row">
+            <div class="row">
+                <div class="col-sm-12 text-center">
+                    <div id="accordion" class="panel-group blank">
+                        <div class="panel panel-default">
+                            <div class="text-center control-navigation">
+                                <h4 style="color: #000 !important; background-color: black; border-radius: 3px; ">
+                                        <a class="a-previous-image btn btn-default btn-prev" data-target="styleConfiguration" data-sort="" data-collection="Clearance"
+                                           data-subcollection="Clearance" data-type="frame" data-gender="WOMENS" data-style="r1029"
+                                           data-color="" data-eyesize="53-16-140"
+                                           href='../clearance/r1029'>
+                                            
+                                            PREVIOUS
+                                        </a>
+                                    <a href="https://www.i-dealoptics.com/catalog/clearance" class="btn btn-default">
+                                        <span>Return To Collection</span>
+                                    </a>
+                                        <a class="a-next-image btn btn-default btn-next" data-target="styleConfiguration" data-sort=""
+                                           data-collection="Clearance" data-subcollection="Clearance" data-type="frame"
+                                           data-gender="WOMENS" data-style="r1032" data-color="" data-eyesize="53-16-140"
+                                           href='../clearance/r1032'>
+                                            
+                                            NEXT
+                                        </a>
+                                </h4>
+                            </div><!-- /.panel-heading -->
+                        </div><!-- /.panel -->
+                    </div><!-- /.accordion -->
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+            <!-- Base style return bar -->
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            <!-- /.panel-heading -->
+            <!-- /.panel -->
+            <!-- /.accordion -->
+            <!-- /.col -->
+            <!-- /.row -->
+        </div>
+    </div><!-- /.container -->
+</section>
+
+    </main>
+
+    
+
+<footer class="dark-bg">
+    <div class="footer-bottom">
+        <div class="container inner">
+            <div class="clearfix">
+                <div class="col-xs-12 col-sm-7 col-md-8">
+                    <ul class="footer-menu ">
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/Home/Contact">Contact</a></li>
+                        <li><a href="/Careers">Careers</a></li> 
+                        <li><a href="/PrivacyPolicy">PRIVACY POLICY</a></li>
+                        <li><a href="/TermsAndConditions">Terms &amp; Conditions</a></li>
+                        <li><a href="/CaliforniaProp65">California Prop 65</a></li>
+                    </ul>
+                </div>
+                <div class="col-xs-12 col-sm-5 col-md-4">
+                    <ul class="social list-unstyled list-inline pull-right">
+                        <li><a href=https://www.facebook.com/idealopticsmedia/ target="_blank"><i class="icon-s-facebook"></i></a></li>
+                        <li><a href=https://twitter.com/idealoptics target="_blank"><i class="icon-s-twitter"></i></a></li>
+                        
+                        <li><a href=https://www.instagram.com/idealoptics/ target="_blank"><i class="icon-s-instagram"></i></a></li>
+                    </ul>
+                </div>
+                <div class="col-xs-12 col-sm-7 col-md-8">
+                    <p class="pull-left text-12">&copy; 2025 I-Deal Optics. All rights reserved.</p>
+                </div>
+            </div>
+        </div><!-- .container -->
+    </div><!-- .footer-bottom -->
+</footer>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script type="text/javascript" src="//cdn.jsdelivr.net/jquery.marquee/1.4.0/jquery.marquee.min.js"></script>
+    <script src="/Scripts/jquery.easing.1.3.min.js"></script>
+    <script src="/Scripts/jquery.form.js"></script>
+    <script src="/Scripts/jquery.validate.min.js"></script>
+    <script src="/Scripts/bootstrap.min.js"></script>
+    <script src="/Scripts/bootstrap-hover-dropdown.min.js"></script>
+    <script src="/Scripts/skrollr.min.js"></script>
+    <script src="/Scripts/skrollr.stylesheets.min.js"></script>
+    <script src="/Scripts/waypoints.min.js"></script>
+    <script src="/Scripts/waypoints-sticky.min.js"></script>
+    <script src="/Scripts/owl.carousel.min.js"></script>
+    <script src="/Scripts/jquery.isotope.min.js"></script>
+    <script src="/Scripts/jquery.easytabs.min.js"></script>
+    <script src="/Scripts/jquery.autocomplete.min.js" type="text/javascript"></script>
+    <script src="/Scripts/viewport-units-buggyfill.js"></script>
+    <script src="/Scripts/js.cookie.js"></script>
+    <script src="/Scripts/scripts.js"></script>
+    <script src="/Scripts/Search.js"></script>
+    <script src="/bundles/jquery?v=Xuam6TWPhcGt1QT7p5fexG3T-XZA9hjh88zJ89jkDQQ1"></script>
+
+    <script src="/bundles/jqueryval?v=Rym-NZH-oM5kiKoKDryqFNXxc4pZgv5U4F7tYDdzUdM1"></script>
+
+
+    
+    
+    <script src="/Scripts/Catalog/Frame.js"></script>
+
+    <script>
+    // server-side generated lookup
+    var fitTypeLookup = {};
+            fitTypeLookup['842691109583'] = 'Standard Fit';
+            fitTypeLookup['842691109590'] = 'Standard Fit';
+            fitTypeLookup['842691109606'] = 'Standard Fit';
+
+    function updateFitTypeValue(upc) {
+        var $el = $('#fitTypeValue');
+        if (!upc) {
+            $el.text('');
+            return;
+        }
+        var value = fitTypeLookup[upc];
+        if (value && value.toUpperCase() !== 'UNAVAILABLE') {
+            $el.text(value);
+        } else {
+            $el.text('');
+        }
+    }
+
+    function getActiveUPC() {
+        var $carousel = $('#frameDetailOwlCarousel');
+
+        // Prefer non-cloned active item (best when loop:true and clones exist)
+        var $img = $carousel.find('.owl-item.active:not(.cloned) img').first();
+        if ($img.length && $img.data('upc') !== undefined) return $img.data('upc');
+
+        // Fallback to any active
+        $img = $carousel.find('.owl-item.active img').first();
+        if ($img.length && $img.data('upc') !== undefined) return $img.data('upc');
+
+        // Final fallback to first item image
+        $img = $carousel.find('.item img').first();
+        return $img.length ? $img.data('upc') : null;
+    }
+
+    $(function() {
+        // initial set
+        var lastUPC = null;
+        function refreshIfChanged() {
+            var upc = getActiveUPC();
+          //  if (upc !== lastUPC) {
+                lastUPC = upc;
+                updateFitTypeValue(upc);
+          //  }
+        }
+        refreshIfChanged();
+
+        // MutationObserver to detect class changes on .owl-item (works across Owl versions)
+        var carousel = document.getElementById('frameDetailOwlCarousel');
+        if (carousel && window.MutationObserver) {
+            var items = carousel.querySelectorAll('.owl-item');
+            var obs = new MutationObserver(function(mutations) {
+                // any class change could indicate active item changed; via requestAnimationFrame
+                window.requestAnimationFrame(refreshIfChanged);
+            });
+            items.forEach(function(it) {
+                obs.observe(it, { attributes: true, attributeFilter: ['class'] });
+            });
+
+            // If owl re-initializes and replaces items, we should observe future items too.
+            // Observe the container for childList changes so we can reattach observers to new items:
+            var containerObs = new MutationObserver(function(mutations) {
+                // detach previous observers and attach to new items
+                items = carousel.querySelectorAll('.owl-item');
+                // small delay to allow new nodes to be present
+                setTimeout(function() {
+                    items.forEach(function(it) {
+                        obs.observe(it, { attributes: true, attributeFilter: ['class'] });
+                    });
+                    // immediate refresh
+                    refreshIfChanged();
+                }, 10);
+            });
+            containerObs.observe(carousel, { childList: true, subtree: true });
+        } else {
+            // Fallback: polling every 250ms
+            setInterval(refreshIfChanged, 250);
+        }
+
+        // Handle built-in nav clicks (.owl-next / .owl-prev) - update shortly after click
+        $(document).on('click', '#frameDetailOwlCarousel .owl-next, #frameDetailOwlCarousel .owl-prev', function() {
+            // show an alert whenever owl carousel controls are clicked
+          //  var which = $(this).hasClass('owl-next') ? 'next' : 'prev';
+            //alert('Owl carousel control clicked: ' + which);
+            var upc = $('#frameDetailOwlCarousel .item').eq(idx).find('img').data('upc');
+            updateFitTypeValue(upc);
+            lastUPC = upc;
+
+            //setTimeout(refreshIfChanged, 80); // allow Owl to move active classes
+        });
+
+        // Color links that move carousel
+        $('.goTo').on('click', function(e) {
+            e.preventDefault();
+            var idx = $(this).data('value');
+            var $carousel = $('#frameDetailOwlCarousel');
+
+            if ($carousel.length && typeof $carousel.trigger === 'function') {
+                // trigger v1/v2 compatible 'to' or custom trigger - v1 supports .trigger('owl.jumpTo', idx) or .trigger('to.owl.carousel', [idx])
+                // We'll call both to be safe, and then fallback to a timed refresh.
+                try { $carousel.trigger('to.owl.carousel', [idx, 300]); } catch(e) {}
+                try { $carousel.trigger('owl.jumpTo', idx); } catch(e) {}
+                try { $carousel.trigger('owl.goTo', idx); } catch(e) {}
+                // Safety update in case events don't propagate
+                setTimeout(function() {
+                    var upc = $carousel.find('.item').eq(idx).find('img').data('upc');
+                    updateFitTypeValue(upc);
+                    lastUPC = upc;
+                }, 50);
+            } else {
+                // fallback immediate update
+                var upc = $('#frameDetailOwlCarousel .item').eq(idx).find('img').data('upc');
+                updateFitTypeValue(upc);
+                lastUPC = upc;
+            }
+        });
+
+        // If user clicks image directly
+        $('#frameDetailOwlCarousel').on('click', '.item img', function() {
+            var upc = $(this).data('upc');
+            updateFitTypeValue(upc);
+            lastUPC = upc;
+        });
+
+        // Responsive inline style for desc-column
+        function applyResponsiveDescColumn() {
+            if (window.innerWidth <= 767) {
+                $('#styleDescriptions .desc-column').css('padding-right', '0');
+            } else {
+                $('#styleDescriptions .desc-column').css('padding-right', '');
+            }
+        }
+        applyResponsiveDescColumn();
+        $(window).on('resize', applyResponsiveDescColumn);
+    });
+    </script>
+
+</body>
+
+<script type="text/javascript">_linkedin_partner_id = "2741986"; window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || []; window._linkedin_data_partner_ids.push(_linkedin_partner_id);</script>
+<script type="text/javascript">(function () { var s = document.getElementsByTagName("script")[0]; var b = document.createElement("script"); b.type = "text/javascript"; b.async = true; b.src = "https://snap.licdn.com/li.lms-analytics/insight.min.js"; s.parentNode.insertBefore(b, s); })();</script>
+<noscript> <img height="1" width="1" style="display:none;" alt="" src="https://px.ads.linkedin.com/collect/?pid=2741986&fmt=gif" /> </noscript>
+
+</html>
