@@ -380,7 +380,7 @@ const OrdersPage: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              className="fixed inset-0 bg-gray-500/75 z-50 flex items-center justify-center p-4"
               onClick={() => setShowPreviewModal(false)}
             >
               <motion.div
@@ -388,74 +388,88 @@ const OrdersPage: React.FC = () => {
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.95, opacity: 0 }}
                 onClick={(e) => e.stopPropagation()}
-                className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+                className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
               >
                 {/* Modal Header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-violet-50 to-blue-50">
-                  <div>
-                    <h2 className="text-2xl font-semibold text-gray-900">Order #{selectedOrder.order_number}</h2>
-                    <p className="text-sm text-gray-600 mt-1">{selectedOrder.vendor}</p>
-                  </div>
+                <div className="flex items-center justify-between px-6 py-5 border-b border-gray-200">
+                  <h3 className="text-lg font-medium text-gray-900">Order Details</h3>
                   <button
                     onClick={() => setShowPreviewModal(false)}
-                    className="p-2 hover:bg-white/50 rounded-lg transition-colors"
+                    className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 rounded-md"
                   >
-                    <X className="h-5 w-5 text-gray-500" />
+                    <X className="h-6 w-6" />
                   </button>
                 </div>
 
                 {/* Modal Body */}
-                <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-                  {/* Order Details */}
-                  <div className="grid grid-cols-2 gap-6 mb-6">
-                    <div>
-                      <label className="text-xs font-medium text-gray-500 uppercase">Customer</label>
-                      <p className="text-sm text-gray-900 mt-1">{selectedOrder.customer_name || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-gray-500 uppercase">Account Number</label>
-                      <p className="text-sm text-gray-900 mt-1">{selectedOrder.account_number || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-gray-500 uppercase">Order Date</label>
-                      <p className="text-sm text-gray-900 mt-1">{formatDate(selectedOrder.order_date)}</p>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-gray-500 uppercase">Status</label>
-                      <div className="mt-1">{getStatusBadge(selectedOrder.status)}</div>
-                    </div>
-                    {selectedOrder.rep_name && (
+                <div className="px-6 py-4 overflow-y-auto max-h-[calc(90vh-180px)]">
+                  {/* Order Summary Section */}
+                  <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                    <h4 className="text-sm font-medium text-gray-900 mb-3">Order Summary</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div>
-                        <label className="text-xs font-medium text-gray-500 uppercase">Sales Rep</label>
-                        <p className="text-sm text-gray-900 mt-1">{selectedOrder.rep_name}</p>
+                        <span className="text-gray-500">Order Number:</span>
+                        <span className="ml-2 text-gray-900 font-medium">{selectedOrder.order_number}</span>
                       </div>
-                    )}
+                      <div>
+                        <span className="text-gray-500">Vendor:</span>
+                        <span className="ml-2 text-gray-900">{selectedOrder.vendor}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Customer:</span>
+                        <span className="ml-2 text-gray-900">{selectedOrder.customer_name || 'N/A'}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Account:</span>
+                        <span className="ml-2 text-gray-900">{selectedOrder.account_number || 'N/A'}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Total Items:</span>
+                        <span className="ml-2 text-gray-900">{selectedOrder.items.length}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Total Pieces:</span>
+                        <span className="ml-2 text-gray-900">{selectedOrder.items.reduce((sum, item) => sum + (item.quantity || 0), 0)}</span>
+                      </div>
+                      {selectedOrder.order_date && (
+                        <div>
+                          <span className="text-gray-500">Order Date:</span>
+                          <span className="ml-2 text-gray-900">{formatDate(selectedOrder.order_date)}</span>
+                        </div>
+                      )}
+                      {selectedOrder.rep_name && (
+                        <div>
+                          <span className="text-gray-500">Sales Rep:</span>
+                          <span className="ml-2 text-gray-900">{selectedOrder.rep_name}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Items Table */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Items</h3>
-                    <div className="border border-gray-200 rounded-lg overflow-hidden">
-                      <table className="w-full">
-                        <thead className="bg-gray-50">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-medium text-gray-900 mb-3">Order Items</h4>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-100">
                           <tr>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">UPC</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Brand</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Model</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Color</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Size</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">UPC</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Brand</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Model</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Color</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-200">
+                        <tbody className="bg-white divide-y divide-gray-200">
                           {selectedOrder.items.map((item, index) => (
-                            <tr key={index} className="hover:bg-gray-50">
-                              <td className="px-4 py-3 text-sm text-gray-900 font-mono">{item.sku}</td>
-                              <td className="px-4 py-3 text-sm text-gray-900">{item.brand}</td>
-                              <td className="px-4 py-3 text-sm text-gray-900">{item.model}</td>
-                              <td className="px-4 py-3 text-sm text-gray-900">{item.color}</td>
-                              <td className="px-4 py-3 text-sm text-gray-900">{item.size}</td>
-                              <td className="px-4 py-3 text-sm text-gray-900">{item.quantity}</td>
+                            <tr key={index}>
+                              <td className="px-4 py-2 text-sm text-gray-900">{item.sku || 'N/A'}</td>
+                              <td className="px-4 py-2 text-sm text-gray-900">{item.brand}</td>
+                              <td className="px-4 py-2 text-sm text-gray-900">{item.model}</td>
+                              <td className="px-4 py-2 text-sm text-gray-900">{item.color}</td>
+                              <td className="px-4 py-2 text-sm text-gray-900">{item.size}</td>
+                              <td className="px-4 py-2 text-sm text-gray-900">{item.quantity}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -465,40 +479,32 @@ const OrdersPage: React.FC = () => {
                 </div>
 
                 {/* Modal Footer */}
-                <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
-                  <div className="text-sm text-gray-600">
-                    Total Items: <span className="font-semibold text-gray-900">{selectedOrder.total_items}</span>
-                  </div>
-                  <div className="flex gap-3">
-                    {selectedOrder.status?.toLowerCase() === 'pending' && (
-                      <button
-                        onClick={() => {
-                          handleConfirmOrder(selectedOrder);
-                          setShowPreviewModal(false);
-                        }}
-                        disabled={confirmingOrders.has(selectedOrder.id)}
-                        className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                      >
-                        {confirmingOrders.has(selectedOrder.id) ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                            Confirming...
-                          </>
-                        ) : (
-                          <>
-                            <CheckCircle className="h-4 w-4" />
-                            Confirm Order
-                          </>
-                        )}
-                      </button>
-                    )}
+                <div className="bg-gray-50 px-6 py-3 border-t border-gray-200 flex justify-end">
+                  {selectedOrder.status?.toLowerCase() === 'pending' && (
                     <button
-                      onClick={() => setShowPreviewModal(false)}
-                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                      onClick={() => {
+                        handleConfirmOrder(selectedOrder);
+                        setShowPreviewModal(false);
+                      }}
+                      disabled={confirmingOrders.has(selectedOrder.id)}
+                      className="mr-3 inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Close
+                      {confirmingOrders.has(selectedOrder.id) ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Confirming...
+                        </>
+                      ) : (
+                        'Confirm Order'
+                      )}
                     </button>
-                  </div>
+                  )}
+                  <button
+                    onClick={() => setShowPreviewModal(false)}
+                    className="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm"
+                  >
+                    Close
+                  </button>
                 </div>
               </motion.div>
             </motion.div>
