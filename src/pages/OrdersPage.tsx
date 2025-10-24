@@ -142,23 +142,41 @@ const OrdersPage: React.FC = () => {
 
   // Handle preview order
   const handlePreviewOrder = (order: OrderData) => {
-    console.log('Preview clicked for order:', order.order_number);
-    console.log('Looking for email_id:', order.email_id);
-    console.log('Available emails:', emails.map(e => ({ id: e.id, subject: e.subject })));
+    // For confirmed/archived orders, we need to construct a fake EmailData from the order
+    // since they don't have email_id or the original email might be deleted
+    const fakeEmailFromOrder: EmailData = {
+      id: order.id.toString(),
+      from_email: order.vendor + ' Orders',
+      to_email: user?.email || '',
+      subject: `Order #${order.order_number}`,
+      attachments_count: 0,
+      spam_score: 0,
+      received_at: order.confirmed_at || order.order_date || new Date().toISOString(),
+      spam_status: 'parsed',
+      parse_status: 'parsed',
+      parsed_data: {
+        vendor: order.vendor,
+        account_number: order.account_number || '',
+        order: {
+          order_number: order.order_number,
+          customer_name: order.customer_name || '',
+          total_pieces: order.total_items,
+          order_date: order.order_date,
+          rep_name: order.rep_name
+        },
+        items: order.items.map(item => ({
+          upc: item.sku, // Use SKU as UPC for confirmed orders
+          brand: item.brand,
+          model: item.model,
+          color: item.color,
+          size: item.size,
+          quantity: item.quantity
+        }))
+      }
+    };
 
-    // Find the corresponding email using email_id
-    // email_id in order is a number, but email.id is a string (UUID)
-    const email = emails.find(e => parseInt(e.id) === order.email_id || e.id === order.email_id.toString());
-
-    console.log('Found email:', email);
-
-    if (email) {
-      setSelectedEmailDetails(email);
-      setShowPreviewModal(true);
-    } else {
-      console.error('Could not find email for order', order);
-      toast.error('Could not find order details');
-    }
+    setSelectedEmailDetails(fakeEmailFromOrder);
+    setShowPreviewModal(true);
   };
 
   // Get status badge
