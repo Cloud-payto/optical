@@ -185,6 +185,10 @@ export function InventoryPage() {
         items={filteredInventory}
         isLoading={isLoading}
         onAddToReturnReport={handleAddToReturnReport}
+        onArchive={(itemId) => archiveItem.mutate(itemId)}
+        onRestore={(itemId) => restoreItem.mutate(itemId)}
+        onDelete={(itemId) => deleteItem.mutate(itemId)}
+        onMarkAsSold={(itemId) => markAsSold.mutate(itemId)}
       />
     </div>
   );

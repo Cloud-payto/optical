@@ -189,14 +189,14 @@ export async function confirmPendingOrder(orderNumber: string, userId?: string):
   });
 }
 
-export async function archiveInventoryItem(itemId: number, userId?: string): Promise<{ success: boolean; message: string; item: InventoryItem }> {
+export async function archiveInventoryItem(itemId: string, userId?: string): Promise<{ success: boolean; message: string; item: InventoryItem }> {
   const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<{ success: boolean; message: string; item: InventoryItem }>(`/inventory/${currentUserId}/${itemId}/archive`, {
     method: 'PUT',
   });
 }
 
-export async function restoreInventoryItem(itemId: number, userId?: string): Promise<{ success: boolean; message: string; item: InventoryItem }> {
+export async function restoreInventoryItem(itemId: string, userId?: string): Promise<{ success: boolean; message: string; item: InventoryItem }> {
   const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<{ success: boolean; message: string; item: InventoryItem }>(`/inventory/${currentUserId}/${itemId}/restore`, {
     method: 'PUT',
@@ -285,7 +285,7 @@ export async function deleteArchivedItemsByVendor(vendorName: string, userId?: s
   });
 }
 
-export async function markItemAsSold(itemId: number, userId?: string): Promise<{ success: boolean; message: string; item: InventoryItem }> {
+export async function markItemAsSold(itemId: string, userId?: string): Promise<{ success: boolean; message: string; item: InventoryItem }> {
   const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<{ success: boolean; message: string; item: InventoryItem }>(`/inventory/${currentUserId}/${itemId}/sold`, {
     method: 'PUT',

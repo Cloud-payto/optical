@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Archive, Trash2, RotateCcw, DollarSign } from 'lucide-react';
 import type { InventoryItem } from '../types/inventory.types';
 import {
   calculateReturnWindow,
@@ -11,12 +11,20 @@ import {
 interface ModernInventoryTableProps {
   items: InventoryItem[];
   onAddToReturnReport?: (item: InventoryItem) => void;
+  onArchive?: (itemId: string) => void;
+  onRestore?: (itemId: string) => void;
+  onDelete?: (itemId: string) => void;
+  onMarkAsSold?: (itemId: string) => void;
   isLoading?: boolean;
 }
 
 export function ModernInventoryTable({
   items,
   onAddToReturnReport,
+  onArchive,
+  onRestore,
+  onDelete,
+  onMarkAsSold,
   isLoading = false
 }: ModernInventoryTableProps) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
@@ -271,17 +279,68 @@ export function ModernInventoryTable({
                       </div>
 
                       {/* Actions */}
-                      {onAddToReturnReport && returnWindow && returnWindow.status !== 'expired' && (
-                        <div className="pt-4">
-                          <button
-                            onClick={() => onAddToReturnReport(item)}
-                            className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm hover:shadow"
-                          >
-                            <span>🔄</span>
-                            <span>Add to Return Report</span>
-                          </button>
+                      <div className="pt-4 border-t border-gray-200">
+                        <div className="flex items-center gap-3 mt-4">
+                          {/* Return Report Button (for current items with valid return window) */}
+                          {onAddToReturnReport && returnWindow && returnWindow.status !== 'expired' && item.status === 'current' && (
+                            <button
+                              onClick={() => onAddToReturnReport(item)}
+                              className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm hover:shadow"
+                            >
+                              <span>🔄</span>
+                              <span>Add to Return Report</span>
+                            </button>
+                          )}
+
+                          {/* Archive Button (for current items) */}
+                          {onArchive && item.status === 'current' && (
+                            <button
+                              onClick={() => onArchive(item.id)}
+                              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm font-medium transition-colors"
+                            >
+                              <Archive className="w-4 h-4" />
+                              <span>Archive</span>
+                            </button>
+                          )}
+
+                          {/* Restore Button (for archived items) */}
+                          {onRestore && item.status === 'archived' && (
+                            <button
+                              onClick={() => onRestore(item.id)}
+                              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                            >
+                              <RotateCcw className="w-4 h-4" />
+                              <span>Restore</span>
+                            </button>
+                          )}
+
+                          {/* Mark as Sold Button (for current items) */}
+                          {onMarkAsSold && item.status === 'current' && (
+                            <button
+                              onClick={() => onMarkAsSold(item.id)}
+                              className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors"
+                            >
+                              <DollarSign className="w-4 h-4" />
+                              <span>Mark as Sold</span>
+                            </button>
+                          )}
+
+                          {/* Delete Button (always available) */}
+                          {onDelete && (
+                            <button
+                              onClick={() => {
+                                if (window.confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
+                                  onDelete(item.id);
+                                }
+                              }}
+                              className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors ml-auto"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              <span>Delete</span>
+                            </button>
+                          )}
                         </div>
-                      )}
+                      </div>
                     </div>
                   </div>
                 </div>

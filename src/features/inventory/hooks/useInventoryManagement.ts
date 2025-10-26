@@ -19,7 +19,7 @@ export function useInventoryManagement() {
   const queryClient = useQueryClient();
 
   const archiveItem = useMutation({
-    mutationFn: (itemId: number) => archiveInventoryItem(itemId),
+    mutationFn: (itemId: string) => archiveInventoryItem(itemId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
       toast.success('Item archived successfully');
@@ -30,7 +30,7 @@ export function useInventoryManagement() {
   });
 
   const restoreItem = useMutation({
-    mutationFn: (itemId: number) => restoreInventoryItem(itemId),
+    mutationFn: (itemId: string) => restoreInventoryItem(itemId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
       toast.success('Item restored to current inventory');
@@ -52,7 +52,7 @@ export function useInventoryManagement() {
   });
 
   const markAsSold = useMutation({
-    mutationFn: (itemId: number) => markItemAsSold(itemId),
+    mutationFn: (itemId: string) => markItemAsSold(itemId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
       toast.success('Item marked as sold');
