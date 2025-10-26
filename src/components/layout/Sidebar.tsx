@@ -16,7 +16,9 @@ import {
   Warehouse,
   ShoppingCart,
   Glasses,
-  Eye
+  Eye,
+  FileText,
+  RotateCcw
 } from 'lucide-react';
 
 // Modern nested navigation structure
@@ -39,6 +41,17 @@ const navigationConfig = [
     children: [
       { name: 'Inventory', to: '/lenses/inventory', icon: Warehouse },
       { name: 'Orders', to: '/lenses/orders', icon: ShoppingCart },
+    ]
+  },
+  {
+    name: 'Reports',
+    icon: FileText,
+    children: [
+      { name: 'Pending', to: '/reports/pending', icon: FileText },
+      { name: 'Current Inventory', to: '/reports/current-inventory', icon: Warehouse },
+      { name: 'Sold', to: '/reports/sold', icon: ShoppingCart },
+      { name: 'Archived', to: '/reports/archived', icon: Package },
+      { name: 'Returns', to: '/reports/returns', icon: RotateCcw },
     ]
   },
   {

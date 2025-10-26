@@ -8,10 +8,18 @@ import { useInventoryByStatus } from './hooks/useInventory';
 import { useInventoryManagement } from './hooks/useInventoryManagement';
 import { InventoryFilters } from './components/InventoryFilters';
 import { ModernInventoryTable } from './components/ModernInventoryTable';
+import { ReturnReportModal } from './components/ReturnReportModal';
 import { ForwardingEmailDisplay } from '../../components/ForwardingEmailDisplay';
 import { useAuth } from '../../contexts/AuthContext';
 import type { InventoryFilters as FilterState, InventoryItem } from './types/inventory.types';
 import { calculateReturnWindow } from './utils/returnWindow';
+import {
+  generateReturnReportPDF,
+  generateReportNumber,
+  formatReportDate,
+  generateReportFilename,
+  downloadPDF
+} from './utils/generateReturnReportPDF';
 
 export function InventoryPage() {
   const { user } = useAuth();
@@ -21,6 +29,7 @@ export function InventoryPage() {
     sortBy: 'newest'
   });
   const [returnReportItems, setReturnReportItems] = useState<InventoryItem[]>([]);
+  const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
 
   // Fetch data based on active tab
   const { data: rawInventory, isLoading, error } = useInventoryByStatus(activeTab);
@@ -106,8 +115,42 @@ export function InventoryPage() {
   };
 
   const handleOpenReturnReport = () => {
-    // TODO: Open Return Report Modal
-    console.log('Open Return Report Modal with items:', returnReportItems);
+    setIsReturnModalOpen(true);
+  };
+
+  const handleGenerateReport = async (vendorName: string, items: InventoryItem[]) => {
+    try {
+      const reportNumber = generateReportNumber();
+      const reportDate = formatReportDate();
+      const contactEmail = user?.email || 'contact@optiprofit.com';
+
+      // Generate PDF
+      const pdfBlob = await generateReturnReportPDF(items, {
+        reportNumber,
+        date: reportDate,
+        vendorName,
+        contactEmail,
+        accountNumber: user?.id?.toString() // Optional account number
+      });
+
+      // Download PDF
+      const filename = generateReportFilename(vendorName, reportNumber);
+      downloadPDF(pdfBlob, filename);
+
+      // TODO: Save report metadata to database for Returns page
+      console.log('Generated report:', {
+        reportNumber,
+        vendorName,
+        filename,
+        itemCount: items.length
+      });
+
+      // Show success message (you can add a toast notification here)
+      alert(`Return report generated successfully!\n\nReport: ${reportNumber}\nVendor: ${vendorName}\nItems: ${items.length}`);
+    } catch (error) {
+      console.error('Error generating return report:', error);
+      alert('Failed to generate return report. Please try again.');
+    }
   };
 
   const tabs = [
@@ -189,6 +232,14 @@ export function InventoryPage() {
         onRestore={(itemId) => restoreItem.mutate(itemId)}
         onDelete={(itemId) => deleteItem.mutate(itemId)}
         onMarkAsSold={(itemId) => markAsSold.mutate(itemId)}
+      />
+
+      {/* Return Report Modal */}
+      <ReturnReportModal
+        isOpen={isReturnModalOpen}
+        onClose={() => setIsReturnModalOpen(false)}
+        items={returnReportItems}
+        onGenerateReport={handleGenerateReport}
       />
     </div>
   );
