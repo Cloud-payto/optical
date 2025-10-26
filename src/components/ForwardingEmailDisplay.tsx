@@ -13,8 +13,11 @@ interface ForwardingEmailDisplayProps {
 export function ForwardingEmailDisplay({ accountId }: ForwardingEmailDisplayProps) {
   const [copied, setCopied] = useState(false);
 
-  // CloudMailin forwarding email format: something+UUID@cloudmailin.net
-  const forwardingEmail = `orders+${accountId}@cloudmailin.net`;
+  // CloudMailin forwarding email format: real-address+UUID@cloudmailin.net
+  const forwardingEmail = `a48947dbd077295c13ea+${accountId}@cloudmailin.net`;
+
+  // Hidden version for display (shows dots)
+  const displayEmail = '••••••••••••••••+' + accountId.substring(0, 8) + '...@cloudmailin.net';
 
   const handleCopy = async () => {
     try {
@@ -35,10 +38,10 @@ export function ForwardingEmailDisplay({ accountId }: ForwardingEmailDisplayProp
           </div>
           <div>
             <div className="text-xs font-medium text-blue-900 mb-1">
-              Forwarding Email Address
+              Forwarding Email Address (Click to Copy)
             </div>
             <div className="font-mono text-sm text-blue-700 font-medium">
-              {forwardingEmail}
+              {displayEmail}
             </div>
           </div>
         </div>
