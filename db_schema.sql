@@ -138,7 +138,7 @@ CREATE TABLE public.inventory (
   full_size character varying,
   temple_length character varying,
   quantity integer DEFAULT 1,
-  status character varying DEFAULT 'pending'::character varying CHECK (status::text = ANY (ARRAY['pending'::character varying, 'confirmed'::character varying, 'sold'::character varying, 'archived'::character varying]::text[])),
+  status character varying DEFAULT 'pending'::character varying CHECK (status::text = ANY (ARRAY['pending'::character varying, 'current'::character varying, 'sold'::character varying, 'archived'::character varying]::text[])),
   upc character varying,
   ean character varying,
   material character varying,
