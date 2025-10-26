@@ -30,7 +30,6 @@ const navigationConfig = [
     children: [
       { name: 'Inventory', to: '/frames/inventory', icon: Warehouse },
       { name: 'Orders', to: '/frames/orders', icon: ShoppingCart },
-      { name: 'Vendors', to: '/brands', icon: Package },
     ]
   },
   {
@@ -42,7 +41,14 @@ const navigationConfig = [
       { name: 'Orders', to: '/lenses/orders', icon: ShoppingCart },
     ]
   },
-  { name: 'Vendor Comparison', to: '/vendor-comparison', icon: Scale },
+  {
+    name: 'Vendors',
+    icon: Package,
+    children: [
+      { name: 'My Vendors', to: '/brands', icon: Package },
+      { name: 'Vendor Comparison', to: '/vendor-comparison', icon: Scale },
+    ]
+  },
   { name: 'About', to: '/about', icon: Info },
 ];
 
