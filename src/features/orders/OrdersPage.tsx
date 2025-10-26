@@ -1,24 +1,63 @@
 /**
  * Orders Page - Main composition layer
- * Handles tab navigation and order display
+ * Handles tab navigation, vendor filtering, and order display
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useOrdersByStatus } from './hooks/useOrders';
 import { useOrderManagement } from './hooks/useOrderManagement';
 import { OrdersTable } from './components/OrdersTable';
 import { ForwardingEmailDisplay } from '../../components/ForwardingEmailDisplay';
 import { useAuth } from '../../contexts/AuthContext';
+import { Filter } from 'lucide-react';
 
 export function OrdersPage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'pending' | 'confirmed'>('pending');
+  const [selectedVendor, setSelectedVendor] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<'date' | 'vendor'>('date');
 
   // Fetch data based on active tab
   const { data: orders, isLoading, error } = useOrdersByStatus(activeTab);
 
   // Get mutation functions
   const { confirmOrder, archiveOrder, deleteOrder } = useOrderManagement();
+
+  // Extract unique vendors from orders
+  const vendors = useMemo(() => {
+    if (!orders) return [];
+    const uniqueVendors = new Set(orders.map(order => order.vendor));
+    return Array.from(uniqueVendors).sort();
+  }, [orders]);
+
+  // Filter and sort orders
+  const filteredAndSortedOrders = useMemo(() => {
+    if (!orders) return [];
+
+    // Filter by vendor
+    let filtered = selectedVendor === 'all'
+      ? orders
+      : orders.filter(order => order.vendor === selectedVendor);
+
+    // Sort orders
+    const sorted = [...filtered].sort((a, b) => {
+      if (sortBy === 'vendor') {
+        // Sort by vendor name, then by order date within vendor
+        const vendorCompare = a.vendor.localeCompare(b.vendor);
+        if (vendorCompare !== 0) return vendorCompare;
+
+        // Within same vendor, sort by date (newest first)
+        return new Date(b.order_date || b.confirmed_at).getTime() -
+               new Date(a.order_date || a.confirmed_at).getTime();
+      } else {
+        // Sort by date (newest first)
+        return new Date(b.order_date || b.confirmed_at).getTime() -
+               new Date(a.order_date || a.confirmed_at).getTime();
+      }
+    });
+
+    return sorted;
+  }, [orders, selectedVendor, sortBy]);
 
   const tabs = [
     { key: 'pending' as const, label: 'Pending Orders', count: orders?.length || 0 },
@@ -65,6 +104,53 @@ export function OrdersPage() {
         </nav>
       </div>
 
+      {/* Filters and Sorting */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Filter className="h-5 w-5 text-gray-400" />
+            <span className="text-sm font-medium text-gray-700">Filter & Sort:</span>
+          </div>
+
+          {/* Vendor Filter */}
+          <div className="flex-1">
+            <label htmlFor="vendor-filter" className="sr-only">Filter by Vendor</label>
+            <select
+              id="vendor-filter"
+              value={selectedVendor}
+              onChange={(e) => setSelectedVendor(e.target.value)}
+              className="block w-full max-w-xs rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="all">All Vendors</option>
+              {vendors.map((vendor) => (
+                <option key={vendor} value={vendor}>
+                  {vendor}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Sort By */}
+          <div className="flex items-center gap-2">
+            <label htmlFor="sort-by" className="text-sm text-gray-600">Sort by:</label>
+            <select
+              id="sort-by"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as 'date' | 'vendor')}
+              className="block rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="date">Order Date</option>
+              <option value="vendor">Vendor Name</option>
+            </select>
+          </div>
+
+          {/* Results count */}
+          <div className="text-sm text-gray-500">
+            {filteredAndSortedOrders.length} {filteredAndSortedOrders.length === 1 ? 'order' : 'orders'}
+          </div>
+        </div>
+      </div>
+
       {/* Error State */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -76,7 +162,7 @@ export function OrdersPage() {
 
       {/* Orders Table */}
       <OrdersTable
-        orders={orders || []}
+        orders={filteredAndSortedOrders}
         isLoading={isLoading}
         onConfirm={activeTab === 'pending' ? (orderNumber) => confirmOrder.mutate(orderNumber) : undefined}
         onArchive={activeTab === 'confirmed' ? (orderId) => archiveOrder.mutate(orderId) : undefined}

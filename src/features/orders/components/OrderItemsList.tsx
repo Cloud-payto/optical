@@ -19,6 +19,16 @@ export function OrderItemsList({ items }: OrderItemsListProps) {
     );
   }
 
+  // Sort items by brand, then by model
+  const sortedItems = [...items].sort((a, b) => {
+    // First sort by brand
+    const brandCompare = (a.brand || '').localeCompare(b.brand || '');
+    if (brandCompare !== 0) return brandCompare;
+
+    // Then sort by model within the same brand
+    return (a.model || '').localeCompare(b.model || '');
+  });
+
   // Calculate totals
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalValue = items.reduce((sum, item) => {
@@ -49,7 +59,7 @@ export function OrderItemsList({ items }: OrderItemsListProps) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {items.map((item, index) => {
+            {sortedItems.map((item, index) => {
               const itemSubtotal = (item.wholesale_price || 0) * item.quantity;
 
               return (
