@@ -10,7 +10,7 @@ async function testPDF() {
     console.log('🧪 Testing Safilo PDF Parser\n');
 
     // Find the PDF file
-    const pdfPath = 'C:\\Users\\payto\\OneDrive\\Desktop\\Software\\Opti-Profit\\Your Receipt for order 113106782.pdf';
+    const pdfPath = path.join(__dirname, '../../dev-email-parsers/Safilo/Your Receipt for order 113006337.pdf');
 
     if (!fs.existsSync(pdfPath)) {
         console.error('❌ PDF file not found at:', pdfPath);

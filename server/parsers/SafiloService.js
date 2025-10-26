@@ -396,6 +396,34 @@ class SafiloService {
     }
     
     /**
+     * Map brand prefix to full brand name
+     * Handles common Safilo brand abbreviations
+     */
+    mapBrandPrefix(prefix) {
+        const brandMap = {
+            'CH': 'CHESTERFIELD',
+            'KS': 'KATE SPADE',
+            'KSP': 'KATE SPADE',
+            'MIS': 'MISSONI',
+            'HER': 'HERO',
+            'BOSS': 'HUGO BOSS',
+            'CARDUC': 'CARRERA DUCATI',
+            'CARRERA': 'CARRERA',
+            'VICTORY': 'VICTORY',
+            'CATRINA': 'KATE SPADE',
+            'JOLIET': 'KATE SPADE',
+            'ADRIE': 'KATE SPADE',
+            'CLAUDIE': 'KATE SPADE',
+            'CLIO': 'KATE SPADE',
+            'GAIA': 'KATE SPADE',
+            'HELKA': 'KATE SPADE',
+            'YOLANDA': 'KATE SPADE'
+        };
+
+        return brandMap[prefix] || prefix;
+    }
+
+    /**
      * Parse individual frame line
      */
     parseFrameLine(line, lineNumber) {
@@ -451,7 +479,8 @@ class SafiloService {
             // - 4 digits (1764, 1833, 1850, etc.)
             // - Contains slash (0167/G, 0334/C, etc.)
             // - Single digit (2, 3) as part of model name (TAYA 2, HERMIONE 2)
-            if (part.match(/^0\d+$/) || part.match(/^\d{4}$/) || part.includes('/') || part.match(/^\d$/)) {
+            // - Chesterfield models: 70XL, 83XL, etc (digit + XL suffix)
+            if (part.match(/^0\d+$/) || part.match(/^\d{4}$/) || part.includes('/') || part.match(/^\d$/) || part.match(/^\d{2,3}XL$/)) {
                 continue;
             }
 
@@ -488,8 +517,15 @@ class SafiloService {
             colorName = parts.slice(3).join(' ');
         }
 
-        // Brand will be determined by API, just use first word as placeholder
-        const brand = parts[0];
+        // Remove brand prefix from model FIRST (before mapping)
+        // e.g., "CH 70XL" → "70XL", "KS DAESHA 2" → "DAESHA 2"
+        const brandPrefix = parts[0];
+        if (model.startsWith(brandPrefix + ' ')) {
+            model = model.substring(brandPrefix.length + 1).trim();
+        }
+
+        // Map brand prefix to full brand name
+        const brand = this.mapBrandPrefix(brandPrefix);
 
         // Clean up color name
         colorName = colorName.replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
