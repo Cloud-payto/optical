@@ -8,10 +8,13 @@ import { useInventoryByStatus } from './hooks/useInventory';
 import { useInventoryManagement } from './hooks/useInventoryManagement';
 import { InventoryFilters } from './components/InventoryFilters';
 import { ModernInventoryTable } from './components/ModernInventoryTable';
+import { ForwardingEmailDisplay } from '../../components/ForwardingEmailDisplay';
+import { useAuth } from '../../contexts/AuthContext';
 import type { InventoryFilters as FilterState, InventoryItem } from './types/inventory.types';
 import { calculateReturnWindow } from './utils/returnWindow';
 
 export function InventoryPage() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'pending' | 'current' | 'archived' | 'sold'>('current');
   const [filters, setFilters] = useState<FilterState>({
     status: 'current',
@@ -153,6 +156,9 @@ export function InventoryPage() {
           })}
         </nav>
       </div>
+
+      {/* Forwarding Email */}
+      {user?.id && <ForwardingEmailDisplay accountId={user.id} />}
 
       {/* Filters */}
       <InventoryFilters

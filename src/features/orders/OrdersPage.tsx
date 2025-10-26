@@ -7,8 +7,11 @@ import React, { useState } from 'react';
 import { useOrdersByStatus } from './hooks/useOrders';
 import { useOrderManagement } from './hooks/useOrderManagement';
 import { OrdersTable } from './components/OrdersTable';
+import { ForwardingEmailDisplay } from '../../components/ForwardingEmailDisplay';
+import { useAuth } from '../../contexts/AuthContext';
 
 export function OrdersPage() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'pending' | 'confirmed'>('pending');
 
   // Fetch data based on active tab
@@ -58,6 +61,9 @@ export function OrdersPage() {
           })}
         </nav>
       </div>
+
+      {/* Forwarding Email */}
+      {user?.id && <ForwardingEmailDisplay accountId={user.id} />}
 
       {/* Error State */}
       {error && (
