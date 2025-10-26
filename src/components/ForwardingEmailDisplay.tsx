@@ -8,9 +8,10 @@ import { Mail, Copy, Check } from 'lucide-react';
 
 interface ForwardingEmailDisplayProps {
   accountId: string;
+  compact?: boolean;
 }
 
-export function ForwardingEmailDisplay({ accountId }: ForwardingEmailDisplayProps) {
+export function ForwardingEmailDisplay({ accountId, compact = false }: ForwardingEmailDisplayProps) {
   const [copied, setCopied] = useState(false);
 
   // CloudMailin forwarding email format: real-address+UUID@cloudmailin.net
@@ -28,6 +29,24 @@ export function ForwardingEmailDisplay({ accountId }: ForwardingEmailDisplayProp
       console.error('Failed to copy:', err);
     }
   };
+
+  if (compact) {
+    return (
+      <button
+        onClick={handleCopy}
+        className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs transition-colors group"
+        title="Click to copy forwarding email address"
+      >
+        <Mail className="w-3.5 h-3.5 text-blue-600" />
+        <span className="font-mono text-blue-700">{displayEmail}</span>
+        {copied ? (
+          <Check className="w-3.5 h-3.5 text-green-600" />
+        ) : (
+          <Copy className="w-3.5 h-3.5 text-blue-500 group-hover:text-blue-700" />
+        )}
+      </button>
+    );
+  }
 
   return (
     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">

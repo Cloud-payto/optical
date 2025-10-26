@@ -120,9 +120,12 @@ export function InventoryPage() {
   return (
     <div className="space-y-6 p-6 bg-gray-50 min-h-screen">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Inventory</h1>
-        <p className="text-gray-500 mt-1">Manage your frames inventory</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Inventory</h1>
+          <p className="text-gray-500 mt-1">Manage your frames inventory</p>
+        </div>
+        {user?.id && <ForwardingEmailDisplay accountId={user.id} compact />}
       </div>
 
       {/* Tabs */}
@@ -156,9 +159,6 @@ export function InventoryPage() {
           })}
         </nav>
       </div>
-
-      {/* Forwarding Email */}
-      {user?.id && <ForwardingEmailDisplay accountId={user.id} />}
 
       {/* Filters */}
       <InventoryFilters
