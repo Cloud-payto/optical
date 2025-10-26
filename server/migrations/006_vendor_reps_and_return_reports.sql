@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS public.vendor_reps (
   rep_title varchar(100),
   is_primary boolean DEFAULT false,
   notes text,
-  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,a
   updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
 );
 

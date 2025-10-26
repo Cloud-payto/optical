@@ -17,9 +17,11 @@ export interface InventoryItem {
   temple_length?: string;
   quantity: number;
   vendor?: {
+    id?: string;
     name?: string;
   };
   order?: {
+    id?: string;
     order_number?: string;
     order_date?: string;
     customer_name?: string;
@@ -30,11 +32,16 @@ export interface InventoryItem {
   email_id?: string;
   full_name?: string;
   wholesale_price?: number;
+  discount_percentage?: number;
   upc?: string;
   in_stock?: boolean;
   api_verified?: boolean;
   created_at: string;
   updated_at: string;
+  // Return window fields (calculated on frontend)
+  return_window_expires?: string;
+  return_window_status?: 'good' | 'warning' | 'critical' | 'expired';
+  return_window_display?: string;
 }
 
 export interface InventoryResponse {
@@ -47,6 +54,8 @@ export interface InventoryFilters {
   status?: 'pending' | 'current' | 'archived' | 'sold';
   vendor?: string;
   brand?: string;
+  color?: string;
+  sortBy?: 'newest' | 'oldest' | 'return_window' | 'brand' | 'stock';
   searchTerm?: string;
 }
 
