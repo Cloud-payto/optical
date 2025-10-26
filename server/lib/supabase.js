@@ -136,14 +136,14 @@ async function calculateMedianWholesalePrice(accountId, vendorId, brandName) {
   try {
     console.log(`📊 Calculating median wholesale price for brand "${brandName}" (vendor: ${vendorId}, account: ${accountId})`);
 
-    // Get all confirmed inventory items for this brand
+    // Get all current inventory items for this brand
     const { data: items, error } = await supabase
       .from('inventory')
       .select('wholesale_price')
       .eq('account_id', accountId)
       .eq('vendor_id', vendorId)
       .ilike('brand', brandName)
-      .eq('status', 'confirmed')
+      .eq('status', 'current')
       .not('wholesale_price', 'is', null)
       .gt('wholesale_price', 0);
 
@@ -373,15 +373,15 @@ const inventoryOperations = {
         return { success: false, message: `No pending items found for order ${orderNumber}` };
       }
 
-      // Update each item to confirmed status (enrichment should have already happened in n8n)
-      console.log(`🔄 Updating ${pendingItems.length} items to confirmed status...`);
+      // Update each item to current status (enrichment should have already happened in n8n)
+      console.log(`🔄 Updating ${pendingItems.length} items to current status...`);
       console.log(`📝 Sample item IDs to update:`, pendingItems.slice(0, 3).map(i => i.id));
 
       const updatePromises = pendingItems.map(item =>
         supabase
           .from('inventory')
           .update({
-            status: 'confirmed'
+            status: 'current'
           })
           .eq('id', item.id)
           .select()
@@ -397,7 +397,7 @@ const inventoryOperations = {
 
       const updatedItems = results.map(r => r.data?.[0]).filter(Boolean);
 
-      console.log(`✅ Successfully updated ${updatedItems.length} items to confirmed status`);
+      console.log(`✅ Successfully updated ${updatedItems.length} items to current status`);
 
       if (updatedItems.length === 0 && pendingItems.length > 0) {
         console.error(`⚠️ WARNING: Tried to update ${pendingItems.length} items but 0 were updated!`);
@@ -945,7 +945,7 @@ const statsOperations = {
 
   async getInventoryByVendorAndBrand(userId, options = {}) {
     try {
-      // Fetch ALL confirmed inventory items (no pagination at item level)
+      // Fetch ALL current inventory items (no pagination at item level)
       const { data: inventory, error } = await supabase
         .from('inventory')
         .select(`
@@ -962,7 +962,7 @@ const statsOperations = {
           enriched_data
         `)
         .eq('account_id', userId)
-        .eq('status', 'confirmed')
+        .eq('status', 'current')
         .order('created_at', { ascending: false }); // Basic ordering for consistency
 
       if (error) throw error;
@@ -1658,12 +1658,12 @@ const vendorOperations = {
     try {
       console.log(`🔍 Getting pending vendor/brand imports for user ${userId}...`);
 
-      // Get all confirmed inventory items for this user
+      // Get all current inventory items for this user
       const { data: inventoryItems, error: inventoryError } = await supabase
         .from('inventory')
         .select('vendor_id, brand, vendors(id, name)')
         .eq('account_id', userId)
-        .eq('status', 'confirmed')
+        .eq('status', 'current')
         .not('vendor_id', 'is', null);
 
       if (inventoryError) throw inventoryError;
