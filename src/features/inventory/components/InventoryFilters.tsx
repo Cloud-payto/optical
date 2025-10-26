@@ -41,7 +41,7 @@ export function InventoryFilters({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+    <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
       <div className="flex flex-wrap items-center gap-4">
         {/* Vendor Filter */}
         <div className="relative">
@@ -111,7 +111,7 @@ export function InventoryFilters({
         {onOpenReturnReport && (
           <button
             onClick={onOpenReturnReport}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm hover:shadow flex items-center gap-2"
+            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm hover:shadow flex items-center gap-2"
           >
             <span>🔄 Return Report</span>
             {returnReportCount > 0 && (

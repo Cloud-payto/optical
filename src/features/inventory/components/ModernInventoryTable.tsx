@@ -56,7 +56,7 @@ export function ModernInventoryTable({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+      <div className="bg-white rounded-xl shadow-sm p-12 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
         <p className="mt-4 text-gray-500">Loading inventory...</p>
       </div>
@@ -65,7 +65,7 @@ export function ModernInventoryTable({
 
   if (items.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+      <div className="bg-white rounded-xl shadow-sm p-12 text-center">
         <div className="text-gray-400 text-6xl mb-4">📦</div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">No inventory found</h3>
         <p className="text-gray-500">Items will appear here when you receive vendor orders</p>
@@ -74,13 +74,13 @@ export function ModernInventoryTable({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
       {/* Table Header */}
-      <div className="grid grid-cols-[40px_80px_120px_2fr_1fr_100px_100px_180px_40px] gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-500 uppercase tracking-wider">
+      <div className="grid grid-cols-[40px_80px_2fr_120px_1fr_100px_100px_180px_40px] gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-500 uppercase tracking-wider">
         <div className="flex items-center">#</div>
         <div>Image</div>
-        <div>SKU</div>
         <div>Brand • Model</div>
+        <div>UPC</div>
         <div>Color</div>
         <div>Size</div>
         <div>Stock</div>
@@ -103,7 +103,7 @@ export function ModernInventoryTable({
               }`}
             >
               {/* Collapsed Row */}
-              <div className="grid grid-cols-[40px_80px_120px_2fr_1fr_100px_100px_180px_40px] gap-4 px-6 py-4 items-center">
+              <div className="grid grid-cols-[40px_80px_2fr_120px_1fr_100px_100px_180px_40px] gap-4 px-6 py-4 items-center">
                 {/* Checkbox */}
                 <div>
                   <input
@@ -115,12 +115,9 @@ export function ModernInventoryTable({
                 </div>
 
                 {/* Image Placeholder */}
-                <div className="w-16 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 text-xs">
+                <div className="w-16 h-16 bg-gray-100 rounded-xl border border-gray-200 flex items-center justify-center text-gray-400 text-xs">
                   No Img
                 </div>
-
-                {/* SKU */}
-                <div className="text-sm font-medium text-gray-900">{item.sku || 'N/A'}</div>
 
                 {/* Brand • Model */}
                 <div>
@@ -129,6 +126,9 @@ export function ModernInventoryTable({
                   </div>
                   <div className="text-sm text-gray-500">{item.model || 'Unknown Model'}</div>
                 </div>
+
+                {/* UPC */}
+                <div className="text-sm font-medium text-gray-900">{item.upc || 'N/A'}</div>
 
                 {/* Color */}
                 <div className="text-sm text-gray-700">{item.color || 'N/A'}</div>
