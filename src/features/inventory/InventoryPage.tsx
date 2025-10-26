@@ -1,31 +1,121 @@
 /**
- * Inventory Page - Main composition layer
- * Handles tab navigation and inventory display
+ * Modern Inventory Page
+ * Features: Filters, Return Window tracking, Return Report generation
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useInventoryByStatus } from './hooks/useInventory';
 import { useInventoryManagement } from './hooks/useInventoryManagement';
-import { InventoryTable } from './components/InventoryTable';
+import { InventoryFilters } from './components/InventoryFilters';
+import { ModernInventoryTable } from './components/ModernInventoryTable';
+import type { InventoryFilters as FilterState, InventoryItem } from './types/inventory.types';
+import { calculateReturnWindow } from './utils/returnWindow';
 
 export function InventoryPage() {
   const [activeTab, setActiveTab] = useState<'pending' | 'current' | 'archived' | 'sold'>('current');
+  const [filters, setFilters] = useState<FilterState>({
+    status: 'current',
+    sortBy: 'newest'
+  });
+  const [returnReportItems, setReturnReportItems] = useState<InventoryItem[]>([]);
 
   // Fetch data based on active tab
-  const { data: inventory, isLoading, error } = useInventoryByStatus(activeTab);
+  const { data: rawInventory, isLoading, error } = useInventoryByStatus(activeTab);
 
   // Get mutation functions
   const { archiveItem, restoreItem, deleteItem, markAsSold } = useInventoryManagement();
 
+  // Extract unique values for filters
+  const { vendors, brands, colors } = useMemo(() => {
+    if (!rawInventory) return { vendors: [], brands: [], colors: [] };
+
+    const vendorSet = new Set<string>();
+    const brandSet = new Set<string>();
+    const colorSet = new Set<string>();
+
+    rawInventory.forEach(item => {
+      if (item.vendor?.name) vendorSet.add(item.vendor.name);
+      if (item.brand) brandSet.add(item.brand);
+      if (item.color) colorSet.add(item.color);
+    });
+
+    return {
+      vendors: Array.from(vendorSet).sort(),
+      brands: Array.from(brandSet).sort(),
+      colors: Array.from(colorSet).sort()
+    };
+  }, [rawInventory]);
+
+  // Apply filters and sorting
+  const filteredInventory = useMemo(() => {
+    if (!rawInventory) return [];
+
+    let filtered = [...rawInventory];
+
+    // Apply filters
+    if (filters.vendor) {
+      filtered = filtered.filter(item => item.vendor?.name === filters.vendor);
+    }
+    if (filters.brand) {
+      filtered = filtered.filter(item => item.brand === filters.brand);
+    }
+    if (filters.color) {
+      filtered = filtered.filter(item => item.color === filters.color);
+    }
+
+    // Apply sorting
+    switch (filters.sortBy) {
+      case 'newest':
+        filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        break;
+      case 'oldest':
+        filtered.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        break;
+      case 'return_window':
+        // Sort by return window (items expiring soon first)
+        filtered.sort((a, b) => {
+          const aWindow = calculateReturnWindow(a.order?.order_date);
+          const bWindow = calculateReturnWindow(b.order?.order_date);
+          if (!aWindow) return 1;
+          if (!bWindow) return -1;
+          return aWindow.daysRemaining - bWindow.daysRemaining;
+        });
+        break;
+      case 'brand':
+        filtered.sort((a, b) => (a.brand || '').localeCompare(b.brand || ''));
+        break;
+      case 'stock':
+        filtered.sort((a, b) => b.quantity - a.quantity);
+        break;
+    }
+
+    return filtered;
+  }, [rawInventory, filters]);
+
+  const handleAddToReturnReport = (item: InventoryItem) => {
+    setReturnReportItems(prev => {
+      // Check if already added
+      if (prev.some(i => i.id === item.id)) {
+        return prev; // Already in cart
+      }
+      return [...prev, item];
+    });
+  };
+
+  const handleOpenReturnReport = () => {
+    // TODO: Open Return Report Modal
+    console.log('Open Return Report Modal with items:', returnReportItems);
+  };
+
   const tabs = [
     { key: 'pending' as const, label: 'Pending', count: 0 },
-    { key: 'current' as const, label: 'Current Inventory', count: inventory?.length || 0 },
+    { key: 'current' as const, label: 'Current Inventory', count: rawInventory?.length || 0 },
     { key: 'sold' as const, label: 'Sold', count: 0 },
     { key: 'archived' as const, label: 'Archived', count: 0 },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6 bg-gray-50 min-h-screen">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Inventory</h1>
@@ -33,24 +123,27 @@ export function InventoryPage() {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
+      <div className="bg-white rounded-lg shadow-sm">
+        <nav className="flex space-x-8 px-6">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.key;
             return (
               <button
                 key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
+                onClick={() => {
+                  setActiveTab(tab.key);
+                  setFilters(prev => ({ ...prev, status: tab.key }));
+                }}
                 className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   isActive
-                    ? 'border-blue-500 text-blue-600'
+                    ? 'border-purple-500 text-purple-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
               >
                 {tab.label}
                 {tab.count > 0 && (
                   <span className={`ml-2 py-0.5 px-2 rounded-full text-xs ${
-                    isActive ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'
+                    isActive ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-600'
                   }`}>
                     {tab.count}
                   </span>
@@ -61,6 +154,17 @@ export function InventoryPage() {
         </nav>
       </div>
 
+      {/* Filters */}
+      <InventoryFilters
+        filters={filters}
+        onFilterChange={setFilters}
+        vendors={vendors}
+        brands={brands}
+        colors={colors}
+        returnReportCount={returnReportItems.length}
+        onOpenReturnReport={handleOpenReturnReport}
+      />
+
       {/* Error State */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -70,14 +174,11 @@ export function InventoryPage() {
         </div>
       )}
 
-      {/* Inventory Table */}
-      <InventoryTable
-        items={inventory || []}
+      {/* Modern Inventory Table */}
+      <ModernInventoryTable
+        items={filteredInventory}
         isLoading={isLoading}
-        onArchive={activeTab === 'current' ? (itemId) => archiveItem.mutate(itemId) : undefined}
-        onRestore={activeTab === 'archived' ? (itemId) => restoreItem.mutate(itemId) : undefined}
-        onDelete={(itemId) => deleteItem.mutate(itemId)}
-        onMarkAsSold={activeTab === 'current' ? (itemId) => markAsSold.mutate(itemId) : undefined}
+        onAddToReturnReport={handleAddToReturnReport}
       />
     </div>
   );
