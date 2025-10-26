@@ -6,12 +6,14 @@
 export interface OrderItem {
   id: number;
   sku: string;
+  upc?: string;
   brand: string;
   model: string;
   color: string;
   size: string;
   quantity: number;
   vendor: string;
+  wholesale_price?: number;
 }
 
 export interface Order {

@@ -208,10 +208,30 @@ export function OrdersTable({ orders, onConfirm, onArchive, onDelete, isLoading 
                     <tr className="bg-gray-50">
                       <td colSpan={8} className="px-4 py-6">
                         <div className="bg-white rounded-lg border border-gray-200 p-6">
-                          <div className="flex items-center gap-2 mb-4">
-                            <ShoppingBag className="h-5 w-5 text-blue-600" />
-                            <h3 className="text-lg font-semibold text-gray-900">Order Details</h3>
+                          {/* Order Details Header */}
+                          <div className="flex items-start justify-between mb-6">
+                            <div className="flex items-center gap-2">
+                              <ShoppingBag className="h-5 w-5 text-blue-600" />
+                              <h3 className="text-lg font-semibold text-gray-900">Order Details</h3>
+                            </div>
+                            {/* Order Summary Info */}
+                            <div className="text-right space-y-1">
+                              {order.account_number && (
+                                <div className="text-sm">
+                                  <span className="text-gray-600">Account #:</span>{' '}
+                                  <span className="font-mono font-semibold text-gray-900">{order.account_number}</span>
+                                </div>
+                              )}
+                              {order.rep_name && (
+                                <div className="text-sm">
+                                  <span className="text-gray-600">Rep:</span>{' '}
+                                  <span className="font-medium text-gray-900">{order.rep_name}</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
+
+                          {/* Order Items */}
                           <OrderItemsList items={order.items} />
                         </div>
                       </td>
