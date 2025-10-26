@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { DollarSignIcon, SlidersIcon, TrendingUpIcon, Check, ChevronDownIcon, PlusIcon, TagIcon, SaveIcon, BuildingIcon } from 'lucide-react';
 import { calculateProfit, calculateRetailPrice, calculateDiscountPercentage } from '../utils/calculations';
-import { FrameData, SavedComparison, Company, Brand } from '../types';
+import { FrameData, SavedComparison } from '../types';
+import { Company, Brand, fetchCompaniesWithPricing } from '../services/api';
 import { useDemo } from '../contexts/DemoContext';
 
 // Helper function to format currency values
@@ -12,12 +13,6 @@ const formatCurrency = (value: number): string => {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(value);
-};
-
-// Function to load companies from localStorage
-const loadSavedCompanies = (): Company[] => {
-  const savedCompanies = localStorage.getItem('optiprofit_companies');
-  return savedCompanies ? JSON.parse(savedCompanies) : [];
 };
 
 // Function to load saved comparisons from localStorage
@@ -234,11 +229,13 @@ const initialFrameData: FrameData = {
 
 const CompareFrames: React.FC = () => {
   const { isDemo, currentStepData } = useDemo();
-  
+
   // State for companies and brands
-  const [companies, setCompanies] = useState<Company[]>(loadSavedCompanies());
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [loadingCompanies, setLoadingCompanies] = useState<boolean>(true);
+  const [companiesError, setCompaniesError] = useState<string | null>(null);
   const [savedComparisons, setSavedComparisons] = useState<SavedComparison[]>(loadSavedComparisons());
-  
+
   // Company and Brand dropdown states
   const [selectedCompany1, setSelectedCompany1] = useState<Company | null>(null);
   const [selectedCompany2, setSelectedCompany2] = useState<Company | null>(null);
@@ -248,7 +245,7 @@ const CompareFrames: React.FC = () => {
   const [showCompanyDropdown2, setShowCompanyDropdown2] = useState<boolean>(false);
   const [showBrandDropdown1, setShowBrandDropdown1] = useState<boolean>(false);
   const [showBrandDropdown2, setShowBrandDropdown2] = useState<boolean>(false);
-  
+
   // Save dialog state
   const [showSaveDialog, setShowSaveDialog] = useState<boolean>(false);
   const [saveComparisonName, setSaveComparisonName] = useState<string>('');
@@ -393,9 +390,33 @@ const CompareFrames: React.FC = () => {
     frame2.insuranceReimbursement
   ]);
 
-  // Load companies when component mounts
+  // Load companies from Supabase when component mounts
   useEffect(() => {
-    setCompanies(loadSavedCompanies());
+    const loadCompanies = async () => {
+      try {
+        setLoadingCompanies(true);
+        setCompaniesError(null);
+        const companiesData = await fetchCompaniesWithPricing();
+        console.log('🔥 DEBUG: CompareFrames loaded companies:', companiesData);
+
+        // Log brands with their pricing data
+        companiesData.forEach(company => {
+          console.log(`🔥 DEBUG: Company "${company.name}" has ${company.brands.length} brands:`);
+          company.brands.forEach(brand => {
+            console.log(`  - ${brand.name}: yourCost=${brand.yourCost}, wholesaleCost=${brand.wholesaleCost}, tariffTax=${brand.tariffTax}`);
+          });
+        });
+
+        setCompanies(companiesData);
+      } catch (error) {
+        console.error('Error loading companies:', error);
+        setCompaniesError('Failed to load companies. Please try again.');
+      } finally {
+        setLoadingCompanies(false);
+      }
+    };
+
+    loadCompanies();
   }, []);
 
   // Save comparisons to localStorage when updated
@@ -496,38 +517,50 @@ const CompareFrames: React.FC = () => {
               <div className="relative" ref={companyDropdownRef1}>
                 <button
                   type="button"
-                  className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  onClick={() => setShowCompanyDropdown1(!showCompanyDropdown1)}
+                  className={`w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                    loadingCompanies ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                  onClick={() => !loadingCompanies && setShowCompanyDropdown1(!showCompanyDropdown1)}
+                  disabled={loadingCompanies}
                 >
                   <div className="flex items-center">
                     <BuildingIcon className="h-4 w-4 text-gray-400 mr-2" />
-                    <span>{selectedCompany1?.name || 'Select a company'}</span>
+                    <span>
+                      {loadingCompanies
+                        ? 'Loading companies...'
+                        : selectedCompany1?.name || 'Select a company'}
+                    </span>
                   </div>
                   <ChevronDownIcon className="h-4 w-4 text-gray-400" />
                 </button>
-                
+
                 {showCompanyDropdown1 && (
                   <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-60 overflow-auto">
                     <ul className="py-1">
-                      {companies.map((company) => (
-                        <li key={company.id}>
-                          <button
-                            type="button"
-                            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${selectedCompany1?.id === company.id ? 'bg-blue-50 text-blue-700' : ''}`}
-                            onClick={() => {
-                              setSelectedCompany1(company);
-                              setSelectedBrand1(null);
-                              setShowCompanyDropdown1(false);
-                            }}
-                          >
-                            {company.name}
-                          </button>
-                        </li>
-                      ))}
-                      {companies.length === 0 && (
+                      {loadingCompanies ? (
+                        <li className="px-4 py-2 text-gray-500 text-sm">Loading companies...</li>
+                      ) : companiesError ? (
+                        <li className="px-4 py-2 text-red-500 text-sm">{companiesError}</li>
+                      ) : companies.length === 0 ? (
                         <li className="px-4 py-2 text-gray-500 text-sm">
-                          No companies available. Add companies in Vendors.
+                          No companies available. Add companies in Vendors section.
                         </li>
+                      ) : (
+                        companies.map((company) => (
+                          <li key={company.id}>
+                            <button
+                              type="button"
+                              className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${selectedCompany1?.id === company.id ? 'bg-blue-50 text-blue-700' : ''}`}
+                              onClick={() => {
+                                setSelectedCompany1(company);
+                                setSelectedBrand1(null);
+                                setShowCompanyDropdown1(false);
+                              }}
+                            >
+                              {company.name}
+                            </button>
+                          </li>
+                        ))
                       )}
                     </ul>
                   </div>
@@ -794,38 +827,50 @@ const CompareFrames: React.FC = () => {
               <div className="relative" ref={companyDropdownRef2}>
                 <button
                   type="button"
-                  className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  onClick={() => setShowCompanyDropdown2(!showCompanyDropdown2)}
+                  className={`w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                    loadingCompanies ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                  onClick={() => !loadingCompanies && setShowCompanyDropdown2(!showCompanyDropdown2)}
+                  disabled={loadingCompanies}
                 >
                   <div className="flex items-center">
                     <BuildingIcon className="h-4 w-4 text-gray-400 mr-2" />
-                    <span>{selectedCompany2?.name || 'Select a company'}</span>
+                    <span>
+                      {loadingCompanies
+                        ? 'Loading companies...'
+                        : selectedCompany2?.name || 'Select a company'}
+                    </span>
                   </div>
                   <ChevronDownIcon className="h-4 w-4 text-gray-400" />
                 </button>
-                
+
                 {showCompanyDropdown2 && (
                   <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-60 overflow-auto">
                     <ul className="py-1">
-                      {companies.map((company) => (
-                        <li key={company.id}>
-                          <button
-                            type="button"
-                            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${selectedCompany2?.id === company.id ? 'bg-blue-50 text-blue-700' : ''}`}
-                            onClick={() => {
-                              setSelectedCompany2(company);
-                              setSelectedBrand2(null);
-                              setShowCompanyDropdown2(false);
-                            }}
-                          >
-                            {company.name}
-                          </button>
-                        </li>
-                      ))}
-                      {companies.length === 0 && (
+                      {loadingCompanies ? (
+                        <li className="px-4 py-2 text-gray-500 text-sm">Loading companies...</li>
+                      ) : companiesError ? (
+                        <li className="px-4 py-2 text-red-500 text-sm">{companiesError}</li>
+                      ) : companies.length === 0 ? (
                         <li className="px-4 py-2 text-gray-500 text-sm">
-                          No companies available. Add companies in Vendors.
+                          No companies available. Add companies in Vendors section.
                         </li>
+                      ) : (
+                        companies.map((company) => (
+                          <li key={company.id}>
+                            <button
+                              type="button"
+                              className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${selectedCompany2?.id === company.id ? 'bg-blue-50 text-blue-700' : ''}`}
+                              onClick={() => {
+                                setSelectedCompany2(company);
+                                setSelectedBrand2(null);
+                                setShowCompanyDropdown2(false);
+                              }}
+                            >
+                              {company.name}
+                            </button>
+                          </li>
+                        ))
                       )}
                     </ul>
                   </div>
