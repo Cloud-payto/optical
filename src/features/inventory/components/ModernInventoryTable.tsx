@@ -76,7 +76,7 @@ export function ModernInventoryTable({
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
       {/* Table Header */}
-      <div className="grid grid-cols-[40px_80px_1.5fr_150px_1fr_100px_100px_180px_40px] gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-500 uppercase tracking-wider">
+      <div className="grid grid-cols-[40px_80px_1.5fr_150px_1fr_100px_100px_180px_140px] gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-500 uppercase tracking-wider">
         <div className="flex items-center">#</div>
         <div>Image</div>
         <div>Brand • Model</div>
@@ -85,7 +85,7 @@ export function ModernInventoryTable({
         <div>Size</div>
         <div>Stock</div>
         <div>Return Window</div>
-        <div></div>
+        <div>Actions</div>
       </div>
 
       {/* Table Body */}
@@ -103,7 +103,7 @@ export function ModernInventoryTable({
               }`}
             >
               {/* Collapsed Row */}
-              <div className="grid grid-cols-[40px_80px_1.5fr_150px_1fr_100px_100px_180px_40px] gap-4 px-6 py-4 items-center">
+              <div className="grid grid-cols-[40px_80px_1.5fr_150px_1fr_100px_100px_180px_140px] gap-4 px-6 py-4 items-center">
                 {/* Checkbox */}
                 <div>
                   <input
@@ -155,17 +155,77 @@ export function ModernInventoryTable({
                   )}
                 </div>
 
-                {/* Expand Button */}
-                <button
-                  onClick={() => toggleExpanded(item.id)}
-                  className="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  {isExpanded ? (
-                    <ChevronUp className="w-4 h-4 text-gray-500" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-gray-500" />
+                {/* Quick Action Buttons */}
+                <div className="flex items-center gap-1">
+                  {/* Return Report Quick Button (for current items with valid return window) */}
+                  {onAddToReturnReport && returnWindow && returnWindow.status !== 'expired' && item.status === 'current' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAddToReturnReport(item);
+                      }}
+                      className="p-2 rounded-lg hover:bg-purple-100 text-purple-600 transition-colors"
+                      title="Add to Return Report"
+                    >
+                      <span className="text-base">🔄</span>
+                    </button>
                   )}
-                </button>
+
+                  {/* Archive Quick Button (for current items) */}
+                  {onArchive && item.status === 'current' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onArchive(item.id);
+                      }}
+                      className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
+                      title="Archive"
+                    >
+                      <Archive className="w-4 h-4" />
+                    </button>
+                  )}
+
+                  {/* Mark as Sold Quick Button (for current items) */}
+                  {onMarkAsSold && item.status === 'current' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onMarkAsSold(item.id);
+                      }}
+                      className="p-2 rounded-lg hover:bg-green-100 text-green-600 transition-colors"
+                      title="Mark as Sold"
+                    >
+                      <DollarSign className="w-4 h-4" />
+                    </button>
+                  )}
+
+                  {/* Restore Quick Button (for archived items) */}
+                  {onRestore && item.status === 'archived' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRestore(item.id);
+                      }}
+                      className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition-colors"
+                      title="Restore"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                    </button>
+                  )}
+
+                  {/* Expand/Collapse Button */}
+                  <button
+                    onClick={() => toggleExpanded(item.id)}
+                    className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                    title="View Details"
+                  >
+                    {isExpanded ? (
+                      <ChevronUp className="w-4 h-4 text-gray-500" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-gray-500" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               {/* Expanded Detail Panel */}
@@ -182,12 +242,28 @@ export function ModernInventoryTable({
 
                     {/* Right: Details Grid */}
                     <div className="space-y-6">
-                      {/* Header */}
+                      {/* Header with Brand */}
                       <div>
                         <h3 className="text-lg font-semibold text-gray-900">
                           {item.brand} - {item.model}
                         </h3>
-                        <div className="h-px bg-gray-200 mt-2"></div>
+
+                        {/* Return Window - Moved under brand */}
+                        {returnWindow && (
+                          <div className="mt-3">
+                            <div className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg ${getReturnWindowColorClass(returnWindow.status)}`}>
+                              <span className="text-lg">{getReturnWindowEmoji(returnWindow.status)}</span>
+                              <div>
+                                <span className="font-medium">{returnWindow.displayText}</span>
+                                <div className="text-xs opacity-75">
+                                  Expires: {formatReturnWindowDate(returnWindow.expiresDate)}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="h-px bg-gray-200 mt-4"></div>
                       </div>
 
                       {/* Details Grid */}
@@ -257,25 +333,6 @@ export function ModernInventoryTable({
                             {item.discount_percentage ? `${item.discount_percentage}%` : 'N/A'}
                           </div>
                         </div>
-
-                        {/* Separator */}
-                        <div className="col-span-2 h-px bg-gray-200"></div>
-
-                        {/* Return Window Info */}
-                        {returnWindow && (
-                          <>
-                            <div className="col-span-2">
-                              <div className="text-xs font-medium text-gray-500 mb-2">Return Window</div>
-                              <div className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg ${getReturnWindowColorClass(returnWindow.status)}`}>
-                                <span className="text-lg">{getReturnWindowEmoji(returnWindow.status)}</span>
-                                <span className="font-medium">{returnWindow.displayText}</span>
-                              </div>
-                              <div className="text-xs text-gray-500 mt-2">
-                                Expires: {formatReturnWindowDate(returnWindow.expiresDate)}
-                              </div>
-                            </div>
-                          </>
-                        )}
                       </div>
 
                       {/* Actions */}
