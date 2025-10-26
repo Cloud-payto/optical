@@ -76,7 +76,7 @@ export function ModernInventoryTable({
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
       {/* Table Header */}
-      <div className="grid grid-cols-[40px_80px_2fr_120px_1fr_100px_100px_180px_40px] gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-500 uppercase tracking-wider">
+      <div className="grid grid-cols-[40px_80px_1.5fr_150px_1fr_100px_100px_180px_40px] gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-500 uppercase tracking-wider">
         <div className="flex items-center">#</div>
         <div>Image</div>
         <div>Brand • Model</div>
@@ -103,7 +103,7 @@ export function ModernInventoryTable({
               }`}
             >
               {/* Collapsed Row */}
-              <div className="grid grid-cols-[40px_80px_2fr_120px_1fr_100px_100px_180px_40px] gap-4 px-6 py-4 items-center">
+              <div className="grid grid-cols-[40px_80px_1.5fr_150px_1fr_100px_100px_180px_40px] gap-4 px-6 py-4 items-center">
                 {/* Checkbox */}
                 <div>
                   <input
