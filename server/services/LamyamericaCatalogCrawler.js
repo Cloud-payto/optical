@@ -236,7 +236,7 @@ class LamyamericaCatalogCrawler {
                     }
                 }
             } catch (error) {
-                console.error(`   ❌ Error caching product ${product.model || product.modelCode}:`, error.message);
+                console.error(`   ❌ Error caching product ${product.styleCode || product.model || product.modelCode}:`, error.message);
                 this.stats.totalErrors++;
             }
         }
@@ -251,7 +251,7 @@ class LamyamericaCatalogCrawler {
             vendor_id: this.vendorId,
             vendor_name: 'L\'amyamerica',
             brand: brand,
-            model: product.model || product.modelCode,
+            model: product.styleCode || product.model || product.modelCode,
             color: colorGroup.colorName || colorGroup.color,
             color_code: colorGroup.color,
             sku: size.sku || `${product.model}-${colorGroup.color}-${size.size}`,
@@ -279,6 +279,7 @@ class LamyamericaCatalogCrawler {
             metadata: {
                 crawled_at: new Date().toISOString(),
                 product_data: {
+                    styleCode: product.styleCode,
                     model: product.model,
                     colorCode: colorGroup.color,
                     colorName: colorGroup.colorName,
