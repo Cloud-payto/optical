@@ -345,4 +345,130 @@ router.get('/stats', async (req, res) => {
     }
 });
 
+/**
+ * GET VENDOR CATALOG ANALYTICS
+ *
+ * GET /api/catalog/vendor/:vendorId
+ *
+ * Returns detailed analytics for a specific vendor's catalog including:
+ * - Brand breakdown with counts and pricing
+ * - Average/median wholesale costs
+ * - Price ranges
+ * - Most popular brands
+ */
+router.get('/vendor/:vendorId', async (req, res) => {
+    try {
+        const { vendorId } = req.params;
+
+        // Get all catalog items for this vendor
+        const { data, error } = await supabase
+            .from('vendor_catalog')
+            .select('*')
+            .eq('vendor_id', vendorId);
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            return res.json({
+                success: true,
+                vendorId,
+                totalProducts: 0,
+                brands: [],
+                message: 'No catalog data found for this vendor'
+            });
+        }
+
+        // Group by brand and calculate stats
+        const brandStats = {};
+        data.forEach(item => {
+            const brand = item.brand;
+            if (!brandStats[brand]) {
+                brandStats[brand] = {
+                    brand: brand,
+                    productCount: 0,
+                    totalOrders: 0,
+                    wholesalePrices: [],
+                    msrps: [],
+                    inStockCount: 0,
+                    models: new Set()
+                };
+            }
+
+            brandStats[brand].productCount++;
+            brandStats[brand].totalOrders += item.times_ordered || 0;
+            brandStats[brand].models.add(item.model);
+
+            if (item.wholesale_cost) {
+                brandStats[brand].wholesalePrices.push(parseFloat(item.wholesale_cost));
+            }
+            if (item.msrp) {
+                brandStats[brand].msrps.push(parseFloat(item.msrp));
+            }
+            if (item.in_stock) {
+                brandStats[brand].inStockCount++;
+            }
+        });
+
+        // Calculate averages and format output
+        const brands = Object.values(brandStats).map(brand => {
+            const avgWholesale = brand.wholesalePrices.length > 0
+                ? brand.wholesalePrices.reduce((a, b) => a + b, 0) / brand.wholesalePrices.length
+                : null;
+
+            const avgMsrp = brand.msrps.length > 0
+                ? brand.msrps.reduce((a, b) => a + b, 0) / brand.msrps.length
+                : null;
+
+            const minWholesale = brand.wholesalePrices.length > 0
+                ? Math.min(...brand.wholesalePrices)
+                : null;
+
+            const maxWholesale = brand.wholesalePrices.length > 0
+                ? Math.max(...brand.wholesalePrices)
+                : null;
+
+            return {
+                brand: brand.brand,
+                productCount: brand.productCount,
+                modelCount: brand.models.size,
+                totalOrders: brand.totalOrders,
+                avgWholesaleCost: avgWholesale ? Math.round(avgWholesale * 100) / 100 : null,
+                avgMsrp: avgMsrp ? Math.round(avgMsrp * 100) / 100 : null,
+                minWholesaleCost: minWholesale ? Math.round(minWholesale * 100) / 100 : null,
+                maxWholesaleCost: maxWholesale ? Math.round(maxWholesale * 100) / 100 : null,
+                inStockCount: brand.inStockCount,
+                inStockPercentage: Math.round((brand.inStockCount / brand.productCount) * 100)
+            };
+        }).sort((a, b) => b.productCount - a.productCount); // Sort by product count
+
+        // Calculate overall vendor stats
+        const allWholesalePrices = data
+            .map(item => item.wholesale_cost)
+            .filter(price => price !== null && price !== undefined)
+            .map(price => parseFloat(price));
+
+        const overallAvgWholesale = allWholesalePrices.length > 0
+            ? allWholesalePrices.reduce((a, b) => a + b, 0) / allWholesalePrices.length
+            : null;
+
+        return res.json({
+            success: true,
+            vendorId,
+            vendorName: data[0]?.vendor_name || 'Unknown',
+            totalProducts: data.length,
+            totalBrands: brands.length,
+            totalOrders: data.reduce((sum, item) => sum + (item.times_ordered || 0), 0),
+            avgWholesaleCost: overallAvgWholesale ? Math.round(overallAvgWholesale * 100) / 100 : null,
+            brands: brands
+        });
+
+    } catch (error) {
+        console.error('❌ Error getting vendor catalog analytics:', error);
+        return res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
 module.exports = router;
