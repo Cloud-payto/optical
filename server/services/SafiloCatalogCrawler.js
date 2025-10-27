@@ -1,3 +1,6 @@
+// Load environment variables first
+require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
+
 const axios = require('axios');
 const { supabase } = require('../lib/supabase');
 
