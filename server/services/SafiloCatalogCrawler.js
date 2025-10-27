@@ -146,20 +146,16 @@ class SafiloCatalogCrawler {
      */
     async crawlBrand(brand) {
         try {
-            // Make API request for this brand
-            const response = await this.makeApiRequest({
-                brand: brand,
-                pageSize: 1000, // Get as many as possible per request
-                pageNumber: 1
-            });
+            // Make API request for this brand using search query
+            const response = await this.makeApiRequest(brand);
 
-            if (!response || !response.products) {
+            if (!response || !Array.isArray(response) || response.length === 0) {
                 console.log(`⚠️  No products found for ${brand}`);
                 return;
             }
 
-            const products = response.products;
-            console.log(`   Found ${products.length} products for ${brand}`);
+            const products = response;
+            console.log(`   Found ${products.length} product models for ${brand}`);
 
             // Process in batches to avoid overwhelming the database
             for (let i = 0; i < products.length; i += this.config.batchSize) {
@@ -178,11 +174,35 @@ class SafiloCatalogCrawler {
     /**
      * Make API request to Safilo with retry logic
      */
-    async makeApiRequest(params, retryCount = 0) {
+    async makeApiRequest(searchQuery, retryCount = 0) {
         try {
             const response = await axios.post(
                 this.config.apiUrl,
-                params,
+                {
+                    "Collections": [],
+                    "ColorFamily": [],
+                    "Shapes": [],
+                    "FrameTypes": [],
+                    "Genders": [],
+                    "FrameMaterials": [],
+                    "FrontMaterials": [],
+                    "HingeTypes": [],
+                    "RimTypes": [],
+                    "TempleMaterials": [],
+                    "LensMaterials": [],
+                    "FITTING": [],
+                    "COUNTRYOFORIGIN": [],
+                    "NewStyles": false,
+                    "BestSellers": false,
+                    "RxAvailable": false,
+                    "InStock": false,
+                    "Readers": false,
+                    "ASizes": {"min": -1, "max": -1},
+                    "BSizes": {"min": -1, "max": -1},
+                    "EDSizes": {"min": -1, "max": -1},
+                    "DBLSizes": {"min": -1, "max": -1},
+                    "search": searchQuery
+                },
                 {
                     headers: this.config.headers,
                     timeout: this.config.timeout
@@ -195,7 +215,7 @@ class SafiloCatalogCrawler {
             if (retryCount < this.config.maxRetries) {
                 console.log(`   ⚠️  Request failed, retrying (${retryCount + 1}/${this.config.maxRetries})...`);
                 await this.sleep(this.config.retryDelay * (retryCount + 1));
-                return this.makeApiRequest(params, retryCount + 1);
+                return this.makeApiRequest(searchQuery, retryCount + 1);
             }
 
             throw error;
@@ -208,52 +228,71 @@ class SafiloCatalogCrawler {
     async processBatch(products, brand) {
         for (const product of products) {
             try {
-                await this.cacheProduct(product, brand);
-                this.stats.totalProcessed++;
+                // Each product can have multiple color groups and sizes
+                // We need to flatten these into individual catalog entries
+                if (!product.colorGroup || product.colorGroup.length === 0) {
+                    continue;
+                }
+
+                for (const colorGroup of product.colorGroup) {
+                    if (!colorGroup.sizes || colorGroup.sizes.length === 0) {
+                        continue;
+                    }
+
+                    for (const size of colorGroup.sizes) {
+                        await this.cacheProductVariant(product, brand, colorGroup, size);
+                        this.stats.totalProcessed++;
+                    }
+                }
             } catch (error) {
-                console.error(`   ❌ Error caching product ${product.modelCode}:`, error.message);
+                console.error(`   ❌ Error caching product ${product.model || product.modelCode}:`, error.message);
                 this.stats.totalErrors++;
             }
         }
     }
 
     /**
-     * Cache a single product to vendor_catalog
+     * Cache a single product variant to vendor_catalog
      */
-    async cacheProduct(product, brand) {
+    async cacheProductVariant(product, brand, colorGroup, size) {
         // Build catalog entry from Safilo API response
         const catalogEntry = {
             vendor_id: this.vendorId,
             vendor_name: 'Safilo',
             brand: brand,
-            model: product.modelCode || product.model,
-            color: product.colorDescription,
-            color_code: product.colorCode,
-            sku: product.sku || `${product.modelCode}-${product.colorCode}`,
-            upc: product.upc,
-            ean: product.ean,
-            wholesale_cost: product.wholesalePrice || product.price,
-            msrp: product.msrp || product.retailPrice,
-            map_price: product.mapPrice,
-            eye_size: product.eyeSize || this.extractSize(product.size, 0),
-            bridge: product.bridge || this.extractSize(product.size, 1),
-            temple_length: product.templeLength || this.extractSize(product.size, 2),
-            full_size: product.size || this.formatFullSize(product),
-            material: product.material,
+            model: product.model || product.modelCode,
+            color: colorGroup.colorName || colorGroup.color,
+            color_code: colorGroup.color,
+            sku: size.sku || `${product.model}-${colorGroup.color}-${size.size}`,
+            upc: size.upc,
+            ean: size.ean || size.frameId,
+            wholesale_cost: parseFloat(size.wholesale) || parseFloat(size.price) || null,
+            msrp: parseFloat(size.msrp) || null,
+            map_price: null, // Not in response
+            eye_size: size.eyeSize || size.a,
+            bridge: size.bridge || size.dbl,
+            temple_length: size.temple,
+            full_size: size.size || size.alternateFrameSize,
+            material: product.material || product.frontMaterial,
             gender: product.gender,
-            fit_type: product.fitType,
-            a_measurement: product.aMeasurement,
-            b_measurement: product.bMeasurement,
-            dbl: product.dbl,
-            ed: product.ed,
-            in_stock: product.inStock !== false, // Default to true if not specified
-            availability_status: product.availability || (product.inStock ? 'In Stock' : 'Out of Stock'),
+            fit_type: product.fitting || product.fitType,
+            a_measurement: size.a || size.eyeSize,
+            b_measurement: size.b,
+            dbl: size.dbl || size.bridge,
+            ed: size.ed,
+            in_stock: size.isInStock || false,
+            availability_status: size.availableStatus || size.availability,
             confidence_score: 95, // High confidence from API
             data_source: 'api',
             verified: true,
             metadata: {
                 crawled_at: new Date().toISOString(),
-                api_data: product
+                product_data: {
+                    model: product.model,
+                    colorCode: colorGroup.color,
+                    colorName: colorGroup.colorName,
+                    size: size.size
+                }
             }
         };
 
