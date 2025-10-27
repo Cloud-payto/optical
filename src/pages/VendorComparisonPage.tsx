@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Package, ChevronDown, Check, Star, TrendingUp, Loader2, X, BarChart3, DollarSign, Box, TrendingDown } from 'lucide-react';
 import { Container } from '../components/ui/Container';
 import { fetchVendors, Vendor } from '../services/api';
-import axios from 'axios';
 
 interface VendorDisplayData extends Vendor {
   id: number | string;
@@ -116,10 +115,11 @@ const VendorComparisonPage: React.FC = () => {
       try {
         setLoadingCatalogData(true);
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-        const response = await axios.get(`${apiUrl}/api/catalog/vendor/${selectedVendorForDetails.id}`);
+        const response = await fetch(`${apiUrl}/api/catalog/vendor/${selectedVendorForDetails.id}`);
+        const data = await response.json();
 
-        if (response.data.success) {
-          setVendorCatalogData(response.data);
+        if (data.success) {
+          setVendorCatalogData(data);
         } else {
           setVendorCatalogData(null);
         }
