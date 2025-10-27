@@ -112,23 +112,17 @@ class LamyamericaCatalogCrawler {
      */
     async getAllBrands() {
         return [
-            'L\'AMY',
-            'LAMY',
-            'MODO',
-            'ECO',
-            'SUNS',
-            'O\'NEILL',
-            'ISTYLE',
-            'LIGHTEC',
-            'STEPPER',
-            'CATHERINE DENEUVE',
-            'FABIANO',
-            'VIVA',
-            'WOODYS',
-            'VANNI',
-            'YALEA',
-            'VISION\'S',
-            'FACE A FACE'
+            '2BB',
+            'Ann Taylor',
+            'Ben Sherman',
+            'C By L\'Amy',
+            'Champion',
+            'Nicole Miller',
+            'Private Label',
+            'Seven.Five',
+            'Sperry',
+            'TLG',
+            'Vision\'s'
         ];
     }
 
@@ -165,34 +159,36 @@ class LamyamericaCatalogCrawler {
     /**
      * Make API request to L'amyamerica with retry logic
      */
-    async makeApiRequest(searchQuery, retryCount = 0) {
+    async makeApiRequest(brandName, retryCount = 0) {
         try {
             const response = await axios.post(
                 this.config.apiUrl,
                 {
                     "Collections": [],
                     "ColorFamily": [],
+                    "Statuses": [],
+                    "Sizes": [],
+                    "EyeSizes": [],
+                    "TempleSizes": [],
+                    "BridgeSizes": [],
                     "Shapes": [],
                     "FrameTypes": [],
                     "Genders": [],
                     "FrameMaterials": [],
-                    "FrontMaterials": [],
                     "HingeTypes": [],
                     "RimTypes": [],
-                    "TempleMaterials": [],
-                    "LensMaterials": [],
-                    "FITTING": [],
-                    "COUNTRYOFORIGIN": [],
+                    "BridgeTypes": [],
+                    "AgeGroup": [],
+                    "Brand": [brandName.toLowerCase()], // Brand filter as lowercase array
+                    "SpecialtyFit": [],
+                    "Clip-Ons": false,
                     "NewStyles": false,
-                    "BestSellers": false,
-                    "RxAvailable": false,
                     "InStock": false,
-                    "Readers": false,
+                    "Sunglasses": false,
                     "ASizes": {"min": -1, "max": -1},
                     "BSizes": {"min": -1, "max": -1},
                     "EDSizes": {"min": -1, "max": -1},
-                    "DBLSizes": {"min": -1, "max": -1},
-                    "search": searchQuery
+                    "DBLSizes": {"min": -1, "max": -1}
                 },
                 {
                     headers: this.config.headers,
@@ -206,7 +202,7 @@ class LamyamericaCatalogCrawler {
             if (retryCount < this.config.maxRetries) {
                 console.log(`   ⚠️  Request failed, retrying (${retryCount + 1}/${this.config.maxRetries})...`);
                 await this.sleep(this.config.retryDelay * (retryCount + 1));
-                return this.makeApiRequest(searchQuery, retryCount + 1);
+                return this.makeApiRequest(brandName, retryCount + 1);
             }
 
             throw error;
