@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Package, ChevronDown, Check, Star, TrendingUp, Loader2, X, BarChart3, DollarSign, Box, TrendingDown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Package, ChevronDown, Check, Star, TrendingUp, Loader2 } from 'lucide-react';
 import { Container } from '../components/ui/Container';
 import { fetchVendors, Vendor } from '../services/api';
 
@@ -11,32 +12,10 @@ interface VendorDisplayData extends Vendor {
   buyingGroups: string;
 }
 
-interface BrandAnalytics {
-  brand: string;
-  productCount: number;
-  modelCount: number;
-  totalOrders: number;
-  avgWholesaleCost: number | null;
-  avgMsrp: number | null;
-  minWholesaleCost: number | null;
-  maxWholesaleCost: number | null;
-  inStockCount: number;
-  inStockPercentage: number;
-}
-
-interface VendorCatalogData {
-  vendorId: string;
-  vendorName: string;
-  totalProducts: number;
-  totalBrands: number;
-  totalOrders: number;
-  avgWholesaleCost: number | null;
-  brands: BrandAnalytics[];
-}
-
 const segments = ["All", "Premium", "Ultra-Premium", "Mid-Tier", "Value", "Boutique"];
 
 const VendorComparisonPage: React.FC = () => {
+  const navigate = useNavigate();
   const [vendors, setVendors] = useState<VendorDisplayData[]>([]);
   const [filteredVendors, setFilteredVendors] = useState<VendorDisplayData[]>([]);
   const [selectedSegment, setSelectedSegment] = useState("All");
@@ -44,9 +23,6 @@ const VendorComparisonPage: React.FC = () => {
   const [selectedVendors, setSelectedVendors] = useState<Set<number | string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedVendorForDetails, setSelectedVendorForDetails] = useState<VendorDisplayData | null>(null);
-  const [vendorCatalogData, setVendorCatalogData] = useState<VendorCatalogData | null>(null);
-  const [loadingCatalogData, setLoadingCatalogData] = useState(false);
 
   // Load vendors from Supabase
   useEffect(() => {
@@ -104,38 +80,6 @@ const VendorComparisonPage: React.FC = () => {
     setFilteredVendors(sorted);
   }, [selectedSegment, sortBy, vendors]);
 
-  // Load catalog data when vendor details are opened
-  useEffect(() => {
-    const loadVendorCatalogData = async () => {
-      if (!selectedVendorForDetails) {
-        setVendorCatalogData(null);
-        return;
-      }
-
-      try {
-        setLoadingCatalogData(true);
-        // Build API URL, handling various formats of VITE_API_URL
-        const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:3001').replace(/\/+$/, ''); // Remove trailing slashes
-        const apiUrl = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
-        const response = await fetch(`${apiUrl}/catalog/vendor/${selectedVendorForDetails.id}`);
-        const data = await response.json();
-
-        if (data.success) {
-          setVendorCatalogData(data);
-        } else {
-          setVendorCatalogData(null);
-        }
-      } catch (err) {
-        console.error('Error loading vendor catalog data:', err);
-        setVendorCatalogData(null);
-      } finally {
-        setLoadingCatalogData(false);
-      }
-    };
-
-    loadVendorCatalogData();
-  }, [selectedVendorForDetails]);
-
   const toggleVendorSelection = (vendorId: number | string) => {
     const newSelected = new Set(selectedVendors);
     if (newSelected.has(vendorId)) {
@@ -144,15 +88,6 @@ const VendorComparisonPage: React.FC = () => {
       newSelected.add(vendorId);
     }
     setSelectedVendors(newSelected);
-  };
-
-  const openVendorDetails = (vendor: VendorDisplayData) => {
-    setSelectedVendorForDetails(vendor);
-  };
-
-  const closeVendorDetails = () => {
-    setSelectedVendorForDetails(null);
-    setVendorCatalogData(null);
   };
 
   const getSegmentColor = (segment: string) => {
@@ -170,11 +105,6 @@ const VendorComparisonPage: React.FC = () => {
       default:
         return 'bg-gray-100 text-gray-800';
     }
-  };
-
-  const formatCurrency = (amount: number | null) => {
-    if (amount === null || amount === undefined) return 'N/A';
-    return `$${amount.toFixed(2)}`;
   };
 
   return (
@@ -394,7 +324,7 @@ const VendorComparisonPage: React.FC = () => {
 
                         <div className="mt-5 flex gap-2">
                           <button
-                            onClick={() => openVendorDetails(vendor)}
+                            onClick={() => navigate(`/vendor/${vendor.id}`)}
                             className="flex-1 bg-gradient-to-r from-gray-100 to-gray-50 hover:from-gray-200 hover:to-gray-100 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm hover:shadow-md"
                           >
                             View Details
@@ -412,195 +342,6 @@ const VendorComparisonPage: React.FC = () => {
           </motion.div>
         </Container>
       </div>
-
-      {/* Vendor Details Modal */}
-      <AnimatePresence>
-        {selectedVendorForDetails && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={closeVendorDetails}
-          >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              transition={{ type: 'spring', damping: 25 }}
-              className="bg-white rounded-3xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Modal Header */}
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl transform translate-x-48 -translate-y-48" />
-                <div className="relative">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl">
-                        <Package className="h-10 w-10" />
-                      </div>
-                      <div>
-                        <h2 className="text-3xl font-bold">{selectedVendorForDetails.name}</h2>
-                        <p className="text-blue-100 mt-1">Vendor Catalog Analysis</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={closeVendorDetails}
-                      className="p-2 hover:bg-white/20 rounded-xl transition-colors"
-                    >
-                      <X className="h-6 w-6" />
-                    </button>
-                  </div>
-
-                  <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                      <div className="text-blue-100 text-sm font-medium mb-1">Segment</div>
-                      <div className="text-white font-bold text-lg">{selectedVendorForDetails.segment}</div>
-                    </div>
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                      <div className="text-blue-100 text-sm font-medium mb-1">Discount</div>
-                      <div className="text-white font-bold text-lg">{selectedVendorForDetails.discount}</div>
-                    </div>
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                      <div className="text-blue-100 text-sm font-medium mb-1">Min Order</div>
-                      <div className="text-white font-bold text-lg">{selectedVendorForDetails.minOrder}</div>
-                    </div>
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                      <div className="text-blue-100 text-sm font-medium mb-1">Payment</div>
-                      <div className="text-white font-bold text-lg">{selectedVendorForDetails.paymentTerms}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Modal Body */}
-              <div className="p-8 overflow-y-auto max-h-[calc(90vh-300px)]">
-                {loadingCatalogData && (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="flex flex-col items-center gap-4">
-                      <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-                      <span className="text-gray-600 font-medium">Loading catalog data...</span>
-                    </div>
-                  </div>
-                )}
-
-                {!loadingCatalogData && !vendorCatalogData && (
-                  <div className="text-center py-12">
-                    <Box className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">No Catalog Data Available</h3>
-                    <p className="text-gray-500">
-                      This vendor doesn't have catalog data yet. Run the crawler to populate it.
-                    </p>
-                  </div>
-                )}
-
-                {!loadingCatalogData && vendorCatalogData && (
-                  <div className="space-y-6">
-                    {/* Catalog Overview */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                      <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-2xl p-6 border border-blue-200">
-                        <div className="flex items-center justify-between mb-2">
-                          <Box className="h-8 w-8 text-blue-600" />
-                        </div>
-                        <div className="text-3xl font-bold text-blue-900">{vendorCatalogData.totalProducts.toLocaleString()}</div>
-                        <div className="text-sm font-medium text-blue-700 mt-1">Total Products</div>
-                      </div>
-
-                      <div className="bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-2xl p-6 border border-purple-200">
-                        <div className="flex items-center justify-between mb-2">
-                          <Package className="h-8 w-8 text-purple-600" />
-                        </div>
-                        <div className="text-3xl font-bold text-purple-900">{vendorCatalogData.totalBrands}</div>
-                        <div className="text-sm font-medium text-purple-700 mt-1">Brands</div>
-                      </div>
-
-                      <div className="bg-gradient-to-br from-green-50 to-green-100/50 rounded-2xl p-6 border border-green-200">
-                        <div className="flex items-center justify-between mb-2">
-                          <BarChart3 className="h-8 w-8 text-green-600" />
-                        </div>
-                        <div className="text-3xl font-bold text-green-900">{vendorCatalogData.totalOrders.toLocaleString()}</div>
-                        <div className="text-sm font-medium text-green-700 mt-1">Times Ordered</div>
-                      </div>
-
-                      <div className="bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-2xl p-6 border border-amber-200">
-                        <div className="flex items-center justify-between mb-2">
-                          <DollarSign className="h-8 w-8 text-amber-600" />
-                        </div>
-                        <div className="text-3xl font-bold text-amber-900">
-                          {formatCurrency(vendorCatalogData.avgWholesaleCost)}
-                        </div>
-                        <div className="text-sm font-medium text-amber-700 mt-1">Avg Wholesale</div>
-                      </div>
-                    </div>
-
-                    {/* Brand Breakdown */}
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                        <Package className="h-6 w-6 text-blue-600" />
-                        Brand Breakdown
-                      </h3>
-                      <div className="space-y-3">
-                        {vendorCatalogData.brands.map((brand, index) => (
-                          <motion.div
-                            key={brand.brand}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                            className="bg-white border-2 border-gray-100 rounded-2xl p-6 hover:border-blue-200 hover:shadow-lg transition-all"
-                          >
-                            <div className="flex items-start justify-between mb-4">
-                              <div>
-                                <h4 className="text-lg font-bold text-gray-900">{brand.brand}</h4>
-                                <p className="text-sm text-gray-500 mt-1">
-                                  {brand.modelCount} models • {brand.productCount} variants
-                                </p>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-2xl font-bold text-blue-600">
-                                  {formatCurrency(brand.avgWholesaleCost)}
-                                </div>
-                                <div className="text-xs text-gray-500">Avg Wholesale</div>
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                              <div className="bg-gray-50 rounded-lg p-3">
-                                <div className="text-xs font-medium text-gray-500 mb-1">Price Range</div>
-                                <div className="text-sm font-semibold text-gray-900">
-                                  {formatCurrency(brand.minWholesaleCost)} - {formatCurrency(brand.maxWholesaleCost)}
-                                </div>
-                              </div>
-                              <div className="bg-blue-50 rounded-lg p-3">
-                                <div className="text-xs font-medium text-gray-500 mb-1">Avg MSRP</div>
-                                <div className="text-sm font-semibold text-blue-900">
-                                  {formatCurrency(brand.avgMsrp)}
-                                </div>
-                              </div>
-                              <div className="bg-green-50 rounded-lg p-3">
-                                <div className="text-xs font-medium text-gray-500 mb-1">In Stock</div>
-                                <div className="text-sm font-semibold text-green-900">
-                                  {brand.inStockPercentage}%
-                                </div>
-                              </div>
-                              <div className="bg-purple-50 rounded-lg p-3">
-                                <div className="text-xs font-medium text-gray-500 mb-1">Orders</div>
-                                <div className="text-sm font-semibold text-purple-900">
-                                  {brand.totalOrders}
-                                </div>
-                              </div>
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };

@@ -15,6 +15,7 @@ import AboutPage from './pages/About.tsx';
 import BrandsCostsPage from './pages/BrandsCostsPage';
 import TimeSavingPage from './pages/TimeSavingPage';
 import VendorComparisonPage from './pages/VendorComparisonPage';
+import VendorDetailsPage from './pages/VendorDetailsPage';
 import Inventory from './pages/Inventory';
 import OrdersPage from './features/orders/OrdersPage';
 import InventoryPage from './features/inventory/InventoryPage';
@@ -55,6 +56,7 @@ function App() {
                           <Route path="/dashboard" element={<DashboardPage />} />
                           <Route path="/brands" element={<BrandsCostsPage />} />
                           <Route path="/vendor-comparison" element={<VendorComparisonPage />} />
+                          <Route path="/vendor/:vendorId" element={<VendorDetailsPage />} />
                           <Route path="/time-saving" element={<TimeSavingPage />} />
                           <Route path="/inventory" element={<Inventory />} />
                           <Route path="/orders" element={<OrdersPage />} />
