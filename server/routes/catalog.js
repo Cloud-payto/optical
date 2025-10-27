@@ -360,11 +360,12 @@ router.get('/vendor/:vendorId', async (req, res) => {
     try {
         const { vendorId } = req.params;
 
-        // Get all catalog items for this vendor
-        const { data, error } = await supabase
+        // Get all catalog items for this vendor (no limit to get complete data)
+        const { data, error, count } = await supabase
             .from('vendor_catalog')
-            .select('*')
-            .eq('vendor_id', vendorId);
+            .select('*', { count: 'exact' })
+            .eq('vendor_id', vendorId)
+            .limit(10000); // Increase limit to get all products
 
         if (error) throw error;
 

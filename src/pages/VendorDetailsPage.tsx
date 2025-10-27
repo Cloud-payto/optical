@@ -3,10 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Package, ArrowLeft, Loader2, Box, BarChart3, DollarSign,
-  TrendingUp, ShoppingCart, Percent, Grid3x3, Search
+  TrendingUp, ShoppingCart, Percent, Grid3x3, Search, Tag
 } from 'lucide-react';
 import { Container } from '../components/ui/Container';
 import { fetchVendors, Vendor } from '../services/api';
+import { getBrandName } from '../utils/brandNames';
 
 interface BrandAnalytics {
   brand: string;
@@ -194,8 +195,35 @@ const VendorDetailsPage: React.FC = () => {
               </div>
             </div>
 
+            {/* Brand Tags */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-100 p-8 mb-8"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <Tag className="h-8 w-8 text-blue-600" />
+                <h2 className="text-2xl font-bold text-gray-900">Available Brands</h2>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {catalogData.brands.map((brand, index) => (
+                  <motion.div
+                    key={brand.brand}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all cursor-pointer"
+                    onClick={() => setSearchTerm(brand.brand)}
+                  >
+                    {getBrandName(brand.brand)}
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
             {/* Catalog Overview Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -232,22 +260,6 @@ const VendorDetailsPage: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="bg-gradient-to-br from-green-50 to-green-100/50 rounded-3xl p-8 border-2 border-green-200 shadow-lg"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <ShoppingCart className="h-12 w-12 text-green-600" />
-                </div>
-                <div className="text-5xl font-bold text-green-900 mb-2">
-                  {catalogData.totalOrders.toLocaleString()}
-                </div>
-                <div className="text-green-700 font-semibold text-lg">Times Ordered</div>
-                <div className="text-green-600 text-sm mt-2">Total order volume</div>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
                 className="bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-3xl p-8 border-2 border-amber-200 shadow-lg"
               >
                 <div className="flex items-center justify-between mb-4">
@@ -298,7 +310,7 @@ const VendorDetailsPage: React.FC = () => {
                     <div className="flex items-start justify-between mb-6">
                       <div>
                         <h3 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                          {brand.brand}
+                          {getBrandName(brand.brand)}
                         </h3>
                         <div className="flex items-center gap-4 text-gray-600">
                           <span className="flex items-center gap-1">
@@ -308,10 +320,6 @@ const VendorDetailsPage: React.FC = () => {
                           <span className="flex items-center gap-1">
                             <Box className="h-4 w-4" />
                             {brand.productCount} variants
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <ShoppingCart className="h-4 w-4" />
-                            {brand.totalOrders} orders
                           </span>
                         </div>
                       </div>
@@ -323,7 +331,7 @@ const VendorDetailsPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4">
                         <div className="text-xs font-medium text-gray-500 mb-2 flex items-center gap-1">
                           <TrendingUp className="h-3 w-3" />
@@ -359,24 +367,13 @@ const VendorDetailsPage: React.FC = () => {
 
                       <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4">
                         <div className="text-xs font-medium text-purple-700 mb-2 flex items-center gap-1">
-                          <BarChart3 className="h-3 w-3" />
-                          Total Orders
+                          <Package className="h-3 w-3" />
+                          Total SKUs
                         </div>
                         <div className="text-lg font-bold text-purple-900">
-                          {brand.totalOrders}
-                        </div>
-                        <div className="text-sm text-purple-600">Order count</div>
-                      </div>
-
-                      <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-4">
-                        <div className="text-xs font-medium text-amber-700 mb-2 flex items-center gap-1">
-                          <Package className="h-3 w-3" />
-                          SKU Count
-                        </div>
-                        <div className="text-lg font-bold text-amber-900">
                           {brand.productCount}
                         </div>
-                        <div className="text-sm text-amber-600">Unique items</div>
+                        <div className="text-sm text-purple-600">Product variants</div>
                       </div>
                     </div>
                   </motion.div>
