@@ -1,0 +1,1857 @@
+{
+  "name": "Optical Inventory Software",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "9f96a3ec-cf85-40f4-9bc9-338424768726",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -208,
+        448
+      ],
+      "id": "4bf34dc6-37a1-42b1-888a-fe9be2b7fc55",
+      "name": "Webhook",
+      "webhookId": "9f96a3ec-cf85-40f4-9bc9-338424768726"
+    },
+    {
+      "parameters": {
+        "tableId": "emails",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "account_id",
+              "fieldValue": "={{ $json.accountId }}"
+            },
+            {
+              "fieldId": "from_email",
+              "fieldValue": "={{ $json.email.envelope.from }}"
+            },
+            {
+              "fieldId": "to_email",
+              "fieldValue": "={{ $json.email.envelope.to }}"
+            },
+            {
+              "fieldId": "subject",
+              "fieldValue": "={{ $json.email.subject }}"
+            },
+            {
+              "fieldId": "raw_data",
+              "fieldValue": "={{ $json.email }}"
+            },
+            {
+              "fieldId": "plain_text",
+              "fieldValue": "={{ $json.email.plain }}"
+            },
+            {
+              "fieldId": "html_text",
+              "fieldValue": "={{ $json.email.html }}"
+            },
+            {
+              "fieldId": "parse_status",
+              "fieldValue": "failed"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        912,
+        544
+      ],
+      "id": "9f564869-34f2-401c-a7a8-8431b30c9350",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "TXCUnZqEhts5gkjI",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/inventory/bulk-add",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "accountId",
+              "value": "={{ $('parse_ModernOptical').item.json.accountId }}"
+            },
+            {
+              "name": "vendor",
+              "value": "Modern Optical"
+            },
+            {
+              "name": "order",
+              "value": "={{ $('parse_ModernOptical').item.json.order }}"
+            },
+            {
+              "name": "items",
+              "value": "={{ $('parse_ModernOptical').item.json.items }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1584,
+        -224
+      ],
+      "id": "f7d85efa-d62c-4905-9bd8-e221b8316f9e",
+      "name": "Bulk-Add"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/enrich/modernoptical",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "accountId",
+              "value": "={{ $('parse_ModernOptical').item.json.accountId }}"
+            },
+            {
+              "name": "orderNumber",
+              "value": "={{ $('parse_ModernOptical').item.json.order.order_number }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1808,
+        -224
+      ],
+      "id": "ecab662e-550f-4982-843c-0affc6b3c020",
+      "name": "Enrich"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/emails/create",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "accountId",
+              "value": "={{ $json.accountId }}"
+            },
+            {
+              "name": "from",
+              "value": "={{ $json.from }}"
+            },
+            {
+              "name": "html",
+              "value": "={{ $json.html }}"
+            },
+            {
+              "name": "plainText",
+              "value": "={{ $json.plainText }}"
+            },
+            {
+              "name": "parsedData",
+              "value": "={{ $json.parsedData }}"
+            },
+            {
+              "name": "subject",
+              "value": "={{ $json.subject }}"
+            },
+            {
+              "name": "vendor",
+              "value": "modern_optical"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1360,
+        -224
+      ],
+      "id": "5a70bcbf-0138-4336-9c6c-f69b1e779331",
+      "name": "Create Email Record"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/parse/modernoptical",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "html",
+              "value": "={{ $json.email.html }}"
+            },
+            {
+              "name": "plainText",
+              "value": "={{ $json.email.plain }}"
+            },
+            {
+              "name": "accountId",
+              "value": "={{ $json.accountId }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        912,
+        -224
+      ],
+      "id": "a87fb387-6a51-4542-aab1-ea07b48cbeda",
+      "name": "parse_ModernOptical"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parseResult = $('parse_ModernOptical').item.json;\nconst accountId = $('Extract Account ID').item.json.accountId;\nconst emailData = $('Extract Account ID').item.json.email;\n\nreturn [{\n  json: {\n    accountId: accountId,\n    from: 'Modern Optical Orders',\n    subject: `Order #${parseResult.order.order_number}`,\n    html: emailData.html,\n    plainText: emailData.plain,\n    parsedData: {\n      vendor: 'modern_optical',  // underscore format\n      order: parseResult.order,\n      items: parseResult.items\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1136,
+        -224
+      ],
+      "id": "223e82ec-c5d4-440d-bcef-796bfff5c0ba",
+      "name": "Prepare Email Data"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/parse/safilo",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "pdfBase64",
+              "value": "={{ $('Webhook').item.json.body.attachments[0].content }}"
+            },
+            {
+              "name": "accountId",
+              "value": "={{ $('Extract Account ID').item.json.accountId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        912,
+        -32
+      ],
+      "id": "5f1e56e1-991e-4201-82d6-cb10aed1b854",
+      "name": "parse_Safilo"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parseResult = $('parse_Safilo').item.json;\nconst accountId = $('Extract Account ID').item.json.accountId;\nconst emailData = $('Extract Account ID').item.json.email;\n\nreturn [{\n  json: {\n    accountId: accountId,\n    from: 'Safilo',\n    subject: `Order #${parseResult.order.order_number}`,\n    html: emailData.html,\n    plainText: emailData.plain,\n    parsedData: {\n      vendor: 'Safilo',  // underscore format\n      order: parseResult.order,\n      items: parseResult.items\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1136,
+        -32
+      ],
+      "id": "cf2e3906-ba62-4eeb-8a11-e6f80c830532",
+      "name": "Prepare Email Safilo"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/emails/create",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "accountId",
+              "value": "={{ $json.accountId }}"
+            },
+            {
+              "name": "from",
+              "value": "={{ $json.from }}"
+            },
+            {
+              "name": "html",
+              "value": "={{ $json.html }}"
+            },
+            {
+              "name": "plainText",
+              "value": "={{ $json.plainText }}"
+            },
+            {
+              "name": "parsedData",
+              "value": "={{ $json.parsedData }}"
+            },
+            {
+              "name": "subject",
+              "value": "={{ $json.subject }}"
+            },
+            {
+              "name": "vendor",
+              "value": "Safilo"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1360,
+        -32
+      ],
+      "id": "7f598d5c-d81a-4b20-bb52-c772392710f5",
+      "name": "Create Email Record1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/inventory/bulk-add",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "accountId",
+              "value": "={{ $('parse_Safilo').item.json.accountId }}"
+            },
+            {
+              "name": "vendor",
+              "value": "Safilo"
+            },
+            {
+              "name": "order",
+              "value": "={{ $('parse_Safilo').item.json.order }}"
+            },
+            {
+              "name": "items",
+              "value": "={{ $('parse_Safilo').item.json.items }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1584,
+        -32
+      ],
+      "id": "c4c4f906-3ae7-451b-a203-0b6b2cdad416",
+      "name": "Bulk-Add1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/parse/luxottica",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "html",
+              "value": "={{ $json.email.html }}"
+            },
+            {
+              "name": "plainText",
+              "value": "={{ $json.email.plain }}"
+            },
+            {
+              "name": "accountId",
+              "value": "={{ $json.accountId }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        912,
+        160
+      ],
+      "id": "377a7506-0ec6-4683-a9c5-b77dbbde12f3",
+      "name": "parse_Luxottica"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parseResult = $('parse_Luxottica').item.json;\nconst accountId = $('Extract Account ID').item.json.accountId;\nconst emailData = $('Extract Account ID').item.json.email;\n\nreturn [{\n  json: {\n    accountId: accountId,\n    from: 'Luxottica Orders',\n    subject: `Order #${parseResult.order.order_number}`,\n    html: emailData.html,\n    plainText: emailData.plain,\n    parsedData: {\n      vendor: 'luxottica',  // underscore format\n      order: parseResult.order,\n      items: parseResult.items\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1136,
+        160
+      ],
+      "id": "cffceba3-3cad-401f-ae0b-cd3b9351c110",
+      "name": "Prepare Email Luxottica"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/emails/create",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "accountId",
+              "value": "={{ $json.accountId }}"
+            },
+            {
+              "name": "from",
+              "value": "={{ $json.from }}"
+            },
+            {
+              "name": "html",
+              "value": "={{ $json.html }}"
+            },
+            {
+              "name": "plainText",
+              "value": "={{ $json.plainText }}"
+            },
+            {
+              "name": "parsedData",
+              "value": "={{ $json.parsedData }}"
+            },
+            {
+              "name": "subject",
+              "value": "={{ $json.subject }}"
+            },
+            {
+              "name": "vendor",
+              "value": "luxottica"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1360,
+        160
+      ],
+      "id": "62567d22-7676-429d-911d-cea17442378f",
+      "name": "Create Email Record2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/inventory/bulk-add",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "accountId",
+              "value": "={{ $('parse_Luxottica').item.json.accountId }}"
+            },
+            {
+              "name": "vendor",
+              "value": "Luxottica"
+            },
+            {
+              "name": "order",
+              "value": "={{ $('parse_Luxottica').item.json.order }}"
+            },
+            {
+              "name": "items",
+              "value": "={{ $('parse_Luxottica').item.json.items }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1584,
+        160
+      ],
+      "id": "76fb943f-e4b8-44de-bd37-b916cde3404f",
+      "name": "Bulk-Add2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// CloudMailin wraps data in 'body' object\nconst data = $json.body || $json;\n\n// Get basic email info\nconst toAddress = data.envelope?.to || '';\nconst envelopeFrom = data.envelope?.from || '';\nconst subject = data.headers?.subject || '';\nconst html = data.html || '';\nconst plain = data.plain || '';\n\nconsole.log('Envelope From:', envelopeFrom);\nconsole.log('To:', toAddress);\nconsole.log('Subject:', subject);\n\n// Extract account UUID from CloudMailin address\nconst accountIdMatch = toAddress.match(/\\+([a-f0-9-]{36})@/);\nconst accountId = accountIdMatch ? accountIdMatch[1] : null;\n\nif (!accountId) {\n  throw new Error('Could not extract account ID from CloudMailin address');\n}\n\n// ====================================\n// FIND ORIGINAL SENDER (for forwarded emails)\n// ====================================\nlet originalSender = envelopeFrom;\nlet originalDomain = '';\n\n// Check HTML for \"From:\" field (Outlook/Gmail forward format)\nconst htmlFromPatterns = [\n  /<b>From:<\\/b>\\s*([^<\\n]+?)(?:<br|<\\/)/i,\n  /From:\\s*([^<\\n]+?)(?:<br|<\\/)/i,\n  /<b>From:<\\/b>.*?&lt;([^&]+)&gt;/i\n];\n\nfor (const pattern of htmlFromPatterns) {\n  const match = html.match(pattern);\n  if (match) {\n    originalSender = match[1].trim();\n    console.log('✅ Found original sender in HTML:', originalSender);\n    break;\n  }\n}\n\n// Check plain text for \"From:\" line\nif (originalSender === envelopeFrom) {\n  const plainFromMatch = plain.match(/^From:\\s*(.+?)$/m);\n  if (plainFromMatch) {\n    originalSender = plainFromMatch[1].trim();\n    console.log('✅ Found original sender in plain text:', originalSender);\n  }\n}\n\n// Extract email address from \"Name <email@domain.com>\" format\nconst emailMatch = originalSender.match(/<([^>]+)>/) || \n                   originalSender.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})/);\n\nif (emailMatch) {\n  const originalEmail = emailMatch[1];\n  originalDomain = originalEmail.includes('@') \n    ? originalEmail.split('@')[1].toLowerCase() \n    : '';\n  console.log('✅ Extracted email:', originalEmail);\n  console.log('✅ Extracted domain:', originalDomain);\n}\n\n// FALLBACK: If still no domain, check subject and body for vendor clues\nif (!originalDomain || originalDomain.includes('petelinvision')) {\n  console.log('⚠️ Domain extraction failed, checking content for clues...');\n  \n  const fullContent = (subject + ' ' + plain + ' ' + html).toLowerCase();\n  \n  if (fullContent.includes('safilo') || fullContent.includes('noreply@safilo.com')) {\n    originalDomain = 'safilo.com';\n    console.log('🔍 Content analysis: safilo.com');\n  } else if (fullContent.includes('modernoptical.com') || fullContent.includes('modern optical')) {\n    originalDomain = 'modernoptical.com';\n    console.log('🔍 Content analysis: modernoptical.com');\n  } else if (fullContent.includes('luxottica.com')) {\n    originalDomain = 'luxottica.com';\n    console.log('🔍 Content analysis: luxottica.com');\n  } else if (fullContent.includes('etniabarcelona.com') || fullContent.includes('etnia barcelona')) {\n    originalDomain = 'etniabarcelona.com';\n    console.log('🔍 Content analysis: etniabarcelona.com');\n  }\n}\n\nconsole.log('Final Original Domain:', originalDomain);\nconsole.log('Envelope Domain:', envelopeFrom.split('@')[1]);\n\nreturn [{\n  json: {\n    accountId: accountId,\n    senderDomain: originalDomain || envelopeFrom.split('@')[1]?.toLowerCase() || '',\n    originalSender: originalSender,\n    envelopeSender: envelopeFrom,\n    email: {\n      envelope: {\n        to: toAddress,\n        from: envelopeFrom\n      },\n      subject: subject,\n      html: html,\n      plain: plain,\n      headers: data.headers\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        448
+      ],
+      "id": "10905825-dd6b-4def-bdfd-f777a5e54ec6",
+      "name": "Extract Account ID"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/parse/etnia-barcelona",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "pdfBase64",
+              "value": "={{ $('Webhook').item.json.body.attachments[0].content }}"
+            },
+            {
+              "name": "accountId",
+              "value": "={{ $('Extract Account ID').item.json.accountId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        912,
+        352
+      ],
+      "id": "7f63d904-67d8-4d56-823b-9c40f8d5afc1",
+      "name": "parse_Etnia"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parseResult = $('parse_Etnia').item.json;\nconst accountId = $('Extract Account ID').item.json.accountId;\nconst emailData = $('Extract Account ID').item.json.email;\n\nreturn [{\n  json: {\n    accountId: accountId,\n    from: 'Etnia Barcelona',\n    subject: `Order #${parseResult.order.order_number}`,\n    html: emailData.html,\n    plainText: emailData.plain,\n    parsedData: {\n      vendor: 'etnia_barcelona',  // underscore format\n      order: parseResult.order,\n      items: parseResult.items\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1136,
+        352
+      ],
+      "id": "a557b33c-c0dd-4460-a695-dc669cf91932",
+      "name": "Prepare Email Etnia"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/emails/create",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "accountId",
+              "value": "={{ $json.accountId }}"
+            },
+            {
+              "name": "from",
+              "value": "={{ $json.from }}"
+            },
+            {
+              "name": "html",
+              "value": "={{ $json.html }}"
+            },
+            {
+              "name": "plainText",
+              "value": "={{ $json.plainText }}"
+            },
+            {
+              "name": "parsedData",
+              "value": "={{ $json.parsedData }}"
+            },
+            {
+              "name": "subject",
+              "value": "={{ $json.subject }}"
+            },
+            {
+              "name": "vendor",
+              "value": "Etnia Barcelona"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1360,
+        352
+      ],
+      "id": "f318499c-acf4-4852-9472-6ad44eaef731",
+      "name": "Create Email Record3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/inventory/bulk-add",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "accountId",
+              "value": "={{ $('parse_Etnia').item.json.accountId }}"
+            },
+            {
+              "name": "vendor",
+              "value": "Etnia Barcelona"
+            },
+            {
+              "name": "order",
+              "value": "={{ $('parse_Etnia').item.json.order }}"
+            },
+            {
+              "name": "items",
+              "value": "={{ $('parse_Etnia').item.json.items }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1584,
+        352
+      ],
+      "id": "c52e4986-b1b6-4b79-ba2b-d6436d81853a",
+      "name": "Bulk-Add3"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the data from previous node\nconst data = $json;\nconst email = data.email || {};\nconst senderDomain = data.senderDomain || '';\nconst subject = (email.subject || '').toLowerCase();\nconst body = ((email.plain || '') + (email.html || '')).toLowerCase();\n\nconsole.log('Detecting vendor...');\nconsole.log('Sender Domain:', senderDomain);\nconsole.log('Subject:', subject);\n\n// ====================================\n// ETNIA BARCELONA DETECTION\n// ====================================\nconst etniaSignals = {\n  domain: senderDomain.includes('etniabarcelona.com') || senderDomain.includes('etnia.es'),\n  subjectOrder: subject.includes('order ') && /order\\s+\\d+/.test(subject),\n  bodyEtniaEyewear: body.includes('etnia eyewear culture'),\n  bodyEtniaBarcelona: body.includes('etnia barcelona'),\n  bodyExtranet: body.includes('extranet-etniabarcelona.com'),\n  bodyPhone: body.includes('888.553.8642'),\n  bodyMiamiAddress: body.includes('6701 ne 2nd ct miami')\n};\nconst etniaMatchCount = Object.values(etniaSignals).filter(Boolean).length;\n\n// ====================================\n// LUXOTTICA DETECTION\n// ====================================\nconst luxotticaSignals = {\n  domain: senderDomain.includes('luxottica.com'),\n  subjectCart: subject.includes('cart number'),\n  subjectLuxottica: subject.includes('luxottica:'),\n  bodyMyLuxottica: body.includes('my.luxottica.com'),\n  bodyRates: body.includes('rates represent full wholesale prices'),\n  bodyLuxotticaDomain: body.includes('luxottica.com'),\n  bodyRepCode: body.includes('agent reference:') && body.includes('customer code:')\n};\nconst luxotticaMatchCount = Object.values(luxotticaSignals).filter(Boolean).length;\n\n// ====================================\n// MODERN OPTICAL DETECTION\n// ====================================\nconst moSignals = {\n  domain: senderDomain.includes('modernoptical.com'),\n  subjectKeyword: subject.includes('modern optical'),\n  bodyDomain: body.includes('modernoptical.com'),\n  bodyPhone: body.includes('1-800-289-6536'),\n  bodyCompanyName: body.includes('modern optical international'),\n  bodyModernOpticalTable: body.includes('item') && body.includes('retail') && body.includes('your cost')\n};\nconst moMatchCount = Object.values(moSignals).filter(Boolean).length;\n\n// ====================================\n// SAFILO DETECTION\n// ====================================\nconst safiloSignals = {\n  domain: senderDomain.includes('safilo.com'),\n  bodyDomain: body.includes('mysafilo.com') || body.includes('safilo.com'),\n  eyerepOrder: body.includes('eyerep order number'),\n  subjectKeyword: subject.includes('safilo'),\n  bodyPlacedBy: body.includes('placed by:') && body.includes('date:')\n};\nconst safiloMatchCount = Object.values(safiloSignals).filter(Boolean).length;\n\nconsole.log('Match Counts:', {\n  etniaBarcelona: etniaMatchCount,\n  luxottica: luxotticaMatchCount,\n  modernOptical: moMatchCount,\n  safilo: safiloMatchCount\n});\n\n// ====================================\n// DETERMINE VENDOR\n// Prioritize: Strong body signals > Domain match\n// ====================================\nlet vendor = 'unknown';\nlet confidence = 0;\n\n// If body has strong unique signals (3+ matches), trust that over domain\nif (etniaMatchCount >= 3) {\n  vendor = 'etnia_barcelona';\n  confidence = etniaMatchCount * 20;\n} else if (luxotticaMatchCount >= 3) {\n  vendor = 'luxottica';\n  confidence = luxotticaMatchCount * 20;\n} else if (safiloMatchCount >= 2) {\n  vendor = 'safilo';\n  confidence = safiloMatchCount * 20;\n} else if (moMatchCount >= 3) {\n  vendor = 'modern_optical';\n  confidence = moMatchCount * 20;\n}\n// Otherwise use highest match count\nelse {\n  const maxCount = Math.max(etniaMatchCount, luxotticaMatchCount, moMatchCount, safiloMatchCount);\n  \n  if (maxCount >= 1) {\n    if (etniaMatchCount === maxCount) vendor = 'etnia_barcelona';\n    else if (luxotticaMatchCount === maxCount) vendor = 'luxottica';\n    else if (safiloMatchCount === maxCount) vendor = 'safilo';\n    else if (moMatchCount === maxCount) vendor = 'modern_optical';\n    \n    confidence = maxCount * 20;\n  }\n}\n\nconsole.log('Detected Vendor:', vendor, 'Confidence:', confidence);\n\nreturn [{\n  json: {\n    ...data,\n    vendor: vendor,\n    detectionConfidence: confidence,\n    detectionDebug: {\n      etniaSignals,\n      luxotticaSignals,\n      moSignals,\n      safiloSignals,\n      etniaMatchCount,\n      luxotticaMatchCount,\n      moMatchCount,\n      safiloMatchCount\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -208,
+        1344
+      ],
+      "id": "1874e613-3482-4176-b3d6-d718a6f76c73",
+      "name": "Detect Vendor"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/emails/detect-vendor",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "from",
+              "value": "={{ $json.email.envelope.from }}"
+            },
+            {
+              "name": "subject",
+              "value": "={{ $json.email.subject }}"
+            },
+            {
+              "name": "html",
+              "value": "={{ $json.email.html }}"
+            },
+            {
+              "name": "plainText",
+              "value": "={{ $json.email.plain }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        448
+      ],
+      "id": "b52414a6-3fc2-4feb-a27e-6ce2c3b4c468",
+      "name": "Detect Vendor (API)"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.vendor }}",
+                    "rightValue": "MODERN",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "64d98fb4-c6fb-4b54-a24b-2dde530443a8"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Modern Optical"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "79f9d163-00d1-4854-9eb3-6452836a4fe7",
+                    "leftValue": "={{ $json.vendor }}",
+                    "rightValue": "SAFILO",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Safilo"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "31a0a28f-34c3-4a74-ab8c-6f04b402f9f4",
+                    "leftValue": "={{ $json.vendor }}",
+                    "rightValue": "LUX",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Luxottica"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "8ccb1d23-3a5c-406c-9354-113c1c84bb9a",
+                    "leftValue": "={{ $json.vendor }}",
+                    "rightValue": "EUROPA",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Europa"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "3f1e6ce5-45b3-4147-9d53-8a3504d0d15d",
+                    "leftValue": "={{ $json.vendor }}",
+                    "rightValue": "ETNIA",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Etnia Barcelona"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "00dcab0f-bfcc-4da9-83cf-0ea23f91af2e",
+                    "leftValue": "={{ $json.vendor }}",
+                    "rightValue": "ideal_optics",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Ideal Optics"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "0e534efe-047a-4aa8-a497-b69bf79e0dc5",
+                    "leftValue": "={{ $json.vendor }}",
+                    "rightValue": "lamyamerica",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "L'amyamerica"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "034f63f4-78a4-4a0e-b66f-65bd797f8779",
+                    "leftValue": "={{ $json.vendor }}",
+                    "rightValue": "CLEAR",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Clear Vision"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "6e18af72-f461-4bca-9423-aa4e8ae4e789",
+                    "leftValue": "={{ $json.vendor }}",
+                    "rightValue": "kenmark",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Kenmark"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        688,
+        320
+      ],
+      "id": "3153d972-e87f-4337-a42e-387235ec87cc",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/parse/idealoptics",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "html",
+              "value": "={{ $json.email.html }}"
+            },
+            {
+              "name": "plainText",
+              "value": "={{ $json.email.plain }}"
+            },
+            {
+              "name": "accountId",
+              "value": "={{ $json.accountId }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        912,
+        736
+      ],
+      "id": "2a72dcda-050f-494e-82fd-799f78176f75",
+      "name": "parse_Idealoptics"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parseResult = $('parse_Idealoptics').item.json;\nconst accountId = $('Extract Account ID').item.json.accountId;\nconst emailData = $('Extract Account ID').item.json.email;\n\nreturn [{\n  json: {\n    accountId: accountId,\n    from: 'Ideal Optics',\n    subject: `Order #${parseResult.order.order_number}`,\n    html: emailData.html,\n    plainText: emailData.plain,\n    parsedData: {\n      vendor: 'ideal_optics',  // underscore format\n      order: parseResult.order,\n      items: parseResult.items\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1136,
+        736
+      ],
+      "id": "562bb95a-9ed5-4a40-9d2b-21eedcc32494",
+      "name": "Prepare Email Ideal"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/emails/create",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "accountId",
+              "value": "={{ $json.accountId }}"
+            },
+            {
+              "name": "from",
+              "value": "={{ $json.from }}"
+            },
+            {
+              "name": "html",
+              "value": "={{ $json.html }}"
+            },
+            {
+              "name": "plainText",
+              "value": "={{ $json.plainText }}"
+            },
+            {
+              "name": "parsedData",
+              "value": "={{ $json.parsedData }}"
+            },
+            {
+              "name": "subject",
+              "value": "={{ $json.subject }}"
+            },
+            {
+              "name": "vendor",
+              "value": "Ideal Optics"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1360,
+        736
+      ],
+      "id": "515b7db4-038f-4323-ba01-0eee12e38e29",
+      "name": "Create Email Record4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/inventory/bulk-add",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "accountId",
+              "value": "={{ $('parse_Idealoptics').item.json.accountId }}"
+            },
+            {
+              "name": "vendor",
+              "value": "={{ $('parse_Idealoptics').item.json.vendor }}"
+            },
+            {
+              "name": "order",
+              "value": "={{ $('parse_Idealoptics').item.json.order }}"
+            },
+            {
+              "name": "items",
+              "value": "={{ $('parse_Idealoptics').item.json.items }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1584,
+        736
+      ],
+      "id": "eca13fe3-eed0-4dd6-8b0c-ea9b6d38f2c1",
+      "name": "Bulk-Add4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/enrich/idealoptics",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "accountId",
+              "value": "={{ $('parse_Idealoptics').item.json.accountId }}"
+            },
+            {
+              "name": "orderNumber",
+              "value": "={{ $('parse_Idealoptics').item.json.order.order_number }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1808,
+        736
+      ],
+      "id": "8ecca33b-4679-47f0-8634-8de9d828f028",
+      "name": "Enrich1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/parse/lamy",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "html",
+              "value": "={{ $json.email.html }}"
+            },
+            {
+              "name": "plainText",
+              "value": "={{ $json.email.plain }}"
+            },
+            {
+              "name": "accountId",
+              "value": "={{ $json.accountId }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        912,
+        928
+      ],
+      "id": "74494bde-60eb-4323-bc90-94fbf3ef4004",
+      "name": "parse_Lamy"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parseResult = $('parse_Lamy').item.json;\nconst accountId = $('Extract Account ID').item.json.accountId;\nconst emailData = $('Extract Account ID').item.json.email;\n\nreturn [{\n  json: {\n    accountId: accountId,\n    from: 'Lamyamerica orders',\n    subject: `Order #${parseResult.order.order_number}`,\n    html: emailData.html,\n    plainText: emailData.plain,\n    parsedData: {\n      vendor: 'lamyamerica',  // underscore format\n      order: parseResult.order,\n      items: parseResult.items\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1136,
+        928
+      ],
+      "id": "f8b703c8-c312-40ea-9e67-8407967c2444",
+      "name": "Prepare Email Lamy"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/emails/create",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "accountId",
+              "value": "={{ $json.accountId }}"
+            },
+            {
+              "name": "from",
+              "value": "={{ $json.from }}"
+            },
+            {
+              "name": "html",
+              "value": "={{ $json.html }}"
+            },
+            {
+              "name": "plainText",
+              "value": "={{ $json.plainText }}"
+            },
+            {
+              "name": "parsedData",
+              "value": "={{ $json.parsedData }}"
+            },
+            {
+              "name": "subject",
+              "value": "={{ $json.subject }}"
+            },
+            {
+              "name": "vendor",
+              "value": "L'amyamerica"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1360,
+        928
+      ],
+      "id": "e0637b2e-ced8-417d-b15b-4d9d3e0fc95d",
+      "name": "Create Email Record5"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/inventory/bulk-add",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "accountId",
+              "value": "={{ $('parse_Lamy').item.json.accountId }}"
+            },
+            {
+              "name": "vendor",
+              "value": "L'amyamerica"
+            },
+            {
+              "name": "order",
+              "value": "={{ $('parse_Lamy').item.json.order }}"
+            },
+            {
+              "name": "items",
+              "value": "={{ $('parse_Lamy').item.json.items }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1584,
+        928
+      ],
+      "id": "6373aacd-56af-4b1b-b290-7ead43d8c4a6",
+      "name": "Bulk-Add5"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get API response from HTTP Request node\nconst apiResponse = $json;\n\n// Get original email data from Extract Account ID node\nconst extractedData = $('Extract Account ID').item.json;\n\nreturn [{\n  json: {\n    // Original data needed by parsers\n    accountId: extractedData.accountId,\n    senderDomain: extractedData.senderDomain,\n    email: extractedData.email,\n    \n    // Vendor detection results from API\n    vendor: apiResponse.vendor,           // \"safilo\", \"modern_optical\", etc.\n    vendor_id: apiResponse.vendorId,      // UUID from database\n    vendor_name: apiResponse.vendorName,  // \"Safilo\", \"Modern Optical\", etc.\n    confidence: apiResponse.confidence,   // 95, 85, etc.\n    detectionMethod: apiResponse.method,  // \"domain\", \"signature\", etc.\n    \n    // Debug info (useful for troubleshooting)\n    detectionDebug: {\n      confidence: apiResponse.confidence,\n      signals: apiResponse.signals,\n      allScores: apiResponse.debug?.allScores\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        464,
+        448
+      ],
+      "id": "1d5a37c7-64ca-4a45-ae12-ddff589d206b",
+      "name": "Format API Response"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/parse/kenmark",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "html",
+              "value": "={{ $json.email.html }}"
+            },
+            {
+              "name": "plainText",
+              "value": "={{ $json.email.plain }}"
+            },
+            {
+              "name": "accountId",
+              "value": "={{ $json.accountId }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        912,
+        1120
+      ],
+      "id": "40da892c-d1c9-4009-b09b-dc314932ae2c",
+      "name": "parse_kenmark"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parseResult = $('parse_kenmark').item.json;\nconst accountId = $('Extract Account ID').item.json.accountId;\nconst emailData = $('Extract Account ID').item.json.email;\n\nreturn [{\n  json: {\n    accountId: accountId,\n    from: 'Kenmark Orders',\n    subject: `Order #${parseResult.order.order_number}`,\n    html: emailData.html,\n    plainText: emailData.plain,\n    parsedData: {\n      vendor: 'kenmark',  // underscore format\n      order: parseResult.order,\n      items: parseResult.items\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1136,
+        1120
+      ],
+      "id": "c1c4ec8a-996e-4cdc-aa06-2366380ff1a9",
+      "name": "Prepare Email Lamy1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/emails/create",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "accountId",
+              "value": "={{ $json.accountId }}"
+            },
+            {
+              "name": "from",
+              "value": "={{ $json.from }}"
+            },
+            {
+              "name": "html",
+              "value": "={{ $json.html }}"
+            },
+            {
+              "name": "plainText",
+              "value": "={{ $json.plainText }}"
+            },
+            {
+              "name": "parsedData",
+              "value": "={{ $json.parsedData }}"
+            },
+            {
+              "name": "subject",
+              "value": "={{ $json.subject }}"
+            },
+            {
+              "name": "vendor",
+              "value": "Kenmark"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1360,
+        1120
+      ],
+      "id": "71172620-98e2-45fe-8b61-f6b31a2569ea",
+      "name": "Create Email Record6"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/inventory/bulk-add",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "accountId",
+              "value": "={{ $('parse_kenmark').item.json.accountId }}"
+            },
+            {
+              "name": "vendor",
+              "value": "L'amyamerica"
+            },
+            {
+              "name": "order",
+              "value": "={{ $('parse_kenmark').item.json.order }}"
+            },
+            {
+              "name": "items",
+              "value": "={{ $('parse_kenmark').item.json.items }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1584,
+        1120
+      ],
+      "id": "5527c7f2-5b07-46fe-9cdc-ccc2d41b1ec1",
+      "name": "Bulk-Add6"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Account ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bulk-Add": {
+      "main": [
+        [
+          {
+            "node": "Enrich",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enrich": {
+      "main": [
+        []
+      ]
+    },
+    "Create Email Record": {
+      "main": [
+        [
+          {
+            "node": "Bulk-Add",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse_ModernOptical": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email Data": {
+      "main": [
+        [
+          {
+            "node": "Create Email Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse_Safilo": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email Safilo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email Safilo": {
+      "main": [
+        [
+          {
+            "node": "Create Email Record1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Email Record1": {
+      "main": [
+        [
+          {
+            "node": "Bulk-Add1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse_Luxottica": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email Luxottica",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email Luxottica": {
+      "main": [
+        [
+          {
+            "node": "Create Email Record2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Email Record2": {
+      "main": [
+        [
+          {
+            "node": "Bulk-Add2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Account ID": {
+      "main": [
+        [
+          {
+            "node": "Detect Vendor (API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse_Etnia": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email Etnia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email Etnia": {
+      "main": [
+        [
+          {
+            "node": "Create Email Record3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Email Record3": {
+      "main": [
+        [
+          {
+            "node": "Bulk-Add3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detect Vendor": {
+      "main": [
+        []
+      ]
+    },
+    "Detect Vendor (API)": {
+      "main": [
+        [
+          {
+            "node": "Format API Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "parse_ModernOptical",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "parse_Safilo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "parse_Luxottica",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [],
+        [
+          {
+            "node": "parse_Etnia",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "parse_Idealoptics",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "parse_Lamy",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [],
+        [
+          {
+            "node": "parse_kenmark",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse_Idealoptics": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email Ideal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email Ideal": {
+      "main": [
+        [
+          {
+            "node": "Create Email Record4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Email Record4": {
+      "main": [
+        [
+          {
+            "node": "Bulk-Add4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bulk-Add4": {
+      "main": [
+        [
+          {
+            "node": "Enrich1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse_Lamy": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email Lamy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email Lamy": {
+      "main": [
+        [
+          {
+            "node": "Create Email Record5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Email Record5": {
+      "main": [
+        [
+          {
+            "node": "Bulk-Add5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format API Response": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse_kenmark": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email Lamy1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email Lamy1": {
+      "main": [
+        [
+          {
+            "node": "Create Email Record6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Email Record6": {
+      "main": [
+        [
+          {
+            "node": "Bulk-Add6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3e5a4e61-2093-4d51-a5b7-5cb40184cc1c",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "755d69fd97946ae86204aaf9353f2da391bb20edeb5619afdf676315f69f4cd2"
+  },
+  "id": "HCl4lPcN9UK15Y0X",
+  "tags": []
+}

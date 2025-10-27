@@ -190,6 +190,61 @@ CREATE TABLE public.orders (
   CONSTRAINT orders_vendor_id_fkey FOREIGN KEY (vendor_id) REFERENCES public.vendors(id),
   CONSTRAINT orders_email_id_fkey FOREIGN KEY (email_id) REFERENCES public.emails(id)
 );
+CREATE TABLE public.return_report_items (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  return_report_id uuid NOT NULL,
+  inventory_id uuid NOT NULL,
+  sku character varying,
+  brand character varying,
+  model character varying,
+  color character varying,
+  size character varying,
+  quantity integer DEFAULT 1,
+  wholesale_price numeric,
+  order_date date,
+  return_window_expires date,
+  reason character varying,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT return_report_items_pkey PRIMARY KEY (id),
+  CONSTRAINT return_report_items_return_report_id_fkey FOREIGN KEY (return_report_id) REFERENCES public.return_reports(id),
+  CONSTRAINT return_report_items_inventory_id_fkey FOREIGN KEY (inventory_id) REFERENCES public.inventory(id)
+);
+CREATE TABLE public.return_reports (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  account_id uuid NOT NULL,
+  vendor_id uuid,
+  report_number character varying NOT NULL UNIQUE,
+  status character varying DEFAULT 'draft'::character varying CHECK (status::text = ANY (ARRAY['draft'::character varying, 'generated'::character varying, 'sent'::character varying, 'cancelled'::character varying]::text[])),
+  vendor_account_number character varying,
+  total_items integer DEFAULT 0,
+  total_value numeric DEFAULT 0,
+  generated_at timestamp with time zone,
+  pdf_path character varying,
+  sent_to_email character varying,
+  sent_at timestamp with time zone,
+  notes text,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT return_reports_pkey PRIMARY KEY (id),
+  CONSTRAINT return_reports_account_id_fkey FOREIGN KEY (account_id) REFERENCES public.accounts(id),
+  CONSTRAINT return_reports_vendor_id_fkey FOREIGN KEY (vendor_id) REFERENCES public.vendors(id)
+);
+CREATE TABLE public.vendor_reps (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  account_id uuid NOT NULL,
+  vendor_id uuid NOT NULL,
+  rep_name character varying NOT NULL,
+  rep_email character varying NOT NULL,
+  rep_phone character varying,
+  rep_title character varying,
+  is_primary boolean DEFAULT false,
+  notes text,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT vendor_reps_pkey PRIMARY KEY (id),
+  CONSTRAINT vendor_reps_account_id_fkey FOREIGN KEY (account_id) REFERENCES public.accounts(id),
+  CONSTRAINT vendor_reps_vendor_id_fkey FOREIGN KEY (vendor_id) REFERENCES public.vendors(id)
+);
 CREATE TABLE public.vendors (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
   name character varying NOT NULL UNIQUE,
@@ -203,6 +258,8 @@ CREATE TABLE public.vendors (
   settings jsonb DEFAULT '{}'::jsonb,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  contact_email character varying,
+  contact_phone character varying,
   CONSTRAINT vendors_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.webhook_logs (
@@ -218,77 +275,46 @@ CREATE TABLE public.webhook_logs (
   CONSTRAINT webhook_logs_account_id_fkey FOREIGN KEY (account_id) REFERENCES public.accounts(id),
   CONSTRAINT webhook_logs_email_id_fkey FOREIGN KEY (email_id) REFERENCES public.emails(id)
 );
-
--- ============================================================================
--- VENDOR DATA INSERTS
--- ============================================================================
-
--- Add Kenmark vendor with comprehensive email detection patterns
--- This vendor has very unique identifiers making detection highly reliable
--- Domain: kenmarkeyewear.com | Image server: jiecosystem.net
-
-INSERT INTO public.vendors (
-  name,
-  code,
-  domain,
-  email_patterns,
-  parser_service,
-  is_active,
-  settings
-) VALUES (
-  'Kenmark',
-  'kenmark',
-  'kenmarkeyewear.com',
-  '{
-    "tier1": {
-      "weight": 95,
-      "domains": [
-        "kenmarkeyewear.com"
-      ]
-    },
-    "tier2": {
-      "weight": 90,
-      "body_signatures": [
-        "Kenmark Eyewear: Your Receipt for Order Number",
-        "Kenmark Eyewear",
-        "kenmarkeyewear.com",
-        "imageserver.jiecosystem.net/image/kenmark/",
-        "PLEASE DO NOT REPLY TO THIS EMAIL",
-        "noreply@kenmarkeyewear.com"
-      ]
-    },
-    "tier3": {
-      "weight": 75,
-      "required_matches": 2,
-      "subject_keywords": [
-        "Kenmark Eyewear",
-        "Receipt for Order Number",
-        "Your Receipt"
-      ],
-      "body_keywords": [
-        "Total Pieces:",
-        "Placed By Rep:",
-        "jiecosystem.net",
-        "Order Number:",
-        "Ship To",
-        "Order Items"
-      ]
-    }
-  }'::jsonb,
-  'kenmark_parser',
-  true,
-  '{
-    "supports_pdf": false,
-    "supports_html": true,
-    "order_confirmation_format": "html_table",
-    "image_server": "imageserver.jiecosystem.net"
-  }'::jsonb
-)
-ON CONFLICT (code) DO UPDATE SET
-  name = EXCLUDED.name,
-  domain = EXCLUDED.domain,
-  email_patterns = EXCLUDED.email_patterns,
-  parser_service = EXCLUDED.parser_service,
-  is_active = EXCLUDED.is_active,
-  settings = EXCLUDED.settings,
-  updated_at = CURRENT_TIMESTAMP;
+CREATE TABLE public.vendor_catalog (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  vendor_id uuid NOT NULL,
+  vendor_name character varying,
+  brand character varying NOT NULL,
+  model character varying NOT NULL,
+  color character varying,
+  color_code character varying,
+  sku character varying,
+  upc character varying,
+  ean character varying,
+  wholesale_cost numeric,
+  msrp numeric,
+  map_price numeric,
+  eye_size character varying,
+  bridge character varying,
+  temple_length character varying,
+  full_size character varying,
+  material character varying,
+  gender character varying,
+  fit_type character varying,
+  a_measurement character varying,
+  b_measurement character varying,
+  dbl character varying,
+  ed character varying,
+  in_stock boolean,
+  availability_status character varying,
+  confidence_score integer DEFAULT 100,
+  data_source character varying CHECK (data_source::text = ANY (ARRAY['web_scrape'::character varying, 'api'::character varying, 'manual'::character varying, 'email_parse'::character varying]::text[])),
+  verified boolean DEFAULT false,
+  first_seen_date timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  last_updated timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  times_ordered integer DEFAULT 1,
+  metadata jsonb DEFAULT '{}'::jsonb,
+  CONSTRAINT vendor_catalog_pkey PRIMARY KEY (id),
+  CONSTRAINT vendor_catalog_vendor_id_fkey FOREIGN KEY (vendor_id) REFERENCES public.vendors(id),
+  CONSTRAINT vendor_catalog_unique_item UNIQUE (vendor_id, model, color, eye_size)
+);
+CREATE INDEX idx_vendor_catalog_brand ON public.vendor_catalog(brand);
+CREATE INDEX idx_vendor_catalog_vendor_brand ON public.vendor_catalog(vendor_id, brand);
+CREATE INDEX idx_vendor_catalog_upc ON public.vendor_catalog(upc) WHERE upc IS NOT NULL;
+CREATE INDEX idx_vendor_catalog_model ON public.vendor_catalog(model);
+CREATE INDEX idx_vendor_catalog_vendor_model ON public.vendor_catalog(vendor_id, model);

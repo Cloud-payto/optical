@@ -8,6 +8,7 @@ const { parseLamyamericaHtml, validateParsedData } = require('../parsers/lamyame
 const LamyamericaService = require('../parsers/LamyamericaService');
 const { parseIdealOpticsHtml } = require('../parsers/idealOpticsParser');
 const IdealOpticsService = require('../parsers/IdealOpticsService');
+const { supabase } = require('../lib/supabase');
 
 /**
  * POST /api/parse/modernoptical
@@ -41,11 +42,19 @@ router.post('/modernoptical', async (req, res) => {
     console.log('  Items found:', parseResult.items?.length || 0);
     console.log('  Unique frames:', parseResult.unique_frames?.length || 0);
 
+    // Get vendor ID from database
+    const { data: vendor } = await supabase
+      .from('vendors')
+      .select('id')
+      .eq('code', 'modern_optical')
+      .single();
+
     // Return the parsed data
     return res.status(200).json({
       success: true,
       accountId: accountId,
       vendor: parseResult.vendor || 'modern_optical',
+      vendorId: vendor?.id,
       order: parseResult.order,
       items: parseResult.items,
       unique_frames: parseResult.unique_frames
@@ -97,11 +106,19 @@ router.post('/safilo', async (req, res) => {
     console.log('  Frames found:', result.frames?.length || 0);
     console.log('  Total pieces:', result.statistics?.totalFrames || 0);
 
+    // Get vendor ID from database
+    const { data: vendor } = await supabase
+      .from('vendors')
+      .select('id')
+      .eq('code', 'safilo')
+      .single();
+
     // Return the parsed data
     return res.status(200).json({
       success: true,
       accountId: accountId,
       vendor: 'safilo',
+      vendorId: vendor?.id,
       order: {
         order_number: result.orderInfo.orderNumber,
         customer_name: result.orderInfo.customerName,
@@ -165,11 +182,19 @@ router.post('/luxottica', async (req, res) => {
     console.log('  Items found:', parseResult.items?.length || 0);
     console.log('  Unique frames:', parseResult.unique_frames?.length || 0);
 
+    // Get vendor ID from database
+    const { data: vendor } = await supabase
+      .from('vendors')
+      .select('id')
+      .eq('code', 'luxottica')
+      .single();
+
     // Return the parsed data
     return res.status(200).json({
       success: true,
       accountId: accountId,
       vendor: parseResult.vendor || 'luxottica',
+      vendorId: vendor?.id,
       order: parseResult.order,
       items: parseResult.items,
       unique_frames: parseResult.unique_frames
@@ -251,11 +276,19 @@ router.post('/etnia-barcelona', async (req, res) => {
       }
     });
 
+    // Get vendor ID from database
+    const { data: vendor } = await supabase
+      .from('vendors')
+      .select('id')
+      .eq('code', 'etnia_barcelona')
+      .single();
+
     // Return the parsed data
     return res.status(200).json({
       success: true,
       accountId: accountId,
       vendor: 'etnia_barcelona',
+      vendorId: vendor?.id,
       order: {
         order_number: result.orderInfo.orderNumber,
         customer_name: result.orderInfo.customerName,
@@ -387,11 +420,19 @@ router.post('/lamy', async (req, res) => {
       return sum + (price * item.quantity);
     }, 0);
 
+    // Get vendor ID from database
+    const { data: vendor } = await supabase
+      .from('vendors')
+      .select('id')
+      .eq('code', 'lamyamerica')
+      .single();
+
     // Return the parsed and enriched data
     return res.status(200).json({
       success: true,
       accountId: accountId,
       vendor: 'lamyamerica',
+      vendorId: vendor?.id,
       order: {
         order_number: enrichedData.orderNumber,
         customer_name: enrichedData.customerName,
@@ -501,11 +542,19 @@ router.post('/idealoptics', async (req, res) => {
       return sum + (price * item.quantity);
     }, 0);
 
+    // Get vendor ID from database
+    const { data: vendor } = await supabase
+      .from('vendors')
+      .select('id')
+      .eq('code', 'ideal_optics')
+      .single();
+
     // Return the parsed and enriched data
     return res.status(200).json({
       success: true,
       accountId: accountId,
       vendor: 'ideal_optics',
+      vendorId: vendor?.id,
       order: {
         order_number: enrichedData.orderNumber,
         customer_name: enrichedData.customerName,
