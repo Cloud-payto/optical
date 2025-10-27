@@ -46,7 +46,7 @@ router.post('/modernoptical', async (req, res) => {
     const { data: vendor } = await supabase
       .from('vendors')
       .select('id')
-      .eq('code', 'modern_optical')
+      .eq('code', 'MODERN')
       .single();
 
     // Return the parsed data
@@ -110,7 +110,7 @@ router.post('/safilo', async (req, res) => {
     const { data: vendor } = await supabase
       .from('vendors')
       .select('id')
-      .eq('code', 'safilo')
+      .eq('code', 'SAFILO')
       .single();
 
     // Return the parsed data
@@ -186,7 +186,7 @@ router.post('/luxottica', async (req, res) => {
     const { data: vendor } = await supabase
       .from('vendors')
       .select('id')
-      .eq('code', 'luxottica')
+      .eq('code', 'LUX')
       .single();
 
     // Return the parsed data
@@ -280,7 +280,7 @@ router.post('/etnia-barcelona', async (req, res) => {
     const { data: vendor } = await supabase
       .from('vendors')
       .select('id')
-      .eq('code', 'etnia_barcelona')
+      .eq('code', 'ETNIA')
       .single();
 
     // Return the parsed data

@@ -91,7 +91,7 @@ class SafiloCatalogCrawler {
         const { data, error } = await supabase
             .from('vendors')
             .select('id')
-            .eq('code', 'safilo')
+            .eq('code', 'SAFILO')
             .single();
 
         if (error || !data) {
