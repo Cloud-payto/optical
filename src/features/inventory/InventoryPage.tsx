@@ -26,7 +26,7 @@ export function InventoryPage() {
   const [activeTab, setActiveTab] = useState<'pending' | 'current' | 'archived' | 'sold'>('current');
   const [filters, setFilters] = useState<FilterState>({
     status: 'current',
-    sortBy: 'newest'
+    sortBy: 'brand'
   });
   const [returnReportItems, setReturnReportItems] = useState<InventoryItem[]>([]);
   const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
@@ -94,7 +94,14 @@ export function InventoryPage() {
         });
         break;
       case 'brand':
-        filtered.sort((a, b) => (a.brand || '').localeCompare(b.brand || ''));
+        filtered.sort((a, b) => {
+          // First sort by brand
+          const brandCompare = (a.brand || '').localeCompare(b.brand || '');
+          if (brandCompare !== 0) return brandCompare;
+
+          // Then sort by model within the same brand
+          return (a.model || '').localeCompare(b.model || '');
+        });
         break;
       case 'stock':
         filtered.sort((a, b) => b.quantity - a.quantity);
