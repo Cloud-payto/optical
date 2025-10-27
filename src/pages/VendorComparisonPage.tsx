@@ -114,8 +114,10 @@ const VendorComparisonPage: React.FC = () => {
 
       try {
         setLoadingCatalogData(true);
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-        const response = await fetch(`${apiUrl}/api/catalog/vendor/${selectedVendorForDetails.id}`);
+        // VITE_API_URL already includes /api in production, so we need to handle both cases
+        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+        const apiUrl = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
+        const response = await fetch(`${apiUrl}/catalog/vendor/${selectedVendorForDetails.id}`);
         const data = await response.json();
 
         if (data.success) {
