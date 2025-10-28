@@ -360,16 +360,35 @@ router.get('/vendor/:vendorId', async (req, res) => {
     try {
         const { vendorId } = req.params;
 
-        // Get all catalog items for this vendor (no limit to get complete data)
-        const { data, error, count } = await supabase
-            .from('vendor_catalog')
-            .select('*', { count: 'exact' })
-            .eq('vendor_id', vendorId)
-            .limit(10000); // Increase limit to get all products
+        // Fetch all catalog items in batches to bypass Supabase 1000 row limit
+        let allData = [];
+        let fromIndex = 0;
+        const batchSize = 1000;
+        let hasMore = true;
 
-        if (error) throw error;
+        while (hasMore) {
+            const { data, error } = await supabase
+                .from('vendor_catalog')
+                .select('*')
+                .eq('vendor_id', vendorId)
+                .range(fromIndex, fromIndex + batchSize - 1);
 
-        if (!data || data.length === 0) {
+            if (error) throw error;
+
+            if (data && data.length > 0) {
+                allData = allData.concat(data);
+                fromIndex += batchSize;
+
+                // If we got less than batchSize, we've reached the end
+                if (data.length < batchSize) {
+                    hasMore = false;
+                }
+            } else {
+                hasMore = false;
+            }
+        }
+
+        if (allData.length === 0) {
             return res.json({
                 success: true,
                 vendorId,
@@ -381,7 +400,7 @@ router.get('/vendor/:vendorId', async (req, res) => {
 
         // Group by brand and calculate stats
         const brandStats = {};
-        data.forEach(item => {
+        allData.forEach(item => {
             const brand = item.brand;
             if (!brandStats[brand]) {
                 brandStats[brand] = {
@@ -443,7 +462,7 @@ router.get('/vendor/:vendorId', async (req, res) => {
         }).sort((a, b) => b.productCount - a.productCount); // Sort by product count
 
         // Calculate overall vendor stats
-        const allWholesalePrices = data
+        const allWholesalePrices = allData
             .map(item => item.wholesale_cost)
             .filter(price => price !== null && price !== undefined)
             .map(price => parseFloat(price));
@@ -455,10 +474,10 @@ router.get('/vendor/:vendorId', async (req, res) => {
         return res.json({
             success: true,
             vendorId,
-            vendorName: data[0]?.vendor_name || 'Unknown',
-            totalProducts: data.length,
+            vendorName: allData[0]?.vendor_name || 'Unknown',
+            totalProducts: allData.length,
             totalBrands: brands.length,
-            totalOrders: data.reduce((sum, item) => sum + (item.times_ordered || 0), 0),
+            totalOrders: allData.reduce((sum, item) => sum + (item.times_ordered || 0), 0),
             avgWholesaleCost: overallAvgWholesale ? Math.round(overallAvgWholesale * 100) / 100 : null,
             brands: brands
         });

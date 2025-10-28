@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Package, ChevronDown, Check, Star, TrendingUp, Loader2 } from 'lucide-react';
 import { Container } from '../components/ui/Container';
 import { fetchVendors, Vendor } from '../services/api';
+import { getBrandName, VENDOR_BRANDS } from '../utils/brandNames';
 
 interface VendorDisplayData extends Vendor {
   id: number | string;
@@ -293,8 +294,25 @@ const VendorComparisonPage: React.FC = () => {
 
                         <div className="space-y-3">
                           <div className="bg-gradient-to-br from-gray-50 to-blue-50/30 rounded-xl p-4 border border-gray-100">
-                            <div className="text-xs font-medium text-gray-500 mb-1">Brands</div>
-                            <div className="text-sm font-semibold text-gray-900">{vendor.brands}</div>
+                            <div className="text-xs font-medium text-gray-500 mb-2">Brands</div>
+                            <div className="flex flex-wrap gap-2">
+                              {VENDOR_BRANDS[vendor.name]?.slice(0, 4).map((brandCode) => (
+                                <span
+                                  key={brandCode}
+                                  className="px-3 py-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs font-semibold rounded-full shadow-sm"
+                                >
+                                  {getBrandName(brandCode)}
+                                </span>
+                              ))}
+                              {VENDOR_BRANDS[vendor.name] && VENDOR_BRANDS[vendor.name].length > 4 && (
+                                <span className="px-3 py-1 bg-gray-200 text-gray-700 text-xs font-semibold rounded-full">
+                                  +{VENDOR_BRANDS[vendor.name].length - 4} more
+                                </span>
+                              )}
+                              {!VENDOR_BRANDS[vendor.name] && (
+                                <span className="text-sm text-gray-600">{vendor.brands}</span>
+                              )}
+                            </div>
                           </div>
 
                           <div className="grid grid-cols-2 gap-3">
