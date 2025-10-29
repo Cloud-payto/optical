@@ -449,6 +449,7 @@ export interface DashboardStats {
   totalInventory: number;
   totalValue: number;
   pendingItems: number;
+  itemsWithMissingPrices: number;
 }
 
 export interface BrandStats {

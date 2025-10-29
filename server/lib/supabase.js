@@ -921,12 +921,20 @@ const statsOperations = {
         .eq('account_id', userId)
         .eq('status', 'pending');
 
+      // Get items with missing prices (wholesale_price is null or 0)
+      const { count: itemsWithMissingPrices } = await supabase
+        .from('inventory')
+        .select('*', { count: 'exact', head: true })
+        .eq('account_id', userId)
+        .neq('status', 'archived')
+        .or('wholesale_price.is.null,wholesale_price.eq.0');
+
       // Calculate total value (if wholesale_price exists)
       const { data: inventoryData } = await supabase
         .from('inventory')
         .select('wholesale_price, quantity')
         .eq('account_id', userId)
-        .not('wholesale_price', 'is', null);
+        .not('wholesale_price', 'is', null');
 
       const totalValue = (inventoryData || []).reduce((sum, item) => {
         return sum + (item.wholesale_price * item.quantity || 0);
@@ -936,7 +944,8 @@ const statsOperations = {
         totalOrders: totalOrders || 0,
         totalInventory: totalInventory || 0,
         totalValue: totalValue || 0,
-        pendingItems: pendingItems || 0
+        pendingItems: pendingItems || 0,
+        itemsWithMissingPrices: itemsWithMissingPrices || 0
       };
     } catch (error) {
       handleSupabaseError(error, 'getDashboardStats');
@@ -1377,7 +1386,43 @@ const vendorOperations = {
       }
 
       console.log('✅ Successfully saved account brand:', accountBrand);
-      
+
+      // Step 3: Update inventory items with missing prices for this brand
+      if (wholesale_cost && wholesale_cost > 0) {
+        try {
+          // Get the brand name from the brands table
+          const { data: brandInfo } = await supabase
+            .from('brands')
+            .select('name')
+            .eq('id', finalBrandId)
+            .single();
+
+          if (brandInfo) {
+            // Update inventory items that have $0 wholesale_price for this brand
+            const { data: updatedItems, error: updateError } = await supabase
+              .from('inventory')
+              .update({
+                wholesale_price: wholesale_cost,
+                updated_at: new Date().toISOString()
+              })
+              .eq('account_id', userId)
+              .eq('vendor_id', vendor_id)
+              .ilike('brand', brandInfo.name)
+              .or('wholesale_price.is.null,wholesale_price.eq.0')
+              .select('id');
+
+            if (updateError) {
+              console.error('⚠️  Error updating inventory prices:', updateError);
+            } else if (updatedItems && updatedItems.length > 0) {
+              console.log(`✅ Updated ${updatedItems.length} inventory item(s) with new pricing for brand "${brandInfo.name}"`);
+            }
+          }
+        } catch (inventoryUpdateError) {
+          console.error('⚠️  Error in inventory price update:', inventoryUpdateError);
+          // Don't throw - this is a bonus feature, not critical
+        }
+      }
+
       const finalResult = {
         account_brand: accountBrand,
         brand_id: finalBrandId, // Return the real brand ID for frontend update

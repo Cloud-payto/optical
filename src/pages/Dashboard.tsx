@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Container } from '../components/ui/Container';
 import { fetchDashboardStats, fetchInventoryByVendor, DashboardStats, VendorInventoryStats, PaginationMetadata } from '../services/api';
-import { PackageIcon, DollarSignIcon, ShoppingCartIcon, ClockIcon, ChevronDownIcon, ChevronRightIcon, ArrowUpDown } from 'lucide-react';
+import { PackageIcon, DollarSignIcon, ShoppingCartIcon, ClockIcon, ChevronDownIcon, ChevronRightIcon, ArrowUpDown, AlertTriangleIcon } from 'lucide-react';
 
 const DashboardPage: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -141,6 +142,32 @@ const DashboardPage: React.FC = () => {
               <p className="text-2xl font-bold text-gray-900">{stats?.totalOrders || 0}</p>
             </div>
           </div>
+
+          {/* Missing Prices Alert */}
+          {stats && stats.itemsWithMissingPrices > 0 && (
+            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg mb-8">
+              <div className="flex items-start">
+                <AlertTriangleIcon className="h-5 w-5 text-yellow-400 mt-0.5 mr-3 flex-shrink-0" />
+                <div className="flex-1">
+                  <h3 className="text-sm font-medium text-yellow-800">
+                    Missing Pricing Information
+                  </h3>
+                  <p className="mt-1 text-sm text-yellow-700">
+                    You have <strong>{stats.itemsWithMissingPrices}</strong> {stats.itemsWithMissingPrices === 1 ? 'item' : 'items'} in inventory without pricing information.
+                    This affects your total inventory value calculation.
+                  </p>
+                  <div className="mt-3">
+                    <Link
+                      to="/brands"
+                      className="text-sm font-medium text-yellow-800 hover:text-yellow-900 underline"
+                    >
+                      Add pricing for your vendors →
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Inventory by Vendor */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
