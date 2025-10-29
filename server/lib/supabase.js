@@ -1407,47 +1407,65 @@ const vendorOperations = {
           if (brandInfo) {
             console.log(`🔍 Found brand name: "${brandInfo.name}"`);
 
-            // First, check how many items match this criteria
-            const { data: matchingItems, error: checkError } = await supabase
+            // Create normalized version for matching (remove spaces, hyphens, lowercase)
+            const normalizedBrandName = brandInfo.name.toLowerCase().replace(/[\s-]/g, '');
+            console.log(`🔍 Normalized brand name: "${normalizedBrandName}"`);
+
+            // Get ALL inventory items for this vendor with missing prices
+            const { data: allVendorItems, error: fetchError } = await supabase
               .from('inventory')
               .select('id, brand, wholesale_price, model')
               .eq('account_id', userId)
               .eq('vendor_id', vendor_id)
-              .ilike('brand', brandInfo.name)
               .or('wholesale_price.is.null,wholesale_price.eq.0');
 
-            if (checkError) {
-              console.error('⚠️  Error checking matching items:', checkError);
-            } else {
-              console.log(`🔍 Found ${matchingItems?.length || 0} inventory item(s) matching brand "${brandInfo.name}" with missing prices`);
-              if (matchingItems && matchingItems.length > 0) {
-                console.log('📋 Sample items to update:', matchingItems.slice(0, 3).map(i => ({ id: i.id, brand: i.brand, model: i.model, current_price: i.wholesale_price })));
-              }
+            if (fetchError) {
+              console.error('⚠️  Error fetching inventory items:', fetchError);
+              return;
             }
 
-            // Update inventory items that have $0 wholesale_price for this brand
-            const { data: updatedItems, error: updateError } = await supabase
-              .from('inventory')
-              .update({
-                wholesale_price: wholesale_cost,
-                updated_at: new Date().toISOString()
-              })
-              .eq('account_id', userId)
-              .eq('vendor_id', vendor_id)
-              .ilike('brand', brandInfo.name)
-              .or('wholesale_price.is.null,wholesale_price.eq.0')
-              .select('id, brand, model');
+            console.log(`🔍 Found ${allVendorItems?.length || 0} total inventory items for this vendor with missing prices`);
 
-            if (updateError) {
-              console.error('⚠️  Error updating inventory prices:', updateError);
-            } else if (updatedItems && updatedItems.length > 0) {
-              console.log(`✅ Successfully updated ${updatedItems.length} inventory item(s) with new pricing $${wholesale_cost} for brand "${brandInfo.name}"`);
-              console.log('📋 Updated items:', updatedItems.map(i => ({ id: i.id, brand: i.brand, model: i.model })));
+            // Filter items that match the brand name (fuzzy matching)
+            const matchingItems = (allVendorItems || []).filter(item => {
+              if (!item.brand) return false;
+              const normalizedItemBrand = item.brand.toLowerCase().replace(/[\s-]/g, '');
+              return normalizedItemBrand === normalizedBrandName;
+            });
+
+            console.log(`🔍 Found ${matchingItems.length} items matching brand "${brandInfo.name}" after fuzzy matching`);
+            if (matchingItems.length > 0) {
+              console.log('📋 Sample items to update:', matchingItems.slice(0, 3).map(i => ({
+                id: i.id,
+                brand: i.brand,
+                model: i.model,
+                current_price: i.wholesale_price
+              })));
+
+              // Get the IDs of items to update
+              const itemIds = matchingItems.map(item => item.id);
+
+              // Update the matched items
+              const { data: updatedItems, error: updateError } = await supabase
+                .from('inventory')
+                .update({
+                  wholesale_price: wholesale_cost,
+                  updated_at: new Date().toISOString()
+                })
+                .in('id', itemIds)
+                .select('id, brand, model');
+
+              if (updateError) {
+                console.error('⚠️  Error updating inventory prices:', updateError);
+              } else if (updatedItems && updatedItems.length > 0) {
+                console.log(`✅ Successfully updated ${updatedItems.length} inventory item(s) with new pricing $${wholesale_cost} for brand "${brandInfo.name}"`);
+                console.log('📋 Updated items:', updatedItems.map(i => ({ id: i.id, brand: i.brand, model: i.model })));
+              }
             } else {
-              console.log(`ℹ️  No inventory items were updated. This could mean:`);
-              console.log(`   - No items exist for brand "${brandInfo.name}" with vendor_id ${vendor_id}`);
-              console.log(`   - All items already have prices set`);
-              console.log(`   - Brand name mismatch between inventory.brand and brands.name`);
+              console.log(`ℹ️  No inventory items matched brand "${brandInfo.name}". Brand names in inventory for this vendor:`);
+              const uniqueBrands = [...new Set((allVendorItems || []).map(i => i.brand).filter(Boolean))];
+              console.log(`   Available brands: ${uniqueBrands.join(', ')}`);
+              console.log(`   Looking for: "${brandInfo.name}" (normalized: "${normalizedBrandName}")`);
             }
           }
         } catch (inventoryUpdateError) {
