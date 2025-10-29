@@ -934,7 +934,7 @@ const statsOperations = {
         .from('inventory')
         .select('wholesale_price, quantity')
         .eq('account_id', userId)
-        .not('wholesale_price', 'is', null');
+        .not('wholesale_price', 'is', null);
 
       const totalValue = (inventoryData || []).reduce((sum, item) => {
         return sum + (item.wholesale_price * item.quantity || 0);
