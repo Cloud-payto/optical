@@ -47,10 +47,8 @@ const navigationConfig = [
     name: 'Reports',
     icon: FileText,
     children: [
-      { name: 'Pending', to: '/reports/pending', icon: FileText },
       { name: 'Current Inventory', to: '/reports/current-inventory', icon: Warehouse },
       { name: 'Sold', to: '/reports/sold', icon: ShoppingCart },
-      { name: 'Archived', to: '/reports/archived', icon: Package },
       { name: 'Returns', to: '/reports/returns', icon: RotateCcw },
     ]
   },

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { DollarSignIcon, SlidersIcon, TrendingUpIcon, Check, ChevronDownIcon, PlusIcon, TagIcon, SaveIcon, BuildingIcon } from 'lucide-react';
-import { calculateProfit, calculateRetailPrice, calculateDiscountPercentage } from '../utils/calculations';
+import { calculateProfit, calculateNonInsuranceProfit, calculateRetailPrice, calculateDiscountPercentage } from '../utils/calculations';
 import { FrameData, SavedComparison } from '../types';
 import { Company, Brand, fetchCompaniesWithPricing } from '../services/api';
 import { useDemo } from '../contexts/DemoContext';
@@ -224,6 +224,7 @@ const initialFrameData: FrameData = {
   useManualRetailPrice: false,
   insuranceCoverage: 150,
   insuranceReimbursement: 57,
+  insuranceEnabled: true,
   profitData: null
 };
 
@@ -270,6 +271,7 @@ const CompareFrames: React.FC = () => {
     useManualRetailPrice: false,
     insuranceCoverage: 150,
     insuranceReimbursement: 57,
+    insuranceEnabled: true,
     profitData: null
   });
 
@@ -285,6 +287,7 @@ const CompareFrames: React.FC = () => {
     useManualRetailPrice: false,
     insuranceCoverage: 150,
     insuranceReimbursement: 57,
+    insuranceEnabled: true,
     profitData: null
   });
   
@@ -338,17 +341,26 @@ const CompareFrames: React.FC = () => {
       insuranceCoverage: frame1.insuranceCoverage,
       insuranceReimbursement: frame1.insuranceReimbursement
     };
-    
+
+    const profitData = frame1.insuranceEnabled
+      ? calculateProfit(
+          frameData.yourCost,
+          frameData.wholesaleCost,
+          frameData.tariffTax,
+          frameData.retailPrice,
+          frameData.insuranceCoverage,
+          frameData.insuranceReimbursement
+        )
+      : calculateNonInsuranceProfit(
+          frameData.yourCost,
+          frameData.wholesaleCost,
+          frameData.tariffTax,
+          frameData.retailPrice
+        );
+
     setFrame1(prev => ({
       ...prev,
-      profitData: calculateProfit(
-        frameData.yourCost,
-        frameData.wholesaleCost,
-        frameData.tariffTax,
-        frameData.retailPrice,
-        frameData.insuranceCoverage,
-        frameData.insuranceReimbursement
-      )
+      profitData
     }));
   }, [
     frame1.yourCost,
@@ -356,7 +368,8 @@ const CompareFrames: React.FC = () => {
     frame1.tariffTax,
     frame1.retailPrice,
     frame1.insuranceCoverage,
-    frame1.insuranceReimbursement
+    frame1.insuranceReimbursement,
+    frame1.insuranceEnabled
   ]);
 
   // Calculate profit data for Frame 2
@@ -369,17 +382,26 @@ const CompareFrames: React.FC = () => {
       insuranceCoverage: frame2.insuranceCoverage,
       insuranceReimbursement: frame2.insuranceReimbursement
     };
-    
+
+    const profitData = frame2.insuranceEnabled
+      ? calculateProfit(
+          frameData.yourCost,
+          frameData.wholesaleCost,
+          frameData.tariffTax,
+          frameData.retailPrice,
+          frameData.insuranceCoverage,
+          frameData.insuranceReimbursement
+        )
+      : calculateNonInsuranceProfit(
+          frameData.yourCost,
+          frameData.wholesaleCost,
+          frameData.tariffTax,
+          frameData.retailPrice
+        );
+
     setFrame2(prev => ({
       ...prev,
-      profitData: calculateProfit(
-        frameData.yourCost,
-        frameData.wholesaleCost,
-        frameData.tariffTax,
-        frameData.retailPrice,
-        frameData.insuranceCoverage,
-        frameData.insuranceReimbursement
-      )
+      profitData
     }));
   }, [
     frame2.yourCost,
@@ -387,7 +409,8 @@ const CompareFrames: React.FC = () => {
     frame2.tariffTax,
     frame2.retailPrice,
     frame2.insuranceCoverage,
-    frame2.insuranceReimbursement
+    frame2.insuranceReimbursement,
+    frame2.insuranceEnabled
   ]);
 
   // Load companies from Supabase when component mounts
@@ -509,6 +532,45 @@ const CompareFrames: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6" data-demo="comparison-form">
           {/* Frame 1 Inputs */}
           <div className="bg-blue-50 p-4 rounded-lg">
+            {/* Insurance Toggle for Frame 1 */}
+            <div className="mb-4 p-3 bg-white rounded-lg border">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-900">Insurance Billing</h4>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {frame1.insuranceEnabled
+                      ? "Calculate profit with insurance provider billing"
+                      : "Calculate profit for cash-pay customers (2x wholesale pricing)"
+                    }
+                  </p>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="insuranceToggle1"
+                    className="sr-only"
+                    checked={frame1.insuranceEnabled}
+                    onChange={(e) => handleUpdateFrame1('insuranceEnabled', e.target.checked)}
+                  />
+                  <label
+                    htmlFor="insuranceToggle1"
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer ${
+                      frame1.insuranceEnabled ? 'bg-blue-600' : 'bg-gray-200'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        frame1.insuranceEnabled ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </label>
+                  <span className="ml-3 text-sm font-medium text-gray-700">
+                    {frame1.insuranceEnabled ? 'On' : 'Off'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
             {/* Company Dropdown */}
             <div className="mb-4">
               <label htmlFor="company1" className="block text-sm font-medium text-gray-700">
@@ -761,64 +823,107 @@ const CompareFrames: React.FC = () => {
                 )}
               </div>
               
-              <div className="space-y-2">
-                <label htmlFor="insuranceCoverage1" className="block text-sm font-medium text-gray-700">
-                  Insurance Coverage Amount
-                </label>
-                <div className="relative rounded-md shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSignIcon className="h-4 w-4 text-gray-400" />
+              {frame1.insuranceEnabled && (
+                <>
+                  <div className="space-y-2">
+                    <label htmlFor="insuranceCoverage1" className="block text-sm font-medium text-gray-700">
+                      Insurance Coverage Amount
+                    </label>
+                    <div className="relative rounded-md shadow-sm">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <DollarSignIcon className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        id="insuranceCoverage1"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        value={frame1.insuranceCoverage}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/^0+(?=\d)/, '');
+                          handleUpdateFrame1('insuranceCoverage', parseFloat(value) || 0);
+                        }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      {frame1.retailPrice > frame1.insuranceCoverage ? (
+                        <>Patient will pay ${(frame1.retailPrice - frame1.insuranceCoverage).toFixed(2)} after 20% discount</>
+                      ) : (
+                        <>Insurance fully covers this frame</>
+                      )}
+                    </p>
                   </div>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    id="insuranceCoverage1"
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                    value={frame1.insuranceCoverage}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/^0+(?=\d)/, '');
-                      handleUpdateFrame1('insuranceCoverage', parseFloat(value) || 0);
-                    }}
-                  />
-                </div>
-                <p className="text-xs text-gray-500">
-                  {frame1.retailPrice > frame1.insuranceCoverage ? (
-                    <>Patient will pay ${(frame1.retailPrice - frame1.insuranceCoverage).toFixed(2)} after 20% discount</>
-                  ) : (
-                    <>Insurance fully covers this frame</>
-                  )}
-                </p>
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="insuranceReimbursement1" className="block text-sm font-medium text-gray-700">
-                  Insurance Reimbursement
-                </label>
-                <div className="relative rounded-md shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSignIcon className="h-4 w-4 text-gray-400" />
+
+                  <div className="space-y-2">
+                    <label htmlFor="insuranceReimbursement1" className="block text-sm font-medium text-gray-700">
+                      Insurance Reimbursement
+                    </label>
+                    <div className="relative rounded-md shadow-sm">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <DollarSignIcon className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        id="insuranceReimbursement1"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        value={frame1.insuranceReimbursement}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/^0+(?=\d)/, '');
+                          handleUpdateFrame1('insuranceReimbursement', parseFloat(value) || 0);
+                        }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 italic">
+                      Typically $57 for most insurance providers
+                    </p>
                   </div>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    id="insuranceReimbursement1"
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                    value={frame1.insuranceReimbursement}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/^0+(?=\d)/, '');
-                      handleUpdateFrame1('insuranceReimbursement', parseFloat(value) || 0);
-                    }}
-                  />
-                </div>
-                <p className="text-xs text-gray-500 italic">
-                  Typically $57 for most insurance providers
-                </p>
-              </div>
+                </>
+              )}
             </div>
           </div>
           
           {/* Frame 2 Inputs */}
           <div className="bg-green-50 p-4 rounded-lg">
+            {/* Insurance Toggle for Frame 2 */}
+            <div className="mb-4 p-3 bg-white rounded-lg border">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-900">Insurance Billing</h4>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {frame2.insuranceEnabled
+                      ? "Calculate profit with insurance provider billing"
+                      : "Calculate profit for cash-pay customers (2x wholesale pricing)"
+                    }
+                  </p>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="insuranceToggle2"
+                    className="sr-only"
+                    checked={frame2.insuranceEnabled}
+                    onChange={(e) => handleUpdateFrame2('insuranceEnabled', e.target.checked)}
+                  />
+                  <label
+                    htmlFor="insuranceToggle2"
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer ${
+                      frame2.insuranceEnabled ? 'bg-green-600' : 'bg-gray-200'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        frame2.insuranceEnabled ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </label>
+                  <span className="ml-3 text-sm font-medium text-gray-700">
+                    {frame2.insuranceEnabled ? 'On' : 'Off'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
             {/* Company Dropdown */}
             <div className="mb-4">
               <label htmlFor="company2" className="block text-sm font-medium text-gray-700">
@@ -1071,59 +1176,63 @@ const CompareFrames: React.FC = () => {
                 )}
               </div>
               
-              <div className="space-y-2">
-                <label htmlFor="insuranceCoverage2" className="block text-sm font-medium text-gray-700">
-                  Insurance Coverage Amount
-                </label>
-                <div className="relative rounded-md shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSignIcon className="h-4 w-4 text-gray-400" />
+              {frame2.insuranceEnabled && (
+                <>
+                  <div className="space-y-2">
+                    <label htmlFor="insuranceCoverage2" className="block text-sm font-medium text-gray-700">
+                      Insurance Coverage Amount
+                    </label>
+                    <div className="relative rounded-md shadow-sm">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <DollarSignIcon className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        id="insuranceCoverage2"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        value={frame2.insuranceCoverage}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/^0+(?=\d)/, '');
+                          handleUpdateFrame2('insuranceCoverage', parseFloat(value) || 0);
+                        }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      {frame2.retailPrice > frame2.insuranceCoverage ? (
+                        <>Patient will pay ${(frame2.retailPrice - frame2.insuranceCoverage).toFixed(2)} after 20% discount</>
+                      ) : (
+                        <>Insurance fully covers this frame</>
+                      )}
+                    </p>
                   </div>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    id="insuranceCoverage2"
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                    value={frame2.insuranceCoverage}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/^0+(?=\d)/, '');
-                      handleUpdateFrame2('insuranceCoverage', parseFloat(value) || 0);
-                    }}
-                  />
-                </div>
-                <p className="text-xs text-gray-500">
-                  {frame2.retailPrice > frame2.insuranceCoverage ? (
-                    <>Patient will pay ${(frame2.retailPrice - frame2.insuranceCoverage).toFixed(2)} after 20% discount</>
-                  ) : (
-                    <>Insurance fully covers this frame</>
-                  )}
-                </p>
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="insuranceReimbursement2" className="block text-sm font-medium text-gray-700">
-                  Insurance Reimbursement
-                </label>
-                <div className="relative rounded-md shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSignIcon className="h-4 w-4 text-gray-400" />
+
+                  <div className="space-y-2">
+                    <label htmlFor="insuranceReimbursement2" className="block text-sm font-medium text-gray-700">
+                      Insurance Reimbursement
+                    </label>
+                    <div className="relative rounded-md shadow-sm">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <DollarSignIcon className="h-4 w-4 text-gray-400" />
+                      </div>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        id="insuranceReimbursement2"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        value={frame2.insuranceReimbursement}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/^0+(?=\d)/, '');
+                          handleUpdateFrame2('insuranceReimbursement', parseFloat(value) || 0);
+                        }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 italic">
+                      Typically $57 for most insurance providers
+                    </p>
                   </div>
-                  <input
-                    type="text"
-                    inputMode="decimal"
-                    id="insuranceReimbursement2"
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                    value={frame2.insuranceReimbursement}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/^0+(?=\d)/, '');
-                      handleUpdateFrame2('insuranceReimbursement', parseFloat(value) || 0);
-                    }}
-                  />
-                </div>
-                <p className="text-xs text-gray-500 italic">
-                  Typically $57 for most insurance providers
-                </p>
-              </div>
+                </>
+              )}
             </div>
           </div>
         </div>
