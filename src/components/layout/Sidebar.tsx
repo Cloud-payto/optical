@@ -107,18 +107,9 @@ const Sidebar: React.FC = () => {
               <span className="text-lg font-bold">OptiProfit</span>
             </div>
           )}
-          {isCollapsed && (
-            <div className="bg-blue-600 rounded-lg p-1.5 mx-auto">
-              <img
-                src="/images/icons/logo_trans_white(128).png"
-                alt="OptiProfit Logo"
-                className="h-8 w-8"
-              />
-            </div>
-          )}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-1 rounded-md hover:bg-gray-700 transition-colors"
+            className={`p-1 rounded-md hover:bg-gray-700 transition-colors ${isCollapsed ? 'mx-auto' : ''}`}
           >
             {isCollapsed ? (
               <ChevronRight className="h-4 w-4" />
