@@ -87,15 +87,45 @@ router.post('/modernoptical', async (req, res) => {
       }
     }
 
-    // Perform web enrichment
-    console.log(`[ENRICH] Starting web enrichment for ${itemsToEnrich.length} items...`);
-    const enrichedItems = await modernOpticalService.enrichPendingItems(itemsToEnrich);
+    // Separate items that need scraping vs already have cached data
+    const itemsNeedingScraping = [];
+    const itemsWithCachedData = [];
 
-    console.log(`[ENRICH] Web enrichment completed for ${enrichedItems.length} items`);
+    itemsToEnrich.forEach(item => {
+      // Check if item already has enriched data from catalog cache
+      const hasWholesalePrice = item.wholesale_price && item.wholesale_price > 0;
+      const hasUpc = item.upc && item.upc.length > 0;
+      const alreadyEnriched = item.api_verified === true;
+
+      if (alreadyEnriched || (hasWholesalePrice && hasUpc)) {
+        console.log(`✅ Skipping scrape for ${item.brand} ${item.model} - already has cached data`);
+        itemsWithCachedData.push(item);
+      } else {
+        console.log(`🔍 Will scrape ${item.brand} ${item.model} - needs enrichment`);
+        itemsNeedingScraping.push(item);
+      }
+    });
+
+    console.log(`[ENRICH] ${itemsWithCachedData.length} items already have cached data, ${itemsNeedingScraping.length} need scraping`);
+
+    let enrichedItems = [];
+
+    // Only scrape items that need it
+    if (itemsNeedingScraping.length > 0) {
+      console.log(`[ENRICH] Starting web enrichment for ${itemsNeedingScraping.length} items...`);
+      const scrapedItems = await modernOpticalService.enrichPendingItems(itemsNeedingScraping);
+      console.log(`[ENRICH] Web enrichment completed for ${scrapedItems.length} items`);
+      enrichedItems = enrichedItems.concat(scrapedItems);
+    } else {
+      console.log('[ENRICH] No items need scraping - all have cached data!');
+    }
+
+    // Add items that were already cached (no scraping needed)
+    enrichedItems = enrichedItems.concat(itemsWithCachedData);
 
     // Count how many were actually enriched (have api_verified = true)
     const enrichedCount = enrichedItems.filter(item => item.api_verified === true).length;
-    console.log(`[ENRICH] Successfully enriched ${enrichedCount} items with web data`);
+    console.log(`[ENRICH] Total: ${enrichedItems.length} items (${itemsNeedingScraping.length} scraped, ${itemsWithCachedData.length} from cache)`);
 
     // Update items in database with enriched data
     try {
@@ -327,15 +357,45 @@ router.post('/idealoptics', async (req, res) => {
       }
     }
 
-    // Perform web enrichment
-    console.log(`[ENRICH] Starting web enrichment for ${itemsToEnrich.length} items...`);
-    const enrichedItems = await idealOpticsService.enrichPendingItems(itemsToEnrich);
+    // Separate items that need scraping vs already have cached data
+    const itemsNeedingScraping = [];
+    const itemsWithCachedData = [];
 
-    console.log(`[ENRICH] Web enrichment completed for ${enrichedItems.length} items`);
+    itemsToEnrich.forEach(item => {
+      // Check if item already has enriched data from catalog cache
+      const hasWholesalePrice = item.wholesale_price && item.wholesale_price > 0;
+      const hasUpc = item.upc && item.upc.length > 0;
+      const alreadyEnriched = item.api_verified === true;
+
+      if (alreadyEnriched || (hasWholesalePrice && hasUpc)) {
+        console.log(`✅ Skipping scrape for ${item.brand} ${item.model} - already has cached data`);
+        itemsWithCachedData.push(item);
+      } else {
+        console.log(`🔍 Will scrape ${item.brand} ${item.model} - needs enrichment`);
+        itemsNeedingScraping.push(item);
+      }
+    });
+
+    console.log(`[ENRICH] ${itemsWithCachedData.length} items already have cached data, ${itemsNeedingScraping.length} need scraping`);
+
+    let enrichedItems = [];
+
+    // Only scrape items that need it
+    if (itemsNeedingScraping.length > 0) {
+      console.log(`[ENRICH] Starting web enrichment for ${itemsNeedingScraping.length} items...`);
+      const scrapedItems = await idealOpticsService.enrichPendingItems(itemsNeedingScraping);
+      console.log(`[ENRICH] Web enrichment completed for ${scrapedItems.length} items`);
+      enrichedItems = enrichedItems.concat(scrapedItems);
+    } else {
+      console.log('[ENRICH] No items need scraping - all have cached data!');
+    }
+
+    // Add items that were already cached (no scraping needed)
+    enrichedItems = enrichedItems.concat(itemsWithCachedData);
 
     // Count how many were actually enriched (have api_verified = true)
     const enrichedCount = enrichedItems.filter(item => item.api_verified === true).length;
-    console.log(`[ENRICH] Successfully enriched ${enrichedCount} items with web data`);
+    console.log(`[ENRICH] Total: ${enrichedItems.length} items (${itemsNeedingScraping.length} scraped, ${itemsWithCachedData.length} from cache)`);
 
     // Update items in database with enriched data
     try {
