@@ -40,8 +40,9 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   'https://optical-software-kohl.vercel.app',
-  // Allow all Vercel preview deployments
-  /https:\/\/optical-software-.*\.vercel\.app$/
+  // Allow all Vercel preview and production deployments
+  /^https:\/\/optical-software-[a-z0-9-]+\.vercel\.app$/,
+  /^https:\/\/[a-z0-9-]+\.vercel\.app$/
 ];
 
 const corsOptions = {
