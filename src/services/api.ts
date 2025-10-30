@@ -292,6 +292,57 @@ export async function markItemAsSold(itemId: string, userId?: string): Promise<{
   });
 }
 
+export interface ManualInventoryData {
+  vendor: string;
+  brand: string;
+  model: string;
+  color: string;
+  size?: string;
+  sku?: string;
+  quantity: number;
+  cost?: number;
+  retail_price?: number;
+  order_number?: string;
+  notes?: string;
+}
+
+export async function createManualInventoryItem(data: ManualInventoryData, userId?: string): Promise<{ success: boolean; message: string; items: InventoryItem[] }> {
+  const currentUserId = userId || await getCurrentUserIdFromSession();
+
+  // Use Supabase directly to insert the inventory items
+  const itemsToInsert = Array.from({ length: data.quantity }, () => ({
+    account_id: currentUserId,
+    vendor_name: data.vendor,
+    brand: data.brand,
+    model: data.model,
+    color: data.color,
+    size: data.size || null,
+    sku: data.sku || null,
+    cost: data.cost || null,
+    retail_price: data.retail_price || null,
+    order_number: data.order_number || null,
+    notes: data.notes || null,
+    status: 'current',
+    created_at: new Date().toISOString(),
+  }));
+
+  const { data: insertedItems, error } = await supabase
+    .from('inventory')
+    .insert(itemsToInsert)
+    .select();
+
+  if (error) {
+    console.error('Failed to create manual inventory items:', error);
+    throw new Error('Failed to add frames to inventory');
+  }
+
+  return {
+    success: true,
+    message: `Successfully added ${data.quantity} frame(s) to inventory`,
+    items: insertedItems as InventoryItem[],
+  };
+}
+
 // Vendor API functions
 export interface Vendor {
   id: string;

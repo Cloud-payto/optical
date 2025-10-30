@@ -4,13 +4,17 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { Plus } from 'lucide-react';
 import { useInventoryByStatus } from './hooks/useInventory';
 import { useInventoryManagement } from './hooks/useInventoryManagement';
 import { InventoryFilters } from './components/InventoryFilters';
 import { ModernInventoryTable } from './components/ModernInventoryTable';
 import { ReturnReportModal } from './components/ReturnReportModal';
+import { ManualEntryModal, ManualInventoryData } from './components/ManualEntryModal';
 import { ForwardingEmailDisplay } from '../../components/ForwardingEmailDisplay';
 import { useAuth } from '../../contexts/AuthContext';
+import { createManualInventoryItem } from '../../services/api';
+import { Button } from '../../components/ui/Button';
 import type { InventoryFilters as FilterState, InventoryItem } from './types/inventory.types';
 import { calculateReturnWindow } from './utils/returnWindow';
 import {
@@ -30,6 +34,7 @@ export function InventoryPage() {
   });
   const [returnReportItems, setReturnReportItems] = useState<InventoryItem[]>([]);
   const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
+  const [isManualEntryOpen, setIsManualEntryOpen] = useState(false);
 
   // Fetch data based on active tab
   const { data: rawInventory, isLoading, error } = useInventoryByStatus(activeTab);
@@ -160,6 +165,11 @@ export function InventoryPage() {
     }
   };
 
+  const handleManualEntrySubmit = async (data: ManualInventoryData) => {
+    await createManualInventoryItem(data);
+    // The real-time subscription will automatically update the inventory list
+  };
+
   const tabs = [
     { key: 'pending' as const, label: 'Pending', count: 0 },
     { key: 'current' as const, label: 'Current Inventory', count: rawInventory?.length || 0 },
@@ -175,7 +185,16 @@ export function InventoryPage() {
           <h1 className="text-3xl font-bold text-gray-900">Inventory</h1>
           <p className="text-gray-500 mt-1">Manage your frames inventory</p>
         </div>
-        {user?.id && <ForwardingEmailDisplay accountId={user.id} compact />}
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={() => setIsManualEntryOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Add Frame Manually
+          </Button>
+          {user?.id && <ForwardingEmailDisplay accountId={user.id} compact />}
+        </div>
       </div>
 
       {/* Tabs */}
@@ -247,6 +266,13 @@ export function InventoryPage() {
         onClose={() => setIsReturnModalOpen(false)}
         items={returnReportItems}
         onGenerateReport={handleGenerateReport}
+      />
+
+      {/* Manual Entry Modal */}
+      <ManualEntryModal
+        isOpen={isManualEntryOpen}
+        onClose={() => setIsManualEntryOpen(false)}
+        onSubmit={handleManualEntrySubmit}
       />
     </div>
   );
