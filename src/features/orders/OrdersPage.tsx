@@ -105,7 +105,7 @@ export function OrdersPage() {
       </div>
 
       {/* Filters and Sorting */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+      <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <Filter className="h-5 w-5 text-gray-400" />
@@ -119,7 +119,7 @@ export function OrdersPage() {
               id="vendor-filter"
               value={selectedVendor}
               onChange={(e) => setSelectedVendor(e.target.value)}
-              className="block w-full max-w-xs rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="block w-full max-w-xs rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             >
               <option value="all">All Vendors</option>
               {vendors.map((vendor) => (
@@ -137,7 +137,7 @@ export function OrdersPage() {
               id="sort-by"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as 'date' | 'vendor')}
-              className="block rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="block rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             >
               <option value="date">Order Date</option>
               <option value="vendor">Vendor Name</option>

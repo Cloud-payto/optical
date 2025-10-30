@@ -189,6 +189,7 @@ export function InventoryPage() {
           <Button
             onClick={() => setIsManualEntryOpen(true)}
             className="flex items-center gap-2"
+            rounded="lg"
           >
             <Plus className="w-4 h-4" />
             Add Frame Manually
