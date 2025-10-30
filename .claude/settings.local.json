@@ -32,5 +32,9 @@
       "Bash(timeout:*)"
     ],
     "deny": []
-  }
+  },
+  "enabledMcpjsonServers": [
+    "render"
+  ],
+  "enableAllProjectMcpServers": true
 }

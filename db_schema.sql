@@ -229,6 +229,43 @@ CREATE TABLE public.return_reports (
   CONSTRAINT return_reports_account_id_fkey FOREIGN KEY (account_id) REFERENCES public.accounts(id),
   CONSTRAINT return_reports_vendor_id_fkey FOREIGN KEY (vendor_id) REFERENCES public.vendors(id)
 );
+CREATE TABLE public.vendor_catalog (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  vendor_id uuid NOT NULL,
+  vendor_name character varying,
+  brand character varying NOT NULL,
+  model character varying NOT NULL,
+  color character varying,
+  color_code character varying,
+  sku character varying,
+  upc character varying,
+  ean character varying,
+  wholesale_cost numeric,
+  msrp numeric,
+  map_price numeric,
+  eye_size character varying,
+  bridge character varying,
+  temple_length character varying,
+  full_size character varying,
+  material character varying,
+  gender character varying,
+  fit_type character varying,
+  a_measurement character varying,
+  b_measurement character varying,
+  dbl character varying,
+  ed character varying,
+  in_stock boolean,
+  availability_status character varying,
+  confidence_score integer DEFAULT 100,
+  data_source character varying CHECK (data_source::text = ANY (ARRAY['web_scrape'::character varying::text, 'api'::character varying::text, 'manual'::character varying::text, 'email_parse'::character varying::text])),
+  verified boolean DEFAULT false,
+  first_seen_date timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  last_updated timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  times_ordered integer DEFAULT 1,
+  metadata jsonb DEFAULT '{}'::jsonb,
+  CONSTRAINT vendor_catalog_pkey PRIMARY KEY (id),
+  CONSTRAINT vendor_catalog_vendor_id_fkey FOREIGN KEY (vendor_id) REFERENCES public.vendors(id)
+);
 CREATE TABLE public.vendor_reps (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
   account_id uuid NOT NULL,
@@ -275,46 +312,3 @@ CREATE TABLE public.webhook_logs (
   CONSTRAINT webhook_logs_account_id_fkey FOREIGN KEY (account_id) REFERENCES public.accounts(id),
   CONSTRAINT webhook_logs_email_id_fkey FOREIGN KEY (email_id) REFERENCES public.emails(id)
 );
-CREATE TABLE public.vendor_catalog (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
-  vendor_id uuid NOT NULL,
-  vendor_name character varying,
-  brand character varying NOT NULL,
-  model character varying NOT NULL,
-  color character varying,
-  color_code character varying,
-  sku character varying,
-  upc character varying,
-  ean character varying,
-  wholesale_cost numeric,
-  msrp numeric,
-  map_price numeric,
-  eye_size character varying,
-  bridge character varying,
-  temple_length character varying,
-  full_size character varying,
-  material character varying,
-  gender character varying,
-  fit_type character varying,
-  a_measurement character varying,
-  b_measurement character varying,
-  dbl character varying,
-  ed character varying,
-  in_stock boolean,
-  availability_status character varying,
-  confidence_score integer DEFAULT 100,
-  data_source character varying CHECK (data_source::text = ANY (ARRAY['web_scrape'::character varying, 'api'::character varying, 'manual'::character varying, 'email_parse'::character varying]::text[])),
-  verified boolean DEFAULT false,
-  first_seen_date timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-  last_updated timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-  times_ordered integer DEFAULT 1,
-  metadata jsonb DEFAULT '{}'::jsonb,
-  CONSTRAINT vendor_catalog_pkey PRIMARY KEY (id),
-  CONSTRAINT vendor_catalog_vendor_id_fkey FOREIGN KEY (vendor_id) REFERENCES public.vendors(id),
-  CONSTRAINT vendor_catalog_unique_item UNIQUE (vendor_id, model, color, eye_size)
-);
-CREATE INDEX idx_vendor_catalog_brand ON public.vendor_catalog(brand);
-CREATE INDEX idx_vendor_catalog_vendor_brand ON public.vendor_catalog(vendor_id, brand);
-CREATE INDEX idx_vendor_catalog_upc ON public.vendor_catalog(upc) WHERE upc IS NOT NULL;
-CREATE INDEX idx_vendor_catalog_model ON public.vendor_catalog(model);
-CREATE INDEX idx_vendor_catalog_vendor_model ON public.vendor_catalog(vendor_id, model);

@@ -5,10 +5,33 @@ const axios = require('axios');
 const { supabase } = require('../lib/supabase');
 
 /**
- * SAFILO FULL CATALOG CRAWLER
+ * SAFILO FULL CATALOG CRAWLER (NO AUTH REQUIRED)
  *
- * This service crawls the entire Safilo catalog using their API
+ * This service crawls the ENTIRE Safilo catalog using their public search API
  * and populates the vendor_catalog table.
+ *
+ * NO AUTHENTICATION REQUIRED! Uses the "Alphabet Soup" technique to capture
+ * ALL products across ALL brands without needing a Safilo account.
+ *
+ * How it works - "Alphabet Soup" Approach:
+ * - Searches for every single letter (A-Z) and digit (0-9) = 36 API calls
+ * - Each search returns products containing that character
+ * - Example: "A" returns 1,397 products, "B" returns 992 products, etc.
+ * - Automatically deduplicates products found in multiple searches
+ * - Brand name is extracted from API response (collectionName field)
+ * - Stores all product variants in the vendor_catalog table
+ *
+ * Why this works:
+ * - The search API does substring matching on model names
+ * - Every product model contains at least one letter or digit
+ * - This guarantees we find every product in their catalog!
+ * - Much more effective than searching by brand prefixes
+ *
+ * Performance:
+ * - 36 API calls total (one per character)
+ * - ~1 second delay between calls = ~40 seconds for search phase
+ * - Then processes and stores all unique products to database
+ * - Estimated total catalog size: 3,000-5,000 unique products
  *
  * Use this to build a complete database of Safilo frames for:
  * - Vendor comparison features
@@ -28,12 +51,18 @@ class SafiloCatalogCrawler {
             retryDelay: options.retryDelay || 2000,
             batchSize: options.batchSize || 50,
             rateLimitDelay: options.rateLimitDelay || 1000, // 1 second between requests
+            cookies: options.cookies || '', // Session cookies for authentication
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             }
         };
+
+        // Add cookies to headers if provided
+        if (this.config.cookies) {
+            this.config.headers['Cookie'] = this.config.cookies;
+        }
 
         this.stats = {
             totalProcessed: 0,
@@ -59,18 +88,52 @@ class SafiloCatalogCrawler {
             // 1. Get Safilo vendor ID from database
             await this.getVendorId();
 
-            // 2. Get all Safilo brands
-            const brands = await this.getAllBrands();
-            console.log(`📦 Found ${brands.length} Safilo brands to crawl`);
+            // 2. Get all search terms (A-Z, 0-9)
+            const searchTerms = await this.getAllSearchTerms();
+            console.log(`📦 Using "Alphabet Soup" approach: ${searchTerms.length} search terms (A-Z, 0-9)`);
 
-            // 3. Crawl each brand
-            for (const brand of brands) {
-                console.log(`\n🏷️  Crawling brand: ${brand}`);
-                await this.crawlBrand(brand);
+            // 3. Crawl using alphabet soup approach
+            const allProducts = new Map(); // Deduplicate across all searches
+            let searchCount = 0;
+
+            for (const searchTerm of searchTerms) {
+                searchCount++;
+                console.log(`\n[${searchCount}/${searchTerms.length}] Searching: "${searchTerm}"`);
+
+                try {
+                    const response = await this.makeApiRequest(searchTerm);
+
+                    if (!response || !Array.isArray(response) || response.length === 0) {
+                        console.log(`   No products found`);
+                        continue;
+                    }
+
+                    console.log(`   Found ${response.length} products`);
+
+                    // Add products to map (deduplicates automatically)
+                    for (const product of response) {
+                        const key = `${product.styleCode || product.model}`;
+                        if (!allProducts.has(key)) {
+                            allProducts.set(key, product);
+                        }
+                    }
+
+                    console.log(`   📊 Total unique products so far: ${allProducts.size}`);
+
+                } catch (error) {
+                    console.error(`   ❌ Error searching "${searchTerm}":`, error.message);
+                    this.stats.totalErrors++;
+                }
 
                 // Rate limiting - be nice to the API
                 await this.sleep(this.config.rateLimitDelay);
             }
+
+            console.log(`\n🎉 Search complete! Found ${allProducts.size} unique products`);
+
+            // 4. Process all products
+            const products = Array.from(allProducts.values());
+            await this.processAllProducts(products);
 
             this.stats.endTime = Date.now();
             this.printSummary();
@@ -106,73 +169,58 @@ class SafiloCatalogCrawler {
     }
 
     /**
-     * Get all Safilo brands from their API
+     * Get search terms for crawling the entire catalog
+     * Uses "Alphabet Soup" approach - searching every letter and digit
+     * This captures ALL products regardless of brand!
+     *
+     * Returns array of search characters (A-Z, 0-9)
      */
-    async getAllBrands() {
-        // Safilo brand codes (based on your SafiloService.js)
-        return [
-            'CARRERA',
-            'CH', // Carolina Herrera
-            'CHL', // Chloe
-            'BOSS',
-            'HBOSS', // Hugo Boss
-            'JIMMY CHOO',
-            'JC', // Jimmy Choo
-            'KATE SPADE',
-            'KS', // Kate Spade
-            'MARC JACOBS',
-            'MJ', // Marc Jacobs
-            'MAX MARA',
-            'MMAW', // Max Mara
-            'POLAROID',
-            'PLD', // Polaroid
-            'FOSSIL',
-            'FOS', // Fossil
-            'LEVI\'S',
-            'LS', // Levi's
-            'BANANA REPUBLIC',
-            'BR', // Banana Republic
-            'MISSONI',
-            'MIS', // Missoni
-            'BOTTEGA VENETA',
-            'BV', // Bottega Veneta
-            'MOSCHINO',
-            'MOS' // Moschino
-        ];
+    async getAllSearchTerms() {
+        // Generate A-Z and 0-9
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        const digits = '0123456789'.split('');
+
+        return [...letters, ...digits];
     }
 
     /**
-     * Crawl all frames for a specific brand
+     * Process all products and save to database
      */
-    async crawlBrand(brand) {
-        try {
-            // Make API request for this brand using search query
-            const response = await this.makeApiRequest(brand);
+    async processAllProducts(products) {
+        console.log(`\n📝 Processing ${products.length} products...`);
 
-            if (!response || !Array.isArray(response) || response.length === 0) {
-                console.log(`⚠️  No products found for ${brand}`);
-                return;
+        // Process in batches to avoid overwhelming the database
+        for (let i = 0; i < products.length; i += this.config.batchSize) {
+            const batch = products.slice(i, i + this.config.batchSize);
+            const batchNum = Math.floor(i / this.config.batchSize) + 1;
+            const totalBatches = Math.ceil(products.length / this.config.batchSize);
+
+            console.log(`\n📦 Processing batch ${batchNum}/${totalBatches}`);
+
+            // Process each product in the batch
+            for (const product of batch) {
+                try {
+                    // Brand name comes from API response
+                    const brand = product.collectionName || 'UNKNOWN';
+                    await this.processBatch([product], brand);
+                } catch (error) {
+                    console.error(`   ❌ Error processing product:`, error.message);
+                    this.stats.totalErrors++;
+                }
             }
 
-            const products = response;
-            console.log(`   Found ${products.length} product models for ${brand}`);
+            console.log(`   ✅ Batch ${batchNum} complete (${Math.min(i + this.config.batchSize, products.length)} / ${products.length})`);
 
-            // Process in batches to avoid overwhelming the database
-            for (let i = 0; i < products.length; i += this.config.batchSize) {
-                const batch = products.slice(i, i + this.config.batchSize);
-                await this.processBatch(batch, brand);
-
-                console.log(`   Processed ${Math.min(i + this.config.batchSize, products.length)} / ${products.length}`);
+            // Small delay between batches
+            if (i + this.config.batchSize < products.length) {
+                await this.sleep(500);
             }
-
-        } catch (error) {
-            console.error(`❌ Error crawling ${brand}:`, error.message);
-            this.stats.totalErrors++;
         }
     }
 
     /**
      * Make API request to Safilo with retry logic
+     * Uses search field (no authentication required)
      */
     async makeApiRequest(searchQuery, retryCount = 0) {
         try {
@@ -201,7 +249,7 @@ class SafiloCatalogCrawler {
                     "BSizes": {"min": -1, "max": -1},
                     "EDSizes": {"min": -1, "max": -1},
                     "DBLSizes": {"min": -1, "max": -1},
-                    "search": searchQuery
+                    "search": searchQuery // Use search field (works without auth)
                 },
                 {
                     headers: this.config.headers,

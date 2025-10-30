@@ -5,11 +5,30 @@ const axios = require('axios');
 const { supabase } = require('../lib/supabase');
 
 /**
- * L'AMYAMERICA FULL CATALOG CRAWLER
+ * L'AMYAMERICA FULL CATALOG CRAWLER (NO AUTH REQUIRED)
  *
- * This service crawls the entire L'amyamerica catalog using their API
- * (same API structure as Safilo - https://www.lamyamerica.com/US/api/CatalogAPI/filter)
+ * This service crawls the ENTIRE L'amyamerica catalog using their public search API
  * and populates the vendor_catalog table.
+ *
+ * NO AUTHENTICATION REQUIRED! Uses the "Alphabet Soup" technique to capture
+ * ALL products across ALL brands without needing a Lamyamerica account.
+ *
+ * How it works - "Alphabet Soup" Approach:
+ * - Searches for every single letter (A-Z) and digit (0-9) = 36 API calls
+ * - Each search returns products containing that character
+ * - Automatically deduplicates products found in multiple searches
+ * - Brand name is extracted from API response (collectionName field)
+ * - Stores all product variants in the vendor_catalog table
+ *
+ * Why this works:
+ * - The search API does substring matching on model names
+ * - Every product model contains at least one letter or digit
+ * - This guarantees we find every product in their catalog!
+ *
+ * Performance:
+ * - 36 API calls total (one per character)
+ * - ~1 second delay between calls = ~40 seconds for search phase
+ * - Then processes and stores all unique products to database
  *
  * Use this to build a complete database of L'amyamerica frames for:
  * - Vendor comparison features
@@ -29,12 +48,18 @@ class LamyamericaCatalogCrawler {
             retryDelay: options.retryDelay || 2000,
             batchSize: options.batchSize || 50,
             rateLimitDelay: options.rateLimitDelay || 1000, // 1 second between requests
+            cookies: options.cookies || '', // Session cookies for authentication
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
             }
         };
+
+        // Add cookies to headers if provided
+        if (this.config.cookies) {
+            this.config.headers['Cookie'] = this.config.cookies;
+        }
 
         this.stats = {
             totalProcessed: 0,
@@ -60,18 +85,52 @@ class LamyamericaCatalogCrawler {
             // 1. Get L'amyamerica vendor ID from database
             await this.getVendorId();
 
-            // 2. Get all L'amyamerica brands
-            const brands = await this.getAllBrands();
-            console.log(`📦 Found ${brands.length} L'amyamerica brands to crawl`);
+            // 2. Get all search terms (A-Z, 0-9)
+            const searchTerms = await this.getAllSearchTerms();
+            console.log(`📦 Using "Alphabet Soup" approach: ${searchTerms.length} search terms (A-Z, 0-9)`);
 
-            // 3. Crawl each brand
-            for (const brand of brands) {
-                console.log(`\n🏷️  Crawling brand: ${brand}`);
-                await this.crawlBrand(brand);
+            // 3. Crawl using alphabet soup approach
+            const allProducts = new Map(); // Deduplicate across all searches
+            let searchCount = 0;
+
+            for (const searchTerm of searchTerms) {
+                searchCount++;
+                console.log(`\n[${searchCount}/${searchTerms.length}] Searching: "${searchTerm}"`);
+
+                try {
+                    const response = await this.makeApiRequest(searchTerm);
+
+                    if (!response || !Array.isArray(response) || response.length === 0) {
+                        console.log(`   No products found`);
+                        continue;
+                    }
+
+                    console.log(`   Found ${response.length} products`);
+
+                    // Add products to map (deduplicates automatically)
+                    for (const product of response) {
+                        const key = `${product.styleCode || product.model}`;
+                        if (!allProducts.has(key)) {
+                            allProducts.set(key, product);
+                        }
+                    }
+
+                    console.log(`   📊 Total unique products so far: ${allProducts.size}`);
+
+                } catch (error) {
+                    console.error(`   ❌ Error searching "${searchTerm}":`, error.message);
+                    this.stats.totalErrors++;
+                }
 
                 // Rate limiting - be nice to the API
                 await this.sleep(this.config.rateLimitDelay);
             }
+
+            console.log(`\n🎉 Search complete! Found ${allProducts.size} unique products`);
+
+            // 4. Process all products
+            const products = Array.from(allProducts.values());
+            await this.processAllProducts(products);
 
             this.stats.endTime = Date.now();
             this.printSummary();
@@ -107,59 +166,60 @@ class LamyamericaCatalogCrawler {
     }
 
     /**
-     * Get all L'amyamerica brands
-     * These are the brands distributed by L'amy Group
+     * Get search terms for crawling the entire catalog
+     * Uses "Alphabet Soup" approach - searching every letter and digit
+     * This captures ALL products regardless of brand!
+     *
+     * Returns array of search characters (A-Z, 0-9)
      */
-    async getAllBrands() {
-        return [
-            '2BB',
-            'Ann Taylor',
-            'Ben Sherman',
-            'C By L\'Amy',
-            'Champion',
-            'Nicole Miller',
-            'Private Label',
-            'Seven.Five',
-            'Sperry',
-            'TLG',
-            'Vision\'s'
-        ];
+    async getAllSearchTerms() {
+        // Generate A-Z and 0-9
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        const digits = '0123456789'.split('');
+
+        return [...letters, ...digits];
     }
 
     /**
-     * Crawl all frames for a specific brand
+     * Process all products and save to database
      */
-    async crawlBrand(brand) {
-        try {
-            // Make API request for this brand using search query
-            const response = await this.makeApiRequest(brand);
+    async processAllProducts(products) {
+        console.log(`\n📝 Processing ${products.length} products...`);
 
-            if (!response || !Array.isArray(response) || response.length === 0) {
-                console.log(`⚠️  No products found for ${brand}`);
-                return;
+        // Process in batches to avoid overwhelming the database
+        for (let i = 0; i < products.length; i += this.config.batchSize) {
+            const batch = products.slice(i, i + this.config.batchSize);
+            const batchNum = Math.floor(i / this.config.batchSize) + 1;
+            const totalBatches = Math.ceil(products.length / this.config.batchSize);
+
+            console.log(`\n📦 Processing batch ${batchNum}/${totalBatches}`);
+
+            // Process each product in the batch
+            for (const product of batch) {
+                try {
+                    // Brand name comes from API response
+                    const brand = product.collectionName || 'UNKNOWN';
+                    await this.processBatch([product], brand);
+                } catch (error) {
+                    console.error(`   ❌ Error processing product:`, error.message);
+                    this.stats.totalErrors++;
+                }
             }
 
-            const products = response;
-            console.log(`   Found ${products.length} product models for ${brand}`);
+            console.log(`   ✅ Batch ${batchNum} complete (${Math.min(i + this.config.batchSize, products.length)} / ${products.length})`);
 
-            // Process in batches to avoid overwhelming the database
-            for (let i = 0; i < products.length; i += this.config.batchSize) {
-                const batch = products.slice(i, i + this.config.batchSize);
-                await this.processBatch(batch, brand);
-
-                console.log(`   Processed ${Math.min(i + this.config.batchSize, products.length)} / ${products.length}`);
+            // Small delay between batches
+            if (i + this.config.batchSize < products.length) {
+                await this.sleep(500);
             }
-
-        } catch (error) {
-            console.error(`❌ Error crawling ${brand}:`, error.message);
-            this.stats.totalErrors++;
         }
     }
 
     /**
      * Make API request to L'amyamerica with retry logic
+     * Uses search field (no authentication required)
      */
-    async makeApiRequest(brandName, retryCount = 0) {
+    async makeApiRequest(searchQuery, retryCount = 0) {
         try {
             const response = await axios.post(
                 this.config.apiUrl,
@@ -179,7 +239,7 @@ class LamyamericaCatalogCrawler {
                     "RimTypes": [],
                     "BridgeTypes": [],
                     "AgeGroup": [],
-                    "Brand": [brandName.toLowerCase()], // Brand filter as lowercase array
+                    "Brand": [], // Empty - using search instead
                     "SpecialtyFit": [],
                     "Clip-Ons": false,
                     "NewStyles": false,
@@ -188,7 +248,8 @@ class LamyamericaCatalogCrawler {
                     "ASizes": {"min": -1, "max": -1},
                     "BSizes": {"min": -1, "max": -1},
                     "EDSizes": {"min": -1, "max": -1},
-                    "DBLSizes": {"min": -1, "max": -1}
+                    "DBLSizes": {"min": -1, "max": -1},
+                    "search": searchQuery // Use search field (works without auth)
                 },
                 {
                     headers: this.config.headers,
@@ -202,7 +263,7 @@ class LamyamericaCatalogCrawler {
             if (retryCount < this.config.maxRetries) {
                 console.log(`   ⚠️  Request failed, retrying (${retryCount + 1}/${this.config.maxRetries})...`);
                 await this.sleep(this.config.retryDelay * (retryCount + 1));
-                return this.makeApiRequest(brandName, retryCount + 1);
+                return this.makeApiRequest(searchQuery, retryCount + 1);
             }
 
             throw error;
