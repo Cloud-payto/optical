@@ -1,14 +1,20 @@
 /**
  * React Query hook for fetching orders data
  * Handles data fetching, caching, and loading states
+ * Includes real-time subscription for automatic updates
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchOrders } from '@/services/api';
+import { supabase } from '@/lib/supabase';
 import { Order } from '../types/order.types';
+import toast from 'react-hot-toast';
 
 export function useOrders() {
-  return useQuery({
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
     queryKey: ['orders'],
     queryFn: async () => {
       const response = await fetchOrders();
@@ -16,6 +22,48 @@ export function useOrders() {
     },
     staleTime: 1000 * 60 * 2, // Consider data fresh for 2 minutes
   });
+
+  // Set up real-time subscription for orders
+  useEffect(() => {
+    console.log('[ORDERS] Setting up real-time subscription...');
+
+    const channel = supabase
+      .channel('orders-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'orders',
+        },
+        (payload) => {
+          console.log('[ORDERS] Real-time event:', payload);
+
+          // Invalidate and refetch orders when any change occurs
+          queryClient.invalidateQueries({ queryKey: ['orders'] });
+
+          // Show toast notification for new orders
+          if (payload.eventType === 'INSERT') {
+            const newOrder = payload.new as Order;
+            toast.success(`New order received: ${newOrder.vendor} #${newOrder.order_number}`, {
+              icon: '📦',
+              duration: 4000,
+            });
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('[ORDERS] Subscription status:', status);
+      });
+
+    // Cleanup subscription on unmount
+    return () => {
+      console.log('[ORDERS] Cleaning up real-time subscription');
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
+  return query;
 }
 
 /**

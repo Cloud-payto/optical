@@ -1,14 +1,20 @@
 /**
  * React Query hook for fetching inventory data
  * Handles data fetching, caching, and loading states
+ * Includes real-time subscription for automatic updates
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchInventory } from '@/services/api';
+import { supabase } from '@/lib/supabase';
 import { InventoryItem } from '../types/inventory.types';
+import toast from 'react-hot-toast';
 
 export function useInventory() {
-  return useQuery({
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
     queryKey: ['inventory'],
     queryFn: async () => {
       const response = await fetchInventory();
@@ -16,6 +22,48 @@ export function useInventory() {
     },
     staleTime: 1000 * 60 * 2, // Consider data fresh for 2 minutes
   });
+
+  // Set up real-time subscription for inventory
+  useEffect(() => {
+    console.log('[INVENTORY] Setting up real-time subscription...');
+
+    const channel = supabase
+      .channel('inventory-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'inventory',
+        },
+        (payload) => {
+          console.log('[INVENTORY] Real-time event:', payload);
+
+          // Invalidate and refetch inventory when any change occurs
+          queryClient.invalidateQueries({ queryKey: ['inventory'] });
+
+          // Show toast notification for new inventory items
+          if (payload.eventType === 'INSERT') {
+            const newItem = payload.new as InventoryItem;
+            toast.success(`New inventory item added: ${newItem.brand || 'Unknown'} ${newItem.model || ''}`, {
+              icon: '👓',
+              duration: 4000,
+            });
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('[INVENTORY] Subscription status:', status);
+      });
+
+    // Cleanup subscription on unmount
+    return () => {
+      console.log('[INVENTORY] Cleaning up real-time subscription');
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
+  return query;
 }
 
 /**
