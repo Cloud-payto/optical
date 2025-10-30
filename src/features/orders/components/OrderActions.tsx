@@ -57,21 +57,21 @@ export function OrderActions({ order, onConfirm, onArchive, onDelete }: OrderAct
       case 'confirm':
         return {
           title: 'Confirm Order',
-          message: `Are you sure you want to confirm order ${order.order_number}? This will move all items to your current inventory.`,
+          message: `Are you sure you want to confirm order ${order.order_number} from ${order.vendor}? This will move all items to your current inventory.`,
           confirmText: 'Confirm Order',
           variant: 'success' as const,
         };
       case 'archive':
         return {
           title: 'Archive Order',
-          message: `Are you sure you want to archive order ${order.order_number}? You can restore it later if needed.`,
+          message: `Are you sure you want to archive order ${order.order_number} from ${order.vendor}? You can restore it later if needed.`,
           confirmText: 'Archive Order',
           variant: 'warning' as const,
         };
       case 'delete':
         return {
           title: 'Delete Order',
-          message: `Are you sure you want to delete order ${order.order_number}? This action cannot be undone.`,
+          message: `Are you sure you want to delete order ${order.order_number} from ${order.vendor}? This action cannot be undone.`,
           confirmText: 'Delete Order',
           variant: 'danger' as const,
         };
