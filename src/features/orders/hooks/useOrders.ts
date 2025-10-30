@@ -44,8 +44,11 @@ export function useOrders() {
 
           // Show toast notification for new orders
           if (payload.eventType === 'INSERT') {
-            const newOrder = payload.new as Order;
-            toast.success(`New order received: ${newOrder.vendor} #${newOrder.order_number}`, {
+            const newOrder = payload.new as any;
+            // Handle both vendor (from API) and vendor_name (from database)
+            const vendorName = newOrder.vendor || newOrder.vendor_name || 'Unknown Vendor';
+            const orderNumber = newOrder.order_number || 'N/A';
+            toast.success(`New order received: ${vendorName} #${orderNumber}`, {
               icon: '📦',
               duration: 4000,
             });

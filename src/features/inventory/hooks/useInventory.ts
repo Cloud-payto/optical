@@ -44,8 +44,11 @@ export function useInventory() {
 
           // Show toast notification for new inventory items
           if (payload.eventType === 'INSERT') {
-            const newItem = payload.new as InventoryItem;
-            toast.success(`New inventory item added: ${newItem.brand || 'Unknown'} ${newItem.model || ''}`, {
+            const newItem = payload.new as any;
+            const brand = newItem.brand || 'Unknown Brand';
+            const model = newItem.model || '';
+            const color = newItem.color ? ` - ${newItem.color}` : '';
+            toast.success(`New frame added: ${brand} ${model}${color}`, {
               icon: '👓',
               duration: 4000,
             });
