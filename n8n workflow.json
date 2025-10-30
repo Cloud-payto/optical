@@ -11,7 +11,7 @@
       "typeVersion": 2.1,
       "position": [
         -208,
-        448
+        456
       ],
       "id": "4bf34dc6-37a1-42b1-888a-fe9be2b7fc55",
       "name": "Webhook",
@@ -61,7 +61,7 @@
       "typeVersion": 1,
       "position": [
         912,
-        544
+        552
       ],
       "id": "9f564869-34f2-401c-a7a8-8431b30c9350",
       "name": "Create a row",
@@ -112,7 +112,7 @@
       "typeVersion": 4.2,
       "position": [
         1808,
-        -224
+        -216
       ],
       "id": "f7d85efa-d62c-4905-9bd8-e221b8316f9e",
       "name": "Bulk-Add"
@@ -139,8 +139,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2032,
-        -224
+        2256,
+        -288
       ],
       "id": "ecab662e-550f-4982-843c-0affc6b3c020",
       "name": "Enrich"
@@ -188,7 +188,7 @@
       "typeVersion": 4.2,
       "position": [
         1584,
-        -224
+        -216
       ],
       "id": "5a70bcbf-0138-4336-9c6c-f69b1e779331",
       "name": "Create Email Record"
@@ -231,7 +231,7 @@
       "typeVersion": 4.2,
       "position": [
         912,
-        -224
+        -216
       ],
       "id": "a87fb387-6a51-4542-aab1-ea07b48cbeda",
       "name": "parse_ModernOptical"
@@ -244,7 +244,7 @@
       "typeVersion": 2,
       "position": [
         1360,
-        -224
+        -216
       ],
       "id": "223e82ec-c5d4-440d-bcef-796bfff5c0ba",
       "name": "Prepare Email Data"
@@ -272,7 +272,7 @@
       "typeVersion": 4.2,
       "position": [
         912,
-        -32
+        -24
       ],
       "id": "5f1e56e1-991e-4201-82d6-cb10aed1b854",
       "name": "parse_Safilo"
@@ -285,7 +285,7 @@
       "typeVersion": 2,
       "position": [
         1360,
-        -32
+        -24
       ],
       "id": "cf2e3906-ba62-4eeb-8a11-e6f80c830532",
       "name": "Prepare Email Safilo"
@@ -333,7 +333,7 @@
       "typeVersion": 4.2,
       "position": [
         1584,
-        -32
+        -24
       ],
       "id": "7f598d5c-d81a-4b20-bb52-c772392710f5",
       "name": "Create Email Record1"
@@ -378,7 +378,7 @@
       "typeVersion": 4.2,
       "position": [
         1808,
-        -32
+        -24
       ],
       "id": "c4c4f906-3ae7-451b-a203-0b6b2cdad416",
       "name": "Bulk-Add1"
@@ -421,7 +421,7 @@
       "typeVersion": 4.2,
       "position": [
         912,
-        160
+        168
       ],
       "id": "377a7506-0ec6-4683-a9c5-b77dbbde12f3",
       "name": "parse_Luxottica"
@@ -434,7 +434,7 @@
       "typeVersion": 2,
       "position": [
         1360,
-        160
+        168
       ],
       "id": "cffceba3-3cad-401f-ae0b-cd3b9351c110",
       "name": "Prepare Email Luxottica"
@@ -482,7 +482,7 @@
       "typeVersion": 4.2,
       "position": [
         1584,
-        160
+        168
       ],
       "id": "62567d22-7676-429d-911d-cea17442378f",
       "name": "Create Email Record2"
@@ -527,7 +527,7 @@
       "typeVersion": 4.2,
       "position": [
         1808,
-        160
+        168
       ],
       "id": "76fb943f-e4b8-44de-bd37-b916cde3404f",
       "name": "Bulk-Add2"
@@ -540,7 +540,7 @@
       "typeVersion": 2,
       "position": [
         16,
-        448
+        456
       ],
       "id": "10905825-dd6b-4def-bdfd-f777a5e54ec6",
       "name": "Extract Account ID"
@@ -568,7 +568,7 @@
       "typeVersion": 4.2,
       "position": [
         912,
-        352
+        360
       ],
       "id": "7f63d904-67d8-4d56-823b-9c40f8d5afc1",
       "name": "parse_Etnia"
@@ -581,7 +581,7 @@
       "typeVersion": 2,
       "position": [
         1360,
-        352
+        360
       ],
       "id": "a557b33c-c0dd-4460-a695-dc669cf91932",
       "name": "Prepare Email Etnia"
@@ -629,7 +629,7 @@
       "typeVersion": 4.2,
       "position": [
         1584,
-        352
+        360
       ],
       "id": "f318499c-acf4-4852-9472-6ad44eaef731",
       "name": "Create Email Record3"
@@ -674,7 +674,7 @@
       "typeVersion": 4.2,
       "position": [
         1808,
-        352
+        360
       ],
       "id": "c52e4986-b1b6-4b79-ba2b-d6436d81853a",
       "name": "Bulk-Add3"
@@ -687,7 +687,7 @@
       "typeVersion": 2,
       "position": [
         -208,
-        1344
+        1352
       ],
       "id": "1874e613-3482-4176-b3d6-d718a6f76c73",
       "name": "Detect Vendor"
@@ -734,7 +734,7 @@
       "typeVersion": 4.2,
       "position": [
         240,
-        448
+        456
       ],
       "id": "b52414a6-3fc2-4feb-a27e-6ce2c3b4c468",
       "name": "Detect Vendor (API)"
@@ -977,7 +977,7 @@
       "typeVersion": 3.3,
       "position": [
         688,
-        320
+        328
       ],
       "id": "3153d972-e87f-4337-a42e-387235ec87cc",
       "name": "Switch"
@@ -1020,7 +1020,7 @@
       "typeVersion": 4.2,
       "position": [
         912,
-        736
+        744
       ],
       "id": "2a72dcda-050f-494e-82fd-799f78176f75",
       "name": "parse_Idealoptics"
@@ -1033,7 +1033,7 @@
       "typeVersion": 2,
       "position": [
         1360,
-        736
+        744
       ],
       "id": "562bb95a-9ed5-4a40-9d2b-21eedcc32494",
       "name": "Prepare Email Ideal"
@@ -1081,7 +1081,7 @@
       "typeVersion": 4.2,
       "position": [
         1584,
-        736
+        744
       ],
       "id": "515b7db4-038f-4323-ba01-0eee12e38e29",
       "name": "Create Email Record4"
@@ -1126,7 +1126,7 @@
       "typeVersion": 4.2,
       "position": [
         1808,
-        736
+        744
       ],
       "id": "eca13fe3-eed0-4dd6-8b0c-ea9b6d38f2c1",
       "name": "Bulk-Add4"
@@ -1153,8 +1153,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2032,
-        736
+        2288,
+        672
       ],
       "id": "8ecca33b-4679-47f0-8634-8de9d828f028",
       "name": "Enrich1"
@@ -1197,7 +1197,7 @@
       "typeVersion": 4.2,
       "position": [
         912,
-        928
+        936
       ],
       "id": "74494bde-60eb-4323-bc90-94fbf3ef4004",
       "name": "parse_Lamy"
@@ -1210,7 +1210,7 @@
       "typeVersion": 2,
       "position": [
         1360,
-        928
+        936
       ],
       "id": "f8b703c8-c312-40ea-9e67-8407967c2444",
       "name": "Prepare Email Lamy"
@@ -1258,7 +1258,7 @@
       "typeVersion": 4.2,
       "position": [
         1584,
-        928
+        936
       ],
       "id": "e0637b2e-ced8-417d-b15b-4d9d3e0fc95d",
       "name": "Create Email Record5"
@@ -1303,7 +1303,7 @@
       "typeVersion": 4.2,
       "position": [
         1808,
-        928
+        936
       ],
       "id": "6373aacd-56af-4b1b-b290-7ead43d8c4a6",
       "name": "Bulk-Add5"
@@ -1316,7 +1316,7 @@
       "typeVersion": 2,
       "position": [
         464,
-        448
+        456
       ],
       "id": "1d5a37c7-64ca-4a45-ae12-ddff589d206b",
       "name": "Format API Response"
@@ -1359,7 +1359,7 @@
       "typeVersion": 4.2,
       "position": [
         912,
-        1120
+        1128
       ],
       "id": "40da892c-d1c9-4009-b09b-dc314932ae2c",
       "name": "parse_kenmark"
@@ -1407,7 +1407,7 @@
       "typeVersion": 4.2,
       "position": [
         1584,
-        1120
+        1128
       ],
       "id": "71172620-98e2-45fe-8b61-f6b31a2569ea",
       "name": "Create Email Record6"
@@ -1452,7 +1452,7 @@
       "typeVersion": 4.2,
       "position": [
         1808,
-        1120
+        1128
       ],
       "id": "5527c7f2-5b07-46fe-9cdc-ccc2d41b1ec1",
       "name": "Bulk-Add6"
@@ -1489,7 +1489,7 @@
       "typeVersion": 4.2,
       "position": [
         1136,
-        -224
+        -216
       ],
       "id": "61de64ca-d9cb-48c1-8bce-ac557609a436",
       "name": "Check Catalog"
@@ -1502,7 +1502,7 @@
       "typeVersion": 2,
       "position": [
         1360,
-        1120
+        1128
       ],
       "id": "c1c4ec8a-996e-4cdc-aa06-2366380ff1a9",
       "name": "Prepare Email Kenmark"
@@ -1539,7 +1539,7 @@
       "typeVersion": 4.2,
       "position": [
         1136,
-        -32
+        -24
       ],
       "id": "e04a7c34-6995-4524-8b94-03fe50f4e09e",
       "name": "Check Catalog1"
@@ -1576,7 +1576,7 @@
       "typeVersion": 4.2,
       "position": [
         1136,
-        160
+        168
       ],
       "id": "e502b751-233e-4b67-82cf-6da4038ac9f9",
       "name": "Check Catalog2"
@@ -1613,7 +1613,7 @@
       "typeVersion": 4.2,
       "position": [
         1136,
-        352
+        360
       ],
       "id": "bf33ff58-be2c-40bf-a646-857271e963b3",
       "name": "Check Catalog3"
@@ -1650,7 +1650,7 @@
       "typeVersion": 4.2,
       "position": [
         1136,
-        736
+        744
       ],
       "id": "95f4e774-e998-4f80-9474-ec3bc09bc2a9",
       "name": "Check Catalog4"
@@ -1687,7 +1687,7 @@
       "typeVersion": 4.2,
       "position": [
         1136,
-        928
+        936
       ],
       "id": "54b44a0e-fa19-4e46-9e34-af45e452ecb8",
       "name": "Check Catalog5"
@@ -1724,7 +1724,7 @@
       "typeVersion": 4.2,
       "position": [
         1136,
-        1120
+        1128
       ],
       "id": "5fab100d-add6-4e72-b524-5c1f19a60070",
       "name": "Check Catalog6"
@@ -1764,8 +1764,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2256,
-        -224
+        2480,
+        -216
       ],
       "id": "f59bc7f0-189c-405c-a828-a68d5ccee8f9",
       "name": "Cache to Catalog"
@@ -1805,8 +1805,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2256,
-        736
+        2480,
+        744
       ],
       "id": "b43c8e89-0349-4af3-9f16-5555793cfcb2",
       "name": "Cache to Catalog1"
@@ -1847,7 +1847,7 @@
       "typeVersion": 4.2,
       "position": [
         2032,
-        -32
+        -24
       ],
       "id": "7610be73-30cd-40b8-bc49-22d9ddc5c898",
       "name": "Cache to Catalog2"
@@ -1888,7 +1888,7 @@
       "typeVersion": 4.2,
       "position": [
         2032,
-        160
+        168
       ],
       "id": "a1191edc-b83d-4e8d-a989-684eb42ac168",
       "name": "Cache to Catalog3"
@@ -1929,7 +1929,7 @@
       "typeVersion": 4.2,
       "position": [
         2032,
-        352
+        360
       ],
       "id": "6829de9f-be1d-421c-8c70-33bfdf21d36c",
       "name": "Cache to Catalog4"
@@ -1970,7 +1970,7 @@
       "typeVersion": 4.2,
       "position": [
         2032,
-        928
+        936
       ],
       "id": "3e3240c1-8739-44b8-a69b-4a20109a7875",
       "name": "Cache to Catalog5"
@@ -2011,10 +2011,76 @@
       "typeVersion": 4.2,
       "position": [
         2032,
-        1120
+        1128
       ],
       "id": "303c6d7e-a77b-4f4c-95ca-bf815ab943aa",
       "name": "Cache to Catalog6"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "34425213-e5aa-4582-91e5-d89ee72e4efc",
+              "leftValue": "={{ $('Check Catalog').item.json.cacheMisses }} ",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2032,
+        -216
+      ],
+      "id": "62ee67f8-e053-4d2d-bd03-2bd42e5c67cf",
+      "name": "If cached"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "34425213-e5aa-4582-91e5-d89ee72e4efc",
+              "leftValue": "={{ $('Check Catalog').item.json.cacheMisses }} ",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2032,
+        744
+      ],
+      "id": "4a8f9765-8ddf-41b0-82e8-74d0d3a2965b",
+      "name": "If cached1"
     }
   ],
   "pinData": {},
@@ -2034,7 +2100,7 @@
       "main": [
         [
           {
-            "node": "Enrich",
+            "node": "If cached",
             "type": "main",
             "index": 0
           }
@@ -2310,7 +2376,7 @@
       "main": [
         [
           {
-            "node": "Enrich1",
+            "node": "If cached1",
             "type": "main",
             "index": 0
           }
@@ -2536,13 +2602,49 @@
           }
         ]
       ]
+    },
+    "If cached": {
+      "main": [
+        [
+          {
+            "node": "Enrich",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cache to Catalog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If cached1": {
+      "main": [
+        [
+          {
+            "node": "Enrich1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cache to Catalog1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "13010a3a-964f-4916-9309-40d37d400b9b",
+  "versionId": "f7caf5d0-2cd9-4f12-81cb-4edb29c4d981",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "755d69fd97946ae86204aaf9353f2da391bb20edeb5619afdf676315f69f4cd2"
