@@ -119,7 +119,7 @@ export function OrdersPage() {
               id="vendor-filter"
               value={selectedVendor}
               onChange={(e) => setSelectedVendor(e.target.value)}
-              className="block w-full max-w-xs rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="block w-full max-w-xs rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             >
               <option value="all">All Vendors</option>
               {vendors.map((vendor) => (
@@ -137,7 +137,7 @@ export function OrdersPage() {
               id="sort-by"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as 'date' | 'vendor')}
-              className="block rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="block rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             >
               <option value="date">Order Date</option>
               <option value="vendor">Vendor Name</option>
