@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, X } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Info, X } from 'lucide-react';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -10,7 +10,7 @@ interface ConfirmDialogProps {
   message: string;
   confirmText?: string;
   cancelText?: string;
-  variant?: 'danger' | 'warning' | 'info';
+  variant?: 'danger' | 'warning' | 'info' | 'success';
 }
 
 export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
@@ -28,25 +28,35 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     onClose();
   };
 
-  const variantStyles = {
+  const variantConfig = {
     danger: {
+      Icon: AlertTriangle,
       icon: 'text-red-600',
       iconBg: 'bg-red-100',
       button: 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
     },
     warning: {
+      Icon: AlertTriangle,
       icon: 'text-yellow-600',
       iconBg: 'bg-yellow-100',
       button: 'bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500'
     },
     info: {
+      Icon: Info,
       icon: 'text-blue-600',
       iconBg: 'bg-blue-100',
       button: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
+    },
+    success: {
+      Icon: CheckCircle,
+      icon: 'text-green-600',
+      iconBg: 'bg-green-100',
+      button: 'bg-green-600 hover:bg-green-700 focus:ring-green-500'
     }
   };
 
-  const styles = variantStyles[variant];
+  const config = variantConfig[variant];
+  const IconComponent = config.Icon;
 
   return (
     <AnimatePresence>
@@ -74,8 +84,8 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             >
               {/* Header */}
               <div className="flex items-start p-6 pb-4">
-                <div className={`flex-shrink-0 ${styles.iconBg} rounded-full p-3`}>
-                  <AlertTriangle className={`h-6 w-6 ${styles.icon}`} />
+                <div className={`flex-shrink-0 ${config.iconBg} rounded-full p-3`}>
+                  <IconComponent className={`h-6 w-6 ${config.icon}`} />
                 </div>
                 <div className="ml-4 flex-1">
                   <h3 className="text-lg font-semibold text-gray-900">
@@ -111,7 +121,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleConfirm}
-                  className={`px-4 py-2 text-sm font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors ${styles.button}`}
+                  className={`px-4 py-2 text-sm font-medium text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors ${config.button}`}
                 >
                   {confirmText}
                 </motion.button>
