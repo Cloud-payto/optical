@@ -21,6 +21,7 @@ import OrdersPage from './features/orders/OrdersPage';
 import InventoryPage from './features/inventory/InventoryPage';
 import ReturnsPage from './features/reports/ReturnsPage';
 import Debug from './pages/Debug';
+import Onboarding from './pages/Onboarding';
 
 // Configure React Query client
 const queryClient = new QueryClient({
@@ -45,6 +46,13 @@ function App() {
                 <Routes>
                   {/* Debug route - accessible without authentication */}
                   <Route path="/debug" element={<Debug />} />
+
+                  {/* Onboarding route - accessible after signup */}
+                  <Route path="/onboarding" element={
+                    <ProtectedRoute>
+                      <Onboarding />
+                    </ProtectedRoute>
+                  } />
 
                   {/* Protected routes */}
                   <Route path="/*" element={

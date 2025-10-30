@@ -213,9 +213,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (data.user) {
         if (data.user.email_confirmed_at) {
-          toast.success('Account created successfully!');
+          toast.success('Account created successfully! Let\'s set up your profile.');
+          // Redirect to onboarding will happen automatically after state updates
+          window.location.href = '/onboarding';
         } else {
-          toast.success('Please check your email to confirm your account');
+          toast.success('Account created! Please check your email to confirm, then complete your profile.');
+          // Still redirect to onboarding for users who need email confirmation
+          setTimeout(() => {
+            window.location.href = '/onboarding';
+          }, 2000);
         }
       }
     } catch (error) {

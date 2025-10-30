@@ -520,3 +520,55 @@ export async function fetchInventoryByVendor(
     pagination: response.pagination
   };
 }
+
+// Account management functions
+export interface UpdateAccountData {
+  businessName?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  name?: string;
+}
+
+export async function updateAccount(data: UpdateAccountData): Promise<void> {
+  const userId = await getCurrentUserIdFromSession();
+
+  // Use Supabase directly to update the account
+  const { error } = await supabase
+    .from('accounts')
+    .update({
+      business_name: data.businessName,
+      phone: data.phone,
+      address: data.address,
+      city: data.city,
+      state: data.state,
+      zip_code: data.zipCode,
+      name: data.name,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userId);
+
+  if (error) {
+    console.error('Failed to update account:', error);
+    throw new Error('Failed to update account information');
+  }
+}
+
+export async function getCurrentAccount(): Promise<any> {
+  const userId = await getCurrentUserIdFromSession();
+
+  const { data, error } = await supabase
+    .from('accounts')
+    .select('*')
+    .eq('id', userId)
+    .single();
+
+  if (error) {
+    console.error('Failed to get account:', error);
+    throw new Error('Failed to get account information');
+  }
+
+  return data;
+}
