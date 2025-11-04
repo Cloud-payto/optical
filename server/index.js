@@ -4,6 +4,18 @@ const bodyParser = require('body-parser');
 const path = require('path');
 require('dotenv').config();
 
+// Import security middleware
+const {
+  apiLimiter,
+  webhookLimiter,
+  authLimiter,
+  expensiveOpsLimiter,
+  sanitizeInputs,
+  helmetConfig,
+  requestLogger,
+  secureErrorHandler
+} = require('./middleware/security');
+
 // Import routes
 const webhookRoutes = require('./routes/webhook');
 const inventoryRoutes = require('./routes/inventory');
@@ -35,12 +47,18 @@ const PORT = process.env.PORT || 3001;
   }
 })();
 
-// CORS configuration - Allow multiple origins for Vercel deployments
+// CORS configuration - Allow multiple origins for deployments
 const allowedOrigins = [
+  // Development
   'http://localhost:5173',
   'http://localhost:3000',
+
+  // Production domains
+  'https://optiprofit.app',
+  'https://www.optiprofit.app',
+
+  // Vercel deployments
   'https://optical-software-kohl.vercel.app',
-  // Allow all Vercel preview and production deployments
   /^https:\/\/optical-software-[a-z0-9-]+\.vercel\.app$/,
   /^https:\/\/[a-z0-9-]+\.vercel\.app$/
 ];
@@ -70,13 +88,25 @@ const corsOptions = {
   optionsSuccessStatus: 200
 };
 
-// Middleware
+// ==============================================
+// SECURITY MIDDLEWARE (Applied First)
+// ==============================================
+
+// 1. Helmet - Security headers (must be first)
+app.use(helmetConfig);
+
+// 2. CORS - Cross-origin resource sharing
 app.use(cors(corsOptions));
 
-// Parse JSON bodies with increased limit for email content
-// Vendor emails with HTML can be large (up to 10MB)
+// 3. Body parsing with limits
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+
+// 4. Input sanitization - Prevents NoSQL injection
+app.use(sanitizeInputs);
+
+// 5. Request logging (production-safe)
+app.use(requestLogger);
 
 // Health check endpoint for Render.com monitoring
 app.get('/health', (req, res) => {
@@ -89,27 +119,35 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Routes
-app.use('/api/health', healthRoutes); // Use the new detailed health routes
-app.use('/api/webhook', webhookRoutes);
-app.use('/api/inventory', inventoryRoutes);
-app.use('/api/emails', emailsRoutes);
-app.use('/api/orders', ordersRoutes);
-app.use('/api/safilo', safiloRoutes);
-app.use('/api/vendors', vendorRoutes);
-app.use('/api/parse', parseRoutes);
-app.use('/api/enrich', enrichRoutes);
-app.use('/api/stats', statsRoutes);
-app.use('/api/catalog', catalogRoutes);
+// ==============================================
+// ROUTES WITH RATE LIMITING
+// ==============================================
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Error:', err.stack);
-  res.status(500).json({ 
-    error: 'Internal Server Error',
-    message: err.message 
-  });
-});
+// Health checks (no rate limit - for monitoring)
+app.use('/api/health', healthRoutes);
+
+// Webhook (high volume, separate rate limit)
+app.use('/api/webhook', webhookLimiter, webhookRoutes);
+
+// Expensive operations (parsing, enrichment)
+app.use('/api/parse', expensiveOpsLimiter, parseRoutes);
+app.use('/api/enrich', expensiveOpsLimiter, enrichRoutes);
+
+// Standard API routes (general rate limit)
+app.use('/api/inventory', apiLimiter, inventoryRoutes);
+app.use('/api/emails', apiLimiter, emailsRoutes);
+app.use('/api/orders', apiLimiter, ordersRoutes);
+app.use('/api/safilo', apiLimiter, safiloRoutes);
+app.use('/api/vendors', apiLimiter, vendorRoutes);
+app.use('/api/stats', apiLimiter, statsRoutes);
+app.use('/api/catalog', apiLimiter, catalogRoutes);
+
+// ==============================================
+// ERROR HANDLING (Production-Safe)
+// ==============================================
+
+// Use secure error handler that doesn't leak info in production
+app.use(secureErrorHandler);
 
 // 404 handler
 app.use((req, res) => {
