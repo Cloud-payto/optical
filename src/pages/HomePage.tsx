@@ -243,7 +243,7 @@ const HomePage = () => {
                 >
                   <div className="relative">
                     <img
-                      src="/animations/hero-data-viz-ezgif.com-optimize.gif"
+                      src="/images/square-modern-hero-customer-ordering-glasses.png"
                       alt="OptiProfit Data Visualization"
                       className="w-full h-auto rounded-xl shadow-2xl border-4 border-white/20"
                     />
