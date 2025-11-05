@@ -62,7 +62,7 @@ export default function Auth() {
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <img
-          src="/images/login-modern-16-9-saas.png"
+          src="/images/login-ar-16-9-modern-saas.png"
           alt="Background"
           className="w-full h-full object-cover"
         />
