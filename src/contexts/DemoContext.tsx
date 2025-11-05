@@ -95,6 +95,7 @@ export interface DemoContextType {
   currentStep: number;
   currentStepData: DemoStep | null;
   demoData: DemoData;
+  setDemoData: React.Dispatch<React.SetStateAction<DemoData>>;
   startDemo: () => void;
   endDemo: () => void;
   nextStep: () => void;
@@ -567,6 +568,7 @@ export const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
         currentStep,
         currentStepData,
         demoData,
+        setDemoData,
         startDemo,
         endDemo,
         nextStep,

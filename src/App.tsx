@@ -7,7 +7,7 @@ import { DemoProvider } from './contexts/DemoContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import MainLayout from './components/layout/MainLayout';
-import DemoOverlay from './components/demo/DemoOverlay';
+import DemoTour from './components/DemoTour';
 import HomePage from './pages/HomePage';
 import CalculatorPage from './pages/CalculatorPage';
 import DashboardPage from './pages/Dashboard';
@@ -82,7 +82,7 @@ function App() {
                     </ProtectedRoute>
                   } />
                 </Routes>
-                <DemoOverlay />
+                <DemoTour />
               </div>
             </DemoProvider>
           </Router>

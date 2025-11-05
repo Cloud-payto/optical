@@ -507,6 +507,7 @@ const ProfitCalculator: React.FC = () => {
                     <button
                       type="button"
                       data-demo="company-dropdown"
+                      data-tour="company-dropdown"
                       className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       onClick={() => setShowCompanyDropdown(!showCompanyDropdown)}
                     >
@@ -629,6 +630,7 @@ const ProfitCalculator: React.FC = () => {
                     <button
                       type="button"
                       data-demo="brand-dropdown"
+                      data-tour="brand-dropdown"
                       className={`w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                         !selectedCompany ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
@@ -831,7 +833,7 @@ const ProfitCalculator: React.FC = () => {
               </div>
             )}
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4" data-demo="cost-fields">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4" data-demo="cost-fields" data-tour="cost-fields">
               {/* Your Actual Cost */}
               <div className="space-y-2">
                 <label htmlFor="yourCost" className="block text-sm font-medium text-gray-700">
@@ -983,7 +985,7 @@ const ProfitCalculator: React.FC = () => {
               )}
             </div>
             
-            <div className="space-y-2" data-demo="retail-price">
+            <div className="space-y-2" data-demo="retail-price" data-tour="retail-price">
               <label htmlFor="retailPrice" className="block text-sm font-medium text-gray-700">
                 Retail Price
               </label>
@@ -1207,7 +1209,7 @@ const ProfitCalculator: React.FC = () => {
           )}
         </div>
         
-        <div className="p-6 md:w-1/2 bg-gradient-to-br from-blue-50 to-gray-50 border-t md:border-t-0 md:border-l border-gray-200" data-demo="profit-display">
+        <div className="p-6 md:w-1/2 bg-gradient-to-br from-blue-50 to-gray-50 border-t md:border-t-0 md:border-l border-gray-200" data-demo="profit-display" data-tour="profit-display">
           <ProfitDisplay 
             profitData={profitData} 
             animate={animateCalculation}

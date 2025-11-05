@@ -117,7 +117,7 @@ export function ReturnsPage() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" data-tour="returns-table">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>

@@ -923,6 +923,7 @@ const Inventory: React.FC = () => {
                 <nav className="flex space-x-8">
                   <button
                     data-demo="pending-tab"
+                    data-tour="pending-tab"
                     onClick={() => {
                       setOrdersSubTab('pending');
                       if (isDemo) notifyUserAction('click');
@@ -1317,6 +1318,7 @@ const Inventory: React.FC = () => {
                 <nav className="flex space-x-8">
                   <button
                     data-demo="inventory-pending-tab"
+                    data-tour="inventory-pending-tab"
                     onClick={() => setInventorySubTab('pending')}
                     className={`py-3 px-1 border-b-2 font-medium text-sm ${
                       inventorySubTab === 'pending'
@@ -1328,6 +1330,7 @@ const Inventory: React.FC = () => {
                   </button>
                   <button
                     data-demo="current-tab"
+                    data-tour="current-tab"
                     onClick={() => {
                       setInventorySubTab('current');
                       if (isDemo) notifyUserAction('click');
@@ -1420,6 +1423,7 @@ const Inventory: React.FC = () => {
                               </span>
                               <button
                                 data-demo="confirm-order-btn"
+                                data-tour="confirm-order-btn"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleOrderConfirmation(orderKey);
@@ -1808,6 +1812,7 @@ const Inventory: React.FC = () => {
                                               key={item.id}
                                               className="relative bg-white"
                                               data-demo={isDemo && items.indexOf(item) === 0 && Object.keys(groupedCurrentInventory)[0] === vendorName && Object.keys(brands)[0] === brandName ? "inventory-row" : undefined}
+                                              data-tour={isDemo && items.indexOf(item) === 0 && Object.keys(groupedCurrentInventory)[0] === vendorName && Object.keys(brands)[0] === brandName ? "inventory-row" : undefined}
                                             >
                                               {/* Collapsed Row */}
                                               <div

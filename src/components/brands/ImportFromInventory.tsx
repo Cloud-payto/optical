@@ -158,6 +158,7 @@ const ImportFromInventory: React.FC<ImportFromInventoryProps> = ({ onImportCompl
             disabled={importing}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             data-demo="import-vendor-btn"
+            data-tour="import-vendor-btn"
           >
             {importing ? (
               <>

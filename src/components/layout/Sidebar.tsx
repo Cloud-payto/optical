@@ -18,8 +18,12 @@ import {
   Glasses,
   Eye,
   FileText,
-  RotateCcw
+  RotateCcw,
+  Bug,
+  Store
 } from 'lucide-react';
+import BugReportModal from '../modals/BugReportModal';
+import VendorRequestModal from '../modals/VendorRequestModal';
 
 // Modern nested navigation structure
 const navigationConfig = [
@@ -66,6 +70,8 @@ const navigationConfig = [
 const Sidebar: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['Frames']));
+  const [isBugReportOpen, setIsBugReportOpen] = useState(false);
+  const [isVendorRequestOpen, setIsVendorRequestOpen] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
 
@@ -210,9 +216,34 @@ const Sidebar: React.FC = () => {
       </nav>
 
       {/* User Section */}
-      <div className="p-4 border-t border-gray-700">
+      <div className="p-4 border-t border-gray-700 space-y-2">
+        {/* Report Bug Button */}
+        <button
+          onClick={() => setIsBugReportOpen(true)}
+          className={`flex items-center w-full px-3 py-2 rounded-lg text-gray-300 hover:bg-orange-600 hover:text-white transition-colors ${
+            isCollapsed ? 'justify-center' : 'space-x-3'
+          }`}
+          title={isCollapsed ? 'Report a Bug' : undefined}
+        >
+          <Bug className="h-5 w-5 flex-shrink-0" />
+          {!isCollapsed && <span className="text-sm font-medium">Report a Bug</span>}
+        </button>
+
+        {/* Request Vendor Button */}
+        <button
+          onClick={() => setIsVendorRequestOpen(true)}
+          className={`flex items-center w-full px-3 py-2 rounded-lg text-gray-300 hover:bg-purple-600 hover:text-white transition-colors ${
+            isCollapsed ? 'justify-center' : 'space-x-3'
+          }`}
+          title={isCollapsed ? 'Request a Vendor' : undefined}
+        >
+          <Store className="h-5 w-5 flex-shrink-0" />
+          {!isCollapsed && <span className="text-sm font-medium">Request a Vendor</span>}
+        </button>
+
+        {/* Welcome Message */}
         {!isCollapsed && (
-          <div className="mb-3">
+          <div className="pt-2">
             <div className="flex items-center space-x-2 text-sm text-gray-300">
               <User className="h-4 w-4" />
               <span>Welcome, {user?.username || user?.email?.split('@')[0]}</span>
@@ -220,6 +251,7 @@ const Sidebar: React.FC = () => {
           </div>
         )}
 
+        {/* Logout Button */}
         <button
           onClick={signOut}
           className={`flex items-center w-full px-3 py-2 rounded-lg text-gray-300 hover:bg-red-600 hover:text-white transition-colors ${
@@ -231,6 +263,10 @@ const Sidebar: React.FC = () => {
           {!isCollapsed && <span className="text-sm font-medium">Logout</span>}
         </button>
       </div>
+
+      {/* Modals */}
+      <BugReportModal isOpen={isBugReportOpen} onClose={() => setIsBugReportOpen(false)} />
+      <VendorRequestModal isOpen={isVendorRequestOpen} onClose={() => setIsVendorRequestOpen(false)} />
     </div>
   );
 };
