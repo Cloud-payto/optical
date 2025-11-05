@@ -100,7 +100,7 @@ const Sidebar: React.FC = () => {
           {!isCollapsed && (
             <div className="flex items-center space-x-2">
               <img
-                src="/logos/logo.png"
+                src="/logos/logo-removebg-preview.png"
                 alt="OptiProfit Logo"
                 className="h-12 w-12"
               />
