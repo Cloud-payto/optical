@@ -67,7 +67,7 @@ const Sidebar: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['Frames']));
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -221,7 +221,7 @@ const Sidebar: React.FC = () => {
         )}
 
         <button
-          onClick={logout}
+          onClick={signOut}
           className={`flex items-center w-full px-3 py-2 rounded-lg text-gray-300 hover:bg-red-600 hover:text-white transition-colors ${
             isCollapsed ? 'justify-center' : 'space-x-3'
           }`}

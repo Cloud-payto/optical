@@ -251,19 +251,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      setLoading(true);
       const { error } = await supabase.auth.signOut();
-      
+
       if (error) {
         throw error;
       }
-      
+
+      // Clear user state immediately
+      setUser(null);
+      setSession(null);
+
       toast.success('Signed out successfully');
+
+      // Redirect will happen automatically via ProtectedRoute
+      // since user state is now null
     } catch (error) {
       console.error('Sign out error:', error);
       toast.error('Failed to sign out');
-    } finally {
-      setLoading(false);
     }
   };
 
