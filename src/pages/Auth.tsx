@@ -58,28 +58,20 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Left Side - Image */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-blue-800 items-center justify-center p-12 relative overflow-hidden">
-        <div className="absolute top-8 left-8">
-          <div className="bg-blue-500 rounded-full p-3 shadow-lg">
-            <Zap className="h-6 w-6 text-white" />
-          </div>
-        </div>
-
-        {/* Homepage Image */}
-        <div className="max-w-2xl w-full">
-          <img
-            src="/images/login-image-ar-4-3.png"
-            alt="OptiProfit Dashboard"
-            className="w-full h-auto rounded-lg shadow-2xl"
-          />
-        </div>
+    <div className="min-h-screen relative flex items-center justify-center p-6">
+      {/* Background Image with Overlay */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src="/images/login-modern-16-9-saas.png"
+          alt="Background"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
       </div>
 
-      {/* Right Side - Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
-        <div className="max-w-md w-full space-y-8">
+      {/* Centered Form */}
+      <div className="relative z-10 w-full max-w-md">
+        <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl p-8 space-y-6">
           {/* Toggle between Login/Register at top */}
           <div className="flex justify-end space-x-2 text-sm">
             <span className="text-gray-600">
@@ -102,7 +94,7 @@ export default function Auth() {
           </div>
 
           {/* Header */}
-          <div>
+          <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-900">
               {isLogin ? 'Login' : 'Register'}
             </h2>
