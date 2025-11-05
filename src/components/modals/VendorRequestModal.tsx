@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Package, X, Send, AlertCircle, Building2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
+import { getApiEndpoint } from '../../lib/api-config';
 
 interface VendorRequestModalProps {
   isOpen: boolean;
@@ -24,29 +25,42 @@ const VendorRequestModal: React.FC<VendorRequestModalProps> = ({ isOpen, onClose
       return;
     }
 
+    if (!user?.id) {
+      toast.error('You must be logged in to submit a vendor request');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // TODO: Implement actual vendor request submission (e.g., send to backend API)
-      // For now, we'll simulate a submission
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Log the vendor request (you can replace this with actual API call)
-      console.log('Vendor Request Submitted:', {
-        vendorName,
-        vendorWebsite,
-        reason,
-        userEmail: user?.email,
-        timestamp: new Date().toISOString(),
+      const response = await fetch(getApiEndpoint('/feedback/vendor-request'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          vendorName: vendorName.trim(),
+          vendorWebsite: vendorWebsite.trim() || null,
+          reason: reason.trim(),
+          userId: user.id,
+          userEmail: user.email || 'unknown@email.com',
+        }),
       });
 
-      toast.success('Vendor request submitted successfully!');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to submit vendor request');
+      }
+
+      toast.success('Vendor request submitted successfully! We\'ll review it soon.');
       setVendorName('');
       setVendorWebsite('');
       setReason('');
       onClose();
     } catch (error) {
-      toast.error('Failed to submit vendor request');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to submit vendor request';
+      toast.error(errorMessage);
       console.error('Error submitting vendor request:', error);
     } finally {
       setIsSubmitting(false);
