@@ -358,15 +358,7 @@ const HomePage = () => {
                 </p>
               </div>
 
-              <div className="relative">
-                <img
-                  src="/images/hero-cool-black-white-architect-look-image-min.png"
-                  alt="OptiProfit Solution Visualization"
-                  className="w-full h-auto rounded-xl shadow-lg border-4 border-white mb-8"
-                />
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid md:grid-cols-2 gap-6 mt-8">
                 <div className="bg-white rounded-xl p-6 shadow-sm border-2 border-green-200">
                   <div className="text-green-600 mb-3 text-2xl">✓</div>
                   <h3 className="font-semibold text-gray-900 mb-2">Automatic inventory from emails</h3>
