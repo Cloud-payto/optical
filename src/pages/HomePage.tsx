@@ -360,7 +360,7 @@ const HomePage = () => {
 
               <div className="relative">
                 <img
-                  src="/animations/hero-cool-black-white-architect-ezgif.com-optimize.gif"
+                  src="/images/hero-cool-black-white-architect-look-image-min.png"
                   alt="OptiProfit Solution Visualization"
                   className="w-full h-auto rounded-xl shadow-lg border-4 border-white mb-8"
                 />
