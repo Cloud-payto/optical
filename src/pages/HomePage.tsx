@@ -243,7 +243,7 @@ const HomePage = () => {
                 >
                   <div className="relative">
                     <img
-                      src="/animations/technical-data-viz-ezgif.com-optimize.gif"
+                      src="/animations/hero-data-viz-ezgif.com-optimize.gif"
                       alt="OptiProfit Data Visualization"
                       className="w-full h-auto rounded-xl shadow-2xl border-4 border-white/20"
                     />
@@ -360,7 +360,7 @@ const HomePage = () => {
 
               <div className="relative">
                 <img
-                  src="/animations/nice-looking-slow-data-viz-ezgif.com-optimize.gif"
+                  src="/animations/hero-cool-black-white-architect-ezgif.com-optimize.gif"
                   alt="OptiProfit Solution Visualization"
                   className="w-full h-auto rounded-xl shadow-lg border-4 border-white mb-8"
                 />
