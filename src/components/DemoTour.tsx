@@ -7,7 +7,6 @@ const DemoTour: React.FC = () => {
   const navigate = useNavigate();
   const { isDemo, endDemo, demoData, setDemoData } = useDemo();
   const [run, setRun] = useState(false);
-  const [stepIndex, setStepIndex] = useState(0);
   const [tourKey, setTourKey] = useState(0);
 
   // Start the tour when demo is activated
@@ -15,14 +14,12 @@ const DemoTour: React.FC = () => {
     if (isDemo) {
       console.log('🎬 Starting demo tour, resetting state');
       setRun(true);
-      setStepIndex(0);
       setTourKey(prev => prev + 1); // Force complete remount
       // Navigate to inventory page
       navigate('/frames/inventory');
     } else {
       console.log('🛑 Demo ended, stopping tour');
       setRun(false);
-      setStepIndex(0);
     }
   }, [isDemo, navigate]);
 
@@ -177,53 +174,59 @@ const DemoTour: React.FC = () => {
   const handleJoyrideCallback = (data: CallBackProps) => {
     const { status, type, index, action, lifecycle } = data;
 
-    console.log('Joyride callback:', { status, type, index, action, lifecycle });
+    console.log('🎯 Joyride callback:', { status, type, index, action, lifecycle });
 
     // Handle tour finish/skip
     if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
-      console.log('Demo tour finished or skipped');
+      console.log('✅ Demo tour finished or skipped');
       setRun(false);
-      setStepIndex(0);
       endDemo();
       return;
     }
 
     // Handle errors
     if (status === STATUS.ERROR) {
-      console.error('Joyride error at step:', index);
+      console.error('❌ Joyride error at step:', index);
       setRun(false);
-      setStepIndex(0);
       endDemo();
       return;
     }
 
-    // Handle step changes for navigation
-    if (type === EVENTS.STEP_AFTER || type === EVENTS.TARGET_NOT_FOUND) {
-      const nextIndex = index + (action === ACTIONS.PREV ? -1 : 1);
+    // Handle target not found separately - DON'T advance the step
+    if (type === EVENTS.TARGET_NOT_FOUND) {
+      console.warn(`⚠️ Target not found for step ${index}. Waiting...`);
+      // Don't change stepIndex, just wait for the element to appear
+      return;
+    }
 
-      // Update step index
-      setStepIndex(nextIndex);
+    // Handle step changes ONLY when step actually changes
+    if (type === EVENTS.STEP_AFTER && action === ACTIONS.NEXT) {
+      const nextIndex = index + 1;
+      console.log(`➡️ Moving from step ${index} to step ${nextIndex}`);
 
-      // Handle page navigation based on step
+      // DON'T set stepIndex here - let Joyride manage it
+      // setStepIndex(nextIndex);
+
+      // Handle page navigation and data changes based on CURRENT step (before advancing)
       setTimeout(() => {
-        // Step 7 (index 6): Navigate to Returns
-        if (nextIndex === 7) {
-          console.log('Navigating to Returns page');
+        // After step 6 (Current Inventory Item): Navigate to Returns
+        if (index === 6) {
+          console.log('🚀 Navigating to Returns page');
           navigate('/reports/returns');
         }
-        // Step 9 (index 8): Navigate to My Vendors
-        else if (nextIndex === 9) {
-          console.log('Navigating to Brands page');
+        // After step 8 (Returns Feature): Navigate to My Vendors
+        else if (index === 8) {
+          console.log('🚀 Navigating to Brands page');
           navigate('/brands');
         }
-        // Step 12 (index 11): Navigate to Calculator
-        else if (nextIndex === 12) {
-          console.log('Navigating to Calculator page');
+        // After step 11 (Edit Vendor Button): Navigate to Calculator
+        else if (index === 11) {
+          console.log('🚀 Navigating to Calculator page');
           navigate('/calculator');
         }
-        // Step 4 (index 3): After confirming order, move demo data
-        else if (index === 3 && action === ACTIONS.NEXT) {
-          console.log('Moving pending items to current inventory');
+        // After step 3 (Confirm Order Button): Move demo data
+        else if (index === 3) {
+          console.log('📦 Moving pending items to current inventory');
           setDemoData((prev) => ({
             ...prev,
             currentInventory: prev.pendingInventory.map((item) => ({
@@ -233,7 +236,13 @@ const DemoTour: React.FC = () => {
             pendingInventory: [],
           }));
         }
-      }, 400);
+      }, 300);
+    }
+
+    // Handle going back
+    else if (type === EVENTS.STEP_AFTER && action === ACTIONS.PREV) {
+      const prevIndex = index - 1;
+      console.log(`⬅️ Going back from step ${index} to step ${prevIndex}`);
     }
   };
 
@@ -293,7 +302,6 @@ const DemoTour: React.FC = () => {
       key={tourKey}
       steps={steps}
       run={run}
-      stepIndex={stepIndex}
       continuous
       showProgress
       showSkipButton

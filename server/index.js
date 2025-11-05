@@ -28,6 +28,7 @@ const parseRoutes = require('./routes/parse');
 const enrichRoutes = require('./routes/enrich');
 const statsRoutes = require('./routes/stats');
 const catalogRoutes = require('./routes/catalog');
+const feedbackRoutes = require('./routes/feedback');
 
 // Import Supabase client
 const { supabase } = require('./lib/supabase');
@@ -141,6 +142,7 @@ app.use('/api/safilo', apiLimiter, safiloRoutes);
 app.use('/api/vendors', apiLimiter, vendorRoutes);
 app.use('/api/stats', apiLimiter, statsRoutes);
 app.use('/api/catalog', apiLimiter, catalogRoutes);
+app.use('/api/feedback', apiLimiter, feedbackRoutes);
 
 // ==============================================
 // ERROR HANDLING (Production-Safe)

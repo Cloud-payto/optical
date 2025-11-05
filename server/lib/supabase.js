@@ -1982,16 +1982,201 @@ async function checkDuplicateOrder(orderNumber, userId) {
       .eq('order_number', orderNumber)
       .eq('account_id', userId)
       .single();
-    
+
     if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
       throw error;
     }
-    
+
     return !!data; // Returns true if duplicate found
   } catch (error) {
     handleSupabaseError(error, 'checkDuplicateOrder');
   }
 }
+
+// Database operations for feedback (bug reports and vendor requests)
+const feedbackOperations = {
+  /**
+   * Save a bug report to the database
+   * @param {string} accountId - User's account ID
+   * @param {string} userEmail - User's email
+   * @param {string} title - Bug report title
+   * @param {string} description - Bug description
+   * @returns {Promise<Object>} The created bug report
+   */
+  async saveBugReport(accountId, userEmail, title, description) {
+    try {
+      const { data, error } = await supabase
+        .from('bug_reports')
+        .insert([
+          {
+            account_id: accountId,
+            user_email: userEmail,
+            title,
+            description,
+            status: 'new'
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleSupabaseError(error, 'saveBugReport');
+    }
+  },
+
+  /**
+   * Save a vendor request to the database
+   * @param {string} accountId - User's account ID
+   * @param {string} userEmail - User's email
+   * @param {string} vendorName - Requested vendor name
+   * @param {string|null} vendorWebsite - Vendor website (optional)
+   * @param {string} reason - Reason for requesting vendor
+   * @returns {Promise<Object>} The created vendor request
+   */
+  async saveVendorRequest(accountId, userEmail, vendorName, vendorWebsite, reason) {
+    try {
+      const { data, error } = await supabase
+        .from('vendor_requests')
+        .insert([
+          {
+            account_id: accountId,
+            user_email: userEmail,
+            vendor_name: vendorName,
+            vendor_website: vendorWebsite,
+            reason,
+            status: 'new'
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleSupabaseError(error, 'saveVendorRequest');
+    }
+  },
+
+  /**
+   * Get all bug reports (with optional filtering)
+   * @param {string|null} status - Filter by status (optional)
+   * @param {number|null} limit - Limit number of results (optional)
+   * @returns {Promise<Array>} Array of bug reports
+   */
+  async getBugReports(status = null, limit = null) {
+    try {
+      let query = supabase
+        .from('bug_reports')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (status) {
+        query = query.eq('status', status);
+      }
+
+      if (limit) {
+        query = query.limit(parseInt(limit));
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      handleSupabaseError(error, 'getBugReports');
+    }
+  },
+
+  /**
+   * Get all vendor requests (with optional filtering)
+   * @param {string|null} status - Filter by status (optional)
+   * @param {number|null} limit - Limit number of results (optional)
+   * @returns {Promise<Array>} Array of vendor requests
+   */
+  async getVendorRequests(status = null, limit = null) {
+    try {
+      let query = supabase
+        .from('vendor_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (status) {
+        query = query.eq('status', status);
+      }
+
+      if (limit) {
+        query = query.limit(parseInt(limit));
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      handleSupabaseError(error, 'getVendorRequests');
+    }
+  },
+
+  /**
+   * Update bug report status
+   * @param {string} id - Bug report ID
+   * @param {string} status - New status
+   * @returns {Promise<Object>} Updated bug report
+   */
+  async updateBugReportStatus(id, status) {
+    try {
+      const updateData = { status, updated_at: new Date().toISOString() };
+
+      // If status is resolved or closed, set resolved_at timestamp
+      if (status === 'resolved' || status === 'closed') {
+        updateData.resolved_at = new Date().toISOString();
+      }
+
+      const { data, error } = await supabase
+        .from('bug_reports')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleSupabaseError(error, 'updateBugReportStatus');
+    }
+  },
+
+  /**
+   * Update vendor request status
+   * @param {string} id - Vendor request ID
+   * @param {string} status - New status
+   * @returns {Promise<Object>} Updated vendor request
+   */
+  async updateVendorRequestStatus(id, status) {
+    try {
+      const updateData = { status, updated_at: new Date().toISOString() };
+
+      // If status is completed, set completed_at timestamp
+      if (status === 'completed') {
+        updateData.completed_at = new Date().toISOString();
+      }
+
+      const { data, error } = await supabase
+        .from('vendor_requests')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleSupabaseError(error, 'updateVendorRequestStatus');
+    }
+  }
+};
 
 module.exports = {
   supabase,
@@ -2000,6 +2185,7 @@ module.exports = {
   orderOperations,
   statsOperations,
   vendorOperations,
+  feedbackOperations,
   checkDuplicateOrder,
   handleSupabaseError
 };

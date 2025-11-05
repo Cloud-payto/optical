@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Bug, X, Send, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
+import { getApiEndpoint } from '../../lib/api-config';
 
 interface BugReportModalProps {
   isOpen: boolean;
@@ -23,27 +24,40 @@ const BugReportModal: React.FC<BugReportModalProps> = ({ isOpen, onClose }) => {
       return;
     }
 
+    if (!user?.id) {
+      toast.error('You must be logged in to submit a bug report');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // TODO: Implement actual bug report submission (e.g., send to backend API)
-      // For now, we'll simulate a submission
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Log the bug report (you can replace this with actual API call)
-      console.log('Bug Report Submitted:', {
-        title,
-        description,
-        userEmail: user?.email,
-        timestamp: new Date().toISOString(),
+      const response = await fetch(getApiEndpoint('/feedback/bug-report'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: title.trim(),
+          description: description.trim(),
+          userId: user.id,
+          userEmail: user.email || 'unknown@email.com',
+        }),
       });
 
-      toast.success('Bug report submitted successfully!');
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to submit bug report');
+      }
+
+      toast.success('Bug report submitted successfully! Thank you for your feedback.');
       setTitle('');
       setDescription('');
       onClose();
     } catch (error) {
-      toast.error('Failed to submit bug report');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to submit bug report';
+      toast.error(errorMessage);
       console.error('Error submitting bug report:', error);
     } finally {
       setIsSubmitting(false);
