@@ -1,5 +1,81 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+// Demo data types
+export interface DemoEmail {
+  id: string;
+  from: string;
+  subject: string;
+  receivedAt: string;
+  vendor: string;
+  orderNumber: string;
+  customerAccount: string;
+  placedBy: string;
+  status: string;
+  itemCount: number;
+  isDemo: true;
+}
+
+export interface DemoPendingItem {
+  id: string;
+  vendor: string;
+  brand: string;
+  model: string;
+  color: string;
+  size: string;
+  upc: string;
+  quantity: number;
+  wholesaleCost: number | null;
+  status: 'pending';
+  orderId: string;
+  receivedDate: string;
+  isDemo: true;
+}
+
+export interface DemoCurrentItem extends DemoPendingItem {
+  status: 'current';
+}
+
+export interface DemoReturn {
+  id: string;
+  vendor: string;
+  brand: string;
+  model: string;
+  color: string;
+  size: string;
+  upc: string;
+  quantity: number;
+  reason: string;
+  returnDate: string;
+  status: string;
+  refundAmount: number;
+  isDemo: true;
+}
+
+export interface DemoVendor {
+  id: string;
+  name: string;
+  importedFrom: string;
+  brands: DemoBrand[];
+  isDemo: true;
+}
+
+export interface DemoBrand {
+  id: string;
+  name: string;
+  wholesaleCost: number | null;
+  yourCost: number | null;
+  tariffTax: number | null;
+  discountPercent: number | null;
+}
+
+export interface DemoData {
+  emails: DemoEmail[];
+  pendingInventory: DemoPendingItem[];
+  currentInventory: DemoCurrentItem[];
+  returns: DemoReturn[];
+  vendors: DemoVendor[];
+}
 
 export interface DemoStep {
   id: string;
@@ -8,8 +84,9 @@ export interface DemoStep {
   page: string;
   selector?: string;
   position?: 'top' | 'bottom' | 'left' | 'right' | 'center';
-  action?: 'click' | 'navigate' | 'highlight' | 'input';
-  content?: string;
+  requiresUserAction?: boolean; // If true, wait for user action before advancing
+  actionType?: 'click' | 'select' | 'input' | 'navigate';
+  waitForSelector?: string; // Selector to watch for user interaction
   highlightElement?: string;
 }
 
@@ -17,194 +94,349 @@ export interface DemoContextType {
   isDemo: boolean;
   currentStep: number;
   currentStepData: DemoStep | null;
+  demoData: DemoData;
   startDemo: () => void;
   endDemo: () => void;
   nextStep: () => void;
   prevStep: () => void;
   skipToStep: (stepIndex: number) => void;
   totalSteps: number;
+  // User action tracking
+  notifyUserAction: (actionType: string, data?: any) => void;
+  waitingForUserAction: boolean;
 }
 
 const DemoContext = createContext<DemoContextType | undefined>(undefined);
 
+// Demo steps following the real operational workflow
 const demoSteps: DemoStep[] = [
-  // Introduction
+  // Phase 1: Email Processing
   {
     id: 'welcome',
     title: 'Welcome to OptiProfit Demo!',
-    description: 'Let me show you how OptiProfit can revolutionize your optical practice\'s profitability. This demo will walk you through the complete workflow from managing costs to calculating profits.',
-    page: '/',
+    description: 'Let me show you how OptiProfit transforms vendor emails into actionable inventory and profit insights. We\'ll walk through the complete workflow from receiving an order email to calculating profits.',
+    page: '/frames/inventory',
     position: 'center'
   },
-  
-  // Step 1: Brands & Costs Introduction
   {
-    id: 'brands-intro',
-    title: 'Step 1: Manage Your Brands & Costs',
-    description: 'First, we\'ll set up your supplier information and frame costs. This is the foundation of accurate profit calculations.',
-    page: '/brands',
-    position: 'center'
-  },
-  
-  // Step 2: Add Company
-  {
-    id: 'add-company',
-    title: 'Adding a New Company',
-    description: 'Click the "Add New Company" button to add a supplier. We\'ll add some demo data for you.',
-    page: '/brands',
-    selector: '[data-demo="add-company-btn"]',
-    action: 'highlight',
+    id: 'email-received',
+    title: 'Step 1: Vendor Sends Order Confirmation',
+    description: 'Your vendor sends an order confirmation email. OptiProfit automatically receives and parses it. Here\'s a demo email from Modern Optical with 5 frames on order.',
+    page: '/frames/inventory',
+    selector: '[data-demo="emails-tab"]',
     position: 'bottom'
   },
-  
-  // Step 3: View Company Details
   {
-    id: 'view-company',
-    title: 'Your Company Data',
-    description: 'Here you can see your suppliers with their brands and costs. Notice how each brand shows wholesale cost, your actual cost, and discount percentage.',
+    id: 'email-details',
+    title: 'Review Email Contents',
+    description: 'Click on the email to see the parsed order details. OptiProfit extracted 5 frames from the confirmation email, including brand, model, UPC, quantity, and costs.',
+    page: '/frames/inventory',
+    selector: '[data-demo="email-row"]',
+    position: 'right',
+    requiresUserAction: true,
+    actionType: 'click',
+    waitForSelector: '[data-demo="email-row"]'
+  },
+
+  // Phase 2: Pending Inventory
+  {
+    id: 'pending-orders',
+    title: 'Step 2: Review Pending Orders',
+    description: 'After parsing the email, the 5 frames appear in your Pending Orders. This is where you review items before confirming them into your current inventory. Click the "Pending" tab to view them.',
+    page: '/frames/inventory',
+    selector: '[data-demo="pending-tab"]',
+    position: 'bottom',
+    requiresUserAction: true,
+    actionType: 'click',
+    waitForSelector: '[data-demo="pending-tab"]'
+  },
+  {
+    id: 'confirm-order',
+    title: 'Confirm Your Order',
+    description: 'Review the pending items and click "Confirm Order" to move them into your current inventory.',
+    page: '/frames/inventory',
+    selector: '[data-demo="confirm-order-btn"]',
+    position: 'top',
+    requiresUserAction: true,
+    actionType: 'click',
+    waitForSelector: '[data-demo="confirm-order-btn"]'
+  },
+
+  // Phase 3: Current Inventory
+  {
+    id: 'current-inventory',
+    title: 'Step 3: View Current Inventory',
+    description: 'Your confirmed frames now appear in Current Inventory. This is your live stock of available frames. Click the "Current" tab to see them.',
+    page: '/frames/inventory',
+    selector: '[data-demo="current-tab"]',
+    position: 'bottom',
+    requiresUserAction: true,
+    actionType: 'click',
+    waitForSelector: '[data-demo="current-tab"]'
+  },
+  {
+    id: 'inventory-details',
+    title: 'Track Frame Details',
+    description: 'Click on any frame to see full details: vendor, brand, model, UPC, quantity in stock, costs, and order history. This helps you manage your inventory efficiently.',
+    page: '/frames/inventory',
+    selector: '[data-demo="inventory-row"]',
+    position: 'right'
+  },
+
+  // Phase 4: Returns
+  {
+    id: 'returns',
+    title: 'Step 4: Handle Returns',
+    description: 'Sometimes frames need to be returned to vendors. The Returns section tracks all returned items, return reasons, and updates your inventory automatically when returns are processed.',
+    page: '/reports/returns',
+    selector: '[data-demo="returns-table"]',
+    position: 'center'
+  },
+
+  // Phase 5: Vendor Management
+  {
+    id: 'import-vendor',
+    title: 'Step 5: Import Vendor Data',
+    description: 'Now let\'s import Modern Optical into "My Vendors". This allows you to add pricing information and use this vendor in the profit calculator. Click "Import from Orders" or navigate to the Brands page.',
     page: '/brands',
-    selector: '[data-demo="company-card"]',
-    action: 'highlight',
+    selector: '[data-demo="import-vendor-btn"]',
+    position: 'bottom'
+  },
+  {
+    id: 'vendor-added',
+    title: 'Vendor Imported!',
+    description: 'Modern Optical has been added to your vendors. Notice the brands detected from your orders: B.M.E.C., GB+ Collection, and Modern Plastics II. But we need to add your actual costs to calculate accurate profits.',
+    page: '/brands',
+    selector: '[data-demo="vendor-card"]',
     position: 'top'
   },
-  
-  // Step 4: Calculator Introduction
+  {
+    id: 'add-pricing',
+    title: 'Step 6: Add Your Costs',
+    description: 'Click "Edit" on Modern Optical to add your actual costs. Enter the wholesale cost and what you actually pay. OptiProfit calculates your discount percentage automatically. This is crucial for accurate profit calculations.',
+    page: '/brands',
+    selector: '[data-demo="edit-vendor-btn"]',
+    position: 'bottom',
+    requiresUserAction: true,
+    actionType: 'click',
+    waitForSelector: '[data-demo="edit-vendor-btn"]'
+  },
+
+  // Phase 6: Profit Calculator (INTERACTIVE)
   {
     id: 'calculator-intro',
-    title: 'Step 2: Calculate Frame Profits',
-    description: 'Now let\'s use your cost data to calculate profits. The Calculator automatically imports the information you just set up.',
+    title: 'Step 7: Calculate Frame Profits',
+    description: 'Now for the magic! The profit calculator automatically imports your vendor pricing. Let\'s calculate how much profit you\'ll make selling a B.M.E.C. frame from Modern Optical.',
     page: '/calculator',
     position: 'center'
   },
-  
-  // Step 5: Select Company
   {
     id: 'select-company',
-    title: 'Select Your Company',
-    description: 'Choose the company whose frame you\'re pricing. Notice how all your companies from Brands & Costs appear here.',
+    title: 'Select Your Vendor Company',
+    description: 'Click the Company dropdown and select "Modern Optical" from the list. This is the vendor you imported earlier.',
     page: '/calculator',
     selector: '[data-demo="company-dropdown"]',
-    action: 'highlight',
-    position: 'bottom'
+    position: 'bottom',
+    requiresUserAction: true,
+    actionType: 'select',
+    waitForSelector: '[data-demo="company-dropdown"]'
   },
-  
-  // Step 6: Select Brand
   {
     id: 'select-brand',
-    title: 'Choose the Brand',
-    description: 'Select the specific brand. Watch how the cost fields auto-populate with your saved data - no manual entry needed!',
+    title: 'Select Brand',
+    description: 'Now select "B.M.E.C." from the Brand dropdown. Watch what happens to the cost fields!',
     page: '/calculator',
     selector: '[data-demo="brand-dropdown"]',
-    action: 'highlight',
-    position: 'bottom'
+    position: 'bottom',
+    requiresUserAction: true,
+    actionType: 'select',
+    waitForSelector: '[data-demo="brand-dropdown"]'
   },
-  
-  // Step 7: Auto-Population
   {
     id: 'auto-populate',
-    title: 'Automatic Cost Population',
-    description: 'See how your cost, wholesale price, and tariff tax are automatically filled in? This saves time and ensures accuracy.',
+    title: 'Costs Auto-Populated!',
+    description: 'See how Your Cost ($42.50), Wholesale Cost ($50.00), and Discount % (15%) automatically filled in? This is the pricing you added in My Vendors. No manual entry needed!',
     page: '/calculator',
     selector: '[data-demo="cost-fields"]',
-    action: 'highlight',
     position: 'right'
   },
-  
-  // Step 8: Adjust Retail Price
   {
-    id: 'retail-price',
+    id: 'enter-retail-price',
     title: 'Set Your Retail Price',
-    description: 'Adjust the retail price based on what your practice actually charges for this frame. The profit calculation updates in real-time.',
+    description: 'Now enter the retail price you charge customers for this frame. Try $150.00. You can also toggle insurance on/off, adjust coverage amounts, and see how it affects profit.',
     page: '/calculator',
     selector: '[data-demo="retail-price"]',
-    action: 'highlight',
-    position: 'right'
+    position: 'right',
+    requiresUserAction: true,
+    actionType: 'input',
+    waitForSelector: '[data-demo="retail-price"]'
   },
-  
-  // Step 9: View Profit Results
   {
-    id: 'profit-results',
-    title: 'Your Profit Analysis',
-    description: 'See your complete profit breakdown: total profit, profit margin, patient payment after insurance, and more. All calculated instantly!',
+    id: 'view-profit',
+    title: 'Your Profit Breakdown',
+    description: 'OptiProfit calculated your complete profit breakdown! Total Profit, Profit Margin %, Patient Payment (if insurance), and more. All computed using the real calculator logic. Try changing the retail price or insurance settings to see live updates!',
     page: '/calculator',
     selector: '[data-demo="profit-display"]',
-    action: 'highlight',
     position: 'left'
   },
-  
-  // Step 10: Save Calculation
+
+  // Phase 7: Conclusion
   {
-    id: 'save-calculation',
-    title: 'Save for Future Reference',
-    description: 'Save this calculation to your account. You can always refer back to it or use it for comparisons.',
-    page: '/calculator',
-    selector: '[data-demo="save-btn"]',
-    action: 'highlight',
-    position: 'top'
-  },
-  
-  // Step 11: Profit Comparison Introduction
-  {
-    id: 'comparison-intro',
-    title: 'Compare Frame Profitability',
-    description: 'Now let\'s see the most powerful feature - comparing two frames side-by-side to find out which one makes you more money!',
-    page: '/calculator',
-    selector: '[data-demo="comparison-tab"]',
-    action: 'highlight',
-    position: 'bottom'
-  },
-  
-  // Step 12: Comparison Tool Overview
-  {
-    id: 'comparison-overview',
-    title: 'Side-by-Side Comparison',
-    description: 'The Profit Comparison tool lets you compare two different brands or even frames from the same brand. Enter costs for both frames just like before.',
-    page: '/calculator',
-    selector: '[data-demo="comparison-form"]',
-    action: 'highlight',
-    position: 'top'
-  },
-  
-  // Step 13: Comparison Results
-  {
-    id: 'comparison-results',
-    title: 'See Which Frame Wins',
-    description: 'The comparison shows you exactly which frame is more profitable, by how much, and why. Green highlights the winner in each category!',
-    page: '/calculator',
-    selector: '[data-demo="comparison-display"]',
-    action: 'highlight',
-    position: 'top'
-  },
-  
-  // Step 14: Dashboard Introduction
-  {
-    id: 'dashboard-intro',
-    title: 'Step 3: Track Your Performance',
-    description: 'Finally, let\'s see your practice\'s overall performance metrics in the Dashboard.',
-    page: '/dashboard',
-    position: 'center'
-  },
-  
-  // Step 15: Performance Metrics
-  {
-    id: 'performance-metrics',
-    title: 'Your Practice Analytics',
-    description: 'Monitor Total Frame Profit, Total Frames Sold, Average Profit Per Frame, and your Top Selling Brand. All the insights you need to grow your business!',
-    page: '/dashboard',
-    selector: '[data-demo="metrics-cards"]',
-    action: 'highlight',
-    position: 'bottom'
-  },
-  
-  // Step 16: Conclusion
-  {
-    id: 'conclusion',
+    id: 'demo-complete',
     title: 'Demo Complete!',
-    description: 'You\'ve seen the complete OptiProfit workflow: managing costs → calculating profits → comparing options → tracking performance. Ready to boost your practice\'s profitability?',
+    description: 'You\'ve completed the full OptiProfit workflow! Email → Review → Confirm → Inventory → Returns → Import Vendor → Add Pricing → Calculate Profit. The Dashboard tracks your performance metrics. Ready to optimize your practice\'s profitability?',
     page: '/dashboard',
     position: 'center'
   }
 ];
+
+// Initial demo data - injected when demo starts
+const initialDemoData: DemoData = {
+  emails: [
+    {
+      id: 'demo-email-001',
+      from: 'noreply@modernoptical.com',
+      subject: 'Your Receipt for Order Number 99999',
+      receivedAt: new Date().toISOString(),
+      vendor: 'Modern Optical',
+      orderNumber: '99999',
+      customerAccount: '99999',
+      placedBy: 'Demo Rep',
+      status: 'parsed',
+      itemCount: 5,
+      isDemo: true
+    }
+  ],
+  pendingInventory: [
+    {
+      id: 'demo-pending-001',
+      vendor: 'Modern Optical',
+      brand: 'B.M.E.C.',
+      model: 'BIG AIR',
+      color: 'BLACK',
+      size: '54',
+      upc: '675254228656',
+      quantity: 1,
+      wholesaleCost: null,
+      status: 'pending',
+      orderId: '99999',
+      receivedDate: new Date().toISOString().split('T')[0],
+      isDemo: true
+    },
+    {
+      id: 'demo-pending-002',
+      vendor: 'Modern Optical',
+      brand: 'B.M.E.C.',
+      model: 'BIG BOLT',
+      color: 'NAVY FADE',
+      size: '58',
+      upc: '675254222883',
+      quantity: 1,
+      wholesaleCost: null,
+      status: 'pending',
+      orderId: '99999',
+      receivedDate: new Date().toISOString().split('T')[0],
+      isDemo: true
+    },
+    {
+      id: 'demo-pending-003',
+      vendor: 'Modern Optical',
+      brand: 'GB+ COLLECTION',
+      model: 'BEAUTIFUL',
+      color: 'BLACK/GOLD',
+      size: '56',
+      upc: '675254228748',
+      quantity: 1,
+      wholesaleCost: null,
+      status: 'pending',
+      orderId: '99999',
+      receivedDate: new Date().toISOString().split('T')[0],
+      isDemo: true
+    },
+    {
+      id: 'demo-pending-004',
+      vendor: 'Modern Optical',
+      brand: 'GB+ COLLECTION',
+      model: 'WONDROUS',
+      color: 'PINK CRYST/PK',
+      size: '54',
+      upc: '675254313710',
+      quantity: 1,
+      wholesaleCost: null,
+      status: 'pending',
+      orderId: '99999',
+      receivedDate: new Date().toISOString().split('T')[0],
+      isDemo: true
+    },
+    {
+      id: 'demo-pending-005',
+      vendor: 'Modern Optical',
+      brand: 'MODERN PLASTICS II',
+      model: 'PATRICK',
+      color: 'BLACK',
+      size: '55',
+      upc: '675254314656',
+      quantity: 1,
+      wholesaleCost: null,
+      status: 'pending',
+      orderId: '99999',
+      receivedDate: new Date().toISOString().split('T')[0],
+      isDemo: true
+    }
+  ],
+  currentInventory: [],
+  returns: [
+    {
+      id: 'demo-return-001',
+      vendor: 'Modern Optical',
+      brand: 'B.M.E.C.',
+      model: 'BIG AIR (Defective)',
+      color: 'BLACK',
+      size: '54',
+      upc: '675254228656',
+      quantity: 1,
+      reason: 'Defective hinge - frame warped',
+      returnDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      status: 'completed',
+      refundAmount: 45.00,
+      isDemo: true
+    }
+  ],
+  vendors: [
+    {
+      id: 'demo-vendor-001',
+      name: 'Modern Optical',
+      importedFrom: 'orders',
+      brands: [
+        {
+          id: 'demo-brand-001',
+          name: 'B.M.E.C.',
+          wholesaleCost: 50.00,
+          yourCost: 42.50,
+          tariffTax: 0,
+          discountPercent: 15.00
+        },
+        {
+          id: 'demo-brand-002',
+          name: 'GB+ COLLECTION',
+          wholesaleCost: 55.00,
+          yourCost: 46.75,
+          tariffTax: 0,
+          discountPercent: 15.00
+        },
+        {
+          id: 'demo-brand-003',
+          name: 'MODERN PLASTICS II',
+          wholesaleCost: 45.00,
+          yourCost: 38.25,
+          tariffTax: 0,
+          discountPercent: 15.00
+        }
+      ],
+      isDemo: true
+    }
+  ]
+};
 
 interface DemoProviderProps {
   children: ReactNode;
@@ -213,27 +445,60 @@ interface DemoProviderProps {
 export const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
   const [isDemo, setIsDemo] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [demoData, setDemoData] = useState<DemoData>({
+    emails: [],
+    pendingInventory: [],
+    currentInventory: [],
+    returns: [],
+    vendors: []
+  });
+  const [waitingForUserAction, setWaitingForUserAction] = useState(false);
   const navigate = useNavigate();
 
   const currentStepData = isDemo && currentStep < demoSteps.length ? demoSteps[currentStep] : null;
 
   const startDemo = () => {
-    // Demo mode no longer uses localStorage - all data comes from Supabase
+    console.log('🎬 Starting interactive demo...');
+
+    // Inject demo data into state
+    setDemoData(initialDemoData);
     setIsDemo(true);
     setCurrentStep(0);
-    navigate('/');
+
+    // Navigate to first step
+    navigate('/frames/inventory');
   };
 
   const endDemo = () => {
+    console.log('🛑 Ending demo and clearing all demo data...');
+
+    // Clear all demo data
+    setDemoData({
+      emails: [],
+      pendingInventory: [],
+      currentInventory: [],
+      returns: [],
+      vendors: []
+    });
+
     setIsDemo(false);
     setCurrentStep(0);
+    setWaitingForUserAction(false);
   };
 
   const nextStep = () => {
     if (currentStep < demoSteps.length - 1) {
       const nextStepData = demoSteps[currentStep + 1];
       setCurrentStep(currentStep + 1);
-      
+
+      // Check if next step requires user action
+      if (nextStepData.requiresUserAction) {
+        setWaitingForUserAction(true);
+        console.log(`⏳ Waiting for user action: ${nextStepData.actionType}`);
+      } else {
+        setWaitingForUserAction(false);
+      }
+
       // Navigate to the next step's page if different
       if (nextStepData.page !== demoSteps[currentStep].page) {
         navigate(nextStepData.page);
@@ -247,7 +512,8 @@ export const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
     if (currentStep > 0) {
       const prevStepData = demoSteps[currentStep - 1];
       setCurrentStep(currentStep - 1);
-      
+      setWaitingForUserAction(false);
+
       // Navigate to the previous step's page if different
       if (prevStepData.page !== demoSteps[currentStep].page) {
         navigate(prevStepData.page);
@@ -259,7 +525,41 @@ export const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
     if (stepIndex >= 0 && stepIndex < demoSteps.length) {
       const targetStep = demoSteps[stepIndex];
       setCurrentStep(stepIndex);
+      setWaitingForUserAction(targetStep.requiresUserAction || false);
       navigate(targetStep.page);
+    }
+  };
+
+  // User action notification - called when user completes required action
+  const notifyUserAction = (actionType: string, data?: any) => {
+    if (!isDemo || !currentStepData) return;
+
+    console.log(`✅ User action detected: ${actionType}`, data);
+
+    // Check if this action matches what we're waiting for
+    if (waitingForUserAction && currentStepData.actionType === actionType) {
+      console.log('✅ Required action completed! Advancing to next step...');
+
+      // Handle specific demo data transformations based on action
+      if (actionType === 'click' && currentStepData.id === 'confirm-order') {
+        // Move pending items to current inventory
+        console.log('📦 Moving pending items to current inventory...');
+        setDemoData(prev => ({
+          ...prev,
+          currentInventory: prev.pendingInventory.map(item => ({
+            ...item,
+            status: 'current' as const
+          })),
+          pendingInventory: []
+        }));
+      }
+
+      setWaitingForUserAction(false);
+
+      // Auto-advance to next step after brief delay
+      setTimeout(() => {
+        nextStep();
+      }, 800);
     }
   };
 
@@ -269,12 +569,15 @@ export const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
         isDemo,
         currentStep,
         currentStepData,
+        demoData,
         startDemo,
         endDemo,
         nextStep,
         prevStep,
         skipToStep,
-        totalSteps: demoSteps.length
+        totalSteps: demoSteps.length,
+        notifyUserAction,
+        waitingForUserAction
       }}
     >
       {children}

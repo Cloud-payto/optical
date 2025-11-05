@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { SearchIcon, PackageIcon, MailIcon, FilterIcon, RefreshCwIcon, TrashIcon, ChevronDownIcon, ChevronRightIcon, CheckIcon, ArchiveIcon, MoreVerticalIcon, XIcon, EyeIcon, Copy, Check } from 'lucide-react';
 import { fetchEmails, fetchInventory, fetchOrders, deleteEmail, deleteInventoryItem, confirmPendingOrder, archiveInventoryItem, restoreInventoryItem, archiveAllItemsByBrand, deleteArchivedItemsByBrand, deleteArchivedItemsByVendor, markItemAsSold, archiveOrder, deleteOrder, EmailData, InventoryItem, EmailResponse, InventoryResponse, OrderData, OrderResponse } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useDemo } from '../contexts/DemoContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import VendorSuggestionModal from '../components/vendors/VendorSuggestionModal';
@@ -10,6 +11,7 @@ import { extractVendorFromEmail, copyToClipboard as copyToClipboardUtil, generat
 
 const Inventory: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
+  const { isDemo, demoData, notifyUserAction } = useDemo();
   const [emails, setEmails] = useState<EmailData[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [orders, setOrders] = useState<OrderData[]>([]);
@@ -80,10 +82,27 @@ const Inventory: React.FC = () => {
         fetchInventory(),
         fetchOrders()
       ]);
-      
-      setEmails(emailResponse.emails || []);
-      setInventory(inventoryResponse.inventory || []);
-      setOrders(ordersResponse.orders || []);
+
+      // Show ONLY demo data when in demo mode (hide real data)
+      const realEmails = emailResponse.emails || [];
+      const realInventory = inventoryResponse.inventory || [];
+      const realOrders = ordersResponse.orders || [];
+
+      if (isDemo) {
+        console.log('🎬 Demo mode: Showing ONLY demo data (hiding real data)');
+        // Show ONLY demo data - real data is completely hidden
+        setEmails(demoData.emails as any[]);
+        setInventory([
+          ...demoData.pendingInventory as any[],
+          ...demoData.currentInventory as any[]
+        ]);
+        setOrders([]); // No real orders shown during demo
+      } else {
+        // Normal mode: Show real data only
+        setEmails(realEmails);
+        setInventory(realInventory);
+        setOrders(realOrders);
+      }
 
       // Debug: Log inventory items with order relationships
       if (inventoryResponse.inventory && inventoryResponse.inventory.length > 0) {
@@ -170,7 +189,7 @@ const Inventory: React.FC = () => {
       setLoading(false);
       setError('Please log in to view inventory data');
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, isDemo, demoData]);
 
   // Check for missing vendors after inventory loads
   useEffect(() => {
@@ -881,7 +900,11 @@ const Inventory: React.FC = () => {
               <div className="border-b border-gray-200 bg-gray-50 px-6">
                 <nav className="flex space-x-8">
                   <button
-                    onClick={() => setOrdersSubTab('pending')}
+                    data-demo="pending-tab"
+                    onClick={() => {
+                      setOrdersSubTab('pending');
+                      if (isDemo) notifyUserAction('click');
+                    }}
                     className={`py-3 px-1 border-b-2 font-medium text-sm ${
                       ordersSubTab === 'pending'
                         ? 'border-orange-500 text-orange-600'
@@ -1270,6 +1293,7 @@ const Inventory: React.FC = () => {
               <div className="border-b border-gray-200 bg-gray-50 px-6">
                 <nav className="flex space-x-8">
                   <button
+                    data-demo="inventory-pending-tab"
                     onClick={() => setInventorySubTab('pending')}
                     className={`py-3 px-1 border-b-2 font-medium text-sm ${
                       inventorySubTab === 'pending'
@@ -1280,7 +1304,11 @@ const Inventory: React.FC = () => {
                     Pending ({pendingInventory.length})
                   </button>
                   <button
-                    onClick={() => setInventorySubTab('current')}
+                    data-demo="current-tab"
+                    onClick={() => {
+                      setInventorySubTab('current');
+                      if (isDemo) notifyUserAction('click');
+                    }}
                     className={`py-3 px-1 border-b-2 font-medium text-sm ${
                       inventorySubTab === 'current'
                         ? 'border-green-500 text-green-600'
@@ -1368,9 +1396,11 @@ const Inventory: React.FC = () => {
                                 {order.items.length} pending
                               </span>
                               <button
+                                data-demo="confirm-order-btn"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleOrderConfirmation(orderKey);
+                                  if (isDemo) notifyUserAction('click');
                                 }}
                                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                               >

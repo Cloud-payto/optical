@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDemo } from '../../contexts/DemoContext';
-import { X, ArrowLeft, ArrowRight, SkipForward } from 'lucide-react';
+import { X, ArrowLeft, ArrowRight, SkipForward, Loader2, MousePointerClick } from 'lucide-react';
 
 const DemoOverlay: React.FC = () => {
-  const { 
-    isDemo, 
-    currentStep, 
-    currentStepData, 
-    nextStep, 
-    prevStep, 
-    endDemo, 
-    totalSteps 
+  const {
+    isDemo,
+    currentStep,
+    currentStepData,
+    nextStep,
+    prevStep,
+    endDemo,
+    totalSteps,
+    waitingForUserAction
   } = useDemo();
 
   const [targetElement, setTargetElement] = useState<HTMLElement | null>(null);
@@ -185,10 +186,34 @@ const DemoOverlay: React.FC = () => {
         {targetElement && !isCenterPosition && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              // Add pulsing animation for interactive steps
+              ...(waitingForUserAction && {
+                boxShadow: [
+                  '0 0 0 0 rgba(59, 130, 246, 0.7)',
+                  '0 0 0 10px rgba(59, 130, 246, 0)',
+                  '0 0 0 0 rgba(59, 130, 246, 0)'
+                ]
+              })
+            }}
             exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.3 }}
-            className="absolute bg-white bg-opacity-10 border-2 border-blue-400 rounded-lg shadow-xl pointer-events-none z-[45]"
+            transition={{
+              duration: 0.3,
+              ...(waitingForUserAction && {
+                boxShadow: {
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: 'easeInOut'
+                }
+              })
+            }}
+            className={`absolute bg-white bg-opacity-10 rounded-lg shadow-xl pointer-events-none z-[45] ${
+              waitingForUserAction
+                ? 'border-4 border-blue-500'
+                : 'border-2 border-blue-400'
+            }`}
             style={{
               left: targetElement.getBoundingClientRect().left - 4,
               top: targetElement.getBoundingClientRect().top - 4,
@@ -263,13 +288,13 @@ const DemoOverlay: React.FC = () => {
             <div className="flex items-center justify-between p-4 border-t border-gray-200">
               <button
                 onClick={prevStep}
-                disabled={currentStep === 0}
+                disabled={currentStep === 0 || waitingForUserAction}
                 className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <ArrowLeft className="w-4 h-4 mr-1" />
                 Previous
               </button>
-              
+
               <div className="flex items-center space-x-2">
                 <button
                   onClick={endDemo}
@@ -278,18 +303,26 @@ const DemoOverlay: React.FC = () => {
                   Skip Demo
                 </button>
               </div>
-              
-              <button
-                onClick={nextStep}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors"
-              >
-                {currentStep === totalSteps - 1 ? 'Finish' : 'Next'}
-                {currentStep === totalSteps - 1 ? (
-                  <SkipForward className="w-4 h-4 ml-1" />
-                ) : (
-                  <ArrowRight className="w-4 h-4 ml-1" />
-                )}
-              </button>
+
+              {/* Show waiting state when user action required */}
+              {waitingForUserAction ? (
+                <div className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-md">
+                  <MousePointerClick className="w-4 h-4 mr-2 animate-pulse" />
+                  Waiting for your action...
+                </div>
+              ) : (
+                <button
+                  onClick={nextStep}
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                >
+                  {currentStep === totalSteps - 1 ? 'Finish' : 'Next'}
+                  {currentStep === totalSteps - 1 ? (
+                    <SkipForward className="w-4 h-4 ml-1" />
+                  ) : (
+                    <ArrowRight className="w-4 h-4 ml-1" />
+                  )}
+                </button>
+              )}
             </div>
           </div>
           

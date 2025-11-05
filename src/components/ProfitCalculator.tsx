@@ -4,6 +4,7 @@ import { Company, Brand, fetchCompaniesWithPricing } from '../services/api';
 import { calculateProfit, calculateNonInsuranceProfit, calculateRetailPrice } from '../utils/calculations';
 import ProfitDisplay from './ProfitDisplay';
 import { DollarSignIcon, SaveIcon, PrinterIcon, SlidersIcon, ChevronDownIcon, PlusIcon, TagIcon, ShieldIcon, BuildingIcon } from 'lucide-react';
+import { useDemo } from '../contexts/DemoContext';
 
 // Helper function to format currency values
 const formatCurrency = (value: number): string => {
@@ -60,6 +61,7 @@ const loadSavedCalculations = (): SavedCalculation[] => {
 };
 
 const ProfitCalculator: React.FC = () => {
+  const { isDemo, demoData, notifyUserAction } = useDemo();
   const [yourCost, setYourCost] = useState<number>(5);
   const [wholesaleCost, setWholesaleCost] = useState<number>(50);
   const [tariffTax, setTariffTax] = useState<number>(0);
@@ -74,7 +76,7 @@ const ProfitCalculator: React.FC = () => {
   const [savedCalculations, setSavedCalculations] = useState<SavedCalculation[]>(loadSavedCalculations());
   const [animateCalculation, setAnimateCalculation] = useState<boolean>(false);
   const [insuranceEnabled, setInsuranceEnabled] = useState<boolean>(true);
-  
+
   // Company and Brand selection state
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
@@ -115,24 +117,31 @@ const ProfitCalculator: React.FC = () => {
   const insurancePlanDropdownRef = useRef<HTMLDivElement>(null);
   const saveDialogRef = useRef<HTMLDivElement>(null);
 
-  // Load companies from Supabase
+  // Load companies from Supabase or demo data
   useEffect(() => {
     const loadCompanies = async () => {
       try {
         setLoadingCompanies(true);
         setCompaniesError(null);
-        const companiesData = await fetchCompaniesWithPricing();
-        console.log('🔥 DEBUG: Calculator loaded companies:', companiesData);
-        
-        // Log brands with their pricing data
-        companiesData.forEach(company => {
-          console.log(`🔥 DEBUG: Company "${company.name}" has ${company.brands.length} brands:`);
-          company.brands.forEach(brand => {
-            console.log(`  - ${brand.name}: yourCost=${brand.yourCost}, wholesaleCost=${brand.wholesaleCost}, tariffTax=${brand.tariffTax}`);
+
+        // If in demo mode, show ONLY demo vendors (hide real data)
+        if (isDemo) {
+          console.log('🎬 Demo mode: Loading ONLY demo vendors in calculator');
+          setCompanies(demoData.vendors as Company[]);
+        } else {
+          const companiesData = await fetchCompaniesWithPricing();
+          console.log('🔥 DEBUG: Calculator loaded companies:', companiesData);
+
+          // Log brands with their pricing data
+          companiesData.forEach(company => {
+            console.log(`🔥 DEBUG: Company "${company.name}" has ${company.brands.length} brands:`);
+            company.brands.forEach(brand => {
+              console.log(`  - ${brand.name}: yourCost=${brand.yourCost}, wholesaleCost=${brand.wholesaleCost}, tariffTax=${brand.tariffTax}`);
+            });
           });
-        });
-        
-        setCompanies(companiesData);
+
+          setCompanies(companiesData);
+        }
       } catch (error) {
         console.error('Error loading companies:', error);
         setCompaniesError('Failed to load companies. Please try again.');
@@ -142,7 +151,7 @@ const ProfitCalculator: React.FC = () => {
     };
 
     loadCompanies();
-  }, []);
+  }, [isDemo, demoData.vendors]);
 
   // Helper function to calculate Your Cost from Wholesale Cost and Discount %
   const calculateYourCostFromDiscount = (wholesale: number, discount: number): number => {
@@ -246,6 +255,12 @@ const ProfitCalculator: React.FC = () => {
     setSelectedCompany(company);
     setSelectedBrand(null); // Reset brand selection when company changes
     setShowCompanyDropdown(false);
+
+    // Notify demo system that user selected a company
+    if (isDemo) {
+      console.log('🎬 Demo: User selected company:', company.name);
+      notifyUserAction('select', { companyId: company.id, companyName: company.name });
+    }
   };
 
   // Handle brand selection and auto-populate fields
@@ -253,6 +268,12 @@ const ProfitCalculator: React.FC = () => {
     console.log('🔥 DEBUG: Brand selected in calculator:', brand);
     setSelectedBrand(brand);
     setShowBrandDropdown(false);
+
+    // Notify demo system that user selected a brand
+    if (isDemo) {
+      console.log('🎬 Demo: User selected brand:', brand.name);
+      notifyUserAction('select', { brandId: brand.id, brandName: brand.name });
+    }
 
     // Auto-populate wholesale cost and tariff tax
     if (brand.wholesaleCost !== undefined && brand.wholesaleCost !== null) {
@@ -982,6 +1003,12 @@ const ProfitCalculator: React.FC = () => {
                     if (!useManualRetailPrice) {
                       // If they manually change the retail price, switch to manual mode
                       setUseManualRetailPrice(true);
+                    }
+
+                    // Notify demo system that user entered retail price
+                    if (isDemo && value) {
+                      console.log('🎬 Demo: User entered retail price:', value);
+                      notifyUserAction('input', { retailPrice: value });
                     }
                   }}
                   readOnly={!useManualRetailPrice}

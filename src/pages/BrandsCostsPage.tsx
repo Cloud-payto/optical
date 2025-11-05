@@ -11,6 +11,7 @@ import ImportFromInventory from '../components/brands/ImportFromInventory';
 import { Company, Brand } from '../types';
 import { fetchCompaniesWithPricing, saveAccountBrand } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useDemo } from '../contexts/DemoContext';
 
 // Function to load companies with account-specific brand data from Supabase
 const loadCompaniesFromSupabase = async (): Promise<Company[]> => {
@@ -25,6 +26,7 @@ const loadCompaniesFromSupabase = async (): Promise<Company[]> => {
 
 const BrandsCostsPage: React.FC = () => {
   const { user } = useAuth();
+  const { isDemo, demoData, notifyUserAction } = useDemo();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -42,8 +44,15 @@ const BrandsCostsPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const companiesData = await loadCompaniesFromSupabase();
-      setCompanies(companiesData);
+
+      // If in demo mode, show ONLY demo vendors (hide real data)
+      if (isDemo) {
+        console.log('🎬 Demo mode: Loading ONLY demo vendors');
+        setCompanies(demoData.vendors as Company[]);
+      } else {
+        const companiesData = await loadCompaniesFromSupabase();
+        setCompanies(companiesData);
+      }
     } catch (err) {
       console.error('Error loading companies:', err);
       setError('Failed to load company data. Please try again.');
@@ -52,10 +61,10 @@ const BrandsCostsPage: React.FC = () => {
     }
   };
 
-  // Load companies from Supabase on component mount
+  // Load companies from Supabase on component mount or when demo state changes
   useEffect(() => {
     loadCompanies();
-  }, []);
+  }, [isDemo, demoData.vendors]);
 
   // Filter companies based on search term
   const filteredCompanies = useMemo(() => {
@@ -89,6 +98,12 @@ const BrandsCostsPage: React.FC = () => {
     if (company) {
       setSelectedCompany(company);
       setIsCompanyModalOpen(true);
+
+      // Notify demo system that user clicked Edit
+      if (isDemo) {
+        console.log('🎬 Demo: User clicked Edit vendor button');
+        notifyUserAction('click', { companyId });
+      }
     }
   };
 
@@ -289,13 +304,13 @@ const BrandsCostsPage: React.FC = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.1 }}
-                    data-demo={index === 0 ? "company-card" : undefined}
                     className="space-y-3"
                   >
                     <CompanyCard
                       company={company}
                       onViewBrandDetails={handleViewBrandDetails}
                       onEditCompany={handleEditCompany}
+                      isDemo={isDemo && index === 0}
                     />
                     {user?.id && (
                       <MissingBrands

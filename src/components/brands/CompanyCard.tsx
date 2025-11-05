@@ -7,9 +7,10 @@ interface CompanyCardProps {
   company: Company;
   onViewBrandDetails: (companyId: string, brandId: string) => void;
   onEditCompany: (companyId: string) => void;
+  isDemo?: boolean;
 }
 
-const CompanyCard: React.FC<CompanyCardProps> = ({ company, onViewBrandDetails, onEditCompany }) => {
+const CompanyCard: React.FC<CompanyCardProps> = ({ company, onViewBrandDetails, onEditCompany, isDemo }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleExpanded = () => {
@@ -28,7 +29,10 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company, onViewBrandDetails, 
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden transition-all duration-200 hover:shadow-md">
+    <div
+      className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden transition-all duration-200 hover:shadow-md"
+      data-demo={isDemo ? "vendor-card" : undefined}
+    >
       {/* Company Header - Clickable */}
       <div className="relative">
         <button
@@ -63,6 +67,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company, onViewBrandDetails, 
           onClick={handleEditCompany}
           className="absolute top-6 right-12 p-1 hover:bg-gray-200 rounded transition-colors z-10"
           title="Edit company details"
+          data-demo={isDemo ? "edit-vendor-btn" : undefined}
         >
           <Edit3 className="h-4 w-4 text-gray-400 hover:text-blue-600" />
         </button>
