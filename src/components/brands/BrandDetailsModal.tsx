@@ -29,6 +29,7 @@ const BrandDetailsModal: React.FC<BrandDetailsModalProps> = ({
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [warnings, setWarnings] = useState<Record<string, string>>({});
   const [isTariffEnabled, setIsTariffEnabled] = useState(false);
 
   useEffect(() => {
@@ -82,6 +83,7 @@ const BrandDetailsModal: React.FC<BrandDetailsModalProps> = ({
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
+    const newWarnings: Record<string, string> = {};
 
     if (!formData.wholesaleCost || formData.wholesaleCost <= 0) {
       newErrors.wholesaleCost = 'Wholesale cost must be greater than 0';
@@ -91,8 +93,14 @@ const BrandDetailsModal: React.FC<BrandDetailsModalProps> = ({
       newErrors.yourCost = 'Your cost must be greater than 0';
     }
 
-    if (formData.yourCost && formData.wholesaleCost && formData.yourCost >= formData.wholesaleCost) {
-      newErrors.yourCost = 'Your cost should be less than wholesale cost';
+    // Only block if your cost is GREATER than wholesale (error condition)
+    // If equal, show a warning but allow save
+    if (formData.yourCost && formData.wholesaleCost) {
+      if (formData.yourCost > formData.wholesaleCost) {
+        newErrors.yourCost = 'Your cost cannot be greater than wholesale cost';
+      } else if (formData.yourCost === formData.wholesaleCost) {
+        newWarnings.yourCost = 'Your cost equals wholesale cost (0% discount)';
+      }
     }
 
     // Validate tariff tax
@@ -101,6 +109,7 @@ const BrandDetailsModal: React.FC<BrandDetailsModalProps> = ({
     }
 
     setErrors(newErrors);
+    setWarnings(newWarnings);
     return Object.keys(newErrors).length === 0;
   };
 
@@ -113,6 +122,7 @@ const BrandDetailsModal: React.FC<BrandDetailsModalProps> = ({
 
   const handleClose = () => {
     setErrors({});
+    setWarnings({});
     onClose();
   };
 
@@ -185,7 +195,7 @@ const BrandDetailsModal: React.FC<BrandDetailsModalProps> = ({
                     step="0.01"
                     min="0"
                     className={`block w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500 ${
-                      errors.yourCost ? 'border-red-300' : 'border-gray-300'
+                      errors.yourCost ? 'border-red-300' : warnings.yourCost ? 'border-yellow-300' : 'border-gray-300'
                     }`}
                     value={formData.yourCost}
                     onChange={(e) => handleInputChange('yourCost', parseFloat(e.target.value) || 0)}
@@ -194,6 +204,9 @@ const BrandDetailsModal: React.FC<BrandDetailsModalProps> = ({
                 </div>
                 {errors.yourCost && (
                   <p className="mt-1 text-sm text-red-600">{errors.yourCost}</p>
+                )}
+                {!errors.yourCost && warnings.yourCost && (
+                  <p className="mt-1 text-sm text-yellow-600">{warnings.yourCost}</p>
                 )}
               </div>
 

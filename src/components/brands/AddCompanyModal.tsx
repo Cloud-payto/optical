@@ -49,6 +49,7 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({
   ]);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [warnings, setWarnings] = useState<Record<string, string>>({});
 
   const resetForm = () => {
     setCompanyName('');
@@ -72,6 +73,7 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({
       notes: ''
     }]);
     setErrors({});
+    setWarnings({});
   };
 
   const handleContactInfoChange = (field: string, value: string) => {
@@ -134,6 +136,7 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({
     }
 
     // Validate each brand
+    const newWarnings: Record<string, string> = {};
     brands.forEach((brand, index) => {
       if (brand.name.trim()) {
         if (!brand.wholesaleCost || brand.wholesaleCost <= 0) {
@@ -142,13 +145,20 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({
         if (!brand.yourCost || brand.yourCost <= 0) {
           newErrors[`brand_${brand.id}_yourCost`] = 'Your cost must be greater than 0';
         }
-        if (brand.yourCost && brand.wholesaleCost && brand.yourCost >= brand.wholesaleCost) {
-          newErrors[`brand_${brand.id}_yourCost`] = 'Your cost should be less than wholesale cost';
+        // Only block if your cost is GREATER than wholesale (error condition)
+        // If equal, show a warning but allow save
+        if (brand.yourCost && brand.wholesaleCost) {
+          if (brand.yourCost > brand.wholesaleCost) {
+            newErrors[`brand_${brand.id}_yourCost`] = 'Your cost cannot be greater than wholesale cost';
+          } else if (brand.yourCost === brand.wholesaleCost) {
+            newWarnings[`brand_${brand.id}_yourCost`] = 'Your cost equals wholesale cost (0% discount)';
+          }
         }
       }
     });
 
     setErrors(newErrors);
+    setWarnings(newWarnings);
     return Object.keys(newErrors).length === 0;
   };
 
@@ -503,7 +513,7 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({
                                 step="0.01"
                                 min="0"
                                 className={`block w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500 ${
-                                  errors[`brand_${brand.id}_yourCost`] ? 'border-red-300' : 'border-gray-300'
+                                  errors[`brand_${brand.id}_yourCost`] ? 'border-red-300' : warnings[`brand_${brand.id}_yourCost`] ? 'border-yellow-300' : 'border-gray-300'
                                 }`}
                                 value={brand.yourCost}
                                 onChange={(e) => handleBrandChange(brand.id, 'yourCost', parseFloat(e.target.value) || 0)}
@@ -512,6 +522,9 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({
                             </div>
                             {errors[`brand_${brand.id}_yourCost`] && (
                               <p className="mt-1 text-sm text-red-600">{errors[`brand_${brand.id}_yourCost`]}</p>
+                            )}
+                            {!errors[`brand_${brand.id}_yourCost`] && warnings[`brand_${brand.id}_yourCost`] && (
+                              <p className="mt-1 text-sm text-yellow-600">{warnings[`brand_${brand.id}_yourCost`]}</p>
                             )}
                           </div>
 
