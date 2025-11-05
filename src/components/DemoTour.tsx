@@ -8,133 +8,91 @@ const DemoTour: React.FC = () => {
   const { isDemo, endDemo, demoData, setDemoData } = useDemo();
   const [run, setRun] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
+  const [tourKey, setTourKey] = useState(0);
 
   // Start the tour when demo is activated
   useEffect(() => {
     if (isDemo) {
+      console.log('🎬 Starting demo tour, resetting state');
       setRun(true);
       setStepIndex(0);
+      setTourKey(prev => prev + 1); // Force complete remount
+      // Navigate to inventory page
+      navigate('/frames/inventory');
     } else {
+      console.log('🛑 Demo ended, stopping tour');
       setRun(false);
+      setStepIndex(0);
     }
-  }, [isDemo]);
+  }, [isDemo, navigate]);
 
-  // Define the tour steps
+  // Define the tour steps (only using elements that actually exist)
   const steps: Step[] = [
     // Step 1: Welcome
     {
       target: 'body',
-      content: 'Welcome to OptiProfit! Let me show you how to automate your optical inventory management. This interactive tour will walk you through the complete workflow: Email → Pending → Confirm → Current Inventory → Returns → Brands → Calculator.',
+      content: 'Welcome to OptiProfit! Let me show you how to automate your optical inventory management. This interactive tour will walk you through: Pending Orders → Confirm → Current Inventory → Returns → Brands → Calculator.',
       placement: 'center',
       disableBeacon: true,
-      styles: {
-        options: {
-          zIndex: 10000,
-        },
-      },
     },
 
-    // Step 2: Email Forwarding (on Inventory page)
-    {
-      target: '[data-tour="email-forwarding"]',
-      content: 'This is your unique forwarding email. Forward vendor order confirmations here and OptiProfit will automatically parse them.',
-      placement: 'bottom',
-      disableBeacon: true,
-    },
-
-    // Step 3: Navigate to Pending Tab
+    // Step 2: Pending Orders Tab
     {
       target: '[data-tour="pending-tab"]',
-      content: 'Click the Pending tab to see orders waiting for confirmation. We have a demo order from Modern Optical with 5 frames.',
+      content: 'Here are your Pending Orders. We have a demo order from Modern Optical with 5 frames waiting for confirmation.',
       placement: 'bottom',
       disableBeacon: true,
-      spotlightClicks: true,
     },
 
-    // Step 4: Review Pending Items
-    {
-      target: '[data-tour="pending-inventory-list"]',
-      content: 'Here are 5 frames from your Modern Optical order, automatically extracted from the email.',
-      placement: 'right',
-      disableBeacon: true,
-    },
-
-    // Step 5: Item Details
-    {
-      target: '[data-tour="pending-item"]',
-      content: 'Each frame shows brand, model, color, size, and quantity parsed from the vendor email.',
-      placement: 'right',
-      disableBeacon: true,
-    },
-
-    // Step 6: Navigate to Pending Inventory Tab
+    // Step 3: Navigate to Pending Inventory Tab
     {
       target: '[data-tour="inventory-pending-tab"]',
-      content: 'Now click "Pending" under Inventory to view these frames in a better workflow.',
+      content: 'Click "Pending" under Inventory to view these frames in your pending inventory.',
       placement: 'bottom',
       disableBeacon: true,
-      spotlightClicks: true,
     },
 
-    // Step 7: Confirm Order Button
+    // Step 4: Confirm Order Button
     {
       target: '[data-tour="confirm-order-btn"]',
       content: 'Review the pending items and click "Confirm Order" to move them to your Current Inventory.',
       placement: 'top',
       disableBeacon: true,
-      spotlightClicks: true,
     },
 
-    // Step 8: Current Inventory Tab (auto-navigate)
+    // Step 5: Current Inventory Tab
     {
       target: '[data-tour="current-tab"]',
-      content: 'Your confirmed frames now appear in Current Inventory. Click the "Current" tab to see them.',
-      placement: 'bottom',
-      disableBeacon: true,
-      spotlightClicks: true,
-    },
-
-    // Step 9: Inventory Filters
-    {
-      target: '[data-tour="inventory-filters"]',
-      content: 'Filter by vendor, brand, color, or sort by various criteria to quickly find frames.',
+      content: 'After confirming, your frames appear here in Current Inventory. This is your live stock of available frames.',
       placement: 'bottom',
       disableBeacon: true,
     },
 
-    // Step 10: Current Inventory Item
+    // Step 6: Current Inventory Item
     {
       target: '[data-tour="inventory-row"]',
-      content: 'Click on any frame to see full details: vendor, brand, model, UPC, quantity in stock, costs, and order history.',
+      content: 'Each frame shows brand, model, color, size, quantity in stock, and pricing. Click to see full details.',
       placement: 'right',
       disableBeacon: true,
     },
 
-    // Step 11: Mark as Sold Demo
-    {
-      target: '[data-tour="inventory-actions"]',
-      content: 'Use the action menu to mark frames as sold, create returns, or edit details.',
-      placement: 'left',
-      disableBeacon: true,
-    },
-
-    // Step 12: Navigate to Returns
+    // Step 7: Navigate to Returns
     {
       target: 'body',
-      content: 'Now let\'s view the Returns page. We\'ll navigate there automatically.',
+      content: 'Now let\'s view the Returns page where you can track items being returned to vendors.',
       placement: 'center',
       disableBeacon: true,
     },
 
-    // Step 13: Returns Feature
+    // Step 8: Returns Feature
     {
       target: '[data-tour="returns-table"]',
-      content: 'The Returns section tracks all returned items, return reasons, and refund amounts. Generate professional return reports for frames approaching their return window.',
+      content: 'The Returns section tracks all returned items, return reasons, and refund amounts. Generate professional return reports for your vendors.',
       placement: 'top',
       disableBeacon: true,
     },
 
-    // Step 14: Navigate to My Vendors
+    // Step 9: Navigate to My Vendors
     {
       target: 'body',
       content: 'Now let\'s set up your vendor pricing for profit calculations. We\'ll navigate to My Vendors.',
@@ -142,15 +100,7 @@ const DemoTour: React.FC = () => {
       disableBeacon: true,
     },
 
-    // Step 15: Add/Import Vendor
-    {
-      target: '[data-tour="import-vendor-btn"]',
-      content: 'We\'ve already imported Modern Optical from your orders. You can also add vendors manually.',
-      placement: 'bottom',
-      disableBeacon: true,
-    },
-
-    // Step 16: Vendor Card
+    // Step 10: Vendor Card
     {
       target: '[data-tour="vendor-card"]',
       content: 'Here\'s Modern Optical with brands detected from your orders: B.M.E.C., GB+ Collection, and Modern Plastics II.',
@@ -158,7 +108,7 @@ const DemoTour: React.FC = () => {
       disableBeacon: true,
     },
 
-    // Step 17: Add Brand Pricing
+    // Step 11: Edit Vendor Button
     {
       target: '[data-tour="edit-vendor-btn"]',
       content: 'Click "Edit" to add your actual costs. Enter wholesale cost, your cost, and retail pricing for each brand. This is crucial for accurate profit calculations.',
@@ -166,7 +116,7 @@ const DemoTour: React.FC = () => {
       disableBeacon: true,
     },
 
-    // Step 18: Navigate to Calculator
+    // Step 12: Navigate to Calculator
     {
       target: 'body',
       content: 'Now let\'s calculate real profit margins using your vendor pricing. We\'ll navigate to the Calculator.',
@@ -174,53 +124,50 @@ const DemoTour: React.FC = () => {
       disableBeacon: true,
     },
 
-    // Step 19: Calculator Company Dropdown
+    // Step 13: Calculator Company Dropdown
     {
       target: '[data-tour="company-dropdown"]',
-      content: 'Select "Modern Optical" from the Company dropdown. This is the vendor you imported earlier.',
+      content: 'Select "Modern Optical" from the Company dropdown. This is the vendor you just set up.',
       placement: 'bottom',
       disableBeacon: true,
-      spotlightClicks: true,
     },
 
-    // Step 20: Calculator Brand Dropdown
+    // Step 14: Calculator Brand Dropdown
     {
       target: '[data-tour="brand-dropdown"]',
       content: 'Now select "B.M.E.C." from the Brand dropdown. Watch how the cost fields auto-populate!',
       placement: 'bottom',
       disableBeacon: true,
-      spotlightClicks: true,
     },
 
-    // Step 21: Auto-populated Costs
+    // Step 15: Auto-populated Costs
     {
       target: '[data-tour="cost-fields"]',
-      content: 'See how Your Cost ($42.50), Wholesale Cost ($50.00), and Discount % (15%) automatically filled in? This is the pricing you added in My Vendors. No manual entry needed!',
+      content: 'See how Your Cost, Wholesale Cost, and Discount % automatically filled in? This is the pricing you added in My Vendors. No manual entry needed!',
       placement: 'right',
       disableBeacon: true,
     },
 
-    // Step 22: Retail Price Input
+    // Step 16: Retail Price Input
     {
       target: '[data-tour="retail-price"]',
-      content: 'Now enter the retail price you charge customers for this frame. Try $150.00. You can also toggle insurance on/off to see how it affects profit.',
+      content: 'Enter the retail price you charge customers. Try $150.00. Toggle insurance on/off to see how it affects profit.',
       placement: 'right',
       disableBeacon: true,
-      spotlightClicks: true,
     },
 
-    // Step 23: Profit Display
+    // Step 17: Profit Display
     {
       target: '[data-tour="profit-display"]',
-      content: 'OptiProfit calculated your complete profit breakdown! Total Profit, Profit Margin %, Patient Payment (if insurance), and more. Try changing the retail price or insurance settings to see live updates!',
+      content: 'OptiProfit calculated your complete profit breakdown! Total Profit, Profit Margin %, and more. Try changing values to see live updates!',
       placement: 'left',
       disableBeacon: true,
     },
 
-    // Step 24: Demo Complete
+    // Step 18: Demo Complete
     {
       target: 'body',
-      content: 'Demo Complete! You\'ve seen the full OptiProfit workflow: Email → Review → Confirm → Inventory → Returns → Vendor Setup → Profit Calculation. Your demo data has been removed. Ready to optimize your practice\'s profitability?',
+      content: 'Demo Complete! You\'ve seen the full OptiProfit workflow: Pending → Confirm → Inventory → Returns → Vendors → Profit Calculator. Ready to start managing your practice?',
       placement: 'center',
       disableBeacon: true,
     },
@@ -228,40 +175,55 @@ const DemoTour: React.FC = () => {
 
   // Handle Joyride callbacks for navigation and state management
   const handleJoyrideCallback = (data: CallBackProps) => {
-    const { status, type, index, action } = data;
+    const { status, type, index, action, lifecycle } = data;
 
-    console.log('Joyride callback:', { status, type, index, action });
+    console.log('Joyride callback:', { status, type, index, action, lifecycle });
 
     // Handle tour finish/skip
     if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
       console.log('Demo tour finished or skipped');
       setRun(false);
+      setStepIndex(0);
+      endDemo();
+      return;
+    }
+
+    // Handle errors
+    if (status === STATUS.ERROR) {
+      console.error('Joyride error at step:', index);
+      setRun(false);
+      setStepIndex(0);
       endDemo();
       return;
     }
 
     // Handle step changes for navigation
-    if (type === EVENTS.STEP_AFTER) {
+    if (type === EVENTS.STEP_AFTER || type === EVENTS.TARGET_NOT_FOUND) {
       const nextIndex = index + (action === ACTIONS.PREV ? -1 : 1);
+
+      // Update step index
       setStepIndex(nextIndex);
 
       // Handle page navigation based on step
       setTimeout(() => {
-        // Step 12: Navigate to Returns
-        if (nextIndex === 12) {
+        // Step 7 (index 6): Navigate to Returns
+        if (nextIndex === 7) {
+          console.log('Navigating to Returns page');
           navigate('/reports/returns');
         }
-        // Step 14: Navigate to My Vendors
-        else if (nextIndex === 14) {
+        // Step 9 (index 8): Navigate to My Vendors
+        else if (nextIndex === 9) {
+          console.log('Navigating to Brands page');
           navigate('/brands');
         }
-        // Step 18: Navigate to Calculator
-        else if (nextIndex === 18) {
+        // Step 12 (index 11): Navigate to Calculator
+        else if (nextIndex === 12) {
+          console.log('Navigating to Calculator page');
           navigate('/calculator');
         }
-        // Step 7: After confirming order, move demo data
-        else if (index === 6 && action === ACTIONS.NEXT) {
-          // Move pending items to current inventory
+        // Step 4 (index 3): After confirming order, move demo data
+        else if (index === 3 && action === ACTIONS.NEXT) {
+          console.log('Moving pending items to current inventory');
           setDemoData((prev) => ({
             ...prev,
             currentInventory: prev.pendingInventory.map((item) => ({
@@ -271,16 +233,7 @@ const DemoTour: React.FC = () => {
             pendingInventory: [],
           }));
         }
-      }, 300);
-    }
-
-    // Handle target not found - wait and retry
-    if (type === EVENTS.TARGET_NOT_FOUND) {
-      console.warn('Target not found for step:', index);
-      // Retry after a delay
-      setTimeout(() => {
-        setStepIndex(index);
-      }, 500);
+      }, 400);
     }
   };
 
@@ -337,6 +290,7 @@ const DemoTour: React.FC = () => {
 
   return (
     <Joyride
+      key={tourKey}
       steps={steps}
       run={run}
       stepIndex={stepIndex}
@@ -351,6 +305,7 @@ const DemoTour: React.FC = () => {
       spotlightPadding={4}
       scrollToFirstStep
       scrollOffset={100}
+      debug
     />
   );
 };
