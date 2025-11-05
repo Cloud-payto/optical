@@ -59,68 +59,21 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Left Side - Illustration */}
-      <div className="hidden lg:flex lg:w-1/2 bg-white items-center justify-center p-12 relative overflow-hidden">
+      {/* Left Side - Image */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-blue-800 items-center justify-center p-12 relative overflow-hidden">
         <div className="absolute top-8 left-8">
-          <div className="bg-orange-500 rounded-full p-3">
+          <div className="bg-blue-500 rounded-full p-3 shadow-lg">
             <Zap className="h-6 w-6 text-white" />
           </div>
         </div>
 
-        {/* Illustration */}
-        <div className="max-w-md w-full text-center">
-          <svg viewBox="0 0 400 400" className="w-full h-auto">
-            {/* Person walking illustration */}
-            <g transform="translate(100, 100)">
-              {/* Plant decoration */}
-              <ellipse cx="50" cy="280" rx="15" ry="5" fill="#B8D4D8" opacity="0.3" />
-              <path d="M 45 280 Q 45 265 50 250" stroke="#B8D4D8" strokeWidth="2" fill="none" />
-              <path d="M 55 280 Q 55 270 50 260" stroke="#B8D4D8" strokeWidth="2" fill="none" />
-              <ellipse cx="48" cy="252" rx="5" ry="8" fill="#B8D4D8" />
-              <ellipse cx="52" cy="262" rx="4" ry="7" fill="#B8D4D8" />
-
-              {/* Ground line */}
-              <line x1="0" y1="300" x2="250" y2="300" stroke="#333" strokeWidth="2" />
-
-              {/* Person */}
-              {/* Head */}
-              <circle cx="120" cy="70" r="20" fill="#2D3748" />
-              {/* Hair bun */}
-              <circle cx="120" cy="55" r="12" fill="#1A202C" />
-              {/* Face */}
-              <circle cx="120" cy="70" r="18" fill="#F7FAFC" />
-
-              {/* Body - Orange coat */}
-              <path
-                d="M 110 90 Q 105 120 100 160 L 90 180 L 95 185 L 110 160 L 120 130 L 130 160 L 145 185 L 150 180 L 140 160 Q 135 120 130 90 Z"
-                fill="#FF8C42"
-              />
-
-              {/* Inner shirt - Black */}
-              <rect x="108" y="90" width="24" height="50" fill="#2D3748" rx="4" />
-
-              {/* Arms */}
-              <ellipse cx="95" cy="120" rx="8" ry="30" fill="#FF8C42" transform="rotate(-20 95 120)" />
-              <ellipse cx="145" cy="120" rx="8" ry="30" fill="#FF8C42" transform="rotate(20 145 120)" />
-
-              {/* Hands */}
-              <circle cx="90" cy="142" r="7" fill="#F7FAFC" />
-              <circle cx="150" cy="142" r="7" fill="#F7FAFC" />
-
-              {/* Pants - Gray */}
-              <path d="M 100 160 L 95 240 L 105 240 L 110 160 Z" fill="#4A5568" />
-              <path d="M 130 160 L 135 240 L 145 240 L 140 160 Z" fill="#4A5568" />
-
-              {/* Shoes */}
-              <ellipse cx="100" cy="245" rx="12" ry="6" fill="#2D3748" />
-              <ellipse cx="140" cy="245" rx="12" ry="6" fill="#2D3748" />
-            </g>
-
-            {/* Decorative stars */}
-            <text x="80" y="80" fontSize="24" fill="#D4D4D4">✦</text>
-            <text x="320" y="140" fontSize="20" fill="#D4D4D4">✦</text>
-            <text x="140" y="320" fontSize="16" fill="#D4D4D4">✦</text>
-          </svg>
+        {/* Homepage Image */}
+        <div className="max-w-2xl w-full">
+          <img
+            src="/images/homepage_2-min.png"
+            alt="OptiProfit Dashboard"
+            className="w-full h-auto rounded-lg shadow-2xl"
+          />
         </div>
       </div>
 
@@ -142,7 +95,7 @@ export default function Auth() {
                 setFirstName('');
                 setLastName('');
               }}
-              className="text-orange-500 hover:text-orange-600 font-semibold"
+              className="text-blue-600 hover:text-blue-700 font-semibold"
             >
               {isLogin ? 'REGISTER' : 'LOGIN'}
             </button>
@@ -181,7 +134,7 @@ export default function Auth() {
                     type="text"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="First Name"
                   />
                 </div>
@@ -194,7 +147,7 @@ export default function Auth() {
                     type="text"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Last Name"
                   />
                 </div>
@@ -211,7 +164,7 @@ export default function Auth() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Email"
                 required
               />
@@ -228,7 +181,7 @@ export default function Auth() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="block w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Password"
                   required
                   minLength={6}
@@ -259,7 +212,7 @@ export default function Auth() {
                     type={showConfirmPassword ? 'text' : 'password'}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="block w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    className="block w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Confirm Password"
                     required
                     minLength={6}
@@ -286,7 +239,7 @@ export default function Auth() {
             <button
               type="submit"
               disabled={formLoading || !email || !password || (!isLogin && password !== confirmPassword)}
-              className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 uppercase tracking-wide"
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 uppercase tracking-wide"
             >
               {formLoading ? (
                 <div className="flex items-center justify-center space-x-2">
