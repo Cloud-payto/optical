@@ -11,7 +11,7 @@ import { extractVendorFromEmail, copyToClipboard as copyToClipboardUtil, generat
 
 const Inventory: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
-  const { isDemo, demoData, notifyUserAction } = useDemo();
+  const { isDemo, demoData, notifyUserAction, currentStepData } = useDemo();
   const [emails, setEmails] = useState<EmailData[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [orders, setOrders] = useState<OrderData[]>([]);
@@ -203,12 +203,34 @@ const Inventory: React.FC = () => {
     const handleClickOutside = () => {
       setOpenDropdown(null);
     };
-    
+
     if (openDropdown) {
       document.addEventListener('click', handleClickOutside);
       return () => document.removeEventListener('click', handleClickOutside);
     }
   }, [openDropdown]);
+
+  // Automatically switch tabs based on demo step
+  useEffect(() => {
+    if (!isDemo || !currentStepData) return;
+
+    console.log('🎬 Demo step changed:', currentStepData.id);
+
+    // Switch to correct tab based on demo step
+    if (currentStepData.id === 'welcome' || currentStepData.id === 'email-received' || currentStepData.id === 'email-details') {
+      // Email-related steps: ensure Orders tab > Pending sub-tab
+      setActiveTab('orders');
+      setOrdersSubTab('pending');
+    } else if (currentStepData.id === 'pending-orders' || currentStepData.id === 'confirm-order') {
+      // Pending inventory steps: switch to Inventory tab > Pending sub-tab
+      setActiveTab('inventory');
+      setInventorySubTab('pending');
+    } else if (currentStepData.id === 'current-inventory' || currentStepData.id === 'inventory-details') {
+      // Current inventory steps: switch to Inventory tab > Current sub-tab
+      setActiveTab('inventory');
+      setInventorySubTab('current');
+    }
+  }, [isDemo, currentStepData]);
 
   // Delete email function
   const handleDeleteEmail = async (emailId: string) => {
@@ -983,6 +1005,7 @@ const Inventory: React.FC = () => {
                               exit={{ opacity: 0, x: 20, height: 0 }}
                               transition={{ duration: 0.3, delay: index * 0.05 }}
                               className="hover:bg-gray-50"
+                              data-demo={isDemo && index === 0 ? "email-row" : undefined}
                             >
                             <td className="px-4 py-4 text-sm font-medium text-gray-900">
                               <div className="flex flex-col">
@@ -1781,9 +1804,13 @@ const Inventory: React.FC = () => {
                                           const frameName = model || item.sku;
                                           
                                           return (
-                                            <div key={item.id} className="relative bg-white">
+                                            <div
+                                              key={item.id}
+                                              className="relative bg-white"
+                                              data-demo={isDemo && items.indexOf(item) === 0 && Object.keys(groupedCurrentInventory)[0] === vendorName && Object.keys(brands)[0] === brandName ? "inventory-row" : undefined}
+                                            >
                                               {/* Collapsed Row */}
-                                              <div 
+                                              <div
                                                 className="px-10 py-3 hover:bg-gray-50 cursor-pointer transition-colors duration-150"
                                                 onClick={() => toggleItemExpansion(item.id)}
                                               >

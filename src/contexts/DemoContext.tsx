@@ -121,34 +121,31 @@ const demoSteps: DemoStep[] = [
   {
     id: 'email-received',
     title: 'Step 1: Vendor Sends Order Confirmation',
-    description: 'Your vendor sends an order confirmation email. OptiProfit automatically receives and parses it. Here\'s a demo email from Modern Optical with 5 frames on order.',
+    description: 'Your vendor sends an order confirmation email. OptiProfit automatically receives and parses it. Here\'s a demo email from Modern Optical with 5 frames on order in the Pending Orders tab.',
     page: '/frames/inventory',
-    selector: '[data-demo="emails-tab"]',
+    selector: '[data-demo="pending-tab"]',
     position: 'bottom'
   },
   {
     id: 'email-details',
-    title: 'Review Email Contents',
-    description: 'Click on the email to see the parsed order details. OptiProfit extracted 5 frames from the confirmation email, including brand, model, UPC, quantity, and costs.',
+    title: 'Review Order Email',
+    description: 'Here you can see the parsed order email. OptiProfit extracted the order details including vendor, order number, and items. This is the first step in the inventory workflow.',
     page: '/frames/inventory',
     selector: '[data-demo="email-row"]',
-    position: 'right',
-    requiresUserAction: true,
-    actionType: 'click',
-    waitForSelector: '[data-demo="email-row"]'
+    position: 'right'
   },
 
   // Phase 2: Pending Inventory
   {
     id: 'pending-orders',
-    title: 'Step 2: Review Pending Orders',
-    description: 'After parsing the email, the 5 frames appear in your Pending Orders. This is where you review items before confirming them into your current inventory. Click the "Pending" tab to view them.',
+    title: 'Step 2: Review Pending Inventory',
+    description: 'Now let\'s view the 5 frames from that order in your Pending Inventory. Click the "Pending" tab under Inventory to see the items waiting to be confirmed.',
     page: '/frames/inventory',
-    selector: '[data-demo="pending-tab"]',
+    selector: '[data-demo="inventory-pending-tab"]',
     position: 'bottom',
     requiresUserAction: true,
     actionType: 'click',
-    waitForSelector: '[data-demo="pending-tab"]'
+    waitForSelector: '[data-demo="inventory-pending-tab"]'
   },
   {
     id: 'confirm-order',
