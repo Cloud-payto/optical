@@ -358,7 +358,15 @@ const HomePage = () => {
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6 mt-8">
+              <div className="relative mb-8">
+                <img
+                  src="/images/hero-ar7-3-modern-saas.png"
+                  alt="OptiProfit Solution Visualization"
+                  className="w-full h-auto rounded-xl shadow-lg"
+                />
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
                 <div className="bg-white rounded-xl p-6 shadow-sm border-2 border-green-200">
                   <div className="text-green-600 mb-3 text-2xl">✓</div>
                   <h3 className="font-semibold text-gray-900 mb-2">Automatic inventory from emails</h3>

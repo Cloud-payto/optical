@@ -70,7 +70,7 @@ export default function Auth() {
         {/* Homepage Image */}
         <div className="max-w-2xl w-full">
           <img
-            src="/images/homepage_2-min.png"
+            src="/images/ar-16-9-modern-saas-data-tech.png"
             alt="OptiProfit Dashboard"
             className="w-full h-auto rounded-lg shadow-2xl"
           />
