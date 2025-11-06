@@ -32,11 +32,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('[AUTH CONTEXT] Initializing authentication...');
     
     // If Supabase is not configured, just set as unauthenticated
     if (!isSupabaseConfigured) {
-      console.warn('[AUTH CONTEXT] Supabase not configured, setting user as unauthenticated');
       setAuthError('Authentication service is not configured. Please check environment variables.');
       setSession(null);
       setUser(null);
@@ -46,7 +44,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Check if supabase client exists
     if (!supabase) {
-      console.error('[AUTH CONTEXT] Supabase client is undefined!');
       setAuthError('Authentication client failed to initialize.');
       setSession(null);
       setUser(null);
@@ -57,7 +54,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Get initial session with error handling
     const getInitialSession = async () => {
       try {
-        console.log('[AUTH CONTEXT] Checking for existing session...');
         
         // Add timeout to prevent hanging
         const timeoutPromise = new Promise((_, reject) => 
@@ -115,7 +111,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let subscription: any = null;
     
     try {
-      console.log('[AUTH CONTEXT] Setting up auth state listener...');
       const { data } = supabase.auth.onAuthStateChange((event, session) => {
         console.log('[AUTH CONTEXT] Auth state changed:', event, {
           hasSession: !!session,
@@ -140,14 +135,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       
       subscription = data.subscription;
-      console.log('[AUTH CONTEXT] Auth state listener setup complete');
     } catch (error) {
       console.error('[AUTH CONTEXT] Failed to setup auth state listener:', error);
     }
 
     return () => {
       if (subscription) {
-        console.log('[AUTH CONTEXT] Cleaning up auth state listener');
         subscription.unsubscribe();
       }
     };

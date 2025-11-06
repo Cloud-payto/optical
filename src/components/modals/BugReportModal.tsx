@@ -119,7 +119,7 @@ const BugReportModal: React.FC<BugReportModalProps> = ({ isOpen, onClose }) => {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Brief description of the issue"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-shadow"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-shadow text-gray-900 placeholder:text-gray-400"
                   disabled={isSubmitting}
                 />
               </div>
@@ -134,7 +134,7 @@ const BugReportModal: React.FC<BugReportModalProps> = ({ isOpen, onClose }) => {
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Please describe what happened, what you expected, and steps to reproduce..."
                   rows={5}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-shadow resize-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-shadow resize-none text-gray-900 placeholder:text-gray-400"
                   disabled={isSubmitting}
                 />
               </div>

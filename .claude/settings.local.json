@@ -29,12 +29,15 @@
       "Bash(mv:*)",
       "Bash(timeout 5s npm run dev)",
       "Bash(VITE_SUPABASE_URL=test VITE_SUPABASE_ANON_KEY=test npm run build)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git rev-parse:*)"
     ],
     "deny": []
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "render"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }

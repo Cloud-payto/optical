@@ -96,6 +96,20 @@ CREATE TABLE public.brands (
   CONSTRAINT brands_pkey PRIMARY KEY (id),
   CONSTRAINT brands_vendor_id_fkey FOREIGN KEY (vendor_id) REFERENCES public.vendors(id)
 );
+CREATE TABLE public.bug_reports (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  account_id uuid NOT NULL,
+  user_email text,
+  title text NOT NULL,
+  description text NOT NULL,
+  status text NOT NULL DEFAULT 'new'::text CHECK (status = ANY (ARRAY['new'::text, 'reviewing'::text, 'in-progress'::text, 'resolved'::text, 'closed'::text])),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  resolved_at timestamp with time zone,
+  internal_notes text,
+  CONSTRAINT bug_reports_pkey PRIMARY KEY (id),
+  CONSTRAINT bug_reports_account_id_fkey FOREIGN KEY (account_id) REFERENCES public.accounts(id)
+);
 CREATE TABLE public.emails (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
   account_id uuid NOT NULL,
@@ -281,6 +295,21 @@ CREATE TABLE public.vendor_reps (
   CONSTRAINT vendor_reps_pkey PRIMARY KEY (id),
   CONSTRAINT vendor_reps_account_id_fkey FOREIGN KEY (account_id) REFERENCES public.accounts(id),
   CONSTRAINT vendor_reps_vendor_id_fkey FOREIGN KEY (vendor_id) REFERENCES public.vendors(id)
+);
+CREATE TABLE public.vendor_requests (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  account_id uuid NOT NULL,
+  user_email text,
+  vendor_name text NOT NULL,
+  vendor_website text,
+  reason text NOT NULL,
+  status text NOT NULL DEFAULT 'new'::text CHECK (status = ANY (ARRAY['new'::text, 'reviewing'::text, 'in-progress'::text, 'completed'::text, 'rejected'::text])),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  completed_at timestamp with time zone,
+  internal_notes text,
+  CONSTRAINT vendor_requests_pkey PRIMARY KEY (id),
+  CONSTRAINT vendor_requests_account_id_fkey FOREIGN KEY (account_id) REFERENCES public.accounts(id)
 );
 CREATE TABLE public.vendors (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),

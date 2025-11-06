@@ -126,7 +126,7 @@ const VendorRequestModal: React.FC<VendorRequestModalProps> = ({ isOpen, onClose
                     value={vendorName}
                     onChange={(e) => setVendorName(e.target.value)}
                     placeholder="e.g., Acme Eyewear Co."
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow"
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow text-gray-900 placeholder:text-gray-400"
                     disabled={isSubmitting}
                   />
                 </div>
@@ -142,7 +142,7 @@ const VendorRequestModal: React.FC<VendorRequestModalProps> = ({ isOpen, onClose
                   value={vendorWebsite}
                   onChange={(e) => setVendorWebsite(e.target.value)}
                   placeholder="https://example.com"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow text-gray-900 placeholder:text-gray-400"
                   disabled={isSubmitting}
                 />
               </div>
@@ -157,7 +157,7 @@ const VendorRequestModal: React.FC<VendorRequestModalProps> = ({ isOpen, onClose
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Tell us why this vendor would be helpful for your business..."
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow resize-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow resize-none text-gray-900 placeholder:text-gray-400"
                   disabled={isSubmitting}
                 />
               </div>

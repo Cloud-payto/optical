@@ -25,8 +25,6 @@ export function useInventory() {
 
   // Set up real-time subscription for inventory
   useEffect(() => {
-    console.log('[INVENTORY] Setting up real-time subscription...');
-
     const channel = supabase
       .channel('inventory-changes')
       .on(
@@ -37,8 +35,6 @@ export function useInventory() {
           table: 'inventory',
         },
         (payload) => {
-          console.log('[INVENTORY] Real-time event:', payload);
-
           // Invalidate and refetch inventory when any change occurs
           queryClient.invalidateQueries({ queryKey: ['inventory'] });
 
@@ -55,13 +51,10 @@ export function useInventory() {
           }
         }
       )
-      .subscribe((status) => {
-        console.log('[INVENTORY] Subscription status:', status);
-      });
+      .subscribe();
 
     // Cleanup subscription on unmount
     return () => {
-      console.log('[INVENTORY] Cleaning up real-time subscription');
       supabase.removeChannel(channel);
     };
   }, [queryClient]);

@@ -12,13 +12,11 @@ const DemoTour: React.FC = () => {
   // Start the tour when demo is activated
   useEffect(() => {
     if (isDemo) {
-      console.log('🎬 Starting demo tour, resetting state');
       setRun(true);
       setTourKey(prev => prev + 1); // Force complete remount
       // Navigate to inventory page
       navigate('/frames/inventory');
     } else {
-      console.log('🛑 Demo ended, stopping tour');
       setRun(false);
     }
   }, [isDemo, navigate]);

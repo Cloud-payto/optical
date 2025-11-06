@@ -47,7 +47,6 @@ const BrandsCostsPage: React.FC = () => {
 
       // If in demo mode, show ONLY demo vendors (hide real data)
       if (isDemo) {
-        console.log('🎬 Demo mode: Loading ONLY demo vendors');
         setCompanies(demoData.vendors as Company[]);
       } else {
         const companiesData = await loadCompaniesFromSupabase();
@@ -101,7 +100,6 @@ const BrandsCostsPage: React.FC = () => {
 
       // Notify demo system that user clicked Edit
       if (isDemo) {
-        console.log('🎬 Demo: User clicked Edit vendor button');
         notifyUserAction('click', { companyId });
       }
     }
@@ -109,25 +107,14 @@ const BrandsCostsPage: React.FC = () => {
 
   const handleSaveBrand = async (updatedBrand: Brand) => {
     try {
-      console.log('🔥 DEBUG: handleSaveBrand called with:', updatedBrand);
-      
       // Find the company (vendor) that contains this brand
       const company = companies.find(c => c.brands.some(b => b.id === updatedBrand.id));
       if (!company) {
         throw new Error('Could not find vendor for this brand');
       }
 
-      console.log('🔥 DEBUG: Found company:', { id: company.id, name: company.name });
-
       // Check if this is a new brand (invalid concatenated ID) or existing brand
       const isNewBrand = !updatedBrand.id || updatedBrand.id.includes('-' + company.id) || updatedBrand.id.length > 36;
-      
-      console.log('🔥 DEBUG: Brand ID analysis:', {
-        brandId: updatedBrand.id,
-        isNewBrand,
-        brandIdLength: updatedBrand.id?.length,
-        containsCompanyId: updatedBrand.id?.includes('-' + company.id)
-      });
       
       const dataToSend = {
         // For new brands, send name instead of invalid ID
@@ -150,12 +137,8 @@ const BrandsCostsPage: React.FC = () => {
         notes: updatedBrand.notes || ''
       };
 
-      console.log('🔥 DEBUG: Sending to API:', dataToSend);
-
       // Save to Supabase with correct data structure
       const result = await saveAccountBrand(dataToSend);
-      
-      console.log('🔥 DEBUG: API response:', result);
 
       // Update local state - handle both existing and new brands
       setCompanies(prevCompanies => 

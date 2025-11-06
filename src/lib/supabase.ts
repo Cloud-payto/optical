@@ -1,9 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 // Debug logging for initialization
-console.log('[SUPABASE INIT] Starting Supabase client initialization...');
-console.log('[SUPABASE INIT] Environment:', import.meta.env.MODE);
-console.log('[SUPABASE INIT] Build mode - Dev:', import.meta.env.DEV, 'Prod:', import.meta.env.PROD);
 
 // Check if import.meta.env is available
 try {
@@ -21,10 +18,6 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Detailed logging of environment variables
-console.log('[SUPABASE INIT] URL present:', !!supabaseUrl);
-console.log('[SUPABASE INIT] Key present:', !!supabaseAnonKey);
-console.log('[SUPABASE INIT] URL starts with:', supabaseUrl ? supabaseUrl.substring(0, 20) + '...' : 'undefined');
-console.log('[SUPABASE INIT] Key length:', supabaseAnonKey ? supabaseAnonKey.length : 0);
 
 // List all VITE_ prefixed env vars (for debugging)
 console.log('[SUPABASE INIT] All VITE_ env vars:', 

@@ -14,15 +14,11 @@ async function getCurrentUserId(): Promise<string> {
 // Helper function to get current user ID from session (async)
 async function getCurrentUserIdFromSession(): Promise<string> {
   const { data: { session }, error } = await supabase.auth.getSession();
-  console.log('🔥 DEBUG: getCurrentUserIdFromSession - session:', session);
-  console.log('🔥 DEBUG: getCurrentUserIdFromSession - error:', error);
   
   if (error || !session?.user) {
-    console.log('🔥 DEBUG: User not authenticated, session:', session, 'error:', error);
     throw new Error('User not authenticated. Please log in to continue.');
   }
   
-  console.log('🔥 DEBUG: Current user ID:', session.user.id);
   return session.user.id;
 }
 
@@ -437,16 +433,12 @@ export async function fetchAccountBrands(userId?: string): Promise<UserVendorPri
 
 export async function saveAccountBrand(brandData: Partial<UserVendorPricing>, userId?: string): Promise<UserVendorPricing[]> {
   const currentUserId = userId || await getCurrentUserIdFromSession();
-  console.log('🔥 DEBUG: saveAccountBrand API call');
-  console.log('🔥 DEBUG: currentUserId:', currentUserId);
-  console.log('🔥 DEBUG: brandData being sent to API:', brandData);
   
   const result = await apiRequest<UserVendorPricing[]>(`/vendors/pricing/${currentUserId}`, {
     method: 'POST',
     body: JSON.stringify(brandData),
   });
   
-  console.log('🔥 DEBUG: API response received:', result);
   return result;
 }
 
