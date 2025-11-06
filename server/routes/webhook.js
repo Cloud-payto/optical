@@ -14,9 +14,6 @@ function detectVendorFromEmail(emailData, rawEmailData) {
   const plainText = emailData.plain_text.toLowerCase();
   const htmlText = emailData.html_text.toLowerCase();
   
-  console.log('Detecting vendor from email:');
-  console.log('- Subject:', subject);
-  console.log('- From:', emailData.from);
   
   // 1. Check subject line for vendor keywords
   if (subject.includes('safilo') || subject.includes('eyerep order') || 
@@ -24,14 +21,11 @@ function detectVendorFromEmail(emailData, rawEmailData) {
     
     // For generic order subjects, check if content mentions Safilo
     if (plainText.includes('safilo') || htmlText.includes('safilo')) {
-      console.log('✓ Detected Safilo from subject + content combination');
       return 'noreply@safilo.com';
     }
   }
   
   // 2. Look for original sender in forwarded email content
-  console.log('- Checking forwarded content...');
-  console.log('- Plain text preview:', plainText.substring(0, 200));
   
   // Multiple patterns to catch different forwarding formats
   const fromPatterns = [

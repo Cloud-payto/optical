@@ -71,25 +71,18 @@ class SafiloService {
         this.stats.processingStartTime = Date.now();
         
         try {
-            console.log('🔍 Processing Safilo order PDF...\n');
-            
             // Phase 1: Parse PDF
             const parsedData = await this.parsePDF(pdfBuffer);
-            console.log(`✅ Parsed ${parsedData.frames.length} frames from PDF\n`);
             
             // Phase 2: Enrich with API data
             const enrichedData = await this.enrichWithAPI(parsedData);
             
             this.stats.processingEndTime = Date.now();
-            const processingTime = ((this.stats.processingEndTime - this.stats.processingStartTime) / 1000).toFixed(2);
-            
-            console.log(`🎉 Processing complete in ${processingTime}s`);
-            console.log(`📊 Results: ${this.stats.validatedFrames}/${this.stats.totalFrames} validated`);
             
             return enrichedData;
             
         } catch (error) {
-            console.error('❌ SafiloService error:', error.message);
+            console.error('SafiloService error:', error.message);
             throw error;
         }
     }

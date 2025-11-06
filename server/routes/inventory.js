@@ -19,12 +19,6 @@ router.post('/bulk-add', async (req, res) => {
   try {
     const { accountId, vendor, order, items, emailId } = req.body;
 
-    console.log('[BULK-ADD] Received request to add order and items');
-    console.log('  Account ID:', accountId);
-    console.log('  Vendor:', vendor);
-    console.log('  Order Number:', order?.order_number);
-    console.log('  Items count:', items?.length || 0);
-    console.log('  Email ID:', emailId || 'none');
 
     // Validate required fields
     if (!accountId || !vendor || !order || !items || items.length === 0) {

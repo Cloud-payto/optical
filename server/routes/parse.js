@@ -21,10 +21,6 @@ router.post('/modernoptical', async (req, res) => {
   try {
     const { html, plainText, accountId } = req.body;
 
-    console.log('[PARSE] Modern Optical parse request received');
-    console.log('  Account ID:', accountId);
-    console.log('  HTML length:', html?.length || 0);
-    console.log('  Plain text length:', plainText?.length || 0);
 
     // Validate input
     if (!html && !plainText) {
@@ -37,10 +33,6 @@ router.post('/modernoptical', async (req, res) => {
     // Parse the email content
     const parseResult = parseModernOpticalHtml(html, plainText);
 
-    console.log('[PARSE] Parse completed successfully');
-    console.log('  Order number:', parseResult.order?.order_number);
-    console.log('  Items found:', parseResult.items?.length || 0);
-    console.log('  Unique frames:', parseResult.unique_frames?.length || 0);
 
     // Get vendor ID from database
     const { data: vendor } = await supabase
@@ -81,10 +73,6 @@ router.post('/safilo', async (req, res) => {
   try {
     const { pdfBase64, accountId } = req.body;
 
-    console.log('[PARSE] Safilo parse request received');
-    console.log('  Account ID:', accountId);
-    console.log('  PDF base64 length:', pdfBase64?.length || 0);
-
     // Validate input
     if (!pdfBase64) {
       return res.status(400).json({
@@ -95,16 +83,11 @@ router.post('/safilo', async (req, res) => {
 
     // Convert base64 to buffer
     const pdfBuffer = Buffer.from(pdfBase64, 'base64');
-    console.log('  PDF buffer size:', pdfBuffer.length, 'bytes');
 
     // Parse the PDF
     const safiloService = new SafiloService();
     const result = await safiloService.processOrder(pdfBuffer);
 
-    console.log('[PARSE] Parse completed successfully');
-    console.log('  Order number:', result.orderInfo?.orderNumber);
-    console.log('  Frames found:', result.frames?.length || 0);
-    console.log('  Total pieces:', result.statistics?.totalFrames || 0);
 
     // Get vendor ID from database
     const { data: vendor } = await supabase
@@ -161,10 +144,6 @@ router.post('/luxottica', async (req, res) => {
   try {
     const { html, plainText, accountId } = req.body;
 
-    console.log('[PARSE] Luxottica parse request received');
-    console.log('  Account ID:', accountId);
-    console.log('  HTML length:', html?.length || 0);
-    console.log('  Plain text length:', plainText?.length || 0);
 
     // Validate input
     if (!html && !plainText) {
@@ -177,10 +156,6 @@ router.post('/luxottica', async (req, res) => {
     // Parse the email content
     const parseResult = parseLuxotticaHtml(html, plainText);
 
-    console.log('[PARSE] Parse completed successfully');
-    console.log('  Cart number:', parseResult.order?.order_number);
-    console.log('  Items found:', parseResult.items?.length || 0);
-    console.log('  Unique frames:', parseResult.unique_frames?.length || 0);
 
     // Get vendor ID from database
     const { data: vendor } = await supabase
@@ -221,10 +196,6 @@ router.post('/etnia-barcelona', async (req, res) => {
   try {
     const { pdfBase64, accountId } = req.body;
 
-    console.log('[PARSE] Etnia Barcelona parse request received');
-    console.log('  Account ID:', accountId);
-    console.log('  PDF base64 length:', pdfBase64?.length || 0);
-
     // Validate input
     if (!pdfBase64) {
       return res.status(400).json({
@@ -235,15 +206,11 @@ router.post('/etnia-barcelona', async (req, res) => {
 
     // Convert base64 to buffer
     const pdfBuffer = Buffer.from(pdfBase64, 'base64');
-    console.log('  PDF buffer size:', pdfBuffer.length, 'bytes');
 
     // Parse the PDF using Etnia Barcelona service
     const etniaService = new EtniaBarcelonaService({ debug: false });
     const result = await etniaService.processOrder(pdfBuffer);
 
-    console.log('[PARSE] Parse completed successfully');
-    console.log('  Order number:', result.orderInfo?.orderNumber);
-    console.log('  Items found:', result.frames?.length || 0);
 
     // Map to standard format
     const items = result.frames.map(frame => ({
@@ -322,10 +289,6 @@ router.post('/lamy', async (req, res) => {
   try {
     const { html, plainText, accountId } = req.body;
 
-    console.log('[PARSE] L\'amyamerica parse request received');
-    console.log('  Account ID:', accountId);
-    console.log('  HTML length:', html?.length || 0);
-    console.log('  Plain text length:', plainText?.length || 0);
 
     // Validate input
     if (!html && !plainText) {
@@ -354,20 +317,14 @@ router.post('/lamy', async (req, res) => {
       console.warn('[PARSE] Warnings:', validation.warnings);
     }
 
-    console.log('[PARSE] Email parsed successfully');
-    console.log('  Order number:', parsedData.orderNumber);
-    console.log('  Items found:', parsedData.items?.length || 0);
-
     // Phase 2: Enrich with API data using UPCs
     let enrichedData = parsedData;
     try {
       const lamyService = new LamyamericaService({ debug: false });
       enrichedData = await lamyService.enrichOrderData(parsedData);
-      console.log('[PARSE] API enrichment completed');
     } catch (enrichmentError) {
       console.error('[PARSE] API enrichment failed:', enrichmentError.message);
       // Continue with non-enriched data
-      console.log('[PARSE] Continuing with non-enriched data');
     }
 
     // Get unique frames (brand + model combinations)
@@ -471,10 +428,6 @@ router.post('/idealoptics', async (req, res) => {
   try {
     const { html, plainText, accountId } = req.body;
 
-    console.log('[PARSE] Ideal Optics parse request received');
-    console.log('  Account ID:', accountId);
-    console.log('  HTML length:', html?.length || 0);
-    console.log('  Plain text length:', plainText?.length || 0);
 
     // Validate input
     if (!html && !plainText) {
@@ -487,14 +440,9 @@ router.post('/idealoptics', async (req, res) => {
     // Phase 1: Parse the email content
     const parsedData = parseIdealOpticsHtml(html, plainText);
 
-    console.log('[PARSE] Email parsed successfully');
-    console.log('  Order number:', parsedData.orderNumber);
-    console.log('  Items found:', parsedData.items?.length || 0);
-
     // Phase 2: Web enrichment is handled separately during confirmation
     // Not during initial parsing to keep webhook fast
     const enrichedData = parsedData;
-    console.log('[PARSE] Skipping web enrichment (done during confirmation)');
 
     // Get unique frames (brand + model combinations)
     const uniqueFramesSet = new Set();

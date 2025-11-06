@@ -1,135 +1,274 @@
 # OptiProfit Backend Server
 
-Express.js backend server with JSON file storage for handling email webhooks from CloudMailin.
+Express.js backend server for OptiProfit, providing API endpoints for email processing, inventory management, and vendor integrations. Uses Supabase (PostgreSQL) for data storage and CloudMailin for email webhook processing.
 
-## Setup
+## 🚀 Setup
 
-The server dependencies are already installed when you run `npm install` from the project root.
+### Prerequisites
+- Node.js 18+
+- Supabase account with database configured
+- CloudMailin account (for email processing)
 
-## Running the Server
+### Installation
+
+```bash
+# From project root
+npm install
+
+# Or from server directory
+cd server
+npm install
+```
+
+### Environment Variables
+
+Copy the backend variables from the root [.env.example](../.env.example) file to `server/.env`:
+
+```bash
+# From project root
+cp .env.example server/.env
+# Edit server/.env and keep only the backend variables
+```
+
+Required variables for the server:
+- `SUPABASE_URL` - Your Supabase project URL
+- `SUPABASE_SERVICE_KEY` - Your Supabase service role key
+- `CLOUDMAILIN_WEBHOOK_SECRET` - CloudMailin webhook verification
+- `PORT` - Server port (default: 3001)
+- `FRONTEND_URL` - Frontend URL for CORS
+
+See the root [.env.example](../.env.example) file for complete documentation of all variables.
+
+## 🏃‍♂️ Running the Server
 
 ### Development Mode
 
-Run both frontend and backend together:
 ```bash
+# From project root - run both frontend and backend
 npm run dev:all
-```
 
-Or run the backend server only:
-```bash
-npm run server
+# Run backend only
+cd server
+node index.js
 ```
 
 The server will start on port 3001 (http://localhost:3001).
 
-## API Endpoints
+### Production Mode
 
-### Health Check
-- **GET** `/api/health`
-- Returns server status and timestamp
+```bash
+cd server
+NODE_ENV=production node index.js
+```
 
-### Email Webhook (CloudMailin)
-- **POST** `/api/webhook/email`
-- Receives and processes CloudMailin email data
-- Stores emails in SQLite database
+## 📡 API Endpoints
 
-### Email Webhook Test
-- **GET** `/api/webhook/email/test`
-- Returns webhook endpoint information
+### Health & Status
+- **GET** `/api/health` - Server health check and status
 
-### List Emails (Webhook Route)
-- **GET** `/api/webhook/email/list/:accountId`
-- Returns list of emails for specified account (legacy route)
+### Authentication
+- **POST** `/api/auth/login` - User login
+- **POST** `/api/auth/register` - User registration
+- **POST** `/api/auth/logout` - User logout
 
-### List Emails (Direct Route)
-- **GET** `/api/emails/:accountId`
-- Returns list of emails for specified account
+### Email Management
+- **POST** `/api/webhook/email` - CloudMailin webhook endpoint (receives vendor emails)
+- **GET** `/api/emails/:accountId` - List all emails for account
+- **DELETE** `/api/emails/:accountId/:emailId` - Delete specific email
+- **POST** `/api/emails/detect-vendor` - Test vendor detection logic
 
 ### Inventory Management
-- **GET** `/api/inventory/:accountId`
-- Returns inventory items for specified account
-- **POST** `/api/inventory/:accountId`
-- Add or update inventory item (requires sku, quantity, vendor in body)
+- **GET** `/api/inventory/:accountId` - List all inventory items
+- **GET** `/api/inventory/:accountId/status/:status` - Filter by status (pending/current/sold/archived)
+- **POST** `/api/inventory/:accountId/confirm/:orderNumber` - Confirm order and enrich data
+- **PUT** `/api/inventory/:accountId/:itemId/sold` - Mark item as sold
+- **PUT** `/api/inventory/:accountId/:itemId/archive` - Archive item
+- **PUT** `/api/inventory/:accountId/:itemId/restore` - Restore archived item
+- **DELETE** `/api/inventory/:accountId/:itemId` - Permanently delete item
 
-## Data Storage
+### Order Management
+- **GET** `/api/orders/:accountId` - List all orders
+- **GET** `/api/orders/:accountId/status/:status` - Filter orders by status
+- **POST** `/api/orders/:accountId` - Create new order
+- **DELETE** `/api/orders/:accountId/:orderId` - Delete order
 
-Data is stored in JSON files in the `server/data/` directory:
+### Vendor Management
+- **GET** `/api/vendors` - List all global vendors
+- **GET** `/api/vendors/:accountId/with-pricing` - Get vendors with account-specific pricing
+- **POST** `/api/vendors/:accountId/brands` - Save account brand pricing
+- **PUT** `/api/vendors/:accountId/brands/:brandId` - Update brand pricing
+- **DELETE** `/api/vendors/:accountId/brands/:brandId` - Remove brand
 
-### accounts.json
-```json
-[{
-  "id": 1,
-  "email": "test@optiprofit.com",
-  "name": "Test Account",
-  "created_at": "2025-01-05T12:00:00Z"
-}]
-```
+### Vendor-Specific Processing
+- **POST** `/api/safilo/process` - Process Safilo PDF orders
+- **POST** `/api/safilo/reprocess` - Re-run Safilo enrichment
+- **GET** `/api/safilo/statistics` - Safilo processing statistics
 
-### emails.json
-Stores CloudMailin webhook data:
-- `id` - Unique identifier
-- `account_id` - Associated account
-- `raw_data` - Full CloudMailin JSON payload
-- `from_email`, `to_email`, `subject` - Email metadata
-- `plain_text`, `html_text` - Email content
-- `attachments_count` - Number of attachments
-- `message_id` - Email message ID
-- `spam_score` - Spam rating
-- `processed_at` - Timestamp
+### Enrichment Services
+- **POST** `/api/enrich/idealoptics` - Ideal Optics batch enrichment
+- **POST** `/api/enrich/idealoptics/single` - Single product test
 
-### inventory.json
-Stores inventory data:
-- `id` - Unique identifier
-- `account_id` - Associated account
-- `sku` - Product SKU
-- `quantity` - Current quantity
-- `vendor` - Vendor name
-- `created_at`, `updated_at` - Timestamps
+### Statistics & Analytics
+- **GET** `/api/stats/:accountId` - Dashboard statistics
+- **GET** `/api/stats/:accountId/vendors` - Vendor inventory breakdown
 
-## Testing
+### Brands & Calculations
+- **GET** `/api/brands` - List all brands (legacy)
+- **POST** `/api/brands` - Create brand (legacy)
+- **POST** `/api/calculations` - Profit calculations
 
-Test the webhook endpoints (server must be running):
+## 🗄️ Database Structure
+
+The server uses Supabase (PostgreSQL) with the following key tables:
+
+- `accounts` - User accounts
+- `emails` - Received vendor emails
+- `inventory` - Frame inventory with lifecycle tracking
+- `orders` - Vendor orders
+- `vendors` - Global vendor list
+- `brands` - Frame brands
+- `account_brands` - Account-specific brand pricing
+- `account_vendors` - Account-vendor relationships
+- `return_reports` - Return report metadata
+- `api_logs` - API call logging
+- `email_patterns` - Vendor detection patterns
+
+See [README_SCHEMA.md](../README_SCHEMA.md) for complete database schema.
+
+## 📧 Email Processing
+
+### CloudMailin Webhook Flow
+
+1. Vendor email forwarded to `account-{id}@mail.optiprofit.app`
+2. CloudMailin posts to `/api/webhook/email`
+3. Server performs 3-tier vendor detection:
+   - **Tier 1**: Domain matching (95% confidence)
+   - **Tier 2**: Strong signatures (90% confidence)
+   - **Tier 3**: Weak patterns (75% confidence)
+4. Vendor-specific parser processes email
+5. Creates pending inventory items
+6. User confirms order to move to current inventory
+
+### Supported Vendor Parsers
+
+Located in `/server/parsers/`:
+
+1. **SafiloService.js** - PDF parsing with API enrichment (18 formats)
+2. **ModernOpticalService.js** - HTML parsing with web scraping
+3. **IdealOpticsService.js** - HTML parsing with web scraping
+4. **EtniaBarcelonaService.js** - Email parsing
+5. **KenmarkService.js** - Email parsing
+6. **LamyamericaService.js** - Email parsing
+7. **luxotticaParser.js** - Email parsing
+
+## 🔒 Security
+
+### Middleware (`/server/middleware/security.js`)
+- **Helmet.js** - Security headers (XSS, clickjacking protection)
+- **CORS** - Cross-origin resource sharing configuration
+- **Rate Limiting** - 100 requests per 15 minutes per IP
+- **Request Logging** - Morgan for HTTP request logging
+
+### Authentication
+- JWT-based authentication via Supabase Auth
+- Service role key for server-side operations
+- Row-level security (RLS) policies in database
+
+## 🧪 Testing
+
+### Test Email Webhook
 ```bash
 cd server
-node test-webhook.js
+node scripts/testForwardedEmail.js
 ```
 
-Test the database directly:
+### Test Vendor Detection
 ```bash
 cd server
-node test-database.js
+node scripts/testVendorDetection.js
 ```
 
-## CloudMailin Setup
-
-1. Configure CloudMailin to send webhooks to:
-   ```
-   http://your-server.com:3001/api/webhook/email
-   ```
-
-2. Set format to JSON (not multipart)
-
-3. The webhook will log all incoming data and save to database
-
-## Data Location
-
-JSON data files are stored in:
-```
-server/data/
-├── accounts.json
-├── emails.json
-└── inventory.json
+### Test Specific Parsers
+```bash
+cd server/parsers
+node test-safilo-pdf.js
+node test-idealoptics-quick.js
+node test-kenmark.js
 ```
 
-This directory is gitignored and will be created automatically when the server starts.
+### Run API Tests
+```bash
+npm test
+```
 
-## CORS Configuration
+## 📁 Project Structure
 
-The server is configured to accept requests from the frontend at `http://localhost:5173`.
+```
+server/
+├── index.js              # Express server entry point
+├── routes/              # API route handlers
+│   ├── auth.js
+│   ├── emails.js
+│   ├── inventory.js
+│   ├── orders.js
+│   ├── vendors.js
+│   └── webhook.js
+├── parsers/             # Vendor email parsers
+│   ├── SafiloService.js
+│   ├── ModernOpticalService.js
+│   └── ...
+├── middleware/          # Express middleware
+│   └── security.js
+├── lib/                # Utilities
+│   └── supabase.js     # Supabase client and operations
+├── services/           # Business logic
+│   └── vendorDetection.js
+└── scripts/            # Utility scripts
+```
 
-## Future Enhancements
+## 🚀 Deployment
 
-- JWT authentication (placeholder in middleware/auth.js)
-- Email parsing for inventory updates
-- API endpoints for inventory management
-- WebSocket support for real-time updates
+### Environment Variables Required
+
+```env
+# Production Supabase
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_KEY=your_service_role_key
+
+# CloudMailin
+CLOUDMAILIN_WEBHOOK_SECRET=your_secret
+
+# Server
+PORT=3001
+NODE_ENV=production
+FRONTEND_URL=https://www.optiprofit.app
+```
+
+### Deploy to Render.com
+
+1. Create Web Service
+2. Set build command: `cd server && npm install`
+3. Set start command: `cd server && node index.js`
+4. Add environment variables
+5. Deploy
+
+## 🐛 Debugging
+
+Enable debug logging:
+```bash
+DEBUG=optiprofit:* node index.js
+```
+
+Check API logs in Supabase:
+```sql
+SELECT * FROM api_logs 
+WHERE created_at > now() - interval '1 hour'
+ORDER BY created_at DESC;
+```
+
+## 📚 Additional Resources
+
+- [Vendor Detection README](./VENDOR_DETECTION_README.md)
+- [Forwarded Email Handling](./FORWARDED_EMAIL_HANDLING.md)
+- [Customer Domains Config](./CUSTOMER_DOMAINS_CONFIG.md)
+- [Kenmark Parser Documentation](./parsers/KENMARK_README.md)
