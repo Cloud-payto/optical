@@ -12,11 +12,81 @@
 }
 
 .demo-popover {
-  background: transparent !important;
+  background: white !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 12px !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  padding: 1.5rem !important;
+  max-width: 400px !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.demo-popover .driver-popover-title {
+  font-size: 1.125rem !important;
+  font-weight: 600 !important;
+  color: #111827 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.demo-popover .driver-popover-description {
+  color: #6b7280 !important;
+  font-size: 0.875rem !important;
+  line-height: 1.5 !important;
+  margin-bottom: 1rem !important;
+}
+
+.demo-popover .driver-popover-navigation {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-top: 1rem !important;
+}
+
+.demo-popover .driver-popover-prev-btn,
+.demo-popover .driver-popover-next-btn,
+.demo-popover .driver-popover-close-btn {
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.5rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
   border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  max-width: none !important;
+  cursor: pointer !important;
+}
+
+.demo-popover .driver-popover-next-btn {
+  background: #3b82f6 !important;
+  color: white !important;
+}
+
+.demo-popover .driver-popover-next-btn:hover {
+  background: #2563eb !important;
+  transform: translateY(-1px) !important;
+}
+
+.demo-popover .driver-popover-prev-btn {
+  background: #f3f4f6 !important;
+  color: #374151 !important;
+}
+
+.demo-popover .driver-popover-prev-btn:hover {
+  background: #e5e7eb !important;
+}
+
+.demo-popover .driver-popover-close-btn {
+  background: transparent !important;
+  color: #6b7280 !important;
+  font-size: 0.75rem !important;
+}
+
+.demo-popover .driver-popover-close-btn:hover {
+  color: #374151 !important;
+}
+
+.demo-popover .driver-popover-progress-text {
+  font-size: 0.75rem !important;
+  color: #6b7280 !important;
+  font-weight: 500 !important;
 }
 
 /* Demo spotlight overlay */

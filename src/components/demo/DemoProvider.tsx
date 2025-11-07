@@ -1,11 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { driver, Driver, Config } from 'driver.js';
-import { createRoot } from 'react-dom/client';
 import { useDemo } from '../../contexts/DemoContext';
 import { demoSteps } from '../../demo/demoSteps';
 import { demoController } from '../../demo/demoUtils';
-import DemoTooltip from './DemoTooltip';
 import 'driver.js/dist/driver.css';
 
 interface DemoProviderProps {
@@ -46,14 +44,12 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
 
       // Create Driver.js configuration
       const driverConfig: Config = {
-        showProgress: false, // We'll handle this in our custom tooltip
-        showButtons: [], // Hide default buttons, use our custom ones
+        showProgress: true,
+        showButtons: ['next', 'previous', 'close'],
         disableActiveInteraction: false,
-        allowClose: false,
+        allowClose: true,
         overlayColor: 'rgba(0, 0, 0, 0.6)',
         popoverClass: 'demo-popover',
-        
-        // Custom popover rendering
         popoverOffset: 10,
         
         onNextClick: () => {
@@ -96,33 +92,8 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
           }
         },
 
-        onPopoverRender: (popover, { config, state }) => {
-          const currentStepData = demoSteps[currentStep - 1];
-          if (!currentStepData) return;
-
-          // Clear default content
-          popover.innerHTML = '';
-
-          // Create our custom tooltip
-          const tooltipContainer = document.createElement('div');
-          popover.appendChild(tooltipContainer);
-
-          const root = createRoot(tooltipContainer);
-          root.render(
-            <DemoTooltip
-              title={currentStepData.popover?.title || ''}
-              description={currentStepData.popover?.description || ''}
-              currentStep={currentStep}
-              totalSteps={totalSteps}
-              onNext={nextStep}
-              onPrevious={previousStep}
-              onSkip={skipDemo}
-              canGoNext={currentStep < totalSteps}
-              canGoPrevious={currentStep > 1}
-              position={currentStepData.popover?.side as any}
-            />
-          );
-        },
+        // Remove custom popover rendering for now to fix the error
+        // We'll use Driver.js built-in popover system
 
         steps: demoSteps.map((step, index) => ({
           element: step.element || 'body',
