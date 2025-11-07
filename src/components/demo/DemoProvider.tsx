@@ -52,14 +52,17 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
         popoverClass: 'demo-popover',
         popoverOffset: 10,
         
-        onNextClick: () => {
-          console.log(`▶️ Next button clicked - moving to step ${currentStep + 1}`);
-          nextStep();
+        onNextClick: (element, step) => {
+          const currentIndex = driverRef.current?.getActiveIndex() ?? 0;
+          console.log(`▶️ Next button clicked - Driver.js moving from step ${currentIndex + 1} to ${currentIndex + 2}`);
+          // Let Driver.js handle step progression naturally
+          // We'll sync React state in onHighlightStarted
         },
         
-        onPrevClick: () => {
-          console.log(`◀️ Previous button clicked - moving to step ${currentStep - 1}`);
-          previousStep();
+        onPrevClick: (element, step) => {
+          const currentIndex = driverRef.current?.getActiveIndex() ?? 0;
+          console.log(`◀️ Previous button clicked - Driver.js moving from step ${currentIndex + 1} to ${currentIndex}`);
+          // Let Driver.js handle step progression naturally
         },
         
         onCloseClick: () => {
@@ -74,32 +77,52 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
         },
 
         onHighlightStarted: async (element, step) => {
-          console.log(`✨ Highlighting step ${currentStep}:`, step);
-          
-          // Handle navigation if required
-          const currentStepData = demoSteps[currentStep - 1];
-          if (currentStepData?.requiresNavigation && currentStepData.page !== location.pathname) {
-            console.log(`🚀 Step ${currentStep} requires navigation to ${currentStepData.page}`);
-            await demoController.navigateToPage(currentStepData.page);
+          try {
+            const stepIndex = driverRef.current?.getActiveIndex() ?? 0;
+            const currentStepData = demoSteps[stepIndex];
             
-            // Wait for elements to be available after navigation
-            if (currentStepData.element && currentStepData.element !== 'body') {
-              console.log(`⏳ Waiting for element: ${currentStepData.element}`);
-              await demoController.waitForElement(currentStepData.element, 3000);
+            console.log(`✨ Highlighting step ${stepIndex + 1}/${demoSteps.length}:`, currentStepData?.id);
+            
+            // Sync React state with Driver.js step
+            if (currentStep !== stepIndex + 1) {
+              console.log(`🔄 Syncing React state: ${currentStep} -> ${stepIndex + 1}`);
+              // Update React state without triggering navigation
             }
-          }
+            
+            // Handle navigation if required
+            if (currentStepData?.requiresNavigation && currentStepData.page !== location.pathname) {
+              console.log(`🚀 Step ${stepIndex + 1} requires navigation to ${currentStepData.page}`);
+              
+              try {
+                await demoController.navigateToPage(currentStepData.page);
+                
+                // Wait for elements to be available after navigation
+                if (currentStepData.element && currentStepData.element !== 'body') {
+                  console.log(`⏳ Waiting for element: ${currentStepData.element}`);
+                  const element = await demoController.waitForElement(currentStepData.element, 5000);
+                  if (!element) {
+                    console.warn(`⚠️ Element not found: ${currentStepData.element}`);
+                  }
+                }
+              } catch (navError) {
+                console.error(`❌ Navigation failed for step ${stepIndex + 1}:`, navError);
+              }
+            }
 
-          // Handle tab clicks if specified
-          if (currentStepData?.tabToClick) {
-            setTimeout(() => {
-              console.log(`🖱️ Auto-clicking tab: ${currentStepData.tabToClick}`);
-              demoController.clickTab(currentStepData.tabToClick!);
-            }, 1000);
-          }
+            // Handle tab clicks if specified
+            if (currentStepData?.tabToClick) {
+              setTimeout(() => {
+                console.log(`🖱️ Auto-clicking tab: ${currentStepData.tabToClick}`);
+                demoController.clickTab(currentStepData.tabToClick!);
+              }, 1000);
+            }
 
-          // Create spotlight effect
-          if (element) {
-            demoController.createSpotlight(`[data-driver-element-id="${step.element}"]`);
+            // Create spotlight effect
+            if (element) {
+              demoController.createSpotlight(`[data-driver-element-id="${step.element}"]`);
+            }
+          } catch (error) {
+            console.error('❌ Error in onHighlightStarted:', error);
           }
         },
 
@@ -144,16 +167,9 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
     };
   }, [isActive, currentStep, location.pathname]);
 
-  // Update driver step when currentStep changes
-  useEffect(() => {
-    if (driverRef.current && isActive && currentStep > 0) {
-      const stepIndex = currentStep - 1;
-      if (stepIndex < demoSteps.length) {
-        console.log(`📍 Moving to step ${currentStep} (index ${stepIndex})`);
-        driverRef.current.drive(stepIndex);
-      }
-    }
-  }, [currentStep, isActive]);
+  // Note: Removed conflicting useEffect that was calling drive(stepIndex)
+  // This was causing Driver.js and React state to be out of sync
+  // Driver.js now handles step progression naturally
 
   // Update navigation helper when location changes
   useEffect(() => {
