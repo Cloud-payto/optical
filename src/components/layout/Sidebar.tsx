@@ -20,10 +20,12 @@ import {
   FileText,
   RotateCcw,
   Bug,
-  Store
+  Store,
+  Settings
 } from 'lucide-react';
 import BugReportModal from '../modals/BugReportModal';
 import VendorRequestModal from '../modals/VendorRequestModal';
+import { SettingsModal } from '../modals/SettingsModal';
 
 // Modern nested navigation structure
 const navigationConfig = [
@@ -72,6 +74,7 @@ const Sidebar: React.FC = () => {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['Frames']));
   const [isBugReportOpen, setIsBugReportOpen] = useState(false);
   const [isVendorRequestOpen, setIsVendorRequestOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
 
@@ -241,6 +244,18 @@ const Sidebar: React.FC = () => {
           {!isCollapsed && <span className="text-sm font-medium">Request a Vendor</span>}
         </button>
 
+        {/* Settings Button */}
+        <button
+          onClick={() => setIsSettingsOpen(true)}
+          className={`flex items-center w-full px-3 py-2 rounded-lg text-gray-300 hover:bg-blue-600 hover:text-white transition-colors ${
+            isCollapsed ? 'justify-center' : 'space-x-3'
+          }`}
+          title={isCollapsed ? 'Settings' : undefined}
+        >
+          <Settings className="h-5 w-5 flex-shrink-0" />
+          {!isCollapsed && <span className="text-sm font-medium">Settings</span>}
+        </button>
+
         {/* Welcome Message */}
         {!isCollapsed && (
           <div className="pt-2">
@@ -267,6 +282,7 @@ const Sidebar: React.FC = () => {
       {/* Modals */}
       <BugReportModal isOpen={isBugReportOpen} onClose={() => setIsBugReportOpen(false)} />
       <VendorRequestModal isOpen={isVendorRequestOpen} onClose={() => setIsVendorRequestOpen(false)} />
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </div>
   );
 };

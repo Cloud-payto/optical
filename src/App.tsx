@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { DemoProvider } from './contexts/DemoContext';
 import DemoProviderComponent from './components/demo/DemoProvider';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -41,7 +42,8 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <Router>
-            <DemoProvider>
+            <ThemeProvider>
+              <DemoProvider>
               <DemoProviderComponent>
                 <div className="min-h-screen">
                 <Toaster position="top-center" />
@@ -87,7 +89,8 @@ function App() {
                 <DemoTour />
                 </div>
               </DemoProviderComponent>
-            </DemoProvider>
+              </DemoProvider>
+            </ThemeProvider>
           </Router>
         </AuthProvider>
         {/* React Query DevTools - only visible in development */}
