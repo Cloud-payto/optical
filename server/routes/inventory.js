@@ -92,6 +92,7 @@ router.post('/bulk-add', async (req, res) => {
         email_id: emailId || null,
         order_number: order.order_number,
         reference_number: order.reference_number || null,
+        account_number: order.account_number || null,
         customer_name: order.customer_name || null,
         customer_code: order.customer_code || null,
         placed_by: order.placed_by || order.rep_name || null,
