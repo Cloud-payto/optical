@@ -63,7 +63,7 @@ const BrandsCostsPage: React.FC = () => {
   // Load companies from Supabase on component mount or when demo state changes
   useEffect(() => {
     loadCompanies();
-  }, [isDemo, demoData.vendors]);
+  }, [isDemo, demoData?.vendors]);
 
   // Filter companies based on search term
   const filteredCompanies = useMemo(() => {

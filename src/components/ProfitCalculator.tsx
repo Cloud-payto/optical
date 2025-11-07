@@ -151,7 +151,7 @@ const ProfitCalculator: React.FC = () => {
     };
 
     loadCompanies();
-  }, [isDemo, demoData.vendors]);
+  }, [isDemo, demoData?.vendors]);
 
   // Helper function to calculate Your Cost from Wholesale Cost and Discount %
   const calculateYourCostFromDiscount = (wholesale: number, discount: number): number => {
