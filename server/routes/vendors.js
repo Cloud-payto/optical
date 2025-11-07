@@ -46,6 +46,7 @@ router.get('/companies/:userId', async (req, res) => {
     const companies = vendorsWithAccountBrands.map(vendor => ({
       id: vendor.id,
       name: vendor.name,
+      accountNumber: vendor.account_number || null,
       brands: (vendor.brands || []).map(brand => ({
         id: brand.id,
         name: brand.name,

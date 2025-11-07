@@ -47,6 +47,9 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company, onViewBrandDetails, 
             <div className="text-left">
               <div className="flex items-center space-x-2">
                 <h3 className="text-lg font-semibold text-gray-900">{company.name}</h3>
+                {company.accountNumber && (
+                  <span className="text-sm text-gray-600 font-mono">(#{company.accountNumber})</span>
+                )}
               </div>
               <p className="text-sm text-gray-500">
                 {company.brands.length} {company.brands.length === 1 ? 'brand' : 'brands'}

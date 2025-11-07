@@ -453,12 +453,14 @@ export interface PendingImport {
     id: string;
     name: string;
     brandCount: number;
+    accountNumber: string | null;
   }>;
   brands: Array<{
     brand_id: string | null;
     brand_name: string;
     vendor_id: string;
     vendor_name: string;
+    vendor_account_number: string | null;
   }>;
 }
 

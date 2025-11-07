@@ -126,6 +126,9 @@ const ImportFromInventory: React.FC<ImportFromInventoryProps> = ({ onImportCompl
                     className="bg-white dark:bg-gray-700 px-3 py-1.5 rounded-full border border-blue-200 dark:border-blue-700 text-sm"
                   >
                     <span className="font-medium text-gray-900 dark:text-white">{vendor.name}</span>
+                    {vendor.accountNumber && (
+                      <span className="text-gray-600 dark:text-gray-400 ml-2">(#{vendor.accountNumber})</span>
+                    )}
                     <span className="text-gray-500 dark:text-gray-400 ml-2">({vendor.brandCount} brand{vendor.brandCount !== 1 ? 's' : ''})</span>
                   </div>
                 ))}
@@ -145,7 +148,10 @@ const ImportFromInventory: React.FC<ImportFromInventoryProps> = ({ onImportCompl
                       className="bg-white dark:bg-gray-700 px-3 py-1.5 rounded-full border border-indigo-200 dark:border-indigo-700 text-sm"
                     >
                       <span className="font-medium text-gray-900 dark:text-white">{brand.brand_name}</span>
-                      <span className="text-gray-500 dark:text-gray-400 ml-2">({brand.vendor_name})</span>
+                      <span className="text-gray-500 dark:text-gray-400 ml-2">
+                        ({brand.vendor_name}
+                        {brand.vendor_account_number && ` - #${brand.vendor_account_number}`})
+                      </span>
                     </div>
                   ))}
                 </div>

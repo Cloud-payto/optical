@@ -136,6 +136,7 @@ export interface Brand {
 export interface Company {
   id: string;
   name: string;
+  accountNumber?: string | null;
   brands: Brand[];
   contactInfo?: {
     companyEmail?: string;

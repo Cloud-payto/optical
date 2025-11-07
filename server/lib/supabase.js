@@ -1494,7 +1494,7 @@ const vendorOperations = {
       // FIRST: Get vendor IDs that the user has explicitly added to their account
       const { data: accountVendors, error: accountVendorsError } = await supabase
         .from('account_vendors')
-        .select('vendor_id')
+        .select('vendor_id, vendor_account_number')
         .eq('account_id', userId);
 
       if (accountVendorsError) throw accountVendorsError;
@@ -1505,8 +1505,14 @@ const vendorOperations = {
         return [];
       }
 
-      // Get unique vendor IDs
+      // Get unique vendor IDs and create account number map
       const userVendorIds = [...new Set(accountVendors.map(av => av.vendor_id))];
+      const vendorAccountNumbers = {};
+      accountVendors.forEach(av => {
+        if (av.vendor_account_number) {
+          vendorAccountNumbers[av.vendor_id] = av.vendor_account_number;
+        }
+      });
       console.log('User has', userVendorIds.length, 'vendors added:', userVendorIds);
 
       // THEN: Get only those vendors with their brands
@@ -1579,7 +1585,8 @@ const vendorOperations = {
 
         return {
           ...vendor,
-          brands: brandsWithAccountData
+          brands: brandsWithAccountData,
+          account_number: vendorAccountNumbers[vendor.id] || null
         };
       });
 
@@ -1795,7 +1802,7 @@ const vendorOperations = {
       // Check which vendors are NOT in account_vendors
       const { data: existingAccountVendors, error: accountVendorsError } = await supabase
         .from('account_vendors')
-        .select('vendor_id, vendors(name)')
+        .select('vendor_id, vendor_account_number, vendors(name)')
         .eq('account_id', userId)
         .in('vendor_id', uniqueVendorIds);
 
@@ -1806,6 +1813,14 @@ const vendorOperations = {
 
       const existingVendorIds = existingAccountVendors?.map(av => av.vendor_id) || [];
       const missingVendorIds = uniqueVendorIds.filter(vid => !existingVendorIds.includes(vid));
+
+      // Create a map of vendor account numbers
+      const vendorAccountNumbers = {};
+      existingAccountVendors?.forEach(av => {
+        if (av.vendor_account_number) {
+          vendorAccountNumbers[av.vendor_id] = av.vendor_account_number;
+        }
+      });
 
       console.log(`\n🆕 ${missingVendorIds.length} NEW vendors detected (not in account):`);
       missingVendorIds.forEach(vid => {
@@ -1822,7 +1837,8 @@ const vendorOperations = {
           vendorsToImport.push({
             id: vendorId,
             name: vendorItem.vendors.name,
-            brandCount: brandCount
+            brandCount: brandCount,
+            accountNumber: vendorAccountNumbers[vendorId] || null
           });
         }
       }
@@ -1866,7 +1882,8 @@ const vendorOperations = {
                 brand_id: globalBrand.id,
                 brand_name: globalBrand.name,
                 vendor_id: vendorId,
-                vendor_name: vendorName
+                vendor_name: vendorName,
+                vendor_account_number: vendorAccountNumbers[vendorId] || null
               });
             } else {
               console.log(`      ✅ "${brandName}" already in user's account_brands`);
@@ -1877,7 +1894,8 @@ const vendorOperations = {
               brand_id: null, // Will be created
               brand_name: brandName,
               vendor_id: vendorId,
-              vendor_name: vendorName
+              vendor_name: vendorName,
+              vendor_account_number: vendorAccountNumbers[vendorId] || null
             });
           }
         }
