@@ -57,7 +57,7 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
           const nextIndex = currentIndex + 1;
           console.log(`▶️ Next button clicked - Driver.js moving from step ${currentIndex + 1} to ${nextIndex + 1}`);
           
-          // Check if next step element exists
+          // Check if next step element exists (for debugging only)
           if (nextIndex < demoSteps.length) {
             const nextStep = demoSteps[nextIndex];
             const nextElement = nextStep.element || 'body';
@@ -78,35 +78,36 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
             const elementExists = nextElement === 'body' || document.querySelector(nextElement);
             console.log(`🔍 Next step ${nextIndex + 1} element "${nextElement}" exists:`, !!elementExists);
             
-            if (!elementExists && nextElement !== 'body') {
-              console.warn(`⚠️ Element "${nextElement}" not found for step ${nextIndex + 1}`);
+            // Only intervene if element is missing AND we need navigation
+            if (!elementExists && nextElement !== 'body' && nextStep.requiresNavigation && nextStep.page !== window.location.pathname) {
+              console.warn(`⚠️ Element "${nextElement}" not found and requires navigation to ${nextStep.page}`);
               
-              // Wait longer for elements to load (React components may take time)
-              console.log(`⏳ Waiting 3 seconds for element to load...`);
-              
-              try {
-                const waitedElement = await demoController.waitForElement(nextElement, 3000);
-                if (waitedElement) {
-                  console.log(`✅ Element found after waiting!`);
-                  return; // Let Driver.js continue normally
-                } else {
-                  console.log(`❌ Element still not found after waiting`);
-                }
-              } catch (error) {
-                console.error(`❌ Error waiting for element:`, error);
+              // Prevent default Driver.js progression
+              if (driverRef.current) {
+                driverRef.current.moveNext = () => {}; // Temporarily disable
               }
               
-              // If still not found and we need navigation, try that
-              if (nextStep.requiresNavigation && nextStep.page !== location.pathname) {
-                console.log(`🚀 Force navigating to ${nextStep.page} for missing element`);
-                await demoController.navigateToPage(nextStep.page);
-                
-                // Wait again after navigation
-                const elementAfterNav = await demoController.waitForElement(nextElement, 3000);
-                console.log(`🔄 After navigation, element exists:`, !!elementAfterNav);
+              console.log(`🚀 Force navigating to ${nextStep.page} for missing element`);
+              await demoController.navigateToPage(nextStep.page);
+              
+              // Wait for element after navigation
+              const elementAfterNav = await demoController.waitForElement(nextElement, 3000);
+              console.log(`🔄 After navigation, element exists:`, !!elementAfterNav);
+              
+              // Re-enable and manually progress
+              if (driverRef.current && elementAfterNav) {
+                driverRef.current.moveNext = Driver.prototype.moveNext; // Restore
+                driverRef.current.moveNext();
               }
+              
+              return false; // Prevent default progression
+            } else if (elementExists) {
+              console.log(`✅ Element exists, allowing Driver.js to continue normally`);
+              // Don't interfere - let Driver.js handle progression naturally
             }
           }
+          
+          // Return undefined to allow default Driver.js behavior
         },
         
         onPrevClick: (element, step) => {
