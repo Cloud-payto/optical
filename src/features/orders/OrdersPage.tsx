@@ -84,6 +84,7 @@ export function OrdersPage() {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
+                data-demo={tab.key === 'pending' ? 'pending-tab' : undefined}
                 className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   isActive
                     ? 'border-blue-500 text-blue-600'

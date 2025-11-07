@@ -52,7 +52,7 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
         popoverClass: 'demo-popover',
         popoverOffset: 10,
         
-        onNextClick: (element, step) => {
+        onNextClick: async (element, step) => {
           const currentIndex = driverRef.current?.getActiveIndex() ?? 0;
           const nextIndex = currentIndex + 1;
           console.log(`▶️ Next button clicked - Driver.js moving from step ${currentIndex + 1} to ${nextIndex + 1}`);
@@ -61,25 +61,48 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
           if (nextIndex < demoSteps.length) {
             const nextStep = demoSteps[nextIndex];
             const nextElement = nextStep.element || 'body';
-            const elementExists = nextElement === 'body' || document.querySelector(nextElement);
             
+            // Add more detailed debugging
+            console.log(`📋 Next step details:`, {
+              stepId: nextStep.id,
+              page: nextStep.page,
+              element: nextElement,
+              currentPage: location.pathname
+            });
+            
+            // Check current page DOM for all data-demo attributes
+            const allDemoElements = document.querySelectorAll('[data-demo]');
+            console.log(`🔍 All demo elements on page:`, Array.from(allDemoElements).map(el => el.getAttribute('data-demo')));
+            
+            const elementExists = nextElement === 'body' || document.querySelector(nextElement);
             console.log(`🔍 Next step ${nextIndex + 1} element "${nextElement}" exists:`, !!elementExists);
             
             if (!elementExists && nextElement !== 'body') {
-              console.warn(`⚠️ Element "${nextElement}" not found for step ${nextIndex + 1}, forcing navigation...`);
+              console.warn(`⚠️ Element "${nextElement}" not found for step ${nextIndex + 1}`);
               
-              // If element doesn't exist, trigger navigation first
+              // Wait longer for elements to load (React components may take time)
+              console.log(`⏳ Waiting 3 seconds for element to load...`);
+              
+              try {
+                const waitedElement = await demoController.waitForElement(nextElement, 3000);
+                if (waitedElement) {
+                  console.log(`✅ Element found after waiting!`);
+                  return; // Let Driver.js continue normally
+                } else {
+                  console.log(`❌ Element still not found after waiting`);
+                }
+              } catch (error) {
+                console.error(`❌ Error waiting for element:`, error);
+              }
+              
+              // If still not found and we need navigation, try that
               if (nextStep.requiresNavigation && nextStep.page !== location.pathname) {
                 console.log(`🚀 Force navigating to ${nextStep.page} for missing element`);
-                demoController.navigateToPage(nextStep.page).then(() => {
-                  // After navigation, let Driver.js try again
-                  setTimeout(() => {
-                    if (driverRef.current) {
-                      const elementNowExists = document.querySelector(nextElement);
-                      console.log(`🔄 After navigation, element exists:`, !!elementNowExists);
-                    }
-                  }, 1000);
-                });
+                await demoController.navigateToPage(nextStep.page);
+                
+                // Wait again after navigation
+                const elementAfterNav = await demoController.waitForElement(nextElement, 3000);
+                console.log(`🔄 After navigation, element exists:`, !!elementAfterNav);
               }
             }
           }
@@ -93,11 +116,39 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
         
         onCloseClick: () => {
           console.log('❌ Close button clicked - skipping demo');
+          // Force cleanup immediately
+          if (driverRef.current) {
+            try {
+              driverRef.current.destroy();
+            } catch (error) {
+              console.warn('⚠️ Error destroying driver on close:', error);
+            }
+            driverRef.current = null;
+          }
+          
+          // Remove any stuck overlays
+          const overlays = document.querySelectorAll('.driver-overlay, .driver-popover-wrapper, .demo-spotlight-overlay');
+          overlays.forEach(overlay => overlay.remove());
+          
           skipDemo();
         },
 
         onDestroyed: () => {
           console.log('🛑 Driver.js destroyed, cleaning up demo...');
+          
+          // Force cleanup of any remaining elements
+          setTimeout(() => {
+            const overlays = document.querySelectorAll('.driver-overlay, .driver-popover-wrapper, .demo-spotlight-overlay');
+            if (overlays.length > 0) {
+              console.log('🧹 Removing stuck overlays:', overlays.length);
+              overlays.forEach(overlay => overlay.remove());
+            }
+            
+            // Reset body styles that might be stuck
+            document.body.style.overflow = '';
+            document.body.style.pointerEvents = '';
+          }, 100);
+          
           endDemo();
           demoController.cleanupDemoData();
         },
