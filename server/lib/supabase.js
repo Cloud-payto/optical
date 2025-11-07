@@ -702,14 +702,20 @@ const orderOperations = {
         .from('orders')
         .select(`
           *,
+          vendor:vendors(name),
           items:inventory(*)
         `)
         .eq('id', orderId)
         .eq('account_id', userId)
         .single();
-      
+
       if (error) throw error;
-      return data;
+
+      // Flatten vendor object to vendor string for consistency with getOrdersByAccount
+      return {
+        ...data,
+        vendor: data.vendor?.name || 'Unknown Vendor'
+      };
     } catch (error) {
       handleSupabaseError(error, 'getOrderById');
     }

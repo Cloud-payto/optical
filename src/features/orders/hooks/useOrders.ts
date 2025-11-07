@@ -6,7 +6,7 @@
 
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchOrders } from '@/services/api';
+import { fetchOrders, fetchOrderById } from '@/services/api';
 import { supabase } from '@/lib/supabase';
 import { Order } from '../types/order.types';
 import toast from 'react-hot-toast';
@@ -45,13 +45,32 @@ export function useOrders() {
           // Show toast notification for new orders
           if (payload.eventType === 'INSERT') {
             const newOrder = payload.new as any;
-            // Handle both vendor (from API) and vendor_name (from database)
-            const vendorName = newOrder.vendor || newOrder.vendor_name || 'Unknown Vendor';
-            const orderNumber = newOrder.order_number || 'N/A';
-            toast.success(`New order received: ${vendorName} #${orderNumber}`, {
-              icon: '📦',
-              duration: 4000,
-            });
+            const orderId = newOrder.id;
+            const accountId = newOrder.account_id;
+
+            // Fetch the complete order with vendor info instead of using raw payload
+            // This ensures we get the vendor name from the vendors table join
+            fetchOrderById(orderId, accountId)
+              .then(response => {
+                const order = response.order;
+                // Backend flattens vendor object to string, so we can use it directly
+                const vendorName = order.vendor || 'Unknown Vendor';
+                const orderNumber = order.order_number || 'N/A';
+
+                toast.success(`New order received: ${vendorName} #${orderNumber}`, {
+                  icon: '📦',
+                  duration: 4000,
+                });
+              })
+              .catch(error => {
+                console.error('Error fetching order for notification:', error);
+                // Fallback to basic notification without vendor name
+                const orderNumber = newOrder.order_number || 'N/A';
+                toast.success(`New order received: #${orderNumber}`, {
+                  icon: '📦',
+                  duration: 4000,
+                });
+              });
           }
         }
       )
