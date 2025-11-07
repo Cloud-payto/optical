@@ -1,5 +1,5 @@
 import { NavigateFunction } from 'react-router-dom';
-import { Driver } from 'driver.js';
+// Driver type removed - using any type for compatibility
 
 export interface DemoNavigationHelper {
   navigate: NavigateFunction;
@@ -7,7 +7,7 @@ export interface DemoNavigationHelper {
 }
 
 export class DemoController {
-  private driver: Driver | null = null;
+  private driver: any | null = null;
   private navigation: DemoNavigationHelper | null = null;
   private cleanup: (() => void)[] = [];
 
@@ -31,7 +31,7 @@ export class DemoController {
     return this.navigation;
   }
 
-  setDriver(driver: Driver) {
+  setDriver(driver: any) {
     this.driver = driver;
   }
 

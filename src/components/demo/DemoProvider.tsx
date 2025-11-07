@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { driver, Driver, Config } from 'driver.js';
+import { driver, Config } from 'driver.js';
+import type { DriveStep } from 'driver.js';
 import { useDemo } from '../../contexts/DemoContext';
 import { demoSteps } from '../../demo/demoSteps';
 import { demoController } from '../../demo/demoUtils';
@@ -13,7 +14,7 @@ interface DemoProviderProps {
 const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const driverRef = useRef<Driver | null>(null);
+  const driverRef = useRef<any | null>(null);
   const { 
     isActive, 
     currentStep, 
@@ -96,8 +97,7 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
               
               // Re-enable and manually progress
               if (driverRef.current && elementAfterNav) {
-                driverRef.current.moveNext = Driver.prototype.moveNext; // Restore
-                driverRef.current.moveNext();
+                driverRef.current.moveNext(); // Just call moveNext directly
               }
               
               return false; // Prevent default progression

@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Demo styles */
+/* Demo styles - must come before @layer statements */
 @import './styles/demo.css';
 
 @layer base {
