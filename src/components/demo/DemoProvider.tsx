@@ -54,9 +54,35 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
         
         onNextClick: (element, step) => {
           const currentIndex = driverRef.current?.getActiveIndex() ?? 0;
-          console.log(`▶️ Next button clicked - Driver.js moving from step ${currentIndex + 1} to ${currentIndex + 2}`);
-          // Let Driver.js handle step progression naturally
-          // We'll sync React state in onHighlightStarted
+          const nextIndex = currentIndex + 1;
+          console.log(`▶️ Next button clicked - Driver.js moving from step ${currentIndex + 1} to ${nextIndex + 1}`);
+          
+          // Check if next step element exists
+          if (nextIndex < demoSteps.length) {
+            const nextStep = demoSteps[nextIndex];
+            const nextElement = nextStep.element || 'body';
+            const elementExists = nextElement === 'body' || document.querySelector(nextElement);
+            
+            console.log(`🔍 Next step ${nextIndex + 1} element "${nextElement}" exists:`, !!elementExists);
+            
+            if (!elementExists && nextElement !== 'body') {
+              console.warn(`⚠️ Element "${nextElement}" not found for step ${nextIndex + 1}, forcing navigation...`);
+              
+              // If element doesn't exist, trigger navigation first
+              if (nextStep.requiresNavigation && nextStep.page !== location.pathname) {
+                console.log(`🚀 Force navigating to ${nextStep.page} for missing element`);
+                demoController.navigateToPage(nextStep.page).then(() => {
+                  // After navigation, let Driver.js try again
+                  setTimeout(() => {
+                    if (driverRef.current) {
+                      const elementNowExists = document.querySelector(nextElement);
+                      console.log(`🔄 After navigation, element exists:`, !!elementNowExists);
+                    }
+                  }, 1000);
+                });
+              }
+            }
+          }
         },
         
         onPrevClick: (element, step) => {
@@ -82,12 +108,12 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
             const currentStepData = demoSteps[stepIndex];
             
             console.log(`✨ Highlighting step ${stepIndex + 1}/${demoSteps.length}:`, currentStepData?.id);
+            console.log(`📍 Current page: ${location.pathname}, Target page: ${currentStepData?.page}`);
+            console.log(`🎯 Looking for element: ${step.element}`);
             
-            // Sync React state with Driver.js step
-            if (currentStep !== stepIndex + 1) {
-              console.log(`🔄 Syncing React state: ${currentStep} -> ${stepIndex + 1}`);
-              // Update React state without triggering navigation
-            }
+            // Check if target element exists
+            const targetElement = step.element === 'body' ? document.body : document.querySelector(step.element);
+            console.log(`🔍 Element "${step.element}" found:`, !!targetElement);
             
             // Handle navigation if required
             if (currentStepData?.requiresNavigation && currentStepData.page !== location.pathname) {
@@ -101,7 +127,9 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
                   console.log(`⏳ Waiting for element: ${currentStepData.element}`);
                   const element = await demoController.waitForElement(currentStepData.element, 5000);
                   if (!element) {
-                    console.warn(`⚠️ Element not found: ${currentStepData.element}`);
+                    console.warn(`⚠️ Element not found after navigation: ${currentStepData.element}`);
+                  } else {
+                    console.log(`✅ Element found after navigation!`);
                   }
                 }
               } catch (navError) {
@@ -129,15 +157,19 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
         // Remove custom popover rendering for now to fix the error
         // We'll use Driver.js built-in popover system
 
-        steps: demoSteps.map((step, index) => ({
-          element: step.element || 'body',
-          popover: {
-            title: step.popover?.title || '',
-            description: step.popover?.description || '',
-            side: step.popover?.side || 'bottom',
-            align: step.popover?.align || 'center'
-          }
-        }))
+        steps: demoSteps.map((step, index) => {
+          const element = step.element || 'body';
+          
+          return {
+            element: element,
+            popover: {
+              title: step.popover?.title || `Step ${index + 1}`,
+              description: step.popover?.description || 'Demo step description',
+              side: step.popover?.side || 'bottom',
+              align: step.popover?.align || 'center'
+            }
+          };
+        })
       };
 
       // Create and start driver

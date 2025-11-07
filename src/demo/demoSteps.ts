@@ -13,7 +13,7 @@ export const demoSteps: ExtendedDemoStep[] = [
   // Step 1: Welcome Modal
   {
     id: 'welcome',
-    page: '/frames/inventory',
+    page: '/frames/orders',
     popover: {
       title: 'Welcome to OptiProfit Demo! 🎉',
       description: `
@@ -38,7 +38,7 @@ export const demoSteps: ExtendedDemoStep[] = [
   // Step 2: Navigate to Pending Orders
   {
     id: 'pending-orders-nav',
-    page: '/frames/inventory',
+    page: '/frames/orders',
     element: '[data-demo="pending-tab"]',
     popover: {
       title: 'Step 1: Vendor Order Processing',
