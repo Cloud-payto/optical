@@ -145,6 +145,27 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                   Company Information
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Account Number
+                    </label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <span className="text-gray-400 font-mono">#</span>
+                      </div>
+                      <input
+                        type="text"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 font-mono"
+                        value={formData.accountNumber || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, accountNumber: e.target.value || null }))}
+                        placeholder="Enter your account number with this vendor"
+                      />
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Your account number with this vendor (e.g., 1119312)
+                    </p>
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Company Email
