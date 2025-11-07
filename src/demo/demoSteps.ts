@@ -59,6 +59,7 @@ export const demoSteps: ExtendedDemoStep[] = [
       side: 'bottom',
       align: 'start'
     },
+    requiresNavigation: true,
     tabToClick: 'pending'
   },
 

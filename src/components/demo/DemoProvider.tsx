@@ -58,56 +58,24 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
           const nextIndex = currentIndex + 1;
           console.log(`▶️ Next button clicked - Driver.js moving from step ${currentIndex + 1} to ${nextIndex + 1}`);
           
-          // Check if next step element exists (for debugging only)
+          // Just log for debugging - don't interfere with Driver.js progression
           if (nextIndex < demoSteps.length) {
             const nextStep = demoSteps[nextIndex];
             const nextElement = nextStep.element || 'body';
             
-            // Add more detailed debugging
             console.log(`📋 Next step details:`, {
               stepId: nextStep.id,
               page: nextStep.page,
               element: nextElement,
-              currentPage: window.location.pathname,
-              reactLocationPath: location.pathname
+              currentPage: window.location.pathname
             });
-            
-            // Check current page DOM for all data-demo attributes
-            const allDemoElements = document.querySelectorAll('[data-demo]');
-            console.log(`🔍 All demo elements on page:`, Array.from(allDemoElements).map(el => el.getAttribute('data-demo')));
             
             const elementExists = nextElement === 'body' || document.querySelector(nextElement);
             console.log(`🔍 Next step ${nextIndex + 1} element "${nextElement}" exists:`, !!elementExists);
-            
-            // Only intervene if element is missing AND we need navigation
-            if (!elementExists && nextElement !== 'body' && nextStep.requiresNavigation && nextStep.page !== window.location.pathname) {
-              console.warn(`⚠️ Element "${nextElement}" not found and requires navigation to ${nextStep.page}`);
-              
-              // Prevent default Driver.js progression
-              if (driverRef.current) {
-                driverRef.current.moveNext = () => {}; // Temporarily disable
-              }
-              
-              console.log(`🚀 Force navigating to ${nextStep.page} for missing element`);
-              await demoController.navigateToPage(nextStep.page);
-              
-              // Wait for element after navigation
-              const elementAfterNav = await demoController.waitForElement(nextElement, 3000);
-              console.log(`🔄 After navigation, element exists:`, !!elementAfterNav);
-              
-              // Re-enable and manually progress
-              if (driverRef.current && elementAfterNav) {
-                driverRef.current.moveNext(); // Just call moveNext directly
-              }
-              
-              return false; // Prevent default progression
-            } else if (elementExists) {
-              console.log(`✅ Element exists, allowing Driver.js to continue normally`);
-              // Don't interfere - let Driver.js handle progression naturally
-            }
           }
           
-          // Return undefined to allow default Driver.js behavior
+          // Always let Driver.js handle progression - don't interfere
+          console.log(`✅ Allowing Driver.js to handle progression naturally`);
         },
         
         onPrevClick: (element, step) => {
