@@ -113,8 +113,8 @@ const ImportFromInventory: React.FC<ImportFromInventoryProps> = ({ onImportCompl
     );
   }
 
-  const totalVendors = pendingImports?.vendors.length || 0;
-  const totalBrands = pendingImports?.brands.length || 0;
+  const totalVendors = pendingImports?.vendors?.length || 0;
+  const totalBrands = pendingImports?.brands?.length || 0;
 
   if (totalVendors === 0 && totalBrands === 0) {
     return null; // Don't show anything if there's nothing to import
@@ -138,11 +138,11 @@ const ImportFromInventory: React.FC<ImportFromInventoryProps> = ({ onImportCompl
           </p>
 
           {/* Vendor List */}
-          {totalVendors > 0 && (
+          {totalVendors > 0 && pendingImports?.vendors && (
             <div className="mb-4">
               <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Vendors to Import:</h4>
               <div className="flex flex-wrap gap-2">
-                {pendingImports?.vendors.map(vendor => (
+                {pendingImports.vendors.map(vendor => (
                   <div
                     key={vendor.id}
                     className="bg-white dark:bg-gray-700 px-3 py-1.5 rounded-full border border-blue-200 dark:border-blue-700 text-sm"
@@ -159,12 +159,12 @@ const ImportFromInventory: React.FC<ImportFromInventoryProps> = ({ onImportCompl
           )}
 
           {/* Brand List */}
-          {totalBrands > 0 && (
+          {totalBrands > 0 && pendingImports?.brands && (
             <div className="mb-4">
               <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Brands to Import:</h4>
               <div className="max-h-32 overflow-y-auto">
                 <div className="flex flex-wrap gap-2">
-                  {pendingImports?.brands.map((brand, idx) => (
+                  {pendingImports.brands.map((brand, idx) => (
                     <div
                       key={idx}
                       className="bg-white dark:bg-gray-700 px-3 py-1.5 rounded-full border border-indigo-200 dark:border-indigo-700 text-sm"
