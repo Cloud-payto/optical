@@ -1807,6 +1807,7 @@ const vendorOperations = {
 
       // Get account numbers from orders table for these vendors
       console.log('🔍 Looking up account numbers from orders...');
+      console.log(`   Searching for vendors: ${uniqueVendorIds.join(', ')}`);
       const { data: ordersWithAccountNumbers, error: ordersError } = await supabase
         .from('orders')
         .select('vendor_id, account_number')
@@ -1817,6 +1818,8 @@ const vendorOperations = {
       if (ordersError) {
         console.error('Error fetching account numbers from orders:', ordersError);
       }
+
+      console.log(`   Found ${ordersWithAccountNumbers?.length || 0} orders with account numbers`);
 
       // Create a map of vendor account numbers from orders (most recent)
       const vendorAccountNumbersFromOrders = {};
