@@ -67,7 +67,8 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
               stepId: nextStep.id,
               page: nextStep.page,
               element: nextElement,
-              currentPage: location.pathname
+              currentPage: window.location.pathname,
+              reactLocationPath: location.pathname
             });
             
             // Check current page DOM for all data-demo attributes

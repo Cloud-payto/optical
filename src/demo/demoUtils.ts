@@ -46,13 +46,24 @@ export class DemoController {
       console.log(`🧭 Navigating from ${this.navigation.currentPath} to ${targetPage}`);
       this.navigation.navigate(targetPage);
       
-      // Update current path immediately
-      this.navigation.currentPath = targetPage;
+      // Wait for actual navigation to complete by checking the URL
+      let attempts = 0;
+      const maxAttempts = 20; // 2 seconds total
       
-      // Wait for navigation and DOM to settle
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      while (attempts < maxAttempts && window.location.pathname !== targetPage) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+      }
       
-      console.log(`✅ Navigation to ${targetPage} completed`);
+      if (window.location.pathname === targetPage) {
+        // Update current path after actual navigation
+        this.navigation.currentPath = targetPage;
+        console.log(`✅ Navigation to ${targetPage} completed (took ${attempts * 100}ms)`);
+      } else {
+        console.warn(`⚠️ Navigation to ${targetPage} failed - still at ${window.location.pathname} after ${maxAttempts * 100}ms`);
+      }
+    } else {
+      console.log(`📍 Already at ${targetPage}`);
     }
   }
 
