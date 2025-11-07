@@ -36,6 +36,9 @@ const { supabase } = require('./lib/supabase');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Trust Render proxy for accurate rate limiting and IP detection
+app.set('trust proxy', 1);
+
 // Test Supabase connection on startup
 (async () => {
   try {
