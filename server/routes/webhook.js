@@ -383,6 +383,7 @@ router.post('/email', async (req, res) => {
                 email_id: result.id,
                 order_number: parsedData.order.order_number,
                 reference_number: parsedData.order.reference_number,
+                account_number: parsedData.order.account_number || parsedData.account_number,
                 customer_name: parsedData.order.customer_name,
                 customer_code: parsedData.order.customer_code,
                 placed_by: parsedData.order.placed_by,
@@ -394,6 +395,7 @@ router.post('/email', async (req, res) => {
               orderId = orderRecord.id;
               console.log(`✓ Created order record with ID: ${orderId}`);
               console.log(`  📅 Order date saved:`, parsedData.order.order_date);
+              console.log(`  🔢 Account number saved:`, parsedData.order.account_number || parsedData.account_number || '(none)');
             } catch (orderError) {
               console.error('Failed to create order record:', orderError);
               // Continue without order_id for backward compatibility
