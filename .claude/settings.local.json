@@ -32,7 +32,8 @@
       "Bash(timeout:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git rev-parse:*)"
+      "Bash(git rev-parse:*)",
+      "Bash(git push:*)"
     ],
     "deny": []
   },

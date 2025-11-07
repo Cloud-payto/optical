@@ -4,6 +4,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
 import { DemoProvider } from './contexts/DemoContext';
+import DemoProviderComponent from './components/demo/DemoProvider';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import MainLayout from './components/layout/MainLayout';
@@ -41,7 +42,8 @@ function App() {
         <AuthProvider>
           <Router>
             <DemoProvider>
-              <div className="min-h-screen">
+              <DemoProviderComponent>
+                <div className="min-h-screen">
                 <Toaster position="top-center" />
                 <Routes>
                   {/* Debug route - accessible without authentication */}
@@ -83,7 +85,8 @@ function App() {
                   } />
                 </Routes>
                 <DemoTour />
-              </div>
+                </div>
+              </DemoProviderComponent>
             </DemoProvider>
           </Router>
         </AuthProvider>

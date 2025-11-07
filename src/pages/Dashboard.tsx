@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Container } from '../components/ui/Container';
 import { fetchDashboardStats, fetchInventoryByVendor, DashboardStats, VendorInventoryStats, PaginationMetadata } from '../services/api';
 import { PackageIcon, DollarSignIcon, ShoppingCartIcon, ClockIcon, ChevronDownIcon, ChevronRightIcon, ArrowUpDown, AlertTriangleIcon } from 'lucide-react';
+import DemoButton from '../components/demo/DemoButton';
 
 const DashboardPage: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -108,8 +109,13 @@ const DashboardPage: React.FC = () => {
     <div className="h-full bg-gray-50">
       <div className="p-6 md:p-8">
         <Container size="xl">
-          {/* Page Title */}
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Dashboard</h1>
+          {/* Page Title with Demo Button */}
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+            <DemoButton size="md" variant="primary">
+              ✨ Watch Interactive Demo
+            </DemoButton>
+          </div>
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

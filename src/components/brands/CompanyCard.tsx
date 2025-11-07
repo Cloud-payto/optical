@@ -31,8 +31,8 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company, onViewBrandDetails, 
   return (
     <div
       className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden transition-all duration-200 hover:shadow-md"
-      data-demo={isDemo ? "vendor-card" : undefined}
-      data-tour={isDemo ? "vendor-card" : undefined}
+      data-demo="vendor-card"
+      data-tour="vendor-card"
     >
       {/* Company Header - Clickable */}
       <div className="relative">
@@ -71,8 +71,8 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company, onViewBrandDetails, 
           onClick={handleEditCompany}
           className="absolute top-6 right-12 p-1 hover:bg-gray-200 rounded transition-colors z-10"
           title="Edit company details"
-          data-demo={isDemo ? "edit-vendor-btn" : undefined}
-          data-tour={isDemo ? "edit-vendor-btn" : undefined}
+          data-demo="edit-vendor-btn"
+          data-tour="edit-vendor-btn"
         >
           <Edit3 className="h-4 w-4 text-gray-400 hover:text-blue-600" />
         </button>

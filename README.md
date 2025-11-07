@@ -111,6 +111,7 @@ npm run preview
 - [API Endpoints](./docs/technical/API_ENDPOINTS.md) - **Complete REST API reference**
 - [Email Pipeline](./docs/technical/EMAIL_PIPELINE.md) - **Complete email processing pipeline documentation**
 - [Database Schema](./docs/technical/DATABASE_SCHEMA.md) - **Complete database schema with ERD diagrams**
+- [Style Guide](./docs/technical/STYLE_GUIDE.md) - **Complete design system and component library**
 - [Testing Strategy](./docs/technical/TESTING.md) - Testing approach and coverage
 - [Debugging Guide](./docs/technical/DEBUGGING_GUIDE.md) - Debugging tips and strategies
 - [Refactoring Status](./docs/technical/REFACTORING_STATUS.md) - Current refactoring progress
