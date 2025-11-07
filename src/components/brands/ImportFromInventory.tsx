@@ -22,38 +22,56 @@ const ImportFromInventory: React.FC<ImportFromInventoryProps> = ({ onImportCompl
       console.log('🔄 [FRONTEND] Fetching pending imports...');
       const data = await fetchPendingImports();
 
-      console.log('📥 [FRONTEND] Received pending imports:', {
-        vendors: data.vendors.length,
-        brands: data.brands.length,
-        vendorDetails: data.vendors,
-        brandDetails: data.brands
+      console.log('📥 [FRONTEND] Received pending imports:', data);
+
+      // Validate response structure
+      if (!data || typeof data !== 'object') {
+        console.error('❌ [FRONTEND] Invalid response structure:', data);
+        setPendingImports({ vendors: [], brands: [] });
+        return;
+      }
+
+      // Ensure arrays exist
+      const vendors = Array.isArray(data.vendors) ? data.vendors : [];
+      const brands = Array.isArray(data.brands) ? data.brands : [];
+
+      console.log('📥 [FRONTEND] Processed pending imports:', {
+        vendors: vendors.length,
+        brands: brands.length,
+        vendorDetails: vendors,
+        brandDetails: brands
       });
 
-      if (data.vendors.length > 0) {
+      if (vendors.length > 0) {
         console.log('🆕 [FRONTEND] NEW VENDORS DETECTED:');
-        data.vendors.forEach(v => console.log(`   - ${v.name} (${v.brandCount} brands)`));
+        vendors.forEach(v => console.log(`   - ${v.name} (${v.brandCount} brands)${v.accountNumber ? ` - #${v.accountNumber}` : ''}`));
       }
 
-      if (data.brands.length > 0) {
+      if (brands.length > 0) {
         console.log('🆕 [FRONTEND] NEW BRANDS DETECTED:');
-        data.brands.forEach(b => console.log(`   - ${b.brand_name} (${b.vendor_name})`));
+        brands.forEach(b => console.log(`   - ${b.brand_name} (${b.vendor_name})`));
       }
 
-      if (data.vendors.length === 0 && data.brands.length === 0) {
+      if (vendors.length === 0 && brands.length === 0) {
         console.log('✅ [FRONTEND] No new vendors or brands to import');
       }
 
-      setPendingImports(data);
+      setPendingImports({ vendors, brands });
     } catch (error) {
       console.error('❌ [FRONTEND] Error loading pending imports:', error);
       toast.error('Failed to check for pending imports');
+      setPendingImports({ vendors: [], brands: [] });
     } finally {
       setLoading(false);
     }
   };
 
   const handleImport = async () => {
-    if (!pendingImports) return;
+    if (!pendingImports || !pendingImports.vendors || !pendingImports.brands) {
+      console.error('Invalid pendingImports state:', pendingImports);
+      toast.error('Unable to import - invalid data');
+      return;
+    }
 
     try {
       setImporting(true);
@@ -61,6 +79,9 @@ const ImportFromInventory: React.FC<ImportFromInventoryProps> = ({ onImportCompl
       // Pass full vendor objects (with account numbers) instead of just IDs
       const vendorData = pendingImports.vendors;
       const brandData = pendingImports.brands;
+
+      console.log('Importing vendors:', vendorData);
+      console.log('Importing brands:', brandData);
 
       const result = await importFromInventory(vendorData, brandData);
 
@@ -162,7 +183,7 @@ const ImportFromInventory: React.FC<ImportFromInventoryProps> = ({ onImportCompl
 
           <button
             onClick={handleImport}
-            disabled={importing}
+            disabled={importing || !pendingImports || !pendingImports.vendors || !pendingImports.brands}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             data-demo="import-vendor-btn"
             data-tour="import-vendor-btn"
