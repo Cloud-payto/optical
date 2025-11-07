@@ -58,10 +58,11 @@ const ImportFromInventory: React.FC<ImportFromInventoryProps> = ({ onImportCompl
     try {
       setImporting(true);
 
-      const vendorIds = pendingImports.vendors.map(v => v.id);
+      // Pass full vendor objects (with account numbers) instead of just IDs
+      const vendorData = pendingImports.vendors;
       const brandData = pendingImports.brands;
 
-      const result = await importFromInventory(vendorIds, brandData);
+      const result = await importFromInventory(vendorData, brandData);
 
       if (result.success) {
         toast.success(

@@ -1805,6 +1805,31 @@ const vendorOperations = {
       console.log('📋 Vendors in confirmed inventory:');
       vendorNamesInInventory.forEach(v => console.log(`   - ${v.name} (${v.id})`));
 
+      // Get account numbers from orders table for these vendors
+      console.log('🔍 Looking up account numbers from orders...');
+      const { data: ordersWithAccountNumbers, error: ordersError } = await supabase
+        .from('orders')
+        .select('vendor_id, account_number')
+        .eq('account_id', userId)
+        .in('vendor_id', uniqueVendorIds)
+        .not('account_number', 'is', null);
+
+      if (ordersError) {
+        console.error('Error fetching account numbers from orders:', ordersError);
+      }
+
+      // Create a map of vendor account numbers from orders (most recent)
+      const vendorAccountNumbersFromOrders = {};
+      ordersWithAccountNumbers?.forEach(order => {
+        if (order.account_number && order.vendor_id) {
+          // Only set if not already set (keeps most recent due to order of query)
+          if (!vendorAccountNumbersFromOrders[order.vendor_id]) {
+            vendorAccountNumbersFromOrders[order.vendor_id] = order.account_number;
+            console.log(`   ✓ Found account number for vendor ${order.vendor_id}: ${order.account_number}`);
+          }
+        }
+      });
+
       // Check which vendors are NOT in account_vendors
       const { data: existingAccountVendors, error: accountVendorsError } = await supabase
         .from('account_vendors')
@@ -1820,7 +1845,7 @@ const vendorOperations = {
       const existingVendorIds = existingAccountVendors?.map(av => av.vendor_id) || [];
       const missingVendorIds = uniqueVendorIds.filter(vid => !existingVendorIds.includes(vid));
 
-      // Create a map of vendor account numbers
+      // Create a map of vendor account numbers (from existing account_vendors or orders)
       const vendorAccountNumbers = {};
       existingAccountVendors?.forEach(av => {
         if (av.vendor_account_number) {
@@ -1840,12 +1865,18 @@ const vendorOperations = {
         const vendorItem = inventoryItems.find(item => item.vendor_id === vendorId);
         if (vendorItem?.vendors) {
           const brandCount = brandsByVendor[vendorId]?.size || 0;
+          // Use account number from orders if available, otherwise from existing account_vendors
+          const accountNumber = vendorAccountNumbersFromOrders[vendorId] || vendorAccountNumbers[vendorId] || null;
           vendorsToImport.push({
             id: vendorId,
             name: vendorItem.vendors.name,
             brandCount: brandCount,
-            accountNumber: vendorAccountNumbers[vendorId] || null
+            accountNumber: accountNumber
           });
+
+          if (accountNumber) {
+            console.log(`   📋 ${vendorItem.vendors.name} will be imported with account number: ${accountNumber}`);
+          }
         }
       }
 
@@ -1924,15 +1955,19 @@ const vendorOperations = {
   },
 
   // Import vendors and brands from inventory
-  async importVendorsAndBrandsFromInventory(userId, vendorIds, brandData) {
+  async importVendorsAndBrandsFromInventory(userId, vendorData, brandData) {
     try {
       console.log(`📥 Importing vendors and brands for user ${userId}...`);
-      console.log(`  Vendors: ${vendorIds?.length || 0}`);
+      console.log(`  Vendors: ${vendorData?.length || 0}`);
       console.log(`  Brands: ${brandData?.length || 0}`);
 
-      // Add vendors to account_vendors
-      for (const vendorId of vendorIds || []) {
-        await this.addAccountVendor(userId, vendorId);
+      // Add vendors to account_vendors with their account numbers
+      for (const vendor of vendorData || []) {
+        const vendorId = typeof vendor === 'string' ? vendor : vendor.id;
+        const accountNumber = typeof vendor === 'object' ? vendor.accountNumber : null;
+
+        console.log(`  Adding vendor ${vendorId}${accountNumber ? ` with account number ${accountNumber}` : ''}`);
+        await this.addAccountVendor(userId, vendorId, accountNumber);
       }
 
       // Add brands to account_brands (creating them in brands table if needed)
@@ -1987,7 +2022,7 @@ const vendorOperations = {
 
       return {
         success: true,
-        vendorsAdded: vendorIds?.length || 0,
+        vendorsAdded: vendorData?.length || 0,
         brandsAdded: brandData?.length || 0
       };
     } catch (error) {

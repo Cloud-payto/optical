@@ -469,11 +469,15 @@ export async function fetchPendingImports(userId?: string): Promise<PendingImpor
   return apiRequest<PendingImport>(`/vendors/pending-imports/${currentUserId}`);
 }
 
-export async function importFromInventory(vendorIds: string[], brandData: any[], userId?: string): Promise<{ success: boolean; vendorsAdded: number; brandsAdded: number }> {
+export async function importFromInventory(
+  vendorData: Array<{ id: string; name: string; brandCount: number; accountNumber: string | null }>,
+  brandData: any[],
+  userId?: string
+): Promise<{ success: boolean; vendorsAdded: number; brandsAdded: number }> {
   const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<{ success: boolean; vendorsAdded: number; brandsAdded: number }>(`/vendors/import-from-inventory/${currentUserId}`, {
     method: 'POST',
-    body: JSON.stringify({ vendorIds, brandData }),
+    body: JSON.stringify({ vendorIds: vendorData, brandData }),
   });
 }
 
