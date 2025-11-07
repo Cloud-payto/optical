@@ -19,20 +19,40 @@ export class DemoController {
     this.navigation = navigation;
   }
 
+  // Update current path when navigation occurs
+  updateCurrentPath(newPath: string) {
+    if (this.navigation) {
+      this.navigation.currentPath = newPath;
+    }
+  }
+
+  // Get current navigation helper
+  getNavigation() {
+    return this.navigation;
+  }
+
   setDriver(driver: Driver) {
     this.driver = driver;
   }
 
   // Navigate to a specific page if needed
   async navigateToPage(targetPage: string): Promise<void> {
-    if (!this.navigation) return;
+    if (!this.navigation) {
+      console.warn('Navigation helper not available');
+      return;
+    }
 
     if (this.navigation.currentPath !== targetPage) {
       console.log(`🧭 Navigating from ${this.navigation.currentPath} to ${targetPage}`);
       this.navigation.navigate(targetPage);
       
-      // Wait for navigation to complete
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Update current path immediately
+      this.navigation.currentPath = targetPage;
+      
+      // Wait for navigation and DOM to settle
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      console.log(`✅ Navigation to ${targetPage} completed`);
     }
   }
 

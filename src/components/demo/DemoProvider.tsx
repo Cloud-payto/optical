@@ -53,14 +53,17 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
         popoverOffset: 10,
         
         onNextClick: () => {
+          console.log(`▶️ Next button clicked - moving to step ${currentStep + 1}`);
           nextStep();
         },
         
         onPrevClick: () => {
+          console.log(`◀️ Previous button clicked - moving to step ${currentStep - 1}`);
           previousStep();
         },
         
         onCloseClick: () => {
+          console.log('❌ Close button clicked - skipping demo');
           skipDemo();
         },
 
@@ -70,20 +73,28 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
           demoController.cleanupDemoData();
         },
 
-        onHighlightStarted: (element, step) => {
+        onHighlightStarted: async (element, step) => {
           console.log(`✨ Highlighting step ${currentStep}:`, step);
           
           // Handle navigation if required
           const currentStepData = demoSteps[currentStep - 1];
           if (currentStepData?.requiresNavigation && currentStepData.page !== location.pathname) {
-            demoController.navigateToPage(currentStepData.page);
+            console.log(`🚀 Step ${currentStep} requires navigation to ${currentStepData.page}`);
+            await demoController.navigateToPage(currentStepData.page);
+            
+            // Wait for elements to be available after navigation
+            if (currentStepData.element && currentStepData.element !== 'body') {
+              console.log(`⏳ Waiting for element: ${currentStepData.element}`);
+              await demoController.waitForElement(currentStepData.element, 3000);
+            }
           }
 
           // Handle tab clicks if specified
           if (currentStepData?.tabToClick) {
             setTimeout(() => {
+              console.log(`🖱️ Auto-clicking tab: ${currentStepData.tabToClick}`);
               demoController.clickTab(currentStepData.tabToClick!);
-            }, 500);
+            }, 1000);
           }
 
           // Create spotlight effect
@@ -115,7 +126,13 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
       demoController.enableKeyboardNavigation();
 
       // Start the tour
-      driverInstance.drive();
+      console.log('🎬 Starting Driver.js tour...');
+      try {
+        driverInstance.drive();
+        console.log('✅ Driver.js tour started successfully');
+      } catch (error) {
+        console.error('❌ Failed to start Driver.js tour:', error);
+      }
     }
 
     return () => {
@@ -132,10 +149,19 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
     if (driverRef.current && isActive && currentStep > 0) {
       const stepIndex = currentStep - 1;
       if (stepIndex < demoSteps.length) {
+        console.log(`📍 Moving to step ${currentStep} (index ${stepIndex})`);
         driverRef.current.drive(stepIndex);
       }
     }
   }, [currentStep, isActive]);
+
+  // Update navigation helper when location changes
+  useEffect(() => {
+    if (demoController.getNavigation()) {
+      console.log(`🗺️ Location changed to: ${location.pathname}`);
+      demoController.updateCurrentPath(location.pathname);
+    }
+  }, [location.pathname]);
 
   // Clean up on unmount
   useEffect(() => {
