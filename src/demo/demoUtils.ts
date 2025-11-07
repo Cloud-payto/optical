@@ -152,29 +152,47 @@ export class DemoController {
   }
 
   // Wait for element to appear (useful for dynamic content)
-  async waitForElement(selector: string, timeout = 5000): Promise<HTMLElement | null> {
-    return new Promise((resolve) => {
-      const startTime = Date.now();
-      
-      const checkElement = () => {
-        const element = document.querySelector(selector) as HTMLElement;
-        
-        if (element) {
-          resolve(element);
-          return;
-        }
-        
-        if (Date.now() - startTime >= timeout) {
-          console.warn(`⏰ Timeout waiting for element: ${selector}`);
-          resolve(null);
-          return;
-        }
-        
-        setTimeout(checkElement, 100);
-      };
-      
-      checkElement();
-    });
+  async waitForElement(
+    selector: string,
+    timeout = 5000,
+    retries = 3
+  ): Promise<HTMLElement | null> {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      const result = await new Promise<HTMLElement | null>((resolve) => {
+        const startTime = Date.now();
+
+        const checkElement = () => {
+          const element = document.querySelector(selector) as HTMLElement;
+
+          if (element) {
+            console.log(`✅ Element found: ${selector} (attempt ${attempt}/${retries})`);
+            resolve(element);
+            return;
+          }
+
+          if (Date.now() - startTime >= timeout) {
+            console.warn(`⏰ Timeout on attempt ${attempt}/${retries} for: ${selector}`);
+            resolve(null);
+            return;
+          }
+
+          setTimeout(checkElement, 100);
+        };
+
+        checkElement();
+      });
+
+      if (result) return result;
+
+      // Wait before retry
+      if (attempt < retries) {
+        console.log(`🔄 Retrying element lookup: ${selector} (${attempt + 1}/${retries})`);
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+
+    console.error(`❌ Element not found after ${retries} attempts: ${selector}`);
+    return null;
   }
 
   // Highlight element with a pulse effect

@@ -4,6 +4,7 @@ export interface ExtendedDemoStep extends DriveStep {
   id: string;
   page: string;
   requiresNavigation?: boolean;
+  waitForElement?: boolean;
   tabToClick?: string;
   dataToInject?: any;
 }
@@ -55,11 +56,12 @@ export const demoSteps: ExtendedDemoStep[] = [
     element: '[data-demo="inventory-pending-tab"]',
     popover: {
       title: 'Step 2: Pending Inventory',
-      description: 'Click "Pending" to see the frames from the order email. These are items confirmed by the vendor but not yet in your physical inventory.',
+      description: 'The "Pending" tab shows frames confirmed by vendors but not yet in your physical inventory. These are the 3 frames from the Modern Optical order email.',
       side: 'bottom',
       align: 'start'
     },
     requiresNavigation: true,
+    waitForElement: true,
     tabToClick: 'pending'
   },
 
@@ -74,7 +76,8 @@ export const demoSteps: ExtendedDemoStep[] = [
       side: 'top',
       align: 'center'
     },
-    requiresNavigation: true
+    requiresNavigation: true,
+    waitForElement: true
   },
 
   // Step 5: Display Modern Optical Vendor Card
@@ -123,7 +126,8 @@ export const demoSteps: ExtendedDemoStep[] = [
       side: 'center',
       align: 'center'
     },
-    requiresNavigation: true
+    requiresNavigation: true,
+    waitForElement: true
   },
 
   // Step 8: Company Dropdown Selection

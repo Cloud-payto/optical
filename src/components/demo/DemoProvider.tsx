@@ -56,32 +56,97 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
         onNextClick: async (element, step) => {
           const currentIndex = driverRef.current?.getActiveIndex() ?? 0;
           const nextIndex = currentIndex + 1;
-          console.log(`▶️ Next button clicked - Driver.js moving from step ${currentIndex + 1} to ${nextIndex + 1}`);
-          
-          // Just log for debugging - don't interfere with Driver.js progression
-          if (nextIndex < demoSteps.length) {
-            const nextStep = demoSteps[nextIndex];
-            const nextElement = nextStep.element || 'body';
-            
-            console.log(`📋 Next step details:`, {
-              stepId: nextStep.id,
-              page: nextStep.page,
-              element: nextElement,
-              currentPage: window.location.pathname
-            });
-            
-            const elementExists = nextElement === 'body' || document.querySelector(nextElement);
-            console.log(`🔍 Next step ${nextIndex + 1} element "${nextElement}" exists:`, !!elementExists);
+          console.log(`▶️ Next button clicked - preparing step ${nextIndex + 1}`);
+
+          // Get button references for loading state
+          const nextButton = document.querySelector('.driver-popover-next-btn') as HTMLButtonElement;
+          const prevButton = document.querySelector('.driver-popover-prev-btn') as HTMLButtonElement;
+          const closeButton = document.querySelector('.driver-popover-close-btn') as HTMLButtonElement;
+
+          // Store original button text
+          const originalNextText = nextButton?.textContent;
+
+          try {
+            // Handle navigation and validation for next step
+            if (nextIndex < demoSteps.length) {
+              const nextStep = demoSteps[nextIndex];
+              const nextElement = nextStep.element || 'body';
+
+              console.log(`📋 Next step details:`, {
+                stepId: nextStep.id,
+                page: nextStep.page,
+                element: nextElement,
+                currentPage: window.location.pathname,
+                requiresNav: nextStep.requiresNavigation
+              });
+
+              // Navigate and wait for completion if required
+              if (nextStep.requiresNavigation && nextStep.page !== window.location.pathname) {
+                console.log(`🚀 Navigating to ${nextStep.page} for step ${nextIndex + 1}`);
+
+                // Disable buttons during navigation
+                if (nextButton) {
+                  nextButton.disabled = true;
+                  nextButton.textContent = 'Loading...';
+                }
+                if (prevButton) prevButton.disabled = true;
+                if (closeButton) closeButton.disabled = true;
+
+                try {
+                  await demoController.navigateToPage(nextStep.page);
+
+                  // Wait for target element if specified
+                  if (nextStep.element && nextStep.element !== 'body') {
+                    console.log(`⏳ Waiting for element: ${nextStep.element}`);
+                    const targetElement = await demoController.waitForElement(nextStep.element, 5000);
+
+                    if (!targetElement) {
+                      console.error(`❌ Element not found after navigation: ${nextStep.element}`);
+                    } else {
+                      console.log(`✅ Element ready: ${nextStep.element}`);
+                    }
+                  }
+
+                  // Additional wait for React rendering
+                  await new Promise(resolve => setTimeout(resolve, 300));
+                } catch (navError) {
+                  console.error(`❌ Navigation failed:`, navError);
+                }
+              } else {
+                // Validate element exists if not navigating
+                if (nextElement !== 'body') {
+                  const elementExists = document.querySelector(nextElement);
+                  if (!elementExists) {
+                    console.warn(`⚠️ Element "${nextElement}" not found for step ${nextIndex + 1}`);
+                  }
+                }
+              }
+            }
+
+            // ✅ CRITICAL: Call moveNext() to progress to next step
+            if (driverRef.current) {
+              console.log(`✅ Moving to step ${nextIndex + 1}`);
+              driverRef.current.moveNext();
+            }
+          } finally {
+            // Re-enable buttons
+            if (nextButton) {
+              nextButton.disabled = false;
+              nextButton.textContent = originalNextText || 'Next';
+            }
+            if (prevButton) prevButton.disabled = false;
+            if (closeButton) closeButton.disabled = false;
           }
-          
-          // Always let Driver.js handle progression - don't interfere
-          console.log(`✅ Allowing Driver.js to handle progression naturally`);
         },
         
         onPrevClick: (element, step) => {
           const currentIndex = driverRef.current?.getActiveIndex() ?? 0;
-          console.log(`◀️ Previous button clicked - Driver.js moving from step ${currentIndex + 1} to ${currentIndex}`);
-          // Let Driver.js handle step progression naturally
+          console.log(`◀️ Previous button clicked - moving from step ${currentIndex + 1} to ${currentIndex}`);
+
+          // Move to previous step
+          if (driverRef.current) {
+            driverRef.current.movePrevious();
+          }
         },
         
         onCloseClick: () => {
@@ -127,47 +192,28 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
           try {
             const stepIndex = driverRef.current?.getActiveIndex() ?? 0;
             const currentStepData = demoSteps[stepIndex];
-            
+
             console.log(`✨ Highlighting step ${stepIndex + 1}/${demoSteps.length}:`, currentStepData?.id);
-            console.log(`📍 Current page: ${location.pathname}, Target page: ${currentStepData?.page}`);
-            console.log(`🎯 Looking for element: ${step.element}`);
-            
-            // Check if target element exists
+            console.log(`📍 Page: ${location.pathname}, Element: ${step.element}`);
+
+            // Validate element exists
             const targetElement = step.element === 'body' ? document.body : document.querySelector(step.element);
-            console.log(`🔍 Element "${step.element}" found:`, !!targetElement);
-            
-            // Handle navigation if required
-            if (currentStepData?.requiresNavigation && currentStepData.page !== location.pathname) {
-              console.log(`🚀 Step ${stepIndex + 1} requires navigation to ${currentStepData.page}`);
-              
-              try {
-                await demoController.navigateToPage(currentStepData.page);
-                
-                // Wait for elements to be available after navigation
-                if (currentStepData.element && currentStepData.element !== 'body') {
-                  console.log(`⏳ Waiting for element: ${currentStepData.element}`);
-                  const element = await demoController.waitForElement(currentStepData.element, 5000);
-                  if (!element) {
-                    console.warn(`⚠️ Element not found after navigation: ${currentStepData.element}`);
-                  } else {
-                    console.log(`✅ Element found after navigation!`);
-                  }
-                }
-              } catch (navError) {
-                console.error(`❌ Navigation failed for step ${stepIndex + 1}:`, navError);
-              }
+            if (!targetElement) {
+              console.warn(`⚠️ Target element not found: ${step.element}`);
+            } else {
+              console.log(`✅ Element found and ready for highlighting`);
             }
 
-            // Handle tab clicks if specified
+            // Handle tab clicks if specified (for within-page navigation)
             if (currentStepData?.tabToClick) {
               setTimeout(() => {
                 console.log(`🖱️ Auto-clicking tab: ${currentStepData.tabToClick}`);
                 demoController.clickTab(currentStepData.tabToClick!);
-              }, 1000);
+              }, 500);
             }
 
             // Create spotlight effect
-            if (element) {
+            if (targetElement) {
               demoController.createSpotlight(`[data-driver-element-id="${step.element}"]`);
             }
           } catch (error) {
@@ -180,9 +226,22 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
 
         steps: demoSteps.map((step, index) => {
           const element = step.element || 'body';
-          
+
+          // For steps requiring navigation, use body as temporary element
+          // The real element will be highlighted after navigation in onNextClick
+          const safeElement = step.requiresNavigation && step.page !== location.pathname
+            ? 'body'
+            : element;
+
+          console.log(`🔧 Configuring step ${index + 1}:`, {
+            id: step.id,
+            element: safeElement,
+            requiresNav: step.requiresNavigation,
+            targetPage: step.page
+          });
+
           return {
-            element: element,
+            element: safeElement,
             popover: {
               title: step.popover?.title || `Step ${index + 1}`,
               description: step.popover?.description || 'Demo step description',
@@ -192,6 +251,52 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
           };
         })
       };
+
+      // Validate steps configuration before starting
+      const validateSteps = (): boolean => {
+        console.log('🔍 Validating demo steps configuration...');
+        let isValid = true;
+
+        demoSteps.forEach((step, index) => {
+          // Check for required fields
+          if (!step.id) {
+            console.error(`❌ Step ${index + 1} missing required 'id' field`);
+            isValid = false;
+          }
+          if (!step.page) {
+            console.error(`❌ Step ${index + 1} missing required 'page' field`);
+            isValid = false;
+          }
+          if (!step.popover) {
+            console.error(`❌ Step ${index + 1} missing required 'popover' field`);
+            isValid = false;
+          }
+
+          // Check for navigation steps without elements
+          if (step.requiresNavigation && !step.element && step.element !== 'body') {
+            console.warn(`⚠️ Step ${index + 1} (${step.id}) requires navigation but has no target element`);
+          }
+
+          // Check for elements that should exist on current page
+          if (!step.requiresNavigation && step.page === location.pathname && step.element && step.element !== 'body') {
+            const exists = document.querySelector(step.element);
+            if (!exists) {
+              console.warn(`⚠️ Step ${index + 1} (${step.id}) element not found on current page: ${step.element}`);
+            }
+          }
+        });
+
+        if (isValid) {
+          console.log(`✅ All ${demoSteps.length} steps validated successfully`);
+        } else {
+          console.error(`❌ Step validation failed - demo may not work correctly`);
+        }
+
+        return isValid;
+      };
+
+      // Validate before starting
+      validateSteps();
 
       // Create and start driver
       const driverInstance = driver(driverConfig);
