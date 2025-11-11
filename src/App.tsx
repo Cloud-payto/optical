@@ -9,7 +9,6 @@ import DemoProviderComponent from './components/demo/DemoProvider';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import MainLayout from './components/layout/MainLayout';
-import DemoTour from './components/DemoTour';
 import HomePage from './pages/HomePage';
 import CalculatorPage from './pages/CalculatorPage';
 import DashboardPage from './pages/Dashboard';
@@ -86,7 +85,6 @@ function App() {
                     </ProtectedRoute>
                   } />
                 </Routes>
-                <DemoTour />
                 </div>
               </DemoProviderComponent>
               </DemoProvider>

@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { DemoData, DEMO_DATA } from '../demo/mockData';
+import {
+  DemoData,
+  DEMO_DATA,
+  fetchDemoData,
+  cleanupDemoSession,
+  updateDemoProgress,
+} from '../demo/mockData';
 
 export interface DemoState {
   isActive: boolean;
@@ -32,7 +38,7 @@ export const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
     isActive: false,
     isLoading: false,
     currentStep: 0,
-    totalSteps: 14,
+    totalSteps: 12, // Updated for 11-step demo flow + welcome step
     demoData: null,
     originalUserData: null
   });
@@ -53,9 +59,9 @@ export const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
     console.log('🔄 User data restored, demo data cleared');
   }, []);
 
-  const startDemo = useCallback(() => {
+  const startDemo = useCallback(async () => {
     console.log('🎬 Starting Driver.js demo...');
-    
+
     setState(prev => ({
       ...prev,
       isActive: true,
@@ -63,21 +69,46 @@ export const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
       currentStep: 1
     }));
 
-    // Inject demo data
-    injectDemoData();
+    try {
+      // Fetch demo data from API (or use mock data as fallback)
+      const demoData = await fetchDemoData();
 
-    setState(prev => ({
-      ...prev,
-      isLoading: false
-    }));
-  }, [injectDemoData]);
-
-  const nextStep = useCallback(() => {
-    if (state.currentStep < state.totalSteps) {
       setState(prev => ({
         ...prev,
-        currentStep: prev.currentStep + 1
+        demoData,
+        isLoading: false
       }));
+
+      console.log('✅ Demo data loaded successfully');
+    } catch (error) {
+      console.error('❌ Error loading demo data:', error);
+
+      // Fallback to mock data
+      setState(prev => ({
+        ...prev,
+        demoData: DEMO_DATA,
+        isLoading: false
+      }));
+    }
+  }, []);
+
+  const nextStep = useCallback(async () => {
+    if (state.currentStep < state.totalSteps) {
+      const newStep = state.currentStep + 1;
+
+      setState(prev => ({
+        ...prev,
+        currentStep: newStep
+      }));
+
+      // Track progress in backend
+      try {
+        const completedSteps = Array.from({ length: state.currentStep }, (_, i) => i + 1);
+        await updateDemoProgress(newStep, completedSteps);
+      } catch (error) {
+        console.error('⚠️ Error updating demo progress:', error);
+        // Don't block UI on progress tracking failure
+      }
     } else {
       endDemo();
     }
@@ -106,14 +137,22 @@ export const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
     endDemo();
   }, []);
 
-  const endDemo = useCallback(() => {
+  const endDemo = useCallback(async () => {
     console.log('🛑 Demo ended, cleaning up...');
-    
+
+    // Cleanup demo session in backend
+    try {
+      await cleanupDemoSession();
+      console.log('✅ Demo session cleaned up');
+    } catch (error) {
+      console.error('⚠️ Error cleaning up demo session:', error);
+    }
+
     setState({
       isActive: false,
       isLoading: false,
       currentStep: 0,
-      totalSteps: 14,
+      totalSteps: 12, // Updated for 11-step demo flow + welcome step
       demoData: null,
       originalUserData: null
     });

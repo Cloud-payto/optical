@@ -100,11 +100,11 @@ const Sidebar: React.FC = () => {
   };
 
   return (
-    <div className={`bg-gray-900 text-white transition-all duration-300 flex flex-col h-screen ${
+    <div className={`bg-white dark:bg-gray-900 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700 transition-all duration-300 flex flex-col h-screen ${
       isCollapsed ? 'w-20' : 'w-64'
     }`}>
       {/* Header */}
-      <div className="p-4 border-b border-gray-700">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
           {!isCollapsed && (
             <div className="flex items-center space-x-2">
@@ -118,7 +118,7 @@ const Sidebar: React.FC = () => {
           )}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className={`p-1 rounded-md hover:bg-gray-700 transition-colors ${isCollapsed ? 'mx-auto' : ''}`}
+            className={`p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${isCollapsed ? 'mx-auto' : ''}`}
           >
             {isCollapsed ? (
               <ChevronRight className="h-4 w-4" />
@@ -149,8 +149,8 @@ const Sidebar: React.FC = () => {
                       isCollapsed ? 'justify-center' : 'justify-between'
                     } ${
                       sectionActive
-                        ? 'bg-gray-800 text-white'
-                        : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                        ? 'bg-blue-100 dark:bg-gray-800 text-blue-700 dark:text-white'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
                     } ${item.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                     title={isCollapsed ? item.name : undefined}
                   >
@@ -179,8 +179,8 @@ const Sidebar: React.FC = () => {
                               to={child.to}
                               className={`flex items-center px-3 py-2 rounded-lg transition-colors space-x-3 ${
                                 isActive(child.to)
-                                  ? 'bg-blue-600 text-white'
-                                  : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                                  ? 'bg-blue-600 dark:bg-blue-600 text-white'
+                                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
                               }`}
                             >
                               <ChildIcon className="h-4 w-4 flex-shrink-0" />
@@ -203,8 +203,8 @@ const Sidebar: React.FC = () => {
                       isCollapsed ? 'justify-center' : 'space-x-3'
                     } ${
                       isActive(item.to!)
-                        ? 'bg-blue-600 text-white'
-                        : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                        ? 'bg-blue-600 dark:bg-blue-600 text-white'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
                     }`}
                     title={isCollapsed ? item.name : undefined}
                   >
@@ -219,11 +219,11 @@ const Sidebar: React.FC = () => {
       </nav>
 
       {/* User Section */}
-      <div className="p-4 border-t border-gray-700 space-y-2">
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
         {/* Report Bug Button */}
         <button
           onClick={() => setIsBugReportOpen(true)}
-          className={`flex items-center w-full px-3 py-2 rounded-lg text-gray-300 hover:bg-orange-600 hover:text-white transition-colors ${
+          className={`flex items-center w-full px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-orange-100 dark:hover:bg-orange-600 hover:text-orange-700 dark:hover:text-white transition-colors ${
             isCollapsed ? 'justify-center' : 'space-x-3'
           }`}
           title={isCollapsed ? 'Report a Bug' : undefined}
@@ -235,7 +235,7 @@ const Sidebar: React.FC = () => {
         {/* Request Vendor Button */}
         <button
           onClick={() => setIsVendorRequestOpen(true)}
-          className={`flex items-center w-full px-3 py-2 rounded-lg text-gray-300 hover:bg-purple-600 hover:text-white transition-colors ${
+          className={`flex items-center w-full px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-purple-600 hover:text-purple-700 dark:hover:text-white transition-colors ${
             isCollapsed ? 'justify-center' : 'space-x-3'
           }`}
           title={isCollapsed ? 'Request a Vendor' : undefined}
@@ -247,7 +247,7 @@ const Sidebar: React.FC = () => {
         {/* Settings Button */}
         <button
           onClick={() => setIsSettingsOpen(true)}
-          className={`flex items-center w-full px-3 py-2 rounded-lg text-gray-300 hover:bg-blue-600 hover:text-white transition-colors ${
+          className={`flex items-center w-full px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-600 hover:text-blue-700 dark:hover:text-white transition-colors ${
             isCollapsed ? 'justify-center' : 'space-x-3'
           }`}
           title={isCollapsed ? 'Settings' : undefined}
@@ -259,7 +259,7 @@ const Sidebar: React.FC = () => {
         {/* Welcome Message */}
         {!isCollapsed && (
           <div className="pt-2">
-            <div className="flex items-center space-x-2 text-sm text-gray-300">
+            <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300">
               <User className="h-4 w-4" />
               <span>Welcome, {user?.username || user?.email?.split('@')[0]}</span>
             </div>
@@ -269,7 +269,7 @@ const Sidebar: React.FC = () => {
         {/* Logout Button */}
         <button
           onClick={signOut}
-          className={`flex items-center w-full px-3 py-2 rounded-lg text-gray-300 hover:bg-red-600 hover:text-white transition-colors ${
+          className={`flex items-center w-full px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-red-100 dark:hover:bg-red-600 hover:text-red-700 dark:hover:text-white transition-colors ${
             isCollapsed ? 'justify-center' : 'space-x-3'
           }`}
           title={isCollapsed ? 'Logout' : undefined}
