@@ -62,6 +62,11 @@ export const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
   const startDemo = useCallback(async () => {
     console.log('🎬 Starting Driver.js demo...');
 
+    // Set demo mode flag in sessionStorage for API calls
+    // This tells the API service to use the demo user ID
+    sessionStorage.setItem('demo_session_id', 'active');
+    console.log('🎭 Demo mode flag set in sessionStorage');
+
     setState(prev => ({
       ...prev,
       isActive: true,
@@ -139,6 +144,10 @@ export const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
 
   const endDemo = useCallback(async () => {
     console.log('🛑 Demo ended, cleaning up...');
+
+    // Remove demo mode flag from sessionStorage
+    sessionStorage.removeItem('demo_session_id');
+    console.log('🧹 Demo mode flag cleared from sessionStorage');
 
     // Cleanup demo session in backend
     try {

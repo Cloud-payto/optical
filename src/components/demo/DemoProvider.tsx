@@ -31,7 +31,7 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
   useEffect(() => {
     if (isActive && !driverRef.current) {
       console.log('🎬 Initializing Driver.js demo...');
-      
+
       // Set up navigation helper for demo controller
       demoController.setNavigation({
         navigate,
@@ -41,6 +41,16 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
       // Inject demo data
       if (demoData) {
         demoController.injectDemoData(demoData);
+      }
+
+      // Navigate to first step's page if required
+      const firstStep = demoSteps[0];
+      if (firstStep.requiresNavigation && firstStep.page !== location.pathname) {
+        console.log(`🚀 Navigating to first step page: ${firstStep.page}`);
+        navigate(firstStep.page);
+        // Wait for navigation and React rendering before starting tour
+        // The tour will start after navigation completes (in the next effect cycle)
+        return;
       }
 
       // Create Driver.js configuration

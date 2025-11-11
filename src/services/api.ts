@@ -1,6 +1,7 @@
 // API service for backend communication
 import { getApiEndpoint } from '../lib/api-config';
 import { supabase } from '../lib/supabase';
+import { DEMO_USER_ID } from '../demo/demoConstants';
 
 // Helper function to get current user ID (async)
 async function getCurrentUserId(): Promise<string> {
@@ -11,14 +12,35 @@ async function getCurrentUserId(): Promise<string> {
   return user.id;
 }
 
+// Helper function to check if demo mode is active
+function isDemoModeActive(): boolean {
+  try {
+    if (typeof window === 'undefined' || !window.sessionStorage) {
+      return false;
+    }
+    // Check if demo is active by looking at sessionStorage
+    // DemoContext sets this when demo starts
+    const demoSessionId = sessionStorage.getItem('demo_session_id');
+    return !!demoSessionId;
+  } catch {
+    return false;
+  }
+}
+
 // Helper function to get current user ID from session (async)
 async function getCurrentUserIdFromSession(): Promise<string> {
+  // Check if demo mode is active first
+  if (isDemoModeActive()) {
+    console.log('🎭 Demo mode detected - returning demo user ID for API calls');
+    return DEMO_USER_ID;
+  }
+
   const { data: { session }, error } = await supabase.auth.getSession();
-  
+
   if (error || !session?.user) {
     throw new Error('User not authenticated. Please log in to continue.');
   }
-  
+
   return session.user.id;
 }
 
