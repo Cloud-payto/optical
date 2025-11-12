@@ -35,9 +35,9 @@ const ProfitDisplay: React.FC<ProfitDisplayProps> = ({ profitData, animate, save
   
   return (
     <div>
-      <h3 className="text-xl font-semibold text-gray-800 mb-5">Profit Analysis</h3>
-      
-      <div className={`mb-8 p-4 rounded-lg ${profitColor} transition-all duration-300 ${animate ? 'scale-105' : 'scale-100'}`}>
+      <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-5">Profit Analysis</h3>
+
+      <div className={`mb-8 p-4 rounded-lg ${profitColor} dark:bg-opacity-20 transition-all duration-300 ${animate ? 'scale-105' : 'scale-100'}`}>
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium">Total Profit</span>
           <span className="text-2xl font-bold">{formatCurrency(profit)}</span>
@@ -49,8 +49,8 @@ const ProfitDisplay: React.FC<ProfitDisplayProps> = ({ profitData, animate, save
       </div>
       
       <div className="space-y-4">
-        <div className="bg-white rounded-lg shadow-sm p-4">
-          <h4 className="text-sm font-medium text-gray-500 mb-2">Revenue Breakdown</h4>
+        <div className="bg-white dark:bg-[#1F2623] rounded-lg shadow-sm p-4">
+          <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Revenue Breakdown</h4>
           <div className="space-y-2">
             {insuranceEnabled ? (
               // Insurance-enabled breakdown
@@ -59,98 +59,98 @@ const ProfitDisplay: React.FC<ProfitDisplayProps> = ({ profitData, animate, save
                   <div className="flex flex-col">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center">
-                        <span className="text-sm">Retail Price</span>
+                        <span className="text-sm dark:text-gray-300">Retail Price</span>
                       </div>
-                      <span className="font-medium">{formatCurrency(retailPrice)}</span>
+                      <span className="font-medium dark:text-white">{formatCurrency(retailPrice)}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <div className="flex items-center">
-                        <span className="text-sm">Insurance Coverage</span>
+                        <span className="text-sm dark:text-gray-300">Insurance Coverage</span>
                       </div>
-                      <span className="font-medium text-green-600">-{formatCurrency(profitData.insuranceCoverage)}</span>
+                      <span className="font-medium text-green-600 dark:text-green-400">-{formatCurrency(profitData.insuranceCoverage)}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <div className="flex items-center">
-                        <span className="text-sm">20% Discount on Difference</span>
+                        <span className="text-sm dark:text-gray-300">20% Discount on Difference</span>
                         <InfoIcon className="h-3 w-3 text-gray-400 ml-1" aria-label="Insurance contracts require a 20% discount on the portion not covered by insurance" />
                       </div>
-                      <span className="font-medium text-green-600">-{formatCurrency(discountedAmount)}</span>
+                      <span className="font-medium text-green-600 dark:text-green-400">-{formatCurrency(discountedAmount)}</span>
                     </div>
-                    <div className="flex justify-between items-center bg-gray-50 p-1 rounded mt-1">
-                      <span className="text-sm font-medium">Patient Payment</span>
-                      <span className="font-medium">{formatCurrency(patientPayment)}</span>
+                    <div className="flex justify-between items-center bg-gray-50 dark:bg-gray-700 p-1 rounded mt-1">
+                      <span className="text-sm font-medium dark:text-gray-200">Patient Payment</span>
+                      <span className="font-medium dark:text-white">{formatCurrency(patientPayment)}</span>
                     </div>
                   </div>
                 )}
                 <div className="flex justify-between items-center mt-2">
                   <div className="flex items-center">
-                    <span className="text-sm">Insurance Reimbursement</span>
+                    <span className="text-sm dark:text-gray-300">Insurance Reimbursement</span>
                     <InfoIcon className="h-3 w-3 text-gray-400 ml-1" aria-label="Fixed amount paid by insurance providers (typically $57)" />
                   </div>
-                  <span className="font-medium">{formatCurrency(reimbursement)}</span>
+                  <span className="font-medium dark:text-white">{formatCurrency(reimbursement)}</span>
                 </div>
               </>
             ) : (
               // Non-insurance (cash-pay) breakdown - much simpler
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
-                  <span className="text-sm">Customer Payment (Full Retail Price)</span>
+                  <span className="text-sm dark:text-gray-300">Customer Payment (Full Retail Price)</span>
                   <InfoIcon className="h-3 w-3 text-gray-400 ml-1" aria-label="Customer pays full retail price (2x wholesale cost)" />
                 </div>
-                <span className="font-medium">{formatCurrency(patientPayment)}</span>
+                <span className="font-medium dark:text-white">{formatCurrency(patientPayment)}</span>
               </div>
             )}
-            <div className="h-px bg-gray-200 my-2"></div>
-            <div className="flex justify-between items-center font-semibold">
+            <div className="h-px bg-gray-200 dark:bg-gray-600 my-2"></div>
+            <div className="flex justify-between items-center font-semibold dark:text-white">
               <span>Total Revenue</span>
               <span>{formatCurrency(total)}</span>
             </div>
           </div>
         </div>
         
-        <div className="bg-white rounded-lg shadow-sm p-4">
-          <h4 className="text-sm font-medium text-gray-500 mb-2">Cost Breakdown & Profit</h4>
+        <div className="bg-white dark:bg-[#1F2623] rounded-lg shadow-sm p-4">
+          <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Cost Breakdown & Profit</h4>
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <div className="flex items-center">
-                <span className="text-sm">Your Actual Cost</span>
+                <span className="text-sm dark:text-gray-300">Your Actual Cost</span>
                 <InfoIcon className="h-3 w-3 text-gray-400 ml-1" aria-label="The real cost you pay for the frame" />
               </div>
-              <span className="font-medium">{formatCurrency(yourCost)}</span>
+              <span className="font-medium dark:text-white">{formatCurrency(yourCost)}</span>
             </div>
             {tariffTax > 0 && (
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
-                  <span className="text-sm">Tariff Tax</span>
+                  <span className="text-sm dark:text-gray-300">Tariff Tax</span>
                   <InfoIcon className="h-3 w-3 text-gray-400 ml-1" aria-label="Additional tariff tax applied to the frame" />
                 </div>
-                <span className="font-medium text-red-600">{formatCurrency(tariffTax)}</span>
+                <span className="font-medium text-red-600 dark:text-red-400">{formatCurrency(tariffTax)}</span>
               </div>
             )}
             {tariffTax > 0 && (
-              <div className="flex justify-between items-center bg-gray-50 p-1 rounded">
+              <div className="flex justify-between items-center bg-gray-50 dark:bg-gray-700 p-1 rounded">
                 <div className="flex items-center">
-                  <span className="text-sm font-medium">Total Cost with Tariff</span>
+                  <span className="text-sm font-medium dark:text-gray-200">Total Cost with Tariff</span>
                 </div>
-                <span className="font-medium">{formatCurrency(totalCost)}</span>
+                <span className="font-medium dark:text-white">{formatCurrency(totalCost)}</span>
               </div>
             )}
             <div className="flex justify-between items-center">
               <div className="flex items-center">
-                <span className="text-sm">Wholesale Price</span>
+                <span className="text-sm dark:text-gray-300">Wholesale Price</span>
                 <InfoIcon className="h-3 w-3 text-gray-400 ml-1" aria-label="The cost reported to insurance (Frame Book Price)" />
               </div>
-              <span className="font-medium">{formatCurrency(wholesaleCost)}</span>
+              <span className="font-medium dark:text-white">{formatCurrency(wholesaleCost)}</span>
             </div>
             <div className="flex justify-between items-center">
               <div className="flex items-center">
-                <span className="text-sm">Discount Percentage from Wholesale Price</span>
+                <span className="text-sm dark:text-gray-300">Discount Percentage from Wholesale Price</span>
                 <InfoIcon className="h-3 w-3 text-gray-400 ml-1" aria-label="How much you save compared to the wholesale price" />
               </div>
-              <span className="font-medium text-green-600">{calculateDiscountPercentage(yourCost, wholesaleCost)}%</span>
+              <span className="font-medium text-green-600 dark:text-green-400">{calculateDiscountPercentage(yourCost, wholesaleCost)}%</span>
             </div>
-            <div className="h-px bg-gray-200 my-2"></div>
-            <div className="flex justify-between items-center font-semibold">
+            <div className="h-px bg-gray-200 dark:bg-gray-600 my-2"></div>
+            <div className="flex justify-between items-center font-semibold dark:text-white">
               <span>Net Profit</span>
               <span>{formatCurrency(profit)}</span>
             </div>
@@ -160,15 +160,15 @@ const ProfitDisplay: React.FC<ProfitDisplayProps> = ({ profitData, animate, save
       
       {savedCalculations.length > 0 && (
         <div className="mt-6">
-          <h4 className="text-sm font-medium text-gray-500 mb-2">Saved Calculations</h4>
-          <div className="bg-white rounded-lg shadow-sm p-2 max-h-48 overflow-y-auto">
+          <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Saved Calculations</h4>
+          <div className="bg-white dark:bg-[#1F2623] rounded-lg shadow-sm p-2 max-h-48 overflow-y-auto">
             {savedCalculations.map((calc) => (
-              <div key={calc.id} className="p-2 hover:bg-gray-50 rounded transition-colors">
+              <div key={calc.id} className="p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded transition-colors">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium">{calc.name}</span>
-                  <span className="font-medium">{formatCurrency(calc.profit)}</span>
+                  <span className="text-sm font-medium dark:text-white">{calc.name}</span>
+                  <span className="font-medium dark:text-white">{formatCurrency(calc.profit)}</span>
                 </div>
-                <div className="text-xs text-gray-500 flex flex-wrap justify-between mt-1">
+                <div className="text-xs text-gray-500 dark:text-gray-400 flex flex-wrap justify-between mt-1">
                   <span>Your Cost: {formatCurrency(calc.yourCost)}</span>
                   {calc.tariffTax > 0 && <span>Tariff: {formatCurrency(calc.tariffTax)}</span>}
                   <span>Wholesale: {formatCurrency(calc.wholesaleCost)}</span>

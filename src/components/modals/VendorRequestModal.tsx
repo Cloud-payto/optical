@@ -85,7 +85,7 @@ const VendorRequestModal: React.FC<VendorRequestModalProps> = ({ isOpen, onClose
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden"
+            className="relative bg-white dark:bg-[#1F2623] rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden"
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4 flex items-center justify-between">
@@ -105,20 +105,20 @@ const VendorRequestModal: React.FC<VendorRequestModalProps> = ({ isOpen, onClose
 
             {/* Content */}
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 flex items-start space-x-2">
-                <AlertCircle className="h-5 w-5 text-purple-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-purple-800">
+              <div className="bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800 rounded-lg p-3 flex items-start space-x-2">
+                <AlertCircle className="h-5 w-5 text-purple-600 dark:text-purple-400 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-purple-800 dark:text-purple-300">
                   Don't see your vendor in our system? Let us know which vendor you'd like us to add!
                 </p>
               </div>
 
               <div>
-                <label htmlFor="vendor-name" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="vendor-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Vendor Name <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Building2 className="h-5 w-5 text-gray-400" />
+                    <Building2 className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                   </div>
                   <input
                     id="vendor-name"
@@ -126,15 +126,15 @@ const VendorRequestModal: React.FC<VendorRequestModalProps> = ({ isOpen, onClose
                     value={vendorName}
                     onChange={(e) => setVendorName(e.target.value)}
                     placeholder="e.g., Acme Eyewear Co."
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow text-gray-900 placeholder:text-gray-400"
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
                     disabled={isSubmitting}
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="vendor-website" className="block text-sm font-medium text-gray-700 mb-1">
-                  Vendor Website <span className="text-gray-400 text-xs">(Optional)</span>
+                <label htmlFor="vendor-website" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Vendor Website <span className="text-gray-400 dark:text-gray-500 text-xs">(Optional)</span>
                 </label>
                 <input
                   id="vendor-website"
@@ -142,13 +142,13 @@ const VendorRequestModal: React.FC<VendorRequestModalProps> = ({ isOpen, onClose
                   value={vendorWebsite}
                   onChange={(e) => setVendorWebsite(e.target.value)}
                   placeholder="https://example.com"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow text-gray-900 placeholder:text-gray-400"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
                   disabled={isSubmitting}
                 />
               </div>
 
               <div>
-                <label htmlFor="vendor-reason" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="vendor-reason" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Why do you need this vendor? <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -157,7 +157,7 @@ const VendorRequestModal: React.FC<VendorRequestModalProps> = ({ isOpen, onClose
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Tell us why this vendor would be helpful for your business..."
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow resize-none text-gray-900 placeholder:text-gray-400"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
                   disabled={isSubmitting}
                 />
               </div>
@@ -167,7 +167,7 @@ const VendorRequestModal: React.FC<VendorRequestModalProps> = ({ isOpen, onClose
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
                   disabled={isSubmitting}
                 >
                   Cancel

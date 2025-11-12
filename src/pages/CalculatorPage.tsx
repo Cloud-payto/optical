@@ -26,22 +26,22 @@ const CalculatorPage: React.FC = () => {
   }, [isDemo, currentStepData]);
 
   return (
-    <div className="h-full bg-gray-50">
+    <div className="h-full bg-gray-50 dark:bg-[#181F1C]">
       <div className="p-6 md:p-8">
         <Container>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-8">
             Profit Tools
           </h1>
-          
+
           {/* Toggle Tabs */}
           <div className="flex mb-8">
-            <div className="inline-flex rounded-lg border border-gray-200 bg-white p-1 shadow-sm">
+            <div className="inline-flex rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1F2623] p-1 shadow-sm">
               <button
                 onClick={() => setActiveTab('calculator')}
                 className={`px-6 py-2 text-sm font-medium rounded-md transition-colors ${
-                  activeTab === 'calculator' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'text-gray-700 hover:bg-gray-100'
+                  activeTab === 'calculator'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
                 Single Profit Calculator
@@ -50,17 +50,17 @@ const CalculatorPage: React.FC = () => {
                 onClick={() => setActiveTab('comparison')}
                 data-demo="comparison-tab"
                 className={`px-6 py-2 text-sm font-medium rounded-md transition-colors ${
-                  activeTab === 'comparison' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'text-gray-700 hover:bg-gray-100'
+                  activeTab === 'comparison'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
                 Profit Comparison
               </button>
             </div>
           </div>
-          
-          <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300">
+
+          <div className="bg-white dark:bg-[#1F2623] rounded-xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300">
             {activeTab === 'calculator' ? (
               <ProfitCalculator />
             ) : (

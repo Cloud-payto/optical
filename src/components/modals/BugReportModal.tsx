@@ -82,7 +82,7 @@ const BugReportModal: React.FC<BugReportModalProps> = ({ isOpen, onClose }) => {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden"
+            className="relative bg-white dark:bg-[#1F2623] rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-hidden"
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-orange-500 to-red-500 px-6 py-4 flex items-center justify-between">
@@ -102,15 +102,15 @@ const BugReportModal: React.FC<BugReportModalProps> = ({ isOpen, onClose }) => {
 
             {/* Content */}
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-start space-x-2">
-                <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-blue-800">
+              <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-3 flex items-start space-x-2">
+                <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-blue-800 dark:text-blue-300">
                   Help us improve OptiProfit by reporting any issues you encounter. We'll review your report and work on a fix.
                 </p>
               </div>
 
               <div>
-                <label htmlFor="bug-title" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="bug-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Bug Title <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -119,13 +119,13 @@ const BugReportModal: React.FC<BugReportModalProps> = ({ isOpen, onClose }) => {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Brief description of the issue"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-shadow text-gray-900 placeholder:text-gray-400"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-shadow bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
                   disabled={isSubmitting}
                 />
               </div>
 
               <div>
-                <label htmlFor="bug-description" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="bug-description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Description <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -134,7 +134,7 @@ const BugReportModal: React.FC<BugReportModalProps> = ({ isOpen, onClose }) => {
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Please describe what happened, what you expected, and steps to reproduce..."
                   rows={5}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-shadow resize-none text-gray-900 placeholder:text-gray-400"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-shadow resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
                   disabled={isSubmitting}
                 />
               </div>
@@ -144,7 +144,7 @@ const BugReportModal: React.FC<BugReportModalProps> = ({ isOpen, onClose }) => {
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
                   disabled={isSubmitting}
                 >
                   Cancel

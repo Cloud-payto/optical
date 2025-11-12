@@ -31,26 +31,26 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   const variantConfig = {
     danger: {
       Icon: AlertTriangle,
-      icon: 'text-red-600',
-      iconBg: 'bg-red-100',
+      icon: 'text-red-600 dark:text-red-400',
+      iconBg: 'bg-red-100 dark:bg-red-900/30',
       button: 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
     },
     warning: {
       Icon: AlertTriangle,
-      icon: 'text-yellow-600',
-      iconBg: 'bg-yellow-100',
+      icon: 'text-yellow-600 dark:text-yellow-400',
+      iconBg: 'bg-yellow-100 dark:bg-yellow-900/30',
       button: 'bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500'
     },
     info: {
       Icon: Info,
-      icon: 'text-blue-600',
-      iconBg: 'bg-blue-100',
+      icon: 'text-blue-600 dark:text-blue-400',
+      iconBg: 'bg-blue-100 dark:bg-blue-900/30',
       button: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
     },
     success: {
       Icon: CheckCircle,
-      icon: 'text-green-600',
-      iconBg: 'bg-green-100',
+      icon: 'text-green-600 dark:text-green-400',
+      iconBg: 'bg-green-100 dark:bg-green-900/30',
       button: 'bg-green-600 hover:bg-green-700 focus:ring-green-500'
     }
   };
@@ -79,7 +79,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden"
+              className="bg-white dark:bg-[#1F2623] rounded-2xl shadow-xl max-w-md w-full overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
@@ -88,12 +88,12 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                   <IconComponent className={`h-6 w-6 ${config.icon}`} />
                 </div>
                 <div className="ml-4 flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                     {title}
                   </h3>
                   <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute top-4 right-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                   >
                     <X className="h-5 w-5" />
                   </button>
@@ -102,18 +102,18 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
               {/* Content */}
               <div className="px-6 pb-6">
-                <p className="text-sm text-gray-600 ml-16">
+                <p className="text-sm text-gray-600 dark:text-gray-300 ml-16">
                   {message}
                 </p>
               </div>
 
               {/* Actions */}
-              <div className="bg-gray-50 px-6 py-4 flex justify-end space-x-3">
+              <div className="bg-gray-50 dark:bg-gray-700/50 px-6 py-4 flex justify-end space-x-3">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={onClose}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
                 >
                   {cancelText}
                 </motion.button>

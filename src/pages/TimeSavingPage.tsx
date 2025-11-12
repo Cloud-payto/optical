@@ -36,7 +36,7 @@ const TimeSavingPage: React.FC = () => {
   ];
 
   return (
-    <div className="h-full bg-gray-50">
+    <div className="h-full bg-gray-50 dark:bg-[#1F2623]">
       <div className="p-6 md:p-8">
         <Container>
           {/* Header */}
@@ -46,11 +46,11 @@ const TimeSavingPage: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-8"
           >
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
               Time-Saving Automation
             </h1>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              OptiProfit automates the tedious, time-consuming tasks that slow down your optical business, 
+            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+              OptiProfit automates the tedious, time-consuming tasks that slow down your optical business,
               allowing you to focus on what matters most - serving your customers and growing your practice.
             </p>
           </motion.div>
@@ -60,32 +60,32 @@ const TimeSavingPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg p-8 mb-12 text-center"
+            className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg p-8 mb-12 text-center"
           >
             <div className="flex justify-center mb-6">
-              <div className="bg-blue-600 rounded-full p-4">
+              <div className="bg-blue-600 dark:bg-blue-500 rounded-full p-4">
                 <Clock className="w-12 h-12 text-white" />
               </div>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
               Save Hours Every Week
             </h2>
-            <p className="text-gray-700 mb-6 max-w-2xl mx-auto">
-              Our users report saving an average of <strong>8-12 hours per week</strong> on administrative 
+            <p className="text-gray-700 dark:text-gray-300 mb-6 max-w-2xl mx-auto">
+              Our users report saving an average of <strong>8-12 hours per week</strong> on administrative
               tasks, giving them more time to focus on patient care and business growth.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
               <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600">8-12</div>
-                <div className="text-sm text-gray-600">Hours saved per week</div>
+                <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">8-12</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Hours saved per week</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600">90%</div>
-                <div className="text-sm text-gray-600">Faster calculations</div>
+                <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">90%</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Faster calculations</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600">100%</div>
-                <div className="text-sm text-gray-600">Accuracy guaranteed</div>
+                <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">100%</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Accuracy guaranteed</div>
               </div>
             </div>
           </motion.div>
@@ -97,7 +97,7 @@ const TimeSavingPage: React.FC = () => {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="mb-8"
           >
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
               Key Time-Saving Features
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -107,21 +107,21 @@ const TimeSavingPage: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.1 * index }}
-                  className="bg-white rounded-lg p-6 shadow-sm border border-gray-200"
+                  className="bg-white dark:bg-[#1F2623] rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700"
                 >
-                  <div className="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-lg mb-4 mx-auto">
-                    <div className="text-blue-600">
+                  <div className="flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900/50 rounded-lg mb-4 mx-auto">
+                    <div className="text-blue-600 dark:text-blue-400">
                       {feature.icon}
                     </div>
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3 text-center">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 text-center">
                     {feature.title}
                   </h3>
-                  <p className="text-gray-600 mb-4 text-center">
+                  <p className="text-gray-600 dark:text-gray-400 mb-4 text-center">
                     {feature.description}
                   </p>
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
-                    <p className="text-sm font-medium text-green-800">
+                  <div className="bg-green-50 dark:bg-green-900/50 border border-green-200 dark:border-green-700 rounded-lg p-3 text-center">
+                    <p className="text-sm font-medium text-green-800 dark:text-green-200">
                       ⏰ Saves: {feature.timeSaved}
                     </p>
                   </div>
@@ -135,16 +135,16 @@ const TimeSavingPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
-            className="bg-white rounded-lg p-8 mb-8 shadow-sm border border-gray-200"
+            className="bg-white dark:bg-[#1F2623] rounded-lg p-8 mb-8 shadow-sm border border-gray-200 dark:border-gray-700"
           >
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
               What Gets Automated
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {automatedTasks.map((task, index) => (
                 <div key={index} className="flex items-center space-x-3">
-                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-                  <span className="text-gray-700">{task}</span>
+                  <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+                  <span className="text-gray-700 dark:text-gray-300">{task}</span>
                 </div>
               ))}
             </div>
@@ -155,26 +155,26 @@ const TimeSavingPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.8 }}
-            className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-8 text-center"
+            className="bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 rounded-lg p-8 text-center"
           >
             <h2 className="text-2xl font-bold text-white mb-4">
               Ready to Save Time and Increase Efficiency?
             </h2>
-            <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
-              Join the optical professionals who are already saving hours every week with OptiProfit's 
+            <p className="text-blue-100 dark:text-blue-200 mb-6 max-w-2xl mx-auto">
+              Join the optical professionals who are already saving hours every week with OptiProfit's
               automated solutions.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/calculator"
-                className="inline-flex items-center px-6 py-3 bg-white text-blue-600 font-medium rounded-lg hover:bg-gray-100 transition-colors"
+                className="inline-flex items-center px-6 py-3 bg-white text-blue-600 font-medium rounded-lg hover:bg-gray-100 dark:hover:bg-gray-200 transition-colors"
               >
                 Try the Calculator
                 <Calculator className="ml-2 w-5 h-5" />
               </Link>
               <Link
                 to="/dashboard"
-                className="inline-flex items-center px-6 py-3 bg-transparent border-2 border-white text-white font-medium rounded-lg hover:bg-white hover:text-blue-600 transition-colors"
+                className="inline-flex items-center px-6 py-3 bg-transparent border-2 border-white text-white font-medium rounded-lg hover:bg-white hover:text-blue-600 dark:hover:bg-gray-100 transition-colors"
               >
                 View Dashboard
                 <ArrowRight className="ml-2 w-5 h-5" />

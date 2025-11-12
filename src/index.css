@@ -32,13 +32,13 @@
   }
   
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 156 11% 11%; /* #181F1C - New dark background */
     --foreground: 210 40% 98%;
     --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 222.2 47.4% 11.2%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    --card: 222.2 47.4% 11.2%;
+    --card: 156 10% 14%; /* #1F2623 - New dark card background */
     --card-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
@@ -47,11 +47,11 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
     --ring: 217.2 91.2% 59.8%;
-    --sidebar: 222.2 47.4% 11.2%;
+    --sidebar: 156 10% 14%; /* #1F2623 - Match card background */
     --sidebar-foreground: 210 40% 98%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
-    --popover: 222.2 47.4% 11.2%;
+    --popover: 156 10% 14%; /* #1F2623 - Match card background */
     --popover-foreground: 210 40% 98%;
     --radius: 0.5rem;
   }
@@ -74,7 +74,7 @@
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-100 dark:bg-gray-900;
+  @apply bg-gray-100 dark:bg-[#181F1C];
 }
 
 ::-webkit-scrollbar-thumb {

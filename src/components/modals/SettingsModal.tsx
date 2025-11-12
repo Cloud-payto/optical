@@ -34,7 +34,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="relative w-full max-w-md rounded-lg bg-white dark:bg-gray-900 shadow-xl border border-gray-200 dark:border-gray-700"
+            className="relative w-full max-w-md rounded-lg bg-white dark:bg-[#1F2623] shadow-xl border border-gray-200 dark:border-gray-700"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-200 dark:border-gray-700">

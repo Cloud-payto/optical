@@ -68,7 +68,7 @@ export function InventoryTable({ items, onArchive, onRestore, onDelete, onMarkAs
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-500">Loading inventory...</p>
+          <p className="text-gray-500 dark:text-gray-400">Loading inventory...</p>
         </div>
       </div>
     );
@@ -77,15 +77,15 @@ export function InventoryTable({ items, onArchive, onRestore, onDelete, onMarkAs
   if (!items || items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <Package className="h-12 w-12 text-gray-400 mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No inventory items found</h3>
-        <p className="text-gray-500">Inventory will appear here when orders are confirmed</p>
+        <Package className="h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No inventory items found</h3>
+        <p className="text-gray-500 dark:text-gray-400">Inventory will appear here when orders are confirmed</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <div className="bg-white dark:bg-[#1F2623] rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>
@@ -107,15 +107,15 @@ export function InventoryTable({ items, onArchive, onRestore, onDelete, onMarkAs
             return (
               <React.Fragment key={vendorName}>
                 {/* Vendor Header Row */}
-                <TableRow className="bg-gray-50 hover:bg-gray-100 cursor-pointer" onClick={() => toggleVendor(vendorName)}>
+                <TableRow className="bg-gray-50 dark:bg-[#181F1C]/50 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" onClick={() => toggleVendor(vendorName)}>
                   <TableCell>
                     {isVendorExpanded ? (
-                      <ChevronDown className="h-4 w-4 text-gray-500" />
+                      <ChevronDown className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                     ) : (
-                      <ChevronRight className="h-4 w-4 text-gray-500" />
+                      <ChevronRight className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                     )}
                   </TableCell>
-                  <TableCell colSpan={7} className="font-semibold">
+                  <TableCell colSpan={7} className="font-semibold dark:text-white">
                     <div className="flex items-center gap-2">
                       <Package className="h-5 w-5 text-blue-500" />
                       {vendorName}
@@ -132,15 +132,15 @@ export function InventoryTable({ items, onArchive, onRestore, onDelete, onMarkAs
                   return (
                     <React.Fragment key={brandKey}>
                       {/* Brand Header Row */}
-                      <TableRow className="bg-gray-25 hover:bg-gray-50 cursor-pointer" onClick={() => toggleBrand(brandKey)}>
+                      <TableRow className="bg-gray-25 dark:bg-[#1F2623]/50 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer" onClick={() => toggleBrand(brandKey)}>
                         <TableCell className="pl-8">
                           {isBrandExpanded ? (
-                            <ChevronDown className="h-4 w-4 text-gray-500" />
+                            <ChevronDown className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                           ) : (
-                            <ChevronRight className="h-4 w-4 text-gray-500" />
+                            <ChevronRight className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                           )}
                         </TableCell>
-                        <TableCell colSpan={7} className="font-medium text-gray-700">
+                        <TableCell colSpan={7} className="font-medium text-gray-700 dark:text-gray-300">
                           {brandName}
                           <Badge variant="outline" className="ml-2">{brandItems.length} items</Badge>
                         </TableCell>
@@ -148,28 +148,28 @@ export function InventoryTable({ items, onArchive, onRestore, onDelete, onMarkAs
 
                       {/* Item Rows (if brand expanded) */}
                       {isBrandExpanded && brandItems.map((item) => (
-                        <TableRow key={item.id} className="hover:bg-gray-50">
+                        <TableRow key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30">
                           <TableCell className="pl-12"></TableCell>
-                          <TableCell className="font-mono text-xs">{item.sku}</TableCell>
+                          <TableCell className="font-mono text-xs dark:text-gray-300">{item.sku}</TableCell>
                           <TableCell>
                             <div>
-                              <div className="font-medium">{item.brand}</div>
-                              <div className="text-sm text-gray-500">{item.model}</div>
+                              <div className="font-medium dark:text-white">{item.brand}</div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400">{item.model}</div>
                             </div>
                           </TableCell>
-                          <TableCell>{item.color || 'N/A'}</TableCell>
-                          <TableCell>{item.size || 'N/A'}</TableCell>
+                          <TableCell className="dark:text-gray-300">{item.color || 'N/A'}</TableCell>
+                          <TableCell className="dark:text-gray-300">{item.size || 'N/A'}</TableCell>
                           <TableCell>
                             <Badge variant="secondary">{item.quantity}</Badge>
                           </TableCell>
                           <TableCell>
                             {item.wholesale_price ? (
-                              <div className="flex items-center gap-1 text-green-600 font-semibold">
+                              <div className="flex items-center gap-1 text-green-600 dark:text-green-400 font-semibold">
                                 <DollarSign className="h-4 w-4" />
                                 {item.wholesale_price.toFixed(2)}
                               </div>
                             ) : (
-                              <span className="text-gray-400">N/A</span>
+                              <span className="text-gray-400 dark:text-gray-500">N/A</span>
                             )}
                           </TableCell>
                           <TableCell onClick={(e) => e.stopPropagation()}>

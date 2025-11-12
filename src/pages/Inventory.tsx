@@ -374,22 +374,22 @@ const Inventory: React.FC = () => {
           <div className="flex items-center space-x-3">
             <div className="flex-shrink-0">
               <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
             </div>
             <div className="flex-1">
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">
                 Order Confirmed! 🎉
               </p>
-              <p className="text-xs text-gray-600 mt-0.5">
+              <p className="text-xs text-gray-600 dark:text-gray-300 mt-0.5">
                 Order #{orderNumber} • {result.updatedCount} item{result.updatedCount !== 1 ? 's' : ''} added to inventory
               </p>
             </div>
             <button
               onClick={() => toast.dismiss(t.id)}
-              className="flex-shrink-0 text-gray-400 hover:text-gray-600"
+              className="flex-shrink-0 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-200"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -779,41 +779,41 @@ const Inventory: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-[#181F1C] flex items-center justify-center">
         <div className="text-center">
-          <RefreshCwIcon className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading inventory data...</p>
+          <RefreshCwIcon className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400 mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-300">Loading inventory data...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#181F1C]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
+
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Inventory Management</h1>
-          <p className="text-gray-600">Track pending orders and received inventory items</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Inventory Management</h1>
+          <p className="text-gray-600 dark:text-gray-300">Track pending orders and received inventory items</p>
         </div>
 
         {/* Forwarding Email Section */}
         {user && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-medium text-gray-700">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-200">
                 📧 Forward Vendor Emails Here
               </h3>
               <button
                 onClick={copyToClipboard}
-                className="inline-flex items-center gap-1 px-3 py-1.5 border border-blue-200 rounded-md text-sm font-medium text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                className="inline-flex items-center gap-1 px-3 py-1.5 border border-blue-200 dark:border-blue-700 rounded-md text-sm font-medium text-blue-700 dark:text-blue-300 bg-white dark:bg-[#1F2623] hover:bg-blue-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                 title={copied ? 'Copied!' : 'Copy to clipboard'}
               >
                 {copied ? (
                   <>
-                    <Check size={16} className="text-green-600" />
-                    <span className="text-green-600">Copied!</span>
+                    <Check size={16} className="text-green-600 dark:text-green-400" />
+                    <span className="text-green-600 dark:text-green-400">Copied!</span>
                   </>
                 ) : (
                   <>
@@ -828,19 +828,19 @@ const Inventory: React.FC = () => {
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+          <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4">
             <div className="flex">
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">
+                <h3 className="text-sm font-medium text-red-800 dark:text-red-300">
                   Error loading data
                 </h3>
-                <div className="mt-2 text-sm text-red-700">
+                <div className="mt-2 text-sm text-red-700 dark:text-red-400">
                   <p>{error}</p>
                 </div>
                 <div className="mt-4">
                   <button
                     onClick={loadData}
-                    className="bg-red-100 px-3 py-1 rounded-md text-sm font-medium text-red-800 hover:bg-red-200"
+                    className="bg-red-100 dark:bg-red-900/40 px-3 py-1 rounded-md text-sm font-medium text-red-800 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/60"
                   >
                     Retry
                   </button>
@@ -854,19 +854,19 @@ const Inventory: React.FC = () => {
         <div className="mb-6 flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="relative flex-1 max-w-md">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <SearchIcon className="h-5 w-5 text-gray-400" />
+              <SearchIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
             </div>
             <input
               type="text"
               placeholder="Search emails or inventory..."
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-[#1F2623] text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <button
             onClick={loadData}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-[#1F2623] hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             <RefreshCwIcon className="h-4 w-4 mr-2" />
             Refresh
@@ -875,13 +875,13 @@ const Inventory: React.FC = () => {
 
         {/* Main Tabs */}
         <div className="mb-6">
-          <nav className="flex space-x-8 border-b border-gray-200">
+          <nav className="flex space-x-8 border-b border-gray-200 dark:border-gray-700">
             <button
               onClick={() => setActiveTab('orders')}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'orders'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
               }`}
             >
               <MailIcon className="h-5 w-5 inline mr-2" />
@@ -891,8 +891,8 @@ const Inventory: React.FC = () => {
               onClick={() => setActiveTab('inventory')}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'inventory'
-                  ? 'border-green-500 text-green-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-green-500 text-green-600 dark:text-green-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
               }`}
             >
               <PackageIcon className="h-5 w-5 inline mr-2" />
@@ -902,8 +902,8 @@ const Inventory: React.FC = () => {
               onClick={() => setActiveTab('archive')}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 activeTab === 'archive'
-                  ? 'border-gray-500 text-gray-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-gray-500 text-gray-600 dark:text-gray-300'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
               }`}
             >
               <ArchiveIcon className="h-5 w-5 inline mr-2" />
@@ -913,13 +913,13 @@ const Inventory: React.FC = () => {
         </div>
 
         {/* Content */}
-        <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="bg-white dark:bg-[#1F2623] shadow dark:shadow-gray-900/50 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
 
           {/* ORDERS TAB */}
           {activeTab === 'orders' && (
             <div>
               {/* Orders Sub-tabs */}
-              <div className="border-b border-gray-200 bg-gray-50 px-6">
+              <div className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#1F2623]/50 px-6">
                 <nav className="flex space-x-8">
                   <button
                     data-demo="pending-tab"
@@ -930,8 +930,8 @@ const Inventory: React.FC = () => {
                     }}
                     className={`py-3 px-1 border-b-2 font-medium text-sm ${
                       ordersSubTab === 'pending'
-                        ? 'border-orange-500 text-orange-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                        ? 'border-orange-500 text-orange-600 dark:text-orange-400'
+                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                     }`}
                   >
                     Pending ({filteredEmails.length})
@@ -940,8 +940,8 @@ const Inventory: React.FC = () => {
                     onClick={() => setOrdersSubTab('confirmed')}
                     className={`py-3 px-1 border-b-2 font-medium text-sm ${
                       ordersSubTab === 'confirmed'
-                        ? 'border-green-500 text-green-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                        ? 'border-green-500 text-green-600 dark:text-green-400'
+                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                     }`}
                   >
                     Confirmed ({orders.filter(o => o.status === 'confirmed' && !o.metadata?.archived).length})
@@ -954,38 +954,38 @@ const Inventory: React.FC = () => {
             <div>
               {pendingOrdersList.length === 0 ? (
                 <div className="text-center py-12">
-                  <MailIcon className="mx-auto h-12 w-12 text-gray-400" />
-                  <h3 className="mt-2 text-sm font-medium text-gray-900">No pending orders</h3>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <MailIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No pending orders</h3>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                     {searchTerm ? 'No orders match your search.' : 'No pending orders yet.'}
                   </p>
                 </div>
               ) : (
                 <div>
-                  <table className="w-full divide-y divide-gray-200 table-fixed">
-                    <thead className="bg-gray-50">
+                  <table className="w-full divide-y divide-gray-200 dark:divide-gray-700 table-fixed">
+                    <thead className="bg-gray-50 dark:bg-[#1F2623]/50">
                       <tr>
-                        <th className="w-[12%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="w-[12%] px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                           Vendor
                         </th>
-                        <th className="w-[25%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="w-[25%] px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                           Order Details
                         </th>
-                        <th className="w-[10%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="w-[10%] px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                           Items
                         </th>
-                        <th className="w-[13%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="w-[13%] px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                           Email Received
                         </th>
-                        <th className="w-[10%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="w-[10%] px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                           Status
                         </th>
-                        <th className="w-[15%] px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th className="w-[15%] px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                           Actions
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white dark:bg-[#1F2623] divide-y divide-gray-200 dark:divide-gray-700">
                       <AnimatePresence mode="popLayout">
                         {filteredEmails.map((email, index) => {
                           const isParsed = (email.spam_status === 'parsed' || email.spam_status === 'n8n') && email.parsed_data;
@@ -1005,38 +1005,38 @@ const Inventory: React.FC = () => {
                               animate={{ opacity: 1, x: 0 }}
                               exit={{ opacity: 0, x: 20, height: 0 }}
                               transition={{ duration: 0.3, delay: index * 0.05 }}
-                              className="hover:bg-gray-50"
+                              className="hover:bg-gray-50 dark:bg-[#1F2623]/50 dark:hover:bg-gray-700/50"
                               data-demo={isDemo && index === 0 ? "email-row" : undefined}
                             >
-                            <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                            <td className="px-4 py-4 text-sm font-medium text-gray-900 dark:text-white dark:text-white">
                               <div className="flex flex-col">
                                 <div className="flex items-center gap-1 flex-wrap">
                                   <span className="truncate">{vendorName}</span>
                                   {isParsed && (
-                                    <span className="inline-flex px-1.5 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800 shrink-0">
+                                    <span className="inline-flex px-1.5 py-0.5 text-xs font-medium rounded-full bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 shrink-0">
                                       Parsed
                                     </span>
                                   )}
                                 </div>
                                 {isParsed && brands.length > 0 && (
-                                  <div className="text-xs text-gray-500 mt-1 truncate" title={`Brands: ${brands.join(', ')}`}>
+                                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate" title={`Brands: ${brands.join(', ')}`}>
                                     {brands.slice(0, 2).join(', ')}{brands.length > 2 ? ` +${brands.length - 2}` : ''}
                                   </div>
                                 )}
                               </div>
                             </td>
-                            <td className="px-4 py-4 text-sm text-gray-500">
+                            <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
                               {isParsed ? (
                                 <div className="space-y-0.5">
-                                  <div className="font-medium text-gray-900">Order #{email.parsed_data!.order.order_number}</div>
-                                  <div className="text-xs text-gray-600 truncate" title={email.parsed_data!.order.customer_name}>
+                                  <div className="font-medium text-gray-900 dark:text-white">Order #{email.parsed_data!.order.order_number}</div>
+                                  <div className="text-xs text-gray-600 dark:text-gray-300 truncate" title={email.parsed_data!.order.customer_name}>
                                     {email.parsed_data!.order.customer_name}
                                   </div>
-                                  <div className="text-xs text-gray-500">
+                                  <div className="text-xs text-gray-500 dark:text-gray-400">
                                     Acct: {email.parsed_data!.account_number}
                                   </div>
                                   {email.parsed_data!.order.order_date && (
-                                    <div className="text-xs text-gray-500">
+                                    <div className="text-xs text-gray-500 dark:text-gray-400">
                                       {formatDateOnly(email.parsed_data!.order.order_date)}
                                     </div>
                                   )}
@@ -1045,19 +1045,19 @@ const Inventory: React.FC = () => {
                                 <div className="truncate" title={email.subject}>{email.subject}</div>
                               )}
                             </td>
-                            <td className="px-4 py-4 text-sm text-gray-500">
+                            <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
                               {isParsed ? (
                                 <div>
-                                  <div className="font-medium text-gray-900">{email.parsed_data!.items.length} items</div>
-                                  <div className="text-xs text-gray-500 mt-0.5">
+                                  <div className="font-medium text-gray-900 dark:text-white">{email.parsed_data!.items.length} items</div>
+                                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                                     {email.parsed_data!.order.total_pieces} pcs
                                   </div>
                                 </div>
                               ) : (
-                                <span className="text-gray-400">Not parsed</span>
+                                <span className="text-gray-400 dark:text-gray-500">Not parsed</span>
                               )}
                             </td>
-                            <td className="px-4 py-4 text-sm text-gray-500">
+                            <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
                               <div className="text-xs">
                                 {formatDate(email.received_at)}
                               </div>
@@ -1065,13 +1065,13 @@ const Inventory: React.FC = () => {
                             <td className="px-4 py-4">
                               <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${
                                 isParsed
-                                  ? 'bg-green-100 text-green-800'
+                                  ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
                                   : 'bg-yellow-100 text-yellow-800'
                               }`}>
                                 {isParsed ? 'Parsed' : 'Pending'}
                               </span>
                             </td>
-                            <td className="px-4 py-4 text-sm text-gray-500">
+                            <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
                               <div className="flex flex-col space-y-2">
                                 <button
                                   onClick={() => handleViewOrderDetails(email)}
@@ -1086,7 +1086,7 @@ const Inventory: React.FC = () => {
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => handleConfirmOrder(email.parsed_data!.order.order_number)}
                                     disabled={confirmingOrders.has(email.parsed_data!.order.order_number)}
-                                    className="inline-flex items-center justify-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="inline-flex items-center justify-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 dark:bg-green-700 hover:bg-green-700 dark:hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                   >
                                     {confirmingOrders.has(email.parsed_data!.order.order_number) ? (
                                       <span className="flex items-center">
@@ -1138,9 +1138,9 @@ const Inventory: React.FC = () => {
             <div className="p-6">
               {orders.filter(order => order.status === 'confirmed' && !order.metadata?.archived).length === 0 ? (
                 <div className="text-center py-12">
-                  <CheckIcon className="mx-auto h-12 w-12 text-gray-400" />
-                  <h3 className="mt-2 text-sm font-medium text-gray-900">No confirmed orders</h3>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <CheckIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white dark:text-white">No confirmed orders</h3>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                     Confirmed orders will appear here after you confirm pending inventory
                   </p>
                 </div>
@@ -1164,7 +1164,7 @@ const Inventory: React.FC = () => {
                         key={order.id}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+                        className="bg-white dark:bg-[#1F2623] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow"
                       >
                         <div className="px-6 py-4">
                           <div className="flex items-center justify-between">
@@ -1182,7 +1182,7 @@ const Inventory: React.FC = () => {
                                     return newSet;
                                   });
                                 }}
-                                className="flex-shrink-0 p-1 hover:bg-gray-100 rounded-md transition-colors"
+                                className="flex-shrink-0 p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
                               >
                                 {isExpanded ? (
                                   <ChevronDownIcon className="h-5 w-5 text-gray-500" />
@@ -1192,30 +1192,30 @@ const Inventory: React.FC = () => {
                               </button>
 
                               <div className="flex-1">
-                                <h3 className="text-lg font-semibold text-gray-900">Order #{order.order_number}</h3>
-                                <p className="text-sm text-gray-600 mt-1">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Order #{order.order_number}</h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                                   {order.vendor} • {order.customer_name || 'Unknown Customer'}
                                 </p>
                                 {order.account_number && (
-                                  <p className="text-sm text-gray-500">Account: {order.account_number}</p>
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">Account: {order.account_number}</p>
                                 )}
                               </div>
                             </div>
                             <div className="text-right">
                               <div className="flex items-center space-x-4">
                                 <div>
-                                  <p className="text-sm font-medium text-gray-900">{order.items?.length || order.total_items || 0} items</p>
-                                  <p className="text-xs text-gray-500">
+                                  <p className="text-sm font-medium text-gray-900 dark:text-white dark:text-white">{order.items?.length || order.total_items || 0} items</p>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">
                                     {formatDateOnly(order.order_date)}
                                   </p>
                                 </div>
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
                                   Confirmed
                                 </span>
                                 <button
                                   onClick={() => handleArchiveOrder(order.id)}
                                   disabled={archivingOrders.has(order.id)}
-                                  className="inline-flex items-center px-3 py-1 border border-orange-300 text-sm font-medium rounded-md text-orange-700 bg-white hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  className="inline-flex items-center px-3 py-1 border border-orange-300 dark:border-orange-700 text-sm font-medium rounded-md text-orange-700 dark:text-orange-300 bg-white dark:bg-[#1F2623] hover:bg-orange-50 dark:hover:bg-orange-900/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                   {archivingOrders.has(order.id) ? (
                                     <>
@@ -1243,20 +1243,20 @@ const Inventory: React.FC = () => {
                                 transition={{ duration: 0.2 }}
                                 className="overflow-hidden"
                               >
-                                <div className="mt-4 pt-4 border-t border-gray-200">
+                                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                                     <div>
-                                      <span className="font-medium text-gray-600">Rep:</span>
+                                      <span className="font-medium text-gray-600 dark:text-gray-300">Rep:</span>
                                       <span className="ml-2 text-gray-900">{order.placed_by || 'Not specified'}</span>
                                     </div>
                                     <div>
-                                      <span className="font-medium text-gray-600">Order Date:</span>
+                                      <span className="font-medium text-gray-600 dark:text-gray-300">Order Date:</span>
                                       <span className="ml-2 text-gray-900" title={`Raw: ${order.order_date}`}>
                                         {formatDateOnly(order.order_date)}
                                       </span>
                                     </div>
                                     <div>
-                                      <span className="font-medium text-gray-600">Total Pieces:</span>
+                                      <span className="font-medium text-gray-600 dark:text-gray-300">Total Pieces:</span>
                                       <span className="ml-2 text-gray-900">{order.total_pieces || order.items?.length || 0}</span>
                                     </div>
                                   </div>
@@ -1264,7 +1264,7 @@ const Inventory: React.FC = () => {
                                   {/* Items List */}
                                   {order.items && order.items.length > 0 && (
                                     <div className="mt-4">
-                                      <h4 className="text-sm font-medium text-gray-900 mb-3">Frame Details:</h4>
+                                      <h4 className="text-sm font-medium text-gray-900 dark:text-white dark:text-white mb-3">Frame Details:</h4>
                                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                                         {order.items.map((item) => (
                                           <motion.div
@@ -1272,21 +1272,21 @@ const Inventory: React.FC = () => {
                                             initial={{ opacity: 0, scale: 0.95 }}
                                             animate={{ opacity: 1, scale: 1 }}
                                             transition={{ duration: 0.2 }}
-                                            className="text-xs bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg px-3 py-2 border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all"
+                                            className="text-xs bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-lg px-3 py-2 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-sm transition-all"
                                           >
                                             <div className="flex items-start justify-between mb-1">
-                                              <span className="font-semibold text-gray-900">{item.brand}</span>
+                                              <span className="font-semibold text-gray-900 dark:text-white">{item.brand}</span>
                                               {item.quantity > 1 && (
-                                                <span className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded text-xs font-medium">
+                                                <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-1.5 py-0.5 rounded text-xs font-medium">
                                                   x{item.quantity}
                                                 </span>
                                               )}
                                             </div>
-                                            <div className="space-y-0.5 text-gray-700">
+                                            <div className="space-y-0.5 text-gray-700 dark:text-gray-200">
                                               <div className="font-medium">{item.model}</div>
                                               <div>{item.color}</div>
                                               <div className="flex items-center justify-between pt-1">
-                                                <span className="text-gray-600">Size {item.size}</span>
+                                                <span className="text-gray-600 dark:text-gray-300">Size {item.size}</span>
                                                 {item.upc && (
                                                   <span className="text-gray-500 text-[10px]">UPC: {item.upc.slice(-6)}</span>
                                                 )}
@@ -1314,7 +1314,7 @@ const Inventory: React.FC = () => {
           {activeTab === 'inventory' && (
             <div>
               {/* Inventory Sub-tabs */}
-              <div className="border-b border-gray-200 bg-gray-50 px-6">
+              <div className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#1F2623]/50 px-6">
                 <nav className="flex space-x-8">
                   <button
                     data-demo="inventory-pending-tab"
@@ -1322,8 +1322,8 @@ const Inventory: React.FC = () => {
                     onClick={() => setInventorySubTab('pending')}
                     className={`py-3 px-1 border-b-2 font-medium text-sm ${
                       inventorySubTab === 'pending'
-                        ? 'border-orange-500 text-orange-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                        ? 'border-orange-500 text-orange-600 dark:text-orange-400'
+                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                     }`}
                   >
                     Pending ({pendingInventory.length})
@@ -1337,8 +1337,8 @@ const Inventory: React.FC = () => {
                     }}
                     className={`py-3 px-1 border-b-2 font-medium text-sm ${
                       inventorySubTab === 'current'
-                        ? 'border-green-500 text-green-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                        ? 'border-green-500 text-green-600 dark:text-green-400'
+                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                     }`}
                   >
                     Current ({currentInventory.length})
@@ -1347,8 +1347,8 @@ const Inventory: React.FC = () => {
                     onClick={() => setInventorySubTab('sold')}
                     className={`py-3 px-1 border-b-2 font-medium text-sm ${
                       inventorySubTab === 'sold'
-                        ? 'border-purple-500 text-purple-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                        ? 'border-purple-500 text-purple-600 dark:text-purple-400'
+                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                     }`}
                   >
                     Sold ({soldInventory.length})
@@ -1361,17 +1361,17 @@ const Inventory: React.FC = () => {
             <div>
               {pendingInventory.length === 0 ? (
                 <div className="text-center py-12">
-                  <PackageIcon className="mx-auto h-12 w-12 text-gray-400" />
-                  <h3 className="mt-2 text-sm font-medium text-gray-900">No pending inventory items</h3>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <PackageIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white dark:text-white">No pending inventory items</h3>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                     {searchTerm ? 'No pending items match your search.' : 'No pending inventory items yet.'}
                   </p>
                 </div>
               ) : Object.entries(groupedPendingOrders).length === 0 ? (
                 <div className="text-center py-12">
-                  <PackageIcon className="mx-auto h-12 w-12 text-gray-400" />
-                  <h3 className="mt-2 text-sm font-medium text-gray-900">Pending items found but cannot be displayed</h3>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <PackageIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white dark:text-white">Pending items found but cannot be displayed</h3>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                     {pendingInventory.length} pending item{pendingInventory.length !== 1 ? 's' : ''} exist but cannot be grouped by order.
                     This usually means the items are missing vendor or order information.
                   </p>
@@ -1393,24 +1393,24 @@ const Inventory: React.FC = () => {
                     const isOrderExpanded = expandedOrders.has(orderKey);
                     
                     return (
-                      <div key={orderKey} className="bg-white rounded-lg border border-gray-200 shadow-sm">
+                      <div key={orderKey} className="bg-white dark:bg-[#1F2623] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                         {/* Order Header */}
                         <div 
-                          className="px-6 py-4 cursor-pointer hover:bg-gray-50 transition-colors duration-150"
+                          className="px-6 py-4 cursor-pointer hover:bg-gray-50 dark:bg-[#1F2623]/50 transition-colors duration-150"
                           onClick={() => toggleOrderExpansion(orderKey)}
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-3">
                               {isOrderExpanded ? (
-                                <ChevronDownIcon className="h-5 w-5 text-gray-400 transition-transform duration-150" />
+                                <ChevronDownIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 transition-transform duration-150" />
                               ) : (
-                                <ChevronRightIcon className="h-5 w-5 text-gray-400 transition-transform duration-150" />
+                                <ChevronRightIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 transition-transform duration-150" />
                               )}
                               <div>
-                                <h2 className="text-lg font-semibold text-gray-900">
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                                   {order.vendor} - Order #{order.orderNumber}
                                 </h2>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-gray-500 dark:text-gray-400">
                                   {order.items.length} item{order.items.length !== 1 ? 's' : ''} pending confirmation
                                   {order.accountNumber && ` • Account #${order.accountNumber}`}
                                   {order.orderDate && ` • ${formatOrderDate(order.orderDate)}`}
@@ -1429,7 +1429,7 @@ const Inventory: React.FC = () => {
                                   handleOrderConfirmation(orderKey);
                                   if (isDemo) notifyUserAction('click');
                                 }}
-                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                               >
                                 Confirm Order
                               </button>
@@ -1439,7 +1439,7 @@ const Inventory: React.FC = () => {
 
                         {/* Order Items (shown when expanded) */}
                         {isOrderExpanded && (
-                          <div className="border-t border-gray-200 bg-gray-50">
+                          <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#1F2623]/50">
                             <div className="divide-y divide-gray-200">
                               {order.items.map((item) => {
                                 const isItemExpanded = expandedItems.has(item.id);
@@ -1456,9 +1456,9 @@ const Inventory: React.FC = () => {
                                 const frameName = model || fullName;
                                 
                                 return (
-                                  <div key={item.id} className="relative bg-white">
+                                  <div key={item.id} className="relative bg-white dark:bg-[#1F2623]">
                                     {/* Item Header */}
-                                    <div className="px-6 py-4 hover:bg-gray-50 transition-colors duration-150">
+                                    <div className="px-6 py-4 hover:bg-gray-50 dark:bg-[#1F2623]/50 transition-colors duration-150">
                                       <div className="flex items-center justify-between">
                                         <div className="flex items-center space-x-4 flex-1">
                                           {/* Selection Checkbox */}
@@ -1474,21 +1474,21 @@ const Inventory: React.FC = () => {
                                           {/* Expand/Collapse Button */}
                                           <button
                                             onClick={() => toggleItemExpansion(item.id)}
-                                            className="flex-shrink-0 p-1 hover:bg-gray-100 rounded"
+                                            className="flex-shrink-0 p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
                                           >
                                             {isItemExpanded ? (
-                                              <ChevronDownIcon className="h-4 w-4 text-gray-400" />
+                                              <ChevronDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                                             ) : (
-                                              <ChevronRightIcon className="h-4 w-4 text-gray-400" />
+                                              <ChevronRightIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                                             )}
                                           </button>
                                           
                                           {/* Frame Info */}
                                           <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium text-gray-900 truncate">
+                                            <p className="text-sm font-medium text-gray-900 dark:text-white dark:text-white truncate">
                                               {frameName}
                                             </p>
-                                            <p className="text-xs text-gray-500">
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">
                                               {colorName} • {fullSize || `Size ${size}`} • Qty: {item.quantity}
                                             </p>
                                           </div>
@@ -1496,12 +1496,12 @@ const Inventory: React.FC = () => {
                                           {/* Pricing Info */}
                                           <div className="flex-shrink-0 text-right">
                                             {(item as any).wholesale_price && (
-                                              <p className="text-sm font-medium text-gray-900">
+                                              <p className="text-sm font-medium text-gray-900 dark:text-white dark:text-white">
                                                 ${(item as any).wholesale_price}
                                               </p>
                                             )}
                                             {(item as any).api_verified && (
-                                              <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                                              <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
                                                 ✓ Verified
                                               </span>
                                             )}
@@ -1527,39 +1527,39 @@ const Inventory: React.FC = () => {
                                     
                                     {/* Expanded Item Details (View Details layout) */}
                                     {isItemExpanded && (
-                                      <div className="px-6 pb-4 bg-gray-100 border-t border-gray-200">
+                                      <div className="px-6 pb-4 bg-gray-100 border-t border-gray-200 dark:border-gray-700">
                                         <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                                           {/* Order Information */}
-                                          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                                            <h4 className="text-sm font-medium text-gray-900 mb-3">Order Information</h4>
+                                          <div className="bg-white dark:bg-[#1F2623] rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+                                            <h4 className="text-sm font-medium text-gray-900 dark:text-white dark:text-white mb-3">Order Information</h4>
                                             <div className="space-y-2">
                                               <div className="flex justify-between">
-                                                <span className="text-sm text-gray-500">Order Date:</span>
+                                                <span className="text-sm text-gray-500 dark:text-gray-400">Order Date:</span>
                                                 <span className="text-sm text-gray-900">{formatOrderDate(item.order?.order_date)}</span>
                                               </div>
                                               <div className="flex justify-between">
-                                                <span className="text-sm text-gray-500">Vendor:</span>
+                                                <span className="text-sm text-gray-500 dark:text-gray-400">Vendor:</span>
                                                 <span className="text-sm text-gray-900">{item.vendor?.name}</span>
                                               </div>
                                               {orderNumber && (
                                                 <div className="flex justify-between">
-                                                  <span className="text-sm text-gray-500">Order #:</span>
+                                                  <span className="text-sm text-gray-500 dark:text-gray-400">Order #:</span>
                                                   <span className="text-sm text-gray-900">{orderNumber}</span>
                                                 </div>
                                               )}
                                               {accountNumber && (
                                                 <div className="flex justify-between">
-                                                  <span className="text-sm text-gray-500">Account #:</span>
+                                                  <span className="text-sm text-gray-500 dark:text-gray-400">Account #:</span>
                                                   <span className="text-sm text-gray-900">{accountNumber}</span>
                                                 </div>
                                               )}
                                               <div className="flex justify-between">
-                                                <span className="text-sm text-gray-500">UPC:</span>
+                                                <span className="text-sm text-gray-500 dark:text-gray-400">UPC:</span>
                                                 <span className="text-sm text-gray-900 font-mono text-xs">{(item as any).upc || 'N/A'}</span>
                                               </div>
                                               {(item as any).availability && (
                                                 <div className="flex justify-between">
-                                                  <span className="text-sm text-gray-500">Stock Status:</span>
+                                                  <span className="text-sm text-gray-500 dark:text-gray-400">Stock Status:</span>
                                                   <span className={`text-sm font-medium ${
                                                     (item as any).in_stock ? 'text-green-800' : 'text-red-800'
                                                   }`}>
@@ -1571,61 +1571,61 @@ const Inventory: React.FC = () => {
                                           </div>
                                           
                                           {/* Product Details */}
-                                          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                                            <h4 className="text-sm font-medium text-gray-900 mb-3">Product Details</h4>
+                                          <div className="bg-white dark:bg-[#1F2623] rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+                                            <h4 className="text-sm font-medium text-gray-900 dark:text-white dark:text-white mb-3">Product Details</h4>
                                             <div className="space-y-2">
                                               <div className="flex justify-between">
-                                                <span className="text-sm text-gray-500">Brand:</span>
+                                                <span className="text-sm text-gray-500 dark:text-gray-400">Brand:</span>
                                                 <span className="text-sm text-gray-900">{brand}</span>
                                               </div>
                                               <div className="flex justify-between">
-                                                <span className="text-sm text-gray-500">Model:</span>
+                                                <span className="text-sm text-gray-500 dark:text-gray-400">Model:</span>
                                                 <span className="text-sm text-gray-900">{model}</span>
                                               </div>
                                               <div className="flex justify-between">
-                                                <span className="text-sm text-gray-500">Color:</span>
+                                                <span className="text-sm text-gray-500 dark:text-gray-400">Color:</span>
                                                 <span className="text-sm text-gray-900">{colorName}</span>
                                               </div>
                                               <div className="flex justify-between">
-                                                <span className="text-sm text-gray-500">Size:</span>
+                                                <span className="text-sm text-gray-500 dark:text-gray-400">Size:</span>
                                                 <span className="text-sm text-gray-900">{fullSize || size}</span>
                                               </div>
                                             </div>
                                           </div>
                                           
                                           {/* Pricing & Details */}
-                                          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                                            <h4 className="text-sm font-medium text-gray-900 mb-3">Pricing & Details</h4>
+                                          <div className="bg-white dark:bg-[#1F2623] rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+                                            <h4 className="text-sm font-medium text-gray-900 dark:text-white dark:text-white mb-3">Pricing & Details</h4>
                                             <div className="space-y-2">
                                               <div className="flex justify-between">
-                                                <span className="text-sm text-gray-500">Wholesale Price:</span>
+                                                <span className="text-sm text-gray-500 dark:text-gray-400">Wholesale Price:</span>
                                                 <span className="text-sm text-gray-900">
                                                   {(item as any).wholesale_price ? `$${(item as any).wholesale_price}` : '$--'}
                                                 </span>
                                               </div>
                                               <div className="flex justify-between">
-                                                <span className="text-sm text-gray-500">MSRP:</span>
+                                                <span className="text-sm text-gray-500 dark:text-gray-400">MSRP:</span>
                                                 <span className="text-sm text-gray-900">
                                                   {(item as any).msrp ? `$${(item as any).msrp}` : '$--'}
                                                 </span>
                                               </div>
                                               {(item as any).api_verified && (
                                                 <div className="flex justify-between">
-                                                  <span className="text-sm text-gray-500">API Verified:</span>
-                                                  <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                                                  <span className="text-sm text-gray-500 dark:text-gray-400">API Verified:</span>
+                                                  <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
                                                     {(item as any).confidence_score}% confidence
                                                   </span>
                                                 </div>
                                               )}
                                               <div className="flex justify-between">
-                                                <span className="text-sm text-gray-500">Measurements:</span>
-                                                <span className="text-sm text-gray-500">
+                                                <span className="text-sm text-gray-500 dark:text-gray-400">Measurements:</span>
+                                                <span className="text-sm text-gray-500 dark:text-gray-400">
                                                   {(item as any).full_size || '--'}
                                                 </span>
                                               </div>
                                               <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                                                <span className="text-sm text-gray-500">Quantity:</span>
-                                                <span className="text-sm font-medium text-gray-900">{item.quantity}</span>
+                                                <span className="text-sm text-gray-500 dark:text-gray-400">Quantity:</span>
+                                                <span className="text-sm font-medium text-gray-900 dark:text-white dark:text-white">{item.quantity}</span>
                                               </div>
                                             </div>
                                           </div>
@@ -1651,17 +1651,17 @@ const Inventory: React.FC = () => {
             <div>
               {currentInventory.length === 0 ? (
                 <div className="text-center py-12">
-                  <PackageIcon className="mx-auto h-12 w-12 text-gray-400" />
-                  <h3 className="mt-2 text-sm font-medium text-gray-900">No current inventory items</h3>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <PackageIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white dark:text-white">No current inventory items</h3>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                     {searchTerm ? 'No current items match your search.' : 'No confirmed inventory items yet.'}
                   </p>
                 </div>
               ) : Object.entries(groupedCurrentInventory).length === 0 ? (
                 <div className="text-center py-12">
-                  <PackageIcon className="mx-auto h-12 w-12 text-gray-400" />
-                  <h3 className="mt-2 text-sm font-medium text-gray-900">Current items found but cannot be displayed</h3>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <PackageIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white dark:text-white">Current items found but cannot be displayed</h3>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                     {currentInventory.length} current item{currentInventory.length !== 1 ? 's' : ''} exist but cannot be grouped.
                     This usually means the items are missing vendor or brand information.
                   </p>
@@ -1689,28 +1689,28 @@ const Inventory: React.FC = () => {
                     const totalItemsInVendor = Object.values(brands).flat().length;
 
                     return (
-                      <div key={vendorName} className="bg-white rounded-lg border border-gray-200 shadow-sm">
+                      <div key={vendorName} className="bg-white dark:bg-[#1F2623] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                         {/* Vendor Header */}
                         <div 
-                          className="px-6 py-4 cursor-pointer hover:bg-gray-50 transition-colors duration-150"
+                          className="px-6 py-4 cursor-pointer hover:bg-gray-50 dark:bg-[#1F2623]/50 transition-colors duration-150"
                           onClick={() => toggleVendorExpansion(vendorName)}
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-3">
                               {isVendorExpanded ? (
-                                <ChevronDownIcon className="h-5 w-5 text-gray-400 transition-transform duration-150" />
+                                <ChevronDownIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 transition-transform duration-150" />
                               ) : (
-                                <ChevronRightIcon className="h-5 w-5 text-gray-400 transition-transform duration-150" />
+                                <ChevronRightIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 transition-transform duration-150" />
                               )}
                               <div>
-                                <h2 className="text-lg font-semibold text-gray-900">{vendorName}</h2>
-                                <p className="text-sm text-gray-500">
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{vendorName}</h2>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">
                                   {Object.keys(brands).length} brand{Object.keys(brands).length !== 1 ? 's' : ''} • {totalItemsInVendor} item{totalItemsInVendor !== 1 ? 's' : ''}
                                 </p>
                               </div>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
                                 {totalItemsInVendor} items
                               </span>
                             </div>
@@ -1719,7 +1719,7 @@ const Inventory: React.FC = () => {
 
                         {/* Brands (shown when vendor is expanded) */}
                         {isVendorExpanded && (
-                          <div className="border-t border-gray-200">
+                          <div className="border-t border-gray-200 dark:border-gray-700">
                             {Object.entries(brands).map(([brandName, items]) => {
                               const brandKey = `${vendorName}-${brandName}`;
                               const isBrandExpanded = expandedBrands.has(brandKey);
@@ -1730,21 +1730,21 @@ const Inventory: React.FC = () => {
                                   <div className="px-8 py-3 bg-gray-25 relative">
                                     <div className="flex items-center justify-between">
                                       <div 
-                                        className="flex items-center space-x-3 flex-1 cursor-pointer hover:bg-gray-50 transition-colors duration-150 p-2 -m-2 rounded"
+                                        className="flex items-center space-x-3 flex-1 cursor-pointer hover:bg-gray-50 dark:bg-[#1F2623]/50 transition-colors duration-150 p-2 -m-2 rounded"
                                         onClick={() => toggleBrandExpansion(brandKey)}
                                       >
                                         {isBrandExpanded ? (
-                                          <ChevronDownIcon className="h-4 w-4 text-gray-400 transition-transform duration-150" />
+                                          <ChevronDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 transition-transform duration-150" />
                                         ) : (
-                                          <ChevronRightIcon className="h-4 w-4 text-gray-400 transition-transform duration-150" />
+                                          <ChevronRightIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 transition-transform duration-150" />
                                         )}
                                         <div>
                                           <h3 className="text-base font-medium text-gray-800">{brandName}</h3>
-                                          <p className="text-sm text-gray-500">{items.length} item{items.length !== 1 ? 's' : ''}</p>
+                                          <p className="text-sm text-gray-500 dark:text-gray-400">{items.length} item{items.length !== 1 ? 's' : ''}</p>
                                         </div>
                                       </div>
                                       <div className="flex items-center space-x-2">
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:text-gray-200">
                                           {items.length}
                                         </span>
                                         <div className="relative">
@@ -1753,20 +1753,20 @@ const Inventory: React.FC = () => {
                                               e.stopPropagation();
                                               setOpenDropdown(openDropdown === brandKey ? null : brandKey);
                                             }}
-                                            className="p-1 hover:bg-gray-100 rounded-full transition-colors duration-150"
+                                            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors duration-150"
                                             title="More actions"
                                           >
                                             <MoreVerticalIcon className="h-4 w-4 text-gray-500" />
                                           </button>
                                           {openDropdown === brandKey && (
-                                            <div className="absolute right-0 top-8 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
+                                            <div className="absolute right-0 top-8 w-48 bg-white dark:bg-[#1F2623] rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
                                               <button
                                                 onClick={(e) => {
                                                   e.stopPropagation();
                                                   handleArchiveAllByBrand(brandName, vendorName);
                                                 }}
                                                 disabled={archivingBrands.has(brandKey)}
-                                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                                                className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:bg-[#1F2623]/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                                               >
                                                 {archivingBrands.has(brandKey) ? (
                                                   <>
@@ -1789,7 +1789,7 @@ const Inventory: React.FC = () => {
 
                                   {/* Items (shown when brand is expanded) */}
                                   {isBrandExpanded && (
-                                    <div className="bg-gray-50">
+                                    <div className="bg-gray-50 dark:bg-[#1F2623]/50">
                                       <div className="divide-y divide-gray-200">
                                         {items.map((item) => {
                                           const isExpanded = expandedItems.has(item.id);
@@ -1810,13 +1810,13 @@ const Inventory: React.FC = () => {
                                           return (
                                             <div
                                               key={item.id}
-                                              className="relative bg-white"
+                                              className="relative bg-white dark:bg-[#1F2623]"
                                               data-demo={isDemo && items.indexOf(item) === 0 && Object.keys(groupedCurrentInventory)[0] === vendorName && Object.keys(brands)[0] === brandName ? "inventory-row" : undefined}
                                               data-tour={isDemo && items.indexOf(item) === 0 && Object.keys(groupedCurrentInventory)[0] === vendorName && Object.keys(brands)[0] === brandName ? "inventory-row" : undefined}
                                             >
                                               {/* Collapsed Row */}
                                               <div
-                                                className="px-10 py-3 hover:bg-gray-50 cursor-pointer transition-colors duration-150"
+                                                className="px-10 py-3 hover:bg-gray-50 dark:bg-[#1F2623]/50 cursor-pointer transition-colors duration-150"
                                                 onClick={() => toggleItemExpansion(item.id)}
                                               >
                                                 <div className="flex items-center justify-between">
@@ -1825,32 +1825,32 @@ const Inventory: React.FC = () => {
                                                       {/* Expand/Collapse Icon */}
                                                       <div className="flex-shrink-0">
                                                         {isExpanded ? (
-                                                          <ChevronDownIcon className="h-4 w-4 text-gray-400 transition-transform duration-150" />
+                                                          <ChevronDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 transition-transform duration-150" />
                                                         ) : (
-                                                          <ChevronRightIcon className="h-4 w-4 text-gray-400 transition-transform duration-150" />
+                                                          <ChevronRightIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 transition-transform duration-150" />
                                                         )}
                                                       </div>
                                                       
                                                       {/* Frame Name */}
                                                       <div className="flex-1 min-w-0">
-                                                        <p className="text-sm font-medium text-gray-900 truncate">
+                                                        <p className="text-sm font-medium text-gray-900 dark:text-white dark:text-white truncate">
                                                           {frameName}
                                                         </p>
-                                                        <p className="text-xs text-gray-500">
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400">
                                                           {colorName} • {fullSize || `Size ${size}`}
                                                         </p>
                                                       </div>
                                                       
                                                       {/* Quantity */}
                                                       <div className="flex-shrink-0">
-                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
                                                           Qty: {item.quantity}
                                                         </span>
                                                       </div>
                                                       
                                                       {/* Status */}
                                                       <div className="flex-shrink-0">
-                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
                                                           Current
                                                         </span>
                                                       </div>
@@ -1893,39 +1893,39 @@ const Inventory: React.FC = () => {
                                               
                                               {/* Expanded Card - Same as pending */}
                                               {isExpanded && (
-                                                <div className="px-10 pb-4 bg-gray-100 border-t border-gray-200">
+                                                <div className="px-10 pb-4 bg-gray-100 border-t border-gray-200 dark:border-gray-700">
                                                   <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                                                     {/* Order Information */}
-                                                    <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                                                      <h4 className="text-sm font-medium text-gray-900 mb-3">Order Information</h4>
+                                                    <div className="bg-white dark:bg-[#1F2623] rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+                                                      <h4 className="text-sm font-medium text-gray-900 dark:text-white dark:text-white mb-3">Order Information</h4>
                                                       <div className="space-y-2">
                                                         <div className="flex justify-between">
-                                                          <span className="text-sm text-gray-500">Order Date:</span>
+                                                          <span className="text-sm text-gray-500 dark:text-gray-400">Order Date:</span>
                                                           <span className="text-sm text-gray-900">{formatOrderDate(item.order?.order_date)}</span>
                                                         </div>
                                                         <div className="flex justify-between">
-                                                          <span className="text-sm text-gray-500">Vendor:</span>
+                                                          <span className="text-sm text-gray-500 dark:text-gray-400">Vendor:</span>
                                                           <span className="text-sm text-gray-900">{item.vendor?.name}</span>
                                                         </div>
                                                         {orderNumber && (
                                                           <div className="flex justify-between">
-                                                            <span className="text-sm text-gray-500">Order #:</span>
+                                                            <span className="text-sm text-gray-500 dark:text-gray-400">Order #:</span>
                                                             <span className="text-sm text-gray-900">{orderNumber}</span>
                                                           </div>
                                                         )}
                                                         {accountNumber && (
                                                           <div className="flex justify-between">
-                                                            <span className="text-sm text-gray-500">Account #:</span>
+                                                            <span className="text-sm text-gray-500 dark:text-gray-400">Account #:</span>
                                                             <span className="text-sm text-gray-900">{accountNumber}</span>
                                                           </div>
                                                         )}
                                                         <div className="flex justify-between">
-                                                          <span className="text-sm text-gray-500">UPC:</span>
+                                                          <span className="text-sm text-gray-500 dark:text-gray-400">UPC:</span>
                                                           <span className="text-sm text-gray-900 font-mono text-xs">{(item as any).upc || 'N/A'}</span>
                                                         </div>
                                                         {(item as any).availability && (
                                                           <div className="flex justify-between">
-                                                            <span className="text-sm text-gray-500">Stock Status:</span>
+                                                            <span className="text-sm text-gray-500 dark:text-gray-400">Stock Status:</span>
                                                             <span className={`text-sm font-medium ${
                                                               (item as any).in_stock ? 'text-green-800' : 'text-red-800'
                                                             }`}>
@@ -1937,61 +1937,61 @@ const Inventory: React.FC = () => {
                                                     </div>
                                                     
                                                     {/* Product Details */}
-                                                    <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                                                      <h4 className="text-sm font-medium text-gray-900 mb-3">Product Details</h4>
+                                                    <div className="bg-white dark:bg-[#1F2623] rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+                                                      <h4 className="text-sm font-medium text-gray-900 dark:text-white dark:text-white mb-3">Product Details</h4>
                                                       <div className="space-y-2">
                                                         <div className="flex justify-between">
-                                                          <span className="text-sm text-gray-500">Brand:</span>
+                                                          <span className="text-sm text-gray-500 dark:text-gray-400">Brand:</span>
                                                           <span className="text-sm text-gray-900">{brand}</span>
                                                         </div>
                                                         <div className="flex justify-between">
-                                                          <span className="text-sm text-gray-500">Model:</span>
+                                                          <span className="text-sm text-gray-500 dark:text-gray-400">Model:</span>
                                                           <span className="text-sm text-gray-900">{model}</span>
                                                         </div>
                                                         <div className="flex justify-between">
-                                                          <span className="text-sm text-gray-500">Color:</span>
+                                                          <span className="text-sm text-gray-500 dark:text-gray-400">Color:</span>
                                                           <span className="text-sm text-gray-900">{colorName}</span>
                                                         </div>
                                                         <div className="flex justify-between">
-                                                          <span className="text-sm text-gray-500">Size:</span>
+                                                          <span className="text-sm text-gray-500 dark:text-gray-400">Size:</span>
                                                           <span className="text-sm text-gray-900">{fullSize || size}</span>
                                                         </div>
                                                       </div>
                                                     </div>
                                                     
                                                     {/* Pricing & Measurements */}
-                                                    <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-                                                      <h4 className="text-sm font-medium text-gray-900 mb-3">Pricing & Details</h4>
+                                                    <div className="bg-white dark:bg-[#1F2623] rounded-lg p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+                                                      <h4 className="text-sm font-medium text-gray-900 dark:text-white dark:text-white mb-3">Pricing & Details</h4>
                                                       <div className="space-y-2">
                                                         <div className="flex justify-between">
-                                                          <span className="text-sm text-gray-500">Wholesale Price:</span>
+                                                          <span className="text-sm text-gray-500 dark:text-gray-400">Wholesale Price:</span>
                                                           <span className="text-sm text-gray-900">
                                                             {(item as any).wholesale_price ? `$${(item as any).wholesale_price}` : '$--'}
                                                           </span>
                                                         </div>
                                                         <div className="flex justify-between">
-                                                          <span className="text-sm text-gray-500">MSRP:</span>
+                                                          <span className="text-sm text-gray-500 dark:text-gray-400">MSRP:</span>
                                                           <span className="text-sm text-gray-900">
                                                             {(item as any).msrp ? `$${(item as any).msrp}` : '$--'}
                                                           </span>
                                                         </div>
                                                         {(item as any).api_verified && (
                                                           <div className="flex justify-between">
-                                                            <span className="text-sm text-gray-500">API Verified:</span>
-                                                            <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                                                            <span className="text-sm text-gray-500 dark:text-gray-400">API Verified:</span>
+                                                            <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
                                                               {(item as any).confidence_score}% confidence
                                                             </span>
                                                           </div>
                                                         )}
                                                         <div className="flex justify-between">
-                                                          <span className="text-sm text-gray-500">Measurements:</span>
-                                                          <span className="text-sm text-gray-500">
+                                                          <span className="text-sm text-gray-500 dark:text-gray-400">Measurements:</span>
+                                                          <span className="text-sm text-gray-500 dark:text-gray-400">
                                                             {(item as any).full_size || '--'}
                                                           </span>
                                                         </div>
                                                         <div className="flex justify-between items-center pt-2 border-t border-gray-100">
-                                                          <span className="text-sm text-gray-500">Quantity:</span>
-                                                          <span className="text-sm font-medium text-gray-900">{item.quantity}</span>
+                                                          <span className="text-sm text-gray-500 dark:text-gray-400">Quantity:</span>
+                                                          <span className="text-sm font-medium text-gray-900 dark:text-white dark:text-white">{item.quantity}</span>
                                                         </div>
                                                       </div>
                                                     </div>
@@ -2022,20 +2022,20 @@ const Inventory: React.FC = () => {
                 <div className="p-6">
                   {soldInventory.length === 0 ? (
                     <div className="text-center py-12">
-                      <PackageIcon className="mx-auto h-12 w-12 text-gray-400" />
-                      <h3 className="mt-2 text-sm font-medium text-gray-900">No sold items</h3>
-                      <p className="mt-1 text-sm text-gray-500">
+                      <PackageIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+                      <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white dark:text-white">No sold items</h3>
+                      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                         {searchTerm ? 'No sold items match your search.' : 'Sold inventory items will appear here.'}
                       </p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {soldInventory.map((item) => (
-                        <div key={item.id} className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-4">
+                        <div key={item.id} className="bg-white dark:bg-[#1F2623] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow p-4">
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex-1">
-                              <h3 className="text-sm font-semibold text-gray-900">{item.brand}</h3>
-                              <p className="text-sm text-gray-600">{item.model}</p>
+                              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{item.brand}</h3>
+                              <p className="text-sm text-gray-600 dark:text-gray-300">{item.model}</p>
                             </div>
                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                               Sold
@@ -2078,9 +2078,9 @@ const Inventory: React.FC = () => {
             <div>
               {archivedInventory.length === 0 ? (
                 <div className="text-center py-12">
-                  <PackageIcon className="mx-auto h-12 w-12 text-gray-400" />
-                  <h3 className="mt-2 text-sm font-medium text-gray-900">No archived items</h3>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <PackageIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white dark:text-white">No archived items</h3>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                     {searchTerm ? 'No archived items match your search.' : 'No items have been archived yet.'}
                   </p>
                 </div>
@@ -2091,22 +2091,22 @@ const Inventory: React.FC = () => {
                     const totalItemsInVendor = Object.values(brands).flat().length;
                     
                     return (
-                      <div key={vendorName} className="bg-white rounded-lg border border-gray-200 shadow-sm">
+                      <div key={vendorName} className="bg-white dark:bg-[#1F2623] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                         {/* Vendor Header */}
                         <div 
-                          className="px-6 py-4 cursor-pointer hover:bg-gray-50 transition-colors duration-150"
+                          className="px-6 py-4 cursor-pointer hover:bg-gray-50 dark:bg-[#1F2623]/50 transition-colors duration-150"
                           onClick={() => toggleVendorExpansion(vendorName)}
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-3">
                               {isVendorExpanded ? (
-                                <ChevronDownIcon className="h-5 w-5 text-gray-400 transition-transform duration-150" />
+                                <ChevronDownIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 transition-transform duration-150" />
                               ) : (
-                                <ChevronRightIcon className="h-5 w-5 text-gray-400 transition-transform duration-150" />
+                                <ChevronRightIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 transition-transform duration-150" />
                               )}
                               <div>
-                                <h2 className="text-lg font-semibold text-gray-900">{vendorName}</h2>
-                                <p className="text-sm text-gray-500">
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{vendorName}</h2>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">
                                   {Object.keys(brands).length} brand{Object.keys(brands).length !== 1 ? 's' : ''} • {totalItemsInVendor} item{totalItemsInVendor !== 1 ? 's' : ''}
                                 </p>
                               </div>
@@ -2121,7 +2121,7 @@ const Inventory: React.FC = () => {
                                   handleDeleteArchivedByVendor(vendorName);
                                 }}
                                 disabled={deletingVendors.has(vendorName)}
-                                className="inline-flex items-center px-3 py-1 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="inline-flex items-center px-3 py-1 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white dark:bg-[#1F2623] hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
                               >
                                 {deletingVendors.has(vendorName) ? (
                                   <>
@@ -2141,7 +2141,7 @@ const Inventory: React.FC = () => {
 
                         {/* Archive items with restore and delete options */}
                         {isVendorExpanded && (
-                          <div className="border-t border-gray-200">
+                          <div className="border-t border-gray-200 dark:border-gray-700">
                             {Object.entries(brands).map(([brandName, items]) => {
                               const brandKey = `${vendorName}-${brandName}`;
                               const isBrandExpanded = expandedBrands.has(brandKey);
@@ -2152,21 +2152,21 @@ const Inventory: React.FC = () => {
                                   <div className="px-8 py-3 bg-gray-25">
                                     <div className="flex items-center justify-between">
                                       <div 
-                                        className="flex items-center space-x-3 flex-1 cursor-pointer hover:bg-gray-50 transition-colors duration-150 p-2 -m-2 rounded"
+                                        className="flex items-center space-x-3 flex-1 cursor-pointer hover:bg-gray-50 dark:bg-[#1F2623]/50 transition-colors duration-150 p-2 -m-2 rounded"
                                         onClick={() => toggleBrandExpansion(brandKey)}
                                       >
                                         {isBrandExpanded ? (
-                                          <ChevronDownIcon className="h-4 w-4 text-gray-400 transition-transform duration-150" />
+                                          <ChevronDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 transition-transform duration-150" />
                                         ) : (
-                                          <ChevronRightIcon className="h-4 w-4 text-gray-400 transition-transform duration-150" />
+                                          <ChevronRightIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 transition-transform duration-150" />
                                         )}
                                         <div>
                                           <h3 className="text-base font-medium text-gray-800">{brandName}</h3>
-                                          <p className="text-sm text-gray-500">{items.length} archived item{items.length !== 1 ? 's' : ''}</p>
+                                          <p className="text-sm text-gray-500 dark:text-gray-400">{items.length} archived item{items.length !== 1 ? 's' : ''}</p>
                                         </div>
                                       </div>
                                       <div className="flex items-center space-x-2">
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:text-gray-200">
                                           {items.length}
                                         </span>
                                         <button
@@ -2175,7 +2175,7 @@ const Inventory: React.FC = () => {
                                             handleDeleteArchivedByBrand(brandName, vendorName);
                                           }}
                                           disabled={deletingBrands.has(brandKey)}
-                                          className="inline-flex items-center px-2 py-1 border border-red-300 text-xs font-medium rounded text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                          className="inline-flex items-center px-2 py-1 border border-red-300 text-xs font-medium rounded text-red-700 bg-white dark:bg-[#1F2623] hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                           {deletingBrands.has(brandKey) ? (
                                             <>
@@ -2195,7 +2195,7 @@ const Inventory: React.FC = () => {
 
                                   {/* Archived Items */}
                                   {isBrandExpanded && (
-                                    <div className="bg-gray-50">
+                                    <div className="bg-gray-50 dark:bg-[#1F2623]/50">
                                       <div className="divide-y divide-gray-200">
                                         {items.map((item) => {
                                           const fullName = (item as any).full_name || item.sku;
@@ -2207,16 +2207,16 @@ const Inventory: React.FC = () => {
                                           const frameName = model || (fullName && fullName.includes(' - ') ? fullName.split(' - ').pop() : fullName) || item.sku;
                                           
                                           return (
-                                            <div key={item.id} className="relative bg-white px-10 py-3">
+                                            <div key={item.id} className="relative bg-white dark:bg-[#1F2623] px-10 py-3">
                                               <div className="flex items-center justify-between">
                                                 <div className="flex-1 min-w-0">
                                                   <div className="flex items-center space-x-4">
                                                     {/* Frame Name */}
                                                     <div className="flex-1 min-w-0">
-                                                      <p className="text-sm font-medium text-gray-900 truncate">
+                                                      <p className="text-sm font-medium text-gray-900 dark:text-white dark:text-white truncate">
                                                         {frameName}
                                                       </p>
-                                                      <p className="text-xs text-gray-500">
+                                                      <p className="text-xs text-gray-500 dark:text-gray-400">
                                                         {color} • Size {size} • Qty: {item.quantity}
                                                       </p>
                                                     </div>
@@ -2236,7 +2236,7 @@ const Inventory: React.FC = () => {
                                                           handleRestoreItem(item.id);
                                                         }}
                                                         disabled={restoringItems.has(item.id)}
-                                                        className="text-green-600 hover:text-green-900 disabled:opacity-50 disabled:cursor-not-allowed px-2 py-1 text-xs border border-green-600 rounded hover:bg-green-50"
+                                                        className="text-green-600 dark:text-green-400 hover:text-green-900 disabled:opacity-50 disabled:cursor-not-allowed px-2 py-1 text-xs border border-green-600 rounded hover:bg-green-50"
                                                       >
                                                         {restoringItems.has(item.id) ? (
                                                           <div className="animate-spin h-3 w-3 border-2 border-green-500 border-t-transparent rounded-full"></div>
@@ -2288,23 +2288,23 @@ const Inventory: React.FC = () => {
                 {/* Archived Orders Section */}
                 {orders.filter(order => order.metadata?.archived).length > 0 && (
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Archived Orders</h3>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Archived Orders</h3>
                     <div className="space-y-4">
                       {orders
                         .filter(order => order.metadata?.archived)
                         .map(order => (
-                          <div key={order.id} className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                          <div key={order.id} className="bg-gray-50 dark:bg-[#1F2623]/50 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
                             <div className="flex justify-between items-start">
                               <div>
-                                <h4 className="text-md font-semibold text-gray-700">
+                                <h4 className="text-md font-semibold text-gray-700 dark:text-gray-200">
                                   {order.vendor} • {order.customer_name || 'Unknown Customer'}
                                 </h4>
-                                <p className="text-sm text-gray-500 mt-1">
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                   Order #{order.order_number}
                                   {order.account_number && ` • Account: ${order.account_number}`}
                                 </p>
                               </div>
-                              <span className="px-2 py-1 bg-gray-200 text-gray-700 rounded-full text-xs font-medium">
+                              <span className="px-2 py-1 bg-gray-200 text-gray-700 dark:text-gray-200 rounded-full text-xs font-medium">
                                 Archived
                               </span>
                             </div>
@@ -2317,29 +2317,29 @@ const Inventory: React.FC = () => {
                 {/* Archived Inventory Section */}
                 {archivedInventory.length > 0 && (
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Archived Inventory</h3>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Archived Inventory</h3>
                     <div className="space-y-4">
                       {Object.entries(groupInventoryByVendorAndBrand(archivedInventory)).map(([vendorName, brands]) => {
                     const isVendorExpanded = expandedVendors.has(vendorName);
                     const totalItemsInVendor = Object.values(brands).flat().length;
                     
                     return (
-                      <div key={vendorName} className="bg-white rounded-lg border border-gray-200 shadow-sm">
+                      <div key={vendorName} className="bg-white dark:bg-[#1F2623] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
                         {/* Vendor Header */}
                         <div 
-                          className="px-6 py-4 cursor-pointer hover:bg-gray-50 transition-colors duration-150"
+                          className="px-6 py-4 cursor-pointer hover:bg-gray-50 dark:bg-[#1F2623]/50 transition-colors duration-150"
                           onClick={() => toggleVendorExpansion(vendorName)}
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-3">
                               {isVendorExpanded ? (
-                                <ChevronDownIcon className="h-5 w-5 text-gray-400 transition-transform duration-150" />
+                                <ChevronDownIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 transition-transform duration-150" />
                               ) : (
-                                <ChevronRightIcon className="h-5 w-5 text-gray-400 transition-transform duration-150" />
+                                <ChevronRightIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 transition-transform duration-150" />
                               )}
                               <div>
-                                <h2 className="text-lg font-semibold text-gray-900">{vendorName}</h2>
-                                <p className="text-sm text-gray-500">
+                                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{vendorName}</h2>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">
                                   {Object.keys(brands).length} brand{Object.keys(brands).length !== 1 ? 's' : ''} • {totalItemsInVendor} sold item{totalItemsInVendor !== 1 ? 's' : ''}
                                 </p>
                               </div>
@@ -2354,7 +2354,7 @@ const Inventory: React.FC = () => {
 
                         {/* Brands (shown when vendor is expanded) */}
                         {isVendorExpanded && (
-                          <div className="border-t border-gray-200">
+                          <div className="border-t border-gray-200 dark:border-gray-700">
                             {Object.entries(brands).map(([brandName, items]) => {
                               const brandKey = `${vendorName}-${brandName}`;
                               const isBrandExpanded = expandedBrands.has(brandKey);
@@ -2363,19 +2363,19 @@ const Inventory: React.FC = () => {
                                 <div key={brandKey} className="border-b border-gray-100 last:border-b-0">
                                   {/* Brand Header */}
                                   <div 
-                                    className="px-8 py-3 cursor-pointer hover:bg-gray-50 transition-colors duration-150 bg-gray-25"
+                                    className="px-8 py-3 cursor-pointer hover:bg-gray-50 dark:bg-[#1F2623]/50 transition-colors duration-150 bg-gray-25"
                                     onClick={() => toggleBrandExpansion(brandKey)}
                                   >
                                     <div className="flex items-center justify-between">
                                       <div className="flex items-center space-x-3">
                                         {isBrandExpanded ? (
-                                          <ChevronDownIcon className="h-4 w-4 text-gray-400 transition-transform duration-150" />
+                                          <ChevronDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 transition-transform duration-150" />
                                         ) : (
-                                          <ChevronRightIcon className="h-4 w-4 text-gray-400 transition-transform duration-150" />
+                                          <ChevronRightIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 transition-transform duration-150" />
                                         )}
                                         <div>
                                           <h3 className="text-base font-medium text-gray-800">{brandName}</h3>
-                                          <p className="text-sm text-gray-500">{items.length} sold item{items.length !== 1 ? 's' : ''}</p>
+                                          <p className="text-sm text-gray-500 dark:text-gray-400">{items.length} sold item{items.length !== 1 ? 's' : ''}</p>
                                         </div>
                                       </div>
                                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
@@ -2386,7 +2386,7 @@ const Inventory: React.FC = () => {
 
                                   {/* Sold Items */}
                                   {isBrandExpanded && (
-                                    <div className="bg-gray-50">
+                                    <div className="bg-gray-50 dark:bg-[#1F2623]/50">
                                       <div className="divide-y divide-gray-200">
                                         {items.map((item) => {
                                           const fullName = (item as any).full_name || item.sku;
@@ -2399,19 +2399,19 @@ const Inventory: React.FC = () => {
                                           const frameName = model || (fullName && fullName.includes(' - ') ? fullName.split(' - ').pop() : fullName) || item.sku;
                                           
                                           return (
-                                            <div key={item.id} className="relative bg-white px-10 py-3">
+                                            <div key={item.id} className="relative bg-white dark:bg-[#1F2623] px-10 py-3">
                                               <div className="flex items-center justify-between">
                                                 <div className="flex-1 min-w-0">
                                                   <div className="flex items-center space-x-4">
                                                     {/* Frame Name */}
                                                     <div className="flex-1 min-w-0">
-                                                      <p className="text-sm font-medium text-gray-900 truncate">
+                                                      <p className="text-sm font-medium text-gray-900 dark:text-white dark:text-white truncate">
                                                         {frameName}
                                                       </p>
-                                                      <p className="text-xs text-gray-500">
+                                                      <p className="text-xs text-gray-500 dark:text-gray-400">
                                                         {color} • Size {size} • Qty: {item.quantity}
                                                       </p>
-                                                      <p className="text-xs text-gray-400">
+                                                      <p className="text-xs text-gray-400 dark:text-gray-500">
                                                         Sold on {formatDate(soldDate)}
                                                       </p>
                                                     </div>
@@ -2446,9 +2446,9 @@ const Inventory: React.FC = () => {
                 {/* Empty State */}
                 {orders.filter(o => o.metadata?.archived).length === 0 && archivedInventory.length === 0 && (
                   <div className="text-center py-12">
-                    <ArchiveIcon className="mx-auto h-12 w-12 text-gray-400" />
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">No archived items</h3>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <ArchiveIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+                    <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white dark:text-white">No archived items</h3>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                       Archived orders and inventory will appear here
                     </p>
                   </div>
@@ -2464,20 +2464,20 @@ const Inventory: React.FC = () => {
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
             <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-gray-500 opacity-75" onClick={closeOrderDetailsModal}></div>
+              <div className="absolute inset-0 bg-gray-50 dark:bg-[#1F2623]/500 opacity-75" onClick={closeOrderDetailsModal}></div>
             </div>
 
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div className="inline-block align-bottom bg-white dark:bg-[#1F2623] rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+              <div className="bg-white dark:bg-[#1F2623] px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
                     Order Details
                   </h3>
                   <button
                     onClick={closeOrderDetailsModal}
-                    className="rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     <XIcon className="h-6 w-6" />
                   </button>
@@ -2485,8 +2485,8 @@ const Inventory: React.FC = () => {
 
                 <div className="mt-3">
                   {/* Order Information */}
-                  <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                    <h4 className="text-sm font-medium text-gray-900 mb-3">Email Information</h4>
+                  <div className="bg-gray-50 dark:bg-[#1F2623]/50 rounded-lg p-4 mb-4">
+                    <h4 className="text-sm font-medium text-gray-900 dark:text-white dark:text-white mb-3">Email Information</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="text-gray-500">From:</span>
@@ -2513,8 +2513,8 @@ const Inventory: React.FC = () => {
                   {selectedEmailDetails.parse_status === 'parsed' && selectedEmailDetails.parsed_data ? (
                     <>
                       {/* Order Summary */}
-                      <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                        <h4 className="text-sm font-medium text-gray-900 mb-3">Order Summary</h4>
+                      <div className="bg-gray-50 dark:bg-[#1F2623]/50 rounded-lg p-4 mb-4">
+                        <h4 className="text-sm font-medium text-gray-900 dark:text-white dark:text-white mb-3">Order Summary</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                           <div>
                             <span className="text-gray-500">Order Number:</span>
@@ -2554,33 +2554,33 @@ const Inventory: React.FC = () => {
                       </div>
 
                       {/* Items List */}
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <h4 className="text-sm font-medium text-gray-900 mb-3">Order Items</h4>
+                      <div className="bg-gray-50 dark:bg-[#1F2623]/50 rounded-lg p-4">
+                        <h4 className="text-sm font-medium text-gray-900 dark:text-white dark:text-white mb-3">Order Items</h4>
                         <div className="overflow-x-auto">
                           <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-100">
                               <tr>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                   UPC
                                 </th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                   Brand
                                 </th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                   Model
                                 </th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                   Color
                                 </th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                   Size
                                 </th>
-                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                   Qty
                                 </th>
                               </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
+                            <tbody className="bg-white dark:bg-[#1F2623] divide-y divide-gray-200 dark:divide-gray-700">
                               {selectedEmailDetails.parsed_data.items.map((item: any, index: number) => (
                                 <tr key={index}>
                                   <td className="px-4 py-2 text-sm text-gray-900">{item.upc || 'N/A'}</td>
@@ -2604,11 +2604,11 @@ const Inventory: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+              <div className="bg-gray-50 dark:bg-[#1F2623]/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button
                   type="button"
                   onClick={closeOrderDetailsModal}
-                  className="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
+                  className="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white dark:bg-[#1F2623] text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:bg-[#1F2623]/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
                 >
                   Close
                 </button>
@@ -2623,20 +2623,20 @@ const Inventory: React.FC = () => {
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
             <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-gray-500 opacity-75" onClick={() => setShowConfirmModal(false)}></div>
+              <div className="absolute inset-0 bg-gray-50 dark:bg-[#1F2623]/500 opacity-75" onClick={() => setShowConfirmModal(false)}></div>
             </div>
 
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div className="inline-block align-bottom bg-white dark:bg-[#1F2623] rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
+              <div className="bg-white dark:bg-[#1F2623] px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
                     Confirm Order Frames
                   </h3>
                   <button
                     onClick={() => setShowConfirmModal(false)}
-                    className="rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
                     <XIcon className="h-6 w-6" />
                   </button>
@@ -2670,19 +2670,19 @@ const Inventory: React.FC = () => {
                     </div>
 
                     {/* Instructions */}
-                    <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                      <h4 className="text-sm font-medium text-gray-900 mb-2">Instructions</h4>
-                      <p className="text-sm text-gray-600">
+                    <div className="bg-gray-50 dark:bg-[#1F2623]/50 rounded-lg p-4 mb-4">
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-white dark:text-white mb-2">Instructions</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
                         Select the frames you actually received from this order. Only selected frames will be moved to current inventory. 
                         Unselected frames will remain in pending inventory for future processing.
                       </p>
                     </div>
 
                     {/* Frame Selection List */}
-                    <div className="bg-white border rounded-lg">
-                      <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
+                    <div className="bg-white dark:bg-[#1F2623] border rounded-lg">
+                      <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#1F2623]/50">
                         <div className="flex items-center justify-between">
-                          <h4 className="text-sm font-medium text-gray-900">
+                          <h4 className="text-sm font-medium text-gray-900 dark:text-white dark:text-white">
                             Select Received Frames ({selectedFrames.size} of {groupedPendingOrders[confirmingOrderKey].items.length} selected)
                           </h4>
                           <div className="flex space-x-2">
@@ -2697,7 +2697,7 @@ const Inventory: React.FC = () => {
                             </button>
                             <button
                               onClick={() => setSelectedFrames(new Set())}
-                              className="text-xs text-gray-600 hover:text-gray-800 font-medium"
+                              className="text-xs text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white font-medium"
                             >
                               Clear All
                             </button>
@@ -2718,7 +2718,7 @@ const Inventory: React.FC = () => {
                             const frameName = model || (item as any).full_name || item.sku;
                             
                             return (
-                              <div key={item.id} className="p-4 hover:bg-gray-50">
+                              <div key={item.id} className="p-4 hover:bg-gray-50 dark:bg-[#1F2623]/50">
                                 <div className="flex items-center space-x-3">
                                   <input
                                     type="checkbox"
@@ -2729,24 +2729,24 @@ const Inventory: React.FC = () => {
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between">
                                       <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium text-gray-900 truncate">
+                                        <p className="text-sm font-medium text-gray-900 dark:text-white dark:text-white truncate">
                                           {frameName}
                                         </p>
-                                        <p className="text-xs text-gray-500">
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">
                                           {colorName} • {fullSize || `Size ${size}`} • Qty: {item.quantity}
                                         </p>
                                       </div>
                                       <div className="flex items-center space-x-4">
                                         {wholesalePrice && (
                                           <div className="text-right">
-                                            <p className="text-sm font-medium text-gray-900">
+                                            <p className="text-sm font-medium text-gray-900 dark:text-white dark:text-white">
                                               ${wholesalePrice}
                                             </p>
-                                            <p className="text-xs text-gray-500">Wholesale</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Wholesale</p>
                                           </div>
                                         )}
                                         {(item as any).api_verified && (
-                                          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                                          <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
                                             ✓ Verified
                                           </span>
                                         )}
@@ -2765,7 +2765,7 @@ const Inventory: React.FC = () => {
                     {selectedFrames.size > 0 && (
                       <div className="bg-green-50 rounded-lg p-4 mt-4 border border-green-200">
                         <div className="flex items-center">
-                          <CheckIcon className="h-5 w-5 text-green-600 mr-2" />
+                          <CheckIcon className="h-5 w-5 text-green-600 dark:text-green-400 mr-2" />
                           <div className="text-sm">
                             <p className="text-green-800 font-medium">
                               {selectedFrames.size} frame{selectedFrames.size !== 1 ? 's' : ''} will be moved to current inventory
@@ -2783,7 +2783,7 @@ const Inventory: React.FC = () => {
                 )}
               </div>
 
-              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+              <div className="bg-gray-50 dark:bg-[#1F2623]/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button
                   type="button"
                   onClick={processPartialConfirmation}
@@ -2799,7 +2799,7 @@ const Inventory: React.FC = () => {
                     setSelectedFrames(new Set());
                     setConfirmingOrderKey(null);
                   }}
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white dark:bg-[#1F2623] text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:bg-[#1F2623]/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                 >
                   Cancel
                 </button>

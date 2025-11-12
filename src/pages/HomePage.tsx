@@ -157,7 +157,7 @@ const HomePage = () => {
   ];
 
   return (
-    <div className="h-full bg-gray-50 dark:bg-gray-950">
+    <div className="h-full bg-gray-50 dark:bg-[#181F1C]">
       <div className="p-6 md:p-8">
         <Container size="xl">
         {/* Hero Section with Animation */}
@@ -238,7 +238,7 @@ const HomePage = () => {
                       alt="OptiProfit Data Visualization"
                       className="w-full h-auto rounded-xl shadow-2xl border-4 border-white/20"
                     />
-                    <div className="absolute -bottom-6 -left-6 bg-white dark:bg-gray-800 rounded-lg shadow-xl p-4 backdrop-blur-sm border border-gray-200 dark:border-gray-700">
+                    <div className="absolute -bottom-6 -left-6 bg-white dark:bg-[#1F2623] rounded-lg shadow-xl p-4 backdrop-blur-sm border border-gray-200 dark:border-gray-700">
                       <div className="flex items-center gap-3">
                         <div className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full p-2">
                           <TrendingUp className="w-6 h-6" />
@@ -302,22 +302,22 @@ const HomePage = () => {
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                <div className="bg-white dark:bg-[#1F2623] rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
                   <div className="text-red-600 dark:text-red-400 mb-3">❌</div>
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Manually tracking inventory in spreadsheets</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300">Hours wasted entering SKUs, prices, and vendor details. One mistake ruins everything.</p>
                 </div>
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                <div className="bg-white dark:bg-[#1F2623] rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
                   <div className="text-red-600 dark:text-red-400 mb-3">❌</div>
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Guessing at profit margins</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300">Using rough estimates or "gut feel" to price frames. Are you actually making money?</p>
                 </div>
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                <div className="bg-white dark:bg-[#1F2623] rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
                   <div className="text-red-600 dark:text-red-400 mb-3">❌</div>
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-2">No visibility into vendor pricing</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300">Which vendor gives you better margins? Which brands are most profitable? Who knows!</p>
                 </div>
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                <div className="bg-white dark:bg-[#1F2623] rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
                   <div className="text-red-600 dark:text-red-400 mb-3">❌</div>
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Insurance calculations are a nightmare</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300">Figuring out reimbursement, coverage, and actual profit is complicated and error-prone.</p>
@@ -358,22 +358,22 @@ const HomePage = () => {
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border-2 border-green-200 dark:border-green-700">
+                <div className="bg-white dark:bg-[#1F2623] rounded-xl p-6 shadow-sm border-2 border-green-200 dark:border-green-700">
                   <div className="text-green-600 dark:text-green-400 mb-3 text-2xl">✓</div>
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Automatic inventory from emails</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300">Forward vendor emails. We extract everything automatically. Zero manual entry.</p>
                 </div>
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border-2 border-green-200 dark:border-green-700">
+                <div className="bg-white dark:bg-[#1F2623] rounded-xl p-6 shadow-sm border-2 border-green-200 dark:border-green-700">
                   <div className="text-green-600 dark:text-green-400 mb-3 text-2xl">✓</div>
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Exact profit calculations</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300">Know your exact profit on every frame. Insurance, wholesale, retail - all calculated instantly.</p>
                 </div>
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border-2 border-green-200 dark:border-green-700">
+                <div className="bg-white dark:bg-[#1F2623] rounded-xl p-6 shadow-sm border-2 border-green-200 dark:border-green-700">
                   <div className="text-green-600 dark:text-green-400 mb-3 text-2xl">✓</div>
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Vendor comparison analytics</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300">See which vendors and brands make you the most money. Make smarter purchasing decisions.</p>
                 </div>
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border-2 border-green-200 dark:border-green-700">
+                <div className="bg-white dark:bg-[#1F2623] rounded-xl p-6 shadow-sm border-2 border-green-200 dark:border-green-700">
                   <div className="text-green-600 dark:text-green-400 mb-3 text-2xl">✓</div>
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Insurance mode built-in</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300">Toggle insurance calculations on/off. See real profit after coverage and reimbursement.</p>
@@ -413,7 +413,7 @@ const HomePage = () => {
                     transition={{ duration: 0.6, delay: index * 0.1 }}
                     className="relative"
                   >
-                    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl dark:shadow-gray-900/50 transition-shadow duration-300 border border-gray-100 dark:border-gray-700 h-full">
+                    <div className="bg-white dark:bg-[#1F2623] rounded-xl p-6 shadow-lg hover:shadow-xl dark:shadow-gray-900/50 transition-shadow duration-300 border border-gray-100 dark:border-gray-700 h-full">
                       <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-full text-2xl font-bold mb-4 mx-auto shadow-lg">
                         {step.number}
                       </div>
@@ -483,7 +483,7 @@ const HomePage = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl dark:shadow-gray-900/50 transition-all duration-300 border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-600"
+                  className="bg-white dark:bg-[#1F2623] rounded-xl p-6 shadow-lg hover:shadow-xl dark:shadow-gray-900/50 transition-all duration-300 border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-600"
                 >
                   <div className="flex items-center justify-center w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg mb-4">
                     {benefit.icon}
@@ -505,7 +505,7 @@ const HomePage = () => {
             transition={{ duration: 0.6 }}
             className="max-w-6xl mx-auto"
           >
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 dark:from-gray-950 dark:to-gray-900 rounded-2xl p-8 md:p-12 shadow-2xl border border-gray-700 dark:border-gray-800">
+            <div className="bg-gradient-to-br from-gray-900 to-gray-800 dark:from-gray-950 dark:to-[#181F1C] rounded-2xl p-8 md:p-12 shadow-2xl border border-gray-700 dark:border-gray-800">
               <div className="grid md:grid-cols-2 gap-12 items-center">
                 <div className="text-white">
                   <h2 className="text-3xl md:text-4xl font-bold mb-6">

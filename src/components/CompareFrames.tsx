@@ -45,11 +45,11 @@ const FrameComparisonDisplay: React.FC<FrameComparisonDisplayProps> = ({ frame1,
   const marginDifference = Math.abs(frame1Margin - frame2Margin);
   
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-xl font-bold text-center mb-6">Profit Comparison</h3>
-      
+    <div className="bg-white dark:bg-[#1F2623] rounded-lg shadow-md p-6">
+      <h3 className="text-xl font-bold text-center mb-6 dark:text-white">Profit Comparison</h3>
+
       {/* Header with winner indicator */}
-      <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+      <div className="mb-6 p-4 bg-gray-50 dark:bg-[#181F1C]/50 rounded-lg">
         {isFrame1MoreProfitable && (
           <div className="flex items-center justify-center text-green-600">
             <Check className="h-5 w-5 mr-2" />
@@ -65,7 +65,7 @@ const FrameComparisonDisplay: React.FC<FrameComparisonDisplayProps> = ({ frame1,
         )}
         
         {!isFrame1MoreProfitable && !isFrame2MoreProfitable && (
-          <div className="text-center text-gray-600 font-medium">
+          <div className="text-center text-gray-600 dark:text-gray-300 font-medium">
             Both frames have equal profitability
           </div>
         )}
@@ -83,7 +83,7 @@ const FrameComparisonDisplay: React.FC<FrameComparisonDisplayProps> = ({ frame1,
         </div>
         
         {/* Your Actual Cost */}
-        <div className="col-span-1 bg-gray-50 p-2 font-medium flex items-center">
+        <div className="col-span-1 bg-gray-50 dark:bg-[#181F1C]/50 p-2 font-medium flex items-center dark:text-white">
           Your Actual Cost
         </div>
         <div className="col-span-1 text-center p-2 bg-blue-50">
@@ -94,7 +94,7 @@ const FrameComparisonDisplay: React.FC<FrameComparisonDisplayProps> = ({ frame1,
         </div>
         
         {/* Wholesale Price */}
-        <div className="col-span-1 bg-gray-50 p-2 font-medium flex items-center">
+        <div className="col-span-1 bg-gray-50 dark:bg-[#181F1C]/50 p-2 font-medium flex items-center dark:text-white">
           Wholesale Price
         </div>
         <div className="col-span-1 text-center p-2 bg-blue-50">
@@ -105,7 +105,7 @@ const FrameComparisonDisplay: React.FC<FrameComparisonDisplayProps> = ({ frame1,
         </div>
         
         {/* Discount Percentage */}
-        <div className="col-span-1 bg-gray-50 p-2 font-medium flex items-center">
+        <div className="col-span-1 bg-gray-50 dark:bg-[#181F1C]/50 p-2 font-medium flex items-center dark:text-white">
           Discount from Wholesale
         </div>
         <div className="col-span-1 text-center p-2 bg-blue-50 font-medium">
@@ -116,7 +116,7 @@ const FrameComparisonDisplay: React.FC<FrameComparisonDisplayProps> = ({ frame1,
         </div>
         
         {/* Retail Price */}
-        <div className="col-span-1 bg-gray-50 p-2 font-medium flex items-center">
+        <div className="col-span-1 bg-gray-50 dark:bg-[#181F1C]/50 p-2 font-medium flex items-center dark:text-white">
           Retail Price
         </div>
         <div className="col-span-1 text-center p-2 bg-blue-50">
@@ -127,7 +127,7 @@ const FrameComparisonDisplay: React.FC<FrameComparisonDisplayProps> = ({ frame1,
         </div>
         
         {/* Patient Payment */}
-        <div className="col-span-1 bg-gray-50 p-2 font-medium flex items-center">
+        <div className="col-span-1 bg-gray-50 dark:bg-[#181F1C]/50 p-2 font-medium flex items-center dark:text-white">
           Patient Payment
         </div>
         <div className="col-span-1 text-center p-2 bg-blue-50">
@@ -138,7 +138,7 @@ const FrameComparisonDisplay: React.FC<FrameComparisonDisplayProps> = ({ frame1,
         </div>
         
         {/* Insurance Reimbursement */}
-        <div className="col-span-1 bg-gray-50 p-2 font-medium flex items-center">
+        <div className="col-span-1 bg-gray-50 dark:bg-[#181F1C]/50 p-2 font-medium flex items-center dark:text-white">
           Insurance Reimbursement
         </div>
         <div className="col-span-1 text-center p-2 bg-blue-50">
@@ -149,7 +149,7 @@ const FrameComparisonDisplay: React.FC<FrameComparisonDisplayProps> = ({ frame1,
         </div>
         
         {/* Total Revenue */}
-        <div className="col-span-1 bg-gray-50 p-2 font-medium flex items-center">
+        <div className="col-span-1 bg-gray-50 dark:bg-[#181F1C]/50 p-2 font-medium flex items-center dark:text-white">
           Total Revenue
         </div>
         <div className="col-span-1 text-center p-2 bg-blue-50 font-medium">
@@ -160,7 +160,7 @@ const FrameComparisonDisplay: React.FC<FrameComparisonDisplayProps> = ({ frame1,
         </div>
         
         {/* Profit */}
-        <div className="col-span-1 bg-gray-50 p-2 font-medium flex items-center">
+        <div className="col-span-1 bg-gray-50 dark:bg-[#181F1C]/50 p-2 font-medium flex items-center dark:text-white">
           Net Profit
         </div>
         <div className={`col-span-1 text-center p-2 ${isFrame1MoreProfitable ? 'bg-blue-200 font-bold' : 'bg-blue-50'}`}>
@@ -171,7 +171,7 @@ const FrameComparisonDisplay: React.FC<FrameComparisonDisplayProps> = ({ frame1,
         </div>
         
         {/* Profit Margin */}
-        <div className="col-span-1 bg-gray-50 p-2 font-medium flex items-center">
+        <div className="col-span-1 bg-gray-50 dark:bg-[#181F1C]/50 p-2 font-medium flex items-center dark:text-white">
           Profit Margin
         </div>
         <div className={`col-span-1 text-center p-2 ${frame1Margin > frame2Margin ? 'bg-blue-200 font-bold' : 'bg-blue-50'}`}>
@@ -183,12 +183,12 @@ const FrameComparisonDisplay: React.FC<FrameComparisonDisplayProps> = ({ frame1,
       </div>
       
       {/* Recommendation */}
-      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-        <h4 className="font-semibold mb-2 flex items-center">
+      <div className="mt-6 p-4 bg-gray-50 dark:bg-[#181F1C]/50 rounded-lg">
+        <h4 className="font-semibold mb-2 flex items-center dark:text-white">
           <TrendingUpIcon className="h-5 w-5 mr-2 text-blue-600" />
           Recommendation
         </h4>
-        <p className="text-gray-700">
+        <p className="text-gray-700 dark:text-gray-200">
           {isFrame1MoreProfitable ? (
             <>
               <span className="font-medium">{frame1.frameName}</span> provides {formatCurrency(profitDifference)} more profit 
@@ -525,19 +525,19 @@ const CompareFrames: React.FC = () => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden">
+    <div className="bg-white dark:bg-[#1F2623] rounded-xl shadow-md overflow-hidden">
       <div className="p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Compare Frame Profitability</h2>
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Compare Frame Profitability</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6" data-demo="comparison-form">
           {/* Frame 1 Inputs */}
           <div className="bg-blue-50 p-4 rounded-lg">
             {/* Insurance Toggle for Frame 1 */}
-            <div className="mb-4 p-3 bg-white rounded-lg border">
+            <div className="mb-4 p-3 bg-white dark:bg-[#181F1C]/50 rounded-lg border border-gray-300 dark:border-gray-600">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-900">Insurance Billing</h4>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">Insurance Billing</h4>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     {frame1.insuranceEnabled
                       ? "Calculate profit with insurance provider billing"
                       : "Calculate profit for cash-pay customers (2x wholesale pricing)"
@@ -555,7 +555,7 @@ const CompareFrames: React.FC = () => {
                   <label
                     htmlFor="insuranceToggle1"
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer ${
-                      frame1.insuranceEnabled ? 'bg-blue-600' : 'bg-gray-200'
+                      frame1.insuranceEnabled ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'
                     }`}
                   >
                     <span
@@ -564,7 +564,7 @@ const CompareFrames: React.FC = () => {
                       }`}
                     />
                   </label>
-                  <span className="ml-3 text-sm font-medium text-gray-700">
+                  <span className="ml-3 text-sm font-medium text-gray-700 dark:text-gray-200">
                     {frame1.insuranceEnabled ? 'On' : 'Off'}
                   </span>
                 </div>
@@ -573,38 +573,38 @@ const CompareFrames: React.FC = () => {
 
             {/* Company Dropdown */}
             <div className="mb-4">
-              <label htmlFor="company1" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="company1" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Company
               </label>
               <div className="relative" ref={companyDropdownRef1}>
                 <button
                   type="button"
-                  className={`w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                  className={`w-full flex items-center justify-between px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#181F1C]/50 text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:text-white ${
                     loadingCompanies ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                   onClick={() => !loadingCompanies && setShowCompanyDropdown1(!showCompanyDropdown1)}
                   disabled={loadingCompanies}
                 >
                   <div className="flex items-center">
-                    <BuildingIcon className="h-4 w-4 text-gray-400 mr-2" />
+                    <BuildingIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
                     <span>
                       {loadingCompanies
                         ? 'Loading companies...'
                         : selectedCompany1?.name || 'Select a company'}
                     </span>
                   </div>
-                  <ChevronDownIcon className="h-4 w-4 text-gray-400" />
+                  <ChevronDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                 </button>
 
                 {showCompanyDropdown1 && (
-                  <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-60 overflow-auto">
+                  <div className="absolute z-10 mt-1 w-full bg-white dark:bg-[#1F2623] shadow-lg rounded-md border border-gray-200 dark:border-gray-700 max-h-60 overflow-auto">
                     <ul className="py-1">
                       {loadingCompanies ? (
-                        <li className="px-4 py-2 text-gray-500 text-sm">Loading companies...</li>
+                        <li className="px-4 py-2 text-gray-500 dark:text-gray-400 text-sm">Loading companies...</li>
                       ) : companiesError ? (
                         <li className="px-4 py-2 text-red-500 text-sm">{companiesError}</li>
                       ) : companies.length === 0 ? (
-                        <li className="px-4 py-2 text-gray-500 text-sm">
+                        <li className="px-4 py-2 text-gray-500 dark:text-gray-400 text-sm">
                           No companies available. Add companies in Vendors section.
                         </li>
                       ) : (
@@ -612,7 +612,7 @@ const CompareFrames: React.FC = () => {
                           <li key={company.id}>
                             <button
                               type="button"
-                              className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${selectedCompany1?.id === company.id ? 'bg-blue-50 text-blue-700' : ''}`}
+                              className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white ${selectedCompany1?.id === company.id ? 'bg-blue-50 text-blue-700' : ''}`}
                               onClick={() => {
                                 setSelectedCompany1(company);
                                 setSelectedBrand1(null);
@@ -632,39 +632,39 @@ const CompareFrames: React.FC = () => {
             
             {/* Brand Dropdown */}
             <div className="mb-4">
-              <label htmlFor="brand1" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="brand1" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Brand
               </label>
               <div className="relative" ref={brandDropdownRef1}>
                 <button
                   type="button"
-                  className={`w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                  className={`w-full flex items-center justify-between px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#181F1C]/50 text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:text-white ${
                     !selectedCompany1 ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                   onClick={() => selectedCompany1 && setShowBrandDropdown1(!showBrandDropdown1)}
                   disabled={!selectedCompany1}
                 >
                   <div className="flex items-center">
-                    <TagIcon className="h-4 w-4 text-gray-400 mr-2" />
+                    <TagIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
                     <span>{selectedBrand1?.name || (selectedCompany1 ? 'Select a brand' : 'Select company first')}</span>
                   </div>
-                  <ChevronDownIcon className="h-4 w-4 text-gray-400" />
+                  <ChevronDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                 </button>
-                
+
                 {showBrandDropdown1 && selectedCompany1 && (
-                  <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-60 overflow-auto">
+                  <div className="absolute z-10 mt-1 w-full bg-white dark:bg-[#1F2623] shadow-lg rounded-md border border-gray-200 dark:border-gray-700 max-h-60 overflow-auto">
                     <ul className="py-1">
                       {selectedCompany1.brands.map((brand) => (
                         <li key={brand.id}>
                           <button
                             type="button"
-                            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${selectedBrand1?.id === brand.id ? 'bg-blue-50 text-blue-700' : ''}`}
+                            className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white ${selectedBrand1?.id === brand.id ? 'bg-blue-50 text-blue-700' : ''}`}
                             onClick={() => handleBrandSelect1(selectedCompany1, brand)}
                           >
                             <div>
                               <div className="font-medium">{brand.name}</div>
                               {(brand.wholesaleCost || brand.yourCost) && (
-                                <div className="text-xs text-gray-500">
+                                <div className="text-xs text-gray-500 dark:text-gray-400">
                                   {brand.yourCost && `Your Cost: $${brand.yourCost}`}
                                   {brand.wholesaleCost && ` • Wholesale: $${brand.wholesaleCost}`}
                                 </div>
@@ -674,7 +674,7 @@ const CompareFrames: React.FC = () => {
                         </li>
                       ))}
                       {selectedCompany1.brands.length === 0 && (
-                        <li className="px-4 py-2 text-gray-500 text-sm">
+                        <li className="px-4 py-2 text-gray-500 dark:text-gray-400 text-sm">
                           No brands available for this company.
                         </li>
                       )}
@@ -683,21 +683,21 @@ const CompareFrames: React.FC = () => {
                 )}
               </div>
             </div>
-            
+
             <div className="space-y-4">
               <div className="space-y-2">
-                <label htmlFor="yourCost1" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="yourCost1" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                   Your Actual Cost
                 </label>
                 <div className="relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSignIcon className="h-4 w-4 text-gray-400" />
+                    <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                   </div>
                   <input
                     type="text"
                     inputMode="decimal"
                     id="yourCost1"
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-[#181F1C]/50 dark:text-white"
                     value={frame1.yourCost}
                     onChange={(e) => {
                       const value = e.target.value.replace(/^0+(?=\d)/, '');
@@ -706,20 +706,20 @@ const CompareFrames: React.FC = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
-                <label htmlFor="wholesaleCost1" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="wholesaleCost1" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                   Wholesale Cost (Frame Book Price)
                 </label>
                 <div className="relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSignIcon className="h-4 w-4 text-gray-400" />
+                    <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                   </div>
                   <input
                     type="text"
                     inputMode="decimal"
                     id="wholesaleCost1"
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-[#181F1C]/50 dark:text-white"
                     value={frame1.wholesaleCost}
                     onChange={(e) => {
                       const value = e.target.value.replace(/^0+(?=\d)/, '');
@@ -728,20 +728,20 @@ const CompareFrames: React.FC = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
-                <label htmlFor="tariffTax1" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="tariffTax1" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                   Tariff Tax
                 </label>
                 <div className="relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSignIcon className="h-4 w-4 text-gray-400" />
+                    <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                   </div>
                   <input
                     type="text"
                     inputMode="decimal"
                     id="tariffTax1"
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-[#181F1C]/50 dark:text-white"
                     value={frame1.tariffTax}
                     onChange={(e) => {
                       const value = e.target.value.replace(/^0+(?=\d)/, '');
@@ -750,19 +750,19 @@ const CompareFrames: React.FC = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
-                <label htmlFor="insuranceMultiplier1" className="block text-sm font-medium text-gray-700 flex justify-between">
+                <label htmlFor="insuranceMultiplier1" className="block text-sm font-medium text-gray-700 dark:text-gray-200 flex justify-between">
                   <span>Insurance Multiplier: {frame1.insuranceMultiplier.toFixed(1)}x</span>
                   <div className="flex items-center">
                     <input
                       type="checkbox"
                       id="useManualPrice1"
-                      className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
                       checked={frame1.useManualRetailPrice}
                       onChange={(e) => handleUpdateFrame1('useManualRetailPrice', e.target.checked)}
                     />
-                    <label htmlFor="useManualPrice1" className="text-xs text-gray-500">
+                    <label htmlFor="useManualPrice1" className="text-xs text-gray-500 dark:text-gray-400">
                       Manual Price
                     </label>
                   </div>
@@ -770,7 +770,7 @@ const CompareFrames: React.FC = () => {
                 {!frame1.useManualRetailPrice && (
                   <div className="relative rounded-md shadow-sm">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <SlidersIcon className="h-4 w-4 text-gray-400" />
+                      <SlidersIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                     </div>
                     <input
                       type="range"
@@ -782,7 +782,7 @@ const CompareFrames: React.FC = () => {
                       value={frame1.insuranceMultiplier}
                       onChange={(e) => handleUpdateFrame1('insuranceMultiplier', parseFloat(e.target.value))}
                     />
-                    <div className="flex justify-between text-xs text-gray-400 px-3">
+                    <div className="flex justify-between text-xs text-gray-400 dark:text-gray-500 px-3">
                       <span>1x</span>
                       <span>2x</span>
                       <span>3x</span>
@@ -791,20 +791,20 @@ const CompareFrames: React.FC = () => {
                   </div>
                 )}
               </div>
-              
+
               <div className="space-y-2">
-                <label htmlFor="retailPrice1" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="retailPrice1" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                   Retail Price
                 </label>
                 <div className="relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSignIcon className="h-4 w-4 text-gray-400" />
+                    <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                   </div>
                   <input
                     type="text"
                     inputMode="decimal"
                     id="retailPrice1"
-                    className={`block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 ${!frame1.useManualRetailPrice ? 'bg-gray-100' : ''}`}
+                    className={`block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:text-white ${!frame1.useManualRetailPrice ? 'bg-gray-100 dark:bg-[#181F1C]/50' : 'bg-white dark:bg-[#181F1C]/50'}`}
                     value={frame1.retailPrice}
                     onChange={(e) => {
                       const value = e.target.value.replace(/^0+(?=\d)/, '');
@@ -817,27 +817,27 @@ const CompareFrames: React.FC = () => {
                   />
                 </div>
                 {!frame1.useManualRetailPrice && (
-                  <p className="text-xs text-gray-500 italic">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 italic">
                     Auto-calculated based on wholesale cost and multiplier
                   </p>
                 )}
               </div>
-              
+
               {frame1.insuranceEnabled && (
                 <>
                   <div className="space-y-2">
-                    <label htmlFor="insuranceCoverage1" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="insuranceCoverage1" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                       Insurance Coverage Amount
                     </label>
                     <div className="relative rounded-md shadow-sm">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <DollarSignIcon className="h-4 w-4 text-gray-400" />
+                        <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                       </div>
                       <input
                         type="text"
                         inputMode="decimal"
                         id="insuranceCoverage1"
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-[#181F1C]/50 dark:text-white"
                         value={frame1.insuranceCoverage}
                         onChange={(e) => {
                           const value = e.target.value.replace(/^0+(?=\d)/, '');
@@ -845,7 +845,7 @@ const CompareFrames: React.FC = () => {
                         }}
                       />
                     </div>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       {frame1.retailPrice > frame1.insuranceCoverage ? (
                         <>Patient will pay ${(frame1.retailPrice - frame1.insuranceCoverage).toFixed(2)} after 20% discount</>
                       ) : (
@@ -855,18 +855,18 @@ const CompareFrames: React.FC = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <label htmlFor="insuranceReimbursement1" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="insuranceReimbursement1" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                       Insurance Reimbursement
                     </label>
                     <div className="relative rounded-md shadow-sm">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <DollarSignIcon className="h-4 w-4 text-gray-400" />
+                        <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                       </div>
                       <input
                         type="text"
                         inputMode="decimal"
                         id="insuranceReimbursement1"
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-[#181F1C]/50 dark:text-white"
                         value={frame1.insuranceReimbursement}
                         onChange={(e) => {
                           const value = e.target.value.replace(/^0+(?=\d)/, '');
@@ -874,7 +874,7 @@ const CompareFrames: React.FC = () => {
                         }}
                       />
                     </div>
-                    <p className="text-xs text-gray-500 italic">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 italic">
                       Typically $57 for most insurance providers
                     </p>
                   </div>
@@ -882,15 +882,15 @@ const CompareFrames: React.FC = () => {
               )}
             </div>
           </div>
-          
+
           {/* Frame 2 Inputs */}
           <div className="bg-green-50 p-4 rounded-lg">
             {/* Insurance Toggle for Frame 2 */}
-            <div className="mb-4 p-3 bg-white rounded-lg border">
+            <div className="mb-4 p-3 bg-white dark:bg-[#181F1C]/50 rounded-lg border border-gray-300 dark:border-gray-600">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-900">Insurance Billing</h4>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">Insurance Billing</h4>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     {frame2.insuranceEnabled
                       ? "Calculate profit with insurance provider billing"
                       : "Calculate profit for cash-pay customers (2x wholesale pricing)"
@@ -908,7 +908,7 @@ const CompareFrames: React.FC = () => {
                   <label
                     htmlFor="insuranceToggle2"
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer ${
-                      frame2.insuranceEnabled ? 'bg-green-600' : 'bg-gray-200'
+                      frame2.insuranceEnabled ? 'bg-green-600' : 'bg-gray-200 dark:bg-gray-700'
                     }`}
                   >
                     <span
@@ -917,7 +917,7 @@ const CompareFrames: React.FC = () => {
                       }`}
                     />
                   </label>
-                  <span className="ml-3 text-sm font-medium text-gray-700">
+                  <span className="ml-3 text-sm font-medium text-gray-700 dark:text-gray-200">
                     {frame2.insuranceEnabled ? 'On' : 'Off'}
                   </span>
                 </div>
@@ -926,38 +926,38 @@ const CompareFrames: React.FC = () => {
 
             {/* Company Dropdown */}
             <div className="mb-4">
-              <label htmlFor="company2" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="company2" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Company
               </label>
               <div className="relative" ref={companyDropdownRef2}>
                 <button
                   type="button"
-                  className={`w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                  className={`w-full flex items-center justify-between px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#181F1C]/50 text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:text-white ${
                     loadingCompanies ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                   onClick={() => !loadingCompanies && setShowCompanyDropdown2(!showCompanyDropdown2)}
                   disabled={loadingCompanies}
                 >
                   <div className="flex items-center">
-                    <BuildingIcon className="h-4 w-4 text-gray-400 mr-2" />
+                    <BuildingIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
                     <span>
                       {loadingCompanies
                         ? 'Loading companies...'
                         : selectedCompany2?.name || 'Select a company'}
                     </span>
                   </div>
-                  <ChevronDownIcon className="h-4 w-4 text-gray-400" />
+                  <ChevronDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                 </button>
 
                 {showCompanyDropdown2 && (
-                  <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-60 overflow-auto">
+                  <div className="absolute z-10 mt-1 w-full bg-white dark:bg-[#1F2623] shadow-lg rounded-md border border-gray-200 dark:border-gray-700 max-h-60 overflow-auto">
                     <ul className="py-1">
                       {loadingCompanies ? (
-                        <li className="px-4 py-2 text-gray-500 text-sm">Loading companies...</li>
+                        <li className="px-4 py-2 text-gray-500 dark:text-gray-400 text-sm">Loading companies...</li>
                       ) : companiesError ? (
                         <li className="px-4 py-2 text-red-500 text-sm">{companiesError}</li>
                       ) : companies.length === 0 ? (
-                        <li className="px-4 py-2 text-gray-500 text-sm">
+                        <li className="px-4 py-2 text-gray-500 dark:text-gray-400 text-sm">
                           No companies available. Add companies in Vendors section.
                         </li>
                       ) : (
@@ -965,7 +965,7 @@ const CompareFrames: React.FC = () => {
                           <li key={company.id}>
                             <button
                               type="button"
-                              className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${selectedCompany2?.id === company.id ? 'bg-blue-50 text-blue-700' : ''}`}
+                              className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white ${selectedCompany2?.id === company.id ? 'bg-blue-50 text-blue-700' : ''}`}
                               onClick={() => {
                                 setSelectedCompany2(company);
                                 setSelectedBrand2(null);
@@ -985,39 +985,39 @@ const CompareFrames: React.FC = () => {
             
             {/* Brand Dropdown */}
             <div className="mb-4">
-              <label htmlFor="brand2" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="brand2" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Brand
               </label>
               <div className="relative" ref={brandDropdownRef2}>
                 <button
                   type="button"
-                  className={`w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                  className={`w-full flex items-center justify-between px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#181F1C]/50 text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:text-white ${
                     !selectedCompany2 ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                   onClick={() => selectedCompany2 && setShowBrandDropdown2(!showBrandDropdown2)}
                   disabled={!selectedCompany2}
                 >
                   <div className="flex items-center">
-                    <TagIcon className="h-4 w-4 text-gray-400 mr-2" />
+                    <TagIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
                     <span>{selectedBrand2?.name || (selectedCompany2 ? 'Select a brand' : 'Select company first')}</span>
                   </div>
-                  <ChevronDownIcon className="h-4 w-4 text-gray-400" />
+                  <ChevronDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                 </button>
-                
+
                 {showBrandDropdown2 && selectedCompany2 && (
-                  <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-60 overflow-auto">
+                  <div className="absolute z-10 mt-1 w-full bg-white dark:bg-[#1F2623] shadow-lg rounded-md border border-gray-200 dark:border-gray-700 max-h-60 overflow-auto">
                     <ul className="py-1">
                       {selectedCompany2.brands.map((brand) => (
                         <li key={brand.id}>
                           <button
                             type="button"
-                            className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${selectedBrand2?.id === brand.id ? 'bg-blue-50 text-blue-700' : ''}`}
+                            className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white ${selectedBrand2?.id === brand.id ? 'bg-blue-50 text-blue-700' : ''}`}
                             onClick={() => handleBrandSelect2(selectedCompany2, brand)}
                           >
                             <div>
                               <div className="font-medium">{brand.name}</div>
                               {(brand.wholesaleCost || brand.yourCost) && (
-                                <div className="text-xs text-gray-500">
+                                <div className="text-xs text-gray-500 dark:text-gray-400">
                                   {brand.yourCost && `Your Cost: $${brand.yourCost}`}
                                   {brand.wholesaleCost && ` • Wholesale: $${brand.wholesaleCost}`}
                                 </div>
@@ -1027,7 +1027,7 @@ const CompareFrames: React.FC = () => {
                         </li>
                       ))}
                       {selectedCompany2.brands.length === 0 && (
-                        <li className="px-4 py-2 text-gray-500 text-sm">
+                        <li className="px-4 py-2 text-gray-500 dark:text-gray-400 text-sm">
                           No brands available for this company.
                         </li>
                       )}
@@ -1036,21 +1036,21 @@ const CompareFrames: React.FC = () => {
                 )}
               </div>
             </div>
-            
+
             <div className="space-y-4">
               <div className="space-y-2">
-                <label htmlFor="yourCost2" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="yourCost2" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                   Your Actual Cost
                 </label>
                 <div className="relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSignIcon className="h-4 w-4 text-gray-400" />
+                    <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                   </div>
                   <input
                     type="text"
                     inputMode="decimal"
                     id="yourCost2"
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-[#181F1C]/50 dark:text-white"
                     value={frame2.yourCost}
                     onChange={(e) => {
                       const value = e.target.value.replace(/^0+(?=\d)/, '');
@@ -1059,20 +1059,20 @@ const CompareFrames: React.FC = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
-                <label htmlFor="wholesaleCost2" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="wholesaleCost2" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                   Wholesale Cost (Frame Book Price)
                 </label>
                 <div className="relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSignIcon className="h-4 w-4 text-gray-400" />
+                    <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                   </div>
                   <input
                     type="text"
                     inputMode="decimal"
                     id="wholesaleCost2"
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-[#181F1C]/50 dark:text-white"
                     value={frame2.wholesaleCost}
                     onChange={(e) => {
                       const value = e.target.value.replace(/^0+(?=\d)/, '');
@@ -1081,20 +1081,20 @@ const CompareFrames: React.FC = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
-                <label htmlFor="tariffTax2" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="tariffTax2" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                   Tariff Tax
                 </label>
                 <div className="relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSignIcon className="h-4 w-4 text-gray-400" />
+                    <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                   </div>
                   <input
                     type="text"
                     inputMode="decimal"
                     id="tariffTax2"
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-[#181F1C]/50 dark:text-white"
                     value={frame2.tariffTax}
                     onChange={(e) => {
                       const value = e.target.value.replace(/^0+(?=\d)/, '');
@@ -1103,19 +1103,19 @@ const CompareFrames: React.FC = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
-                <label htmlFor="insuranceMultiplier2" className="block text-sm font-medium text-gray-700 flex justify-between">
+                <label htmlFor="insuranceMultiplier2" className="block text-sm font-medium text-gray-700 dark:text-gray-200 flex justify-between">
                   <span>Insurance Multiplier: {frame2.insuranceMultiplier.toFixed(1)}x</span>
                   <div className="flex items-center">
                     <input
                       type="checkbox"
                       id="useManualPrice2"
-                      className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
                       checked={frame2.useManualRetailPrice}
                       onChange={(e) => handleUpdateFrame2('useManualRetailPrice', e.target.checked)}
                     />
-                    <label htmlFor="useManualPrice2" className="text-xs text-gray-500">
+                    <label htmlFor="useManualPrice2" className="text-xs text-gray-500 dark:text-gray-400">
                       Manual Price
                     </label>
                   </div>
@@ -1123,7 +1123,7 @@ const CompareFrames: React.FC = () => {
                 {!frame2.useManualRetailPrice && (
                   <div className="relative rounded-md shadow-sm">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <SlidersIcon className="h-4 w-4 text-gray-400" />
+                      <SlidersIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                     </div>
                     <input
                       type="range"
@@ -1135,7 +1135,7 @@ const CompareFrames: React.FC = () => {
                       value={frame2.insuranceMultiplier}
                       onChange={(e) => handleUpdateFrame2('insuranceMultiplier', parseFloat(e.target.value))}
                     />
-                    <div className="flex justify-between text-xs text-gray-400 px-3">
+                    <div className="flex justify-between text-xs text-gray-400 dark:text-gray-500 px-3">
                       <span>1x</span>
                       <span>2x</span>
                       <span>3x</span>
@@ -1144,20 +1144,20 @@ const CompareFrames: React.FC = () => {
                   </div>
                 )}
               </div>
-              
+
               <div className="space-y-2">
-                <label htmlFor="retailPrice2" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="retailPrice2" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                   Retail Price
                 </label>
                 <div className="relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSignIcon className="h-4 w-4 text-gray-400" />
+                    <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                   </div>
                   <input
                     type="text"
                     inputMode="decimal"
                     id="retailPrice2"
-                    className={`block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 ${!frame2.useManualRetailPrice ? 'bg-gray-100' : ''}`}
+                    className={`block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:text-white ${!frame2.useManualRetailPrice ? 'bg-gray-100 dark:bg-[#181F1C]/50' : 'bg-white dark:bg-[#181F1C]/50'}`}
                     value={frame2.retailPrice}
                     onChange={(e) => {
                       const value = e.target.value.replace(/^0+(?=\d)/, '');
@@ -1170,27 +1170,27 @@ const CompareFrames: React.FC = () => {
                   />
                 </div>
                 {!frame2.useManualRetailPrice && (
-                  <p className="text-xs text-gray-500 italic">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 italic">
                     Auto-calculated based on wholesale cost and multiplier
                   </p>
                 )}
               </div>
-              
+
               {frame2.insuranceEnabled && (
                 <>
                   <div className="space-y-2">
-                    <label htmlFor="insuranceCoverage2" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="insuranceCoverage2" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                       Insurance Coverage Amount
                     </label>
                     <div className="relative rounded-md shadow-sm">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <DollarSignIcon className="h-4 w-4 text-gray-400" />
+                        <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                       </div>
                       <input
                         type="text"
                         inputMode="decimal"
                         id="insuranceCoverage2"
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-[#181F1C]/50 dark:text-white"
                         value={frame2.insuranceCoverage}
                         onChange={(e) => {
                           const value = e.target.value.replace(/^0+(?=\d)/, '');
@@ -1198,7 +1198,7 @@ const CompareFrames: React.FC = () => {
                         }}
                       />
                     </div>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       {frame2.retailPrice > frame2.insuranceCoverage ? (
                         <>Patient will pay ${(frame2.retailPrice - frame2.insuranceCoverage).toFixed(2)} after 20% discount</>
                       ) : (
@@ -1208,18 +1208,18 @@ const CompareFrames: React.FC = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <label htmlFor="insuranceReimbursement2" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="insuranceReimbursement2" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                       Insurance Reimbursement
                     </label>
                     <div className="relative rounded-md shadow-sm">
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <DollarSignIcon className="h-4 w-4 text-gray-400" />
+                        <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                       </div>
                       <input
                         type="text"
                         inputMode="decimal"
                         id="insuranceReimbursement2"
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-[#181F1C]/50 dark:text-white"
                         value={frame2.insuranceReimbursement}
                         onChange={(e) => {
                           const value = e.target.value.replace(/^0+(?=\d)/, '');
@@ -1227,7 +1227,7 @@ const CompareFrames: React.FC = () => {
                         }}
                       />
                     </div>
-                    <p className="text-xs text-gray-500 italic">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 italic">
                       Typically $57 for most insurance providers
                     </p>
                   </div>
@@ -1267,45 +1267,45 @@ const CompareFrames: React.FC = () => {
         {/* Save Dialog */}
         {showSaveDialog && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div ref={saveDialogRef} className="bg-white rounded-lg p-6 max-w-md w-full">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Save Frame Comparison</h3>
+            <div ref={saveDialogRef} className="bg-white dark:bg-[#1F2623] rounded-lg p-6 max-w-md w-full">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Save Frame Comparison</h3>
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="comparisonName" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="comparisonName" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                     Comparison Name
                   </label>
                   <input
                     type="text"
                     id="comparisonName"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-[#181F1C]/50 dark:text-white"
                     placeholder="Enter a name"
                     value={saveComparisonName}
                     onChange={(e) => setSaveComparisonName(e.target.value)}
                     autoFocus
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-1">Frame 1</h4>
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Frame 1</h4>
                     <div className="text-sm">
-                      <p><span className="font-medium">{frame1.frameName}</span></p>
-                      {frame1.brand && <p className="text-gray-500">{frame1.brand}</p>}
+                      <p><span className="font-medium dark:text-white">{frame1.frameName}</span></p>
+                      {frame1.brand && <p className="text-gray-500 dark:text-gray-400">{frame1.brand}</p>}
                     </div>
                   </div>
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-1">Frame 2</h4>
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Frame 2</h4>
                     <div className="text-sm">
-                      <p><span className="font-medium">{frame2.frameName}</span></p>
-                      {frame2.brand && <p className="text-gray-500">{frame2.brand}</p>}
+                      <p><span className="font-medium dark:text-white">{frame2.frameName}</span></p>
+                      {frame2.brand && <p className="text-gray-500 dark:text-gray-400">{frame2.brand}</p>}
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="flex justify-end space-x-3 pt-2">
                   <button
                     type="button"
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-[#181F1C]/50 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                     onClick={() => setShowSaveDialog(false)}
                   >
                     Cancel
@@ -1361,13 +1361,13 @@ const CompareFrames: React.FC = () => {
         {/* Saved Comparisons */}
         {savedComparisons.length > 0 && (
           <div className="mt-8">
-            <h3 className="text-lg font-medium text-gray-900 mb-3">Saved Comparisons</h3>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <ul className="divide-y divide-gray-200">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Saved Comparisons</h3>
+            <div className="bg-white dark:bg-[#1F2623] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <ul className="divide-y divide-gray-200 dark:divide-gray-700">
                 {savedComparisons.map((comparison) => (
-                  <li 
+                  <li
                     key={comparison.id}
-                    className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                    className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                     onClick={() => {
                       setFrame1({
                         frameName: comparison.frame1.frameName,
@@ -1402,24 +1402,24 @@ const CompareFrames: React.FC = () => {
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <h4 className="text-sm font-medium text-gray-900">{comparison.name}</h4>
-                        <div className="mt-1 flex items-center text-xs text-gray-500">
+                        <h4 className="text-sm font-medium text-gray-900 dark:text-white">{comparison.name}</h4>
+                        <div className="mt-1 flex items-center text-xs text-gray-500 dark:text-gray-400">
                           <span>{comparison.date}</span>
                         </div>
                       </div>
                     </div>
                     <div className="mt-2 grid grid-cols-2 gap-2">
-                      <div className="text-xs bg-blue-50 p-2 rounded">
-                        <div className="font-medium">{comparison.frame1.frameName}</div>
-                        <div className="text-gray-600">{comparison.frame1.brand}</div>
-                        <div className="mt-1">
+                      <div className="text-xs bg-blue-50 dark:bg-blue-900/20 p-2 rounded">
+                        <div className="font-medium dark:text-white">{comparison.frame1.frameName}</div>
+                        <div className="text-gray-600 dark:text-gray-300">{comparison.frame1.brand}</div>
+                        <div className="mt-1 dark:text-gray-200">
                           Profit: {formatCurrency(comparison.frame1.profit)} ({comparison.frame1.margin}%)
                         </div>
                       </div>
-                      <div className="text-xs bg-green-50 p-2 rounded">
-                        <div className="font-medium">{comparison.frame2.frameName}</div>
-                        <div className="text-gray-600">{comparison.frame2.brand}</div>
-                        <div className="mt-1">
+                      <div className="text-xs bg-green-50 dark:bg-green-900/20 p-2 rounded">
+                        <div className="font-medium dark:text-white">{comparison.frame2.frameName}</div>
+                        <div className="text-gray-600 dark:text-gray-300">{comparison.frame2.brand}</div>
+                        <div className="mt-1 dark:text-gray-200">
                           Profit: {formatCurrency(comparison.frame2.profit)} ({comparison.frame2.margin}%)
                         </div>
                       </div>

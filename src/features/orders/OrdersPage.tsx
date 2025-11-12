@@ -65,7 +65,7 @@ export function OrdersPage() {
   ];
 
   return (
-    <div className="space-y-6 p-6 bg-gray-50 dark:bg-gray-950 min-h-screen">
+    <div className="space-y-6 p-6 bg-gray-50 dark:bg-[#181F1C] min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -94,7 +94,7 @@ export function OrdersPage() {
                 {tab.label}
                 {tab.count > 0 && (
                   <span className={`ml-2 py-0.5 px-2 rounded-full text-xs ${
-                    isActive ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
+                    isActive ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'bg-gray-100 dark:bg-[#1F2623] text-gray-600 dark:text-gray-300'
                   }`}>
                     {tab.count}
                   </span>
@@ -106,7 +106,7 @@ export function OrdersPage() {
       </div>
 
       {/* Filters and Sorting */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
+      <div className="bg-white dark:bg-[#1F2623] rounded-2xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <Filter className="h-5 w-5 text-gray-400 dark:text-gray-500" />
@@ -120,7 +120,7 @@ export function OrdersPage() {
               id="vendor-filter"
               value={selectedVendor}
               onChange={(e) => setSelectedVendor(e.target.value)}
-              className="block w-full max-w-xs rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="block w-full max-w-xs rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1F2623] text-gray-900 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             >
               <option value="all">All Vendors</option>
               {vendors.map((vendor) => (
@@ -138,7 +138,7 @@ export function OrdersPage() {
               id="sort-by"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as 'date' | 'vendor')}
-              className="block rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="block rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1F2623] text-gray-900 dark:text-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             >
               <option value="date">Order Date</option>
               <option value="vendor">Vendor Name</option>

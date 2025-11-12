@@ -56,27 +56,27 @@ export function ModernInventoryTable({
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+      <div className="bg-white dark:bg-[#1F2623] rounded-xl shadow-sm p-12 text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-        <p className="mt-4 text-gray-500">Loading inventory...</p>
+        <p className="mt-4 text-gray-500 dark:text-gray-400">Loading inventory...</p>
       </div>
     );
   }
 
   if (items.length === 0) {
     return (
-      <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-        <div className="text-gray-400 text-6xl mb-4">📦</div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No inventory found</h3>
-        <p className="text-gray-500">Items will appear here when you receive vendor orders</p>
+      <div className="bg-white dark:bg-[#1F2623] rounded-xl shadow-sm p-12 text-center">
+        <div className="text-gray-400 dark:text-gray-500 text-6xl mb-4">📦</div>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No inventory found</h3>
+        <p className="text-gray-500 dark:text-gray-400">Items will appear here when you receive vendor orders</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div className="bg-white dark:bg-[#1F2623] rounded-xl shadow-sm overflow-hidden">
       {/* Table Header */}
-      <div className="grid grid-cols-[40px_80px_1.5fr_150px_1fr_100px_100px_180px_140px] gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200 text-xs font-medium text-gray-500 uppercase tracking-wider">
+      <div className="grid grid-cols-[40px_80px_1.5fr_150px_1fr_100px_100px_180px_140px] gap-4 px-6 py-3 bg-gray-50 dark:bg-[#181F1C]/50 border-b border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
         <div className="flex items-center">#</div>
         <div>Image</div>
         <div>Brand • Model</div>
@@ -89,7 +89,7 @@ export function ModernInventoryTable({
       </div>
 
       {/* Table Body */}
-      <div className="divide-y divide-gray-200">
+      <div className="divide-y divide-gray-200 dark:divide-gray-700">
         {items.map((item) => {
           const isExpanded = expandedRows.has(item.id);
           const isSelected = selectedItems.has(item.id);
@@ -99,7 +99,7 @@ export function ModernInventoryTable({
             <div
               key={item.id}
               className={`transition-colors ${
-                isExpanded ? 'bg-purple-50/30' : 'hover:bg-gray-50'
+                isExpanded ? 'bg-purple-50/30 dark:bg-purple-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
               }`}
             >
               {/* Collapsed Row */}
@@ -115,29 +115,29 @@ export function ModernInventoryTable({
                 </div>
 
                 {/* Image Placeholder */}
-                <div className="w-16 h-16 bg-gray-100 rounded-xl border border-gray-200 flex items-center justify-center text-gray-400 text-xs">
+                <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-400 dark:text-gray-500 text-xs">
                   No Img
                 </div>
 
                 {/* Brand • Model */}
                 <div>
-                  <div className="text-sm font-medium text-gray-900">
+                  <div className="text-sm font-medium text-gray-900 dark:text-white">
                     {item.brand || 'Unknown Brand'}
                   </div>
-                  <div className="text-sm text-gray-500">{item.model || 'Unknown Model'}</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">{item.model || 'Unknown Model'}</div>
                 </div>
 
                 {/* UPC */}
-                <div className="text-sm font-medium text-gray-900">{item.upc || 'N/A'}</div>
+                <div className="text-sm font-medium text-gray-900 dark:text-white">{item.upc || 'N/A'}</div>
 
                 {/* Color */}
-                <div className="text-sm text-gray-700">{item.color || 'N/A'}</div>
+                <div className="text-sm text-gray-700 dark:text-gray-300">{item.color || 'N/A'}</div>
 
                 {/* Size */}
-                <div className="text-sm text-gray-700">{item.size || 'N/A'}</div>
+                <div className="text-sm text-gray-700 dark:text-gray-300">{item.size || 'N/A'}</div>
 
                 {/* Stock */}
-                <div className="text-sm font-medium text-gray-900">
+                <div className="text-sm font-medium text-gray-900 dark:text-white">
                   {item.quantity} {item.quantity === 1 ? 'pc' : 'pcs'}
                 </div>
 
@@ -146,12 +146,12 @@ export function ModernInventoryTable({
                   {returnWindow ? (
                     <div className="flex items-center gap-2">
                       <span className="text-base">{getReturnWindowEmoji(returnWindow.status)}</span>
-                      <span className={`text-sm font-medium ${returnWindow.status === 'expired' ? 'text-gray-500' : ''}`}>
+                      <span className={`text-sm font-medium ${returnWindow.status === 'expired' ? 'text-gray-500 dark:text-gray-400' : 'dark:text-gray-200'}`}>
                         {returnWindow.displayText}
                       </span>
                     </div>
                   ) : (
-                    <span className="text-sm text-gray-400">No date</span>
+                    <span className="text-sm text-gray-400 dark:text-gray-500">No date</span>
                   )}
                 </div>
 
@@ -164,7 +164,7 @@ export function ModernInventoryTable({
                         e.stopPropagation();
                         onAddToReturnReport(item);
                       }}
-                      className="p-2 rounded-lg hover:bg-purple-100 text-purple-600 transition-colors"
+                      className="p-2 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 text-purple-600 dark:text-purple-400 transition-colors"
                       title="Add to Return Report"
                     >
                       <span className="text-base">🔄</span>
@@ -178,7 +178,7 @@ export function ModernInventoryTable({
                         e.stopPropagation();
                         onArchive(item.id);
                       }}
-                      className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
+                      className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 transition-colors"
                       title="Archive"
                     >
                       <Archive className="w-4 h-4" />
@@ -192,7 +192,7 @@ export function ModernInventoryTable({
                         e.stopPropagation();
                         onMarkAsSold(item.id);
                       }}
-                      className="p-2 rounded-lg hover:bg-green-100 text-green-600 transition-colors"
+                      className="p-2 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/50 text-green-600 dark:text-green-400 transition-colors"
                       title="Mark as Sold"
                     >
                       <DollarSign className="w-4 h-4" />
@@ -206,7 +206,7 @@ export function ModernInventoryTable({
                         e.stopPropagation();
                         onRestore(item.id);
                       }}
-                      className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition-colors"
+                      className="p-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 transition-colors"
                       title="Restore"
                     >
                       <RotateCcw className="w-4 h-4" />
@@ -216,13 +216,13 @@ export function ModernInventoryTable({
                   {/* Expand/Collapse Button */}
                   <button
                     onClick={() => toggleExpanded(item.id)}
-                    className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                     title="View Details"
                   >
                     {isExpanded ? (
-                      <ChevronUp className="w-4 h-4 text-gray-500" />
+                      <ChevronUp className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                     ) : (
-                      <ChevronDown className="w-4 h-4 text-gray-500" />
+                      <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                     )}
                   </button>
                 </div>
@@ -230,10 +230,10 @@ export function ModernInventoryTable({
 
               {/* Expanded Detail Panel */}
               {isExpanded && (
-                <div className="px-6 pb-6 bg-white border-t border-gray-100">
+                <div className="px-6 pb-6 bg-white dark:bg-[#1F2623] border-t border-gray-100 dark:border-gray-700">
                   <div className="grid grid-cols-[200px_1fr] gap-8 pt-6">
                     {/* Left: Image Placeholder */}
-                    <div className="w-48 h-48 bg-gray-100 rounded-2xl border-2 border-gray-200 flex items-center justify-center text-gray-400">
+                    <div className="w-48 h-48 bg-gray-100 dark:bg-gray-700 rounded-2xl border-2 border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-400 dark:text-gray-500">
                       <div className="text-center">
                         <div className="text-4xl mb-2">🖼️</div>
                         <div className="text-xs">No Image</div>
@@ -244,7 +244,7 @@ export function ModernInventoryTable({
                     <div className="space-y-6">
                       {/* Header with Brand */}
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                           {item.brand} - {item.model}
                         </h3>
 
@@ -263,49 +263,49 @@ export function ModernInventoryTable({
                           </div>
                         )}
 
-                        <div className="h-px bg-gray-200 mt-4"></div>
+                        <div className="h-px bg-gray-200 dark:bg-gray-700 mt-4"></div>
                       </div>
 
                       {/* Details Grid */}
                       <div className="grid grid-cols-2 gap-x-12 gap-y-4">
                         {/* Basic Info */}
                         <div>
-                          <div className="text-xs font-medium text-gray-500 mb-1">Color</div>
-                          <div className="text-sm text-gray-900">{item.color || 'N/A'}</div>
+                          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Color</div>
+                          <div className="text-sm text-gray-900 dark:text-white">{item.color || 'N/A'}</div>
                         </div>
 
                         <div>
-                          <div className="text-xs font-medium text-gray-500 mb-1">Size</div>
-                          <div className="text-sm text-gray-900">{item.size || 'N/A'}</div>
+                          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Size</div>
+                          <div className="text-sm text-gray-900 dark:text-white">{item.size || 'N/A'}</div>
                         </div>
 
                         <div>
-                          <div className="text-xs font-medium text-gray-500 mb-1">SKU</div>
-                          <div className="text-sm text-gray-900">{item.sku || 'N/A'}</div>
+                          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">SKU</div>
+                          <div className="text-sm text-gray-900 dark:text-white">{item.sku || 'N/A'}</div>
                         </div>
 
                         <div>
-                          <div className="text-xs font-medium text-gray-500 mb-1">UPC</div>
-                          <div className="text-sm text-gray-900">{item.upc || 'N/A'}</div>
+                          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">UPC</div>
+                          <div className="text-sm text-gray-900 dark:text-white">{item.upc || 'N/A'}</div>
                         </div>
 
                         {/* Separator */}
-                        <div className="col-span-2 h-px bg-gray-200"></div>
+                        <div className="col-span-2 h-px bg-gray-200 dark:bg-gray-700"></div>
 
                         {/* Vendor Info */}
                         <div>
-                          <div className="text-xs font-medium text-gray-500 mb-1">Vendor</div>
-                          <div className="text-sm text-gray-900">{item.vendor?.name || 'N/A'}</div>
+                          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Vendor</div>
+                          <div className="text-sm text-gray-900 dark:text-white">{item.vendor?.name || 'N/A'}</div>
                         </div>
 
                         <div>
-                          <div className="text-xs font-medium text-gray-500 mb-1">Brand</div>
-                          <div className="text-sm text-gray-900">{item.brand || 'N/A'}</div>
+                          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Brand</div>
+                          <div className="text-sm text-gray-900 dark:text-white">{item.brand || 'N/A'}</div>
                         </div>
 
                         <div>
-                          <div className="text-xs font-medium text-gray-500 mb-1">Order Date</div>
-                          <div className="text-sm text-gray-900">
+                          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Order Date</div>
+                          <div className="text-sm text-gray-900 dark:text-white">
                             {item.order?.order_date
                               ? new Date(item.order.order_date).toLocaleDateString('en-US', {
                                   year: 'numeric',
@@ -317,26 +317,26 @@ export function ModernInventoryTable({
                         </div>
 
                         {/* Separator */}
-                        <div className="col-span-2 h-px bg-gray-200"></div>
+                        <div className="col-span-2 h-px bg-gray-200 dark:bg-gray-700"></div>
 
                         {/* Pricing Info */}
                         <div>
-                          <div className="text-xs font-medium text-gray-500 mb-1">Wholesale Cost</div>
-                          <div className="text-sm text-gray-900">
+                          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Wholesale Cost</div>
+                          <div className="text-sm text-gray-900 dark:text-white">
                             {item.wholesale_price ? `$${item.wholesale_price.toFixed(2)}` : 'N/A'}
                           </div>
                         </div>
 
                         <div>
-                          <div className="text-xs font-medium text-gray-500 mb-1">Discount</div>
-                          <div className="text-sm text-gray-900">
+                          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Discount</div>
+                          <div className="text-sm text-gray-900 dark:text-white">
                             {item.discount_percentage ? `${item.discount_percentage}%` : 'N/A'}
                           </div>
                         </div>
                       </div>
 
                       {/* Actions */}
-                      <div className="pt-4 border-t border-gray-200">
+                      <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                         <div className="flex items-center gap-3 mt-4">
                           {/* Return Report Button (for current items with valid return window) */}
                           {onAddToReturnReport && returnWindow && returnWindow.status !== 'expired' && item.status === 'current' && (

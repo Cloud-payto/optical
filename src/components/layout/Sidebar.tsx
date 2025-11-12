@@ -100,7 +100,7 @@ const Sidebar: React.FC = () => {
   };
 
   return (
-    <div className={`bg-white dark:bg-gray-900 text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700 transition-all duration-300 flex flex-col h-screen ${
+    <div className={`bg-white dark:bg-[#1F2623] text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-700 transition-all duration-300 flex flex-col h-screen ${
       isCollapsed ? 'w-20' : 'w-64'
     }`}>
       {/* Header */}
@@ -149,7 +149,7 @@ const Sidebar: React.FC = () => {
                       isCollapsed ? 'justify-center' : 'justify-between'
                     } ${
                       sectionActive
-                        ? 'bg-blue-100 dark:bg-gray-800 text-blue-700 dark:text-white'
+                        ? 'bg-blue-100 dark:bg-[#1F2623] text-blue-700 dark:text-white'
                         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
                     } ${item.disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                     title={isCollapsed ? item.name : undefined}

@@ -18,6 +18,8 @@ module.exports = {
     },
     extend: {
       colors: {
+        'dark-bg': '#181F1C',  // Primary dark background
+        'dark-card': '#1F2623',  // Secondary dark background for cards
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',

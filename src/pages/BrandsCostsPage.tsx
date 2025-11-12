@@ -211,16 +211,16 @@ const BrandsCostsPage: React.FC = () => {
   };
 
   return (
-    <div className="h-full bg-gray-50">
+    <div className="h-full bg-gray-50 dark:bg-[#181F1C]">
       <div className="p-6 md:p-8">
         <Container>
           {/* Page Header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                 Vendors
               </h1>
-              <p className="text-lg text-gray-600">
+              <p className="text-lg text-gray-600 dark:text-gray-300">
                 Manage optical vendors, their brands, and associated costs.
               </p>
             </div>
@@ -241,11 +241,11 @@ const BrandsCostsPage: React.FC = () => {
           <div className="mb-8">
             <div className="relative max-w-md">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
+                <Search className="h-5 w-5 text-gray-400 dark:text-gray-500" />
               </div>
               <input
                 type="text"
-                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white"
+                className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-[#1F2623] text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                 placeholder="Search for brands or companies..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -258,16 +258,16 @@ const BrandsCostsPage: React.FC = () => {
             <div className="flex items-center justify-center py-12">
               <div className="flex items-center gap-3">
                 <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-                <span className="text-gray-600">Loading company data...</span>
+                <span className="text-gray-600 dark:text-gray-300">Loading company data...</span>
               </div>
             </div>
           )}
 
           {/* Error State */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center mb-8">
-              <div className="text-red-600 font-medium mb-2">Error Loading Companies</div>
-              <div className="text-red-500 text-sm mb-4">{error}</div>
+            <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg p-6 text-center mb-8">
+              <div className="text-red-600 dark:text-red-400 font-medium mb-2">Error Loading Companies</div>
+              <div className="text-red-500 dark:text-red-300 text-sm mb-4">{error}</div>
               <button 
                 onClick={() => window.location.reload()}
                 className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
@@ -307,12 +307,12 @@ const BrandsCostsPage: React.FC = () => {
                 ))
               ) : (
                 <div className="text-center py-12">
-                  <div className="text-gray-400 mb-4">
+                  <div className="text-gray-400 dark:text-gray-600 mb-4">
                     <Search className="h-12 w-12 mx-auto" />
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No companies found</h3>
-                  <p className="text-gray-500">
-                    {searchTerm 
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No companies found</h3>
+                  <p className="text-gray-500 dark:text-gray-400">
+                    {searchTerm
                       ? `No companies or brands match "${searchTerm}"`
                       : 'No companies available'
                     }
@@ -324,26 +324,26 @@ const BrandsCostsPage: React.FC = () => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 rounded-lg">
+            <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1F2623] px-4 py-3 sm:px-6 rounded-lg">
               <div className="flex flex-1 justify-between sm:hidden">
                 <button
                   onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
-                  className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="relative inline-flex items-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1F2623] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Previous
                 </button>
                 <button
                   onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                   disabled={currentPage === totalPages}
-                  className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1F2623] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
                 </button>
               </div>
               <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-sm text-gray-700">
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
                     Showing{' '}
                     <span className="font-medium">{startIndex + 1}</span> to{' '}
                     <span className="font-medium">
@@ -357,7 +357,7 @@ const BrandsCostsPage: React.FC = () => {
                     <button
                       onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                       disabled={currentPage === 1}
-                      className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 dark:text-gray-500 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <ChevronLeft className="h-5 w-5" />
                     </button>
@@ -368,7 +368,7 @@ const BrandsCostsPage: React.FC = () => {
                         className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold ${
                           page === currentPage
                             ? 'z-10 bg-blue-600 text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600'
-                            : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0'
+                            : 'text-gray-900 dark:text-gray-100 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 focus:z-20 focus:outline-offset-0'
                         }`}
                       >
                         {page}
@@ -377,7 +377,7 @@ const BrandsCostsPage: React.FC = () => {
                     <button
                       onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                       disabled={currentPage === totalPages}
-                      className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 dark:text-gray-500 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <ChevronRight className="h-5 w-5" />
                     </button>

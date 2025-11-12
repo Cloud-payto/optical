@@ -104,7 +104,7 @@ const ImportFromInventory: React.FC<ImportFromInventoryProps> = ({ onImportCompl
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 border border-blue-200 dark:border-gray-700 rounded-lg p-6">
+      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-[#181F1C] border border-blue-200 dark:border-gray-700 rounded-lg p-6">
         <div className="flex items-center gap-3">
           <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
           <span className="text-gray-600 dark:text-gray-300">Checking for vendors in your inventory...</span>
@@ -121,7 +121,7 @@ const ImportFromInventory: React.FC<ImportFromInventoryProps> = ({ onImportCompl
   }
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 border-2 border-blue-300 dark:border-blue-600 rounded-lg p-6 mb-6">
+    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-[#181F1C] border-2 border-blue-300 dark:border-blue-600 rounded-lg p-6 mb-6">
       <div className="flex items-start gap-4">
         <div className="flex-shrink-0">
           <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">

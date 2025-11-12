@@ -449,17 +449,17 @@ const ProfitCalculator: React.FC = () => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
+    <div className="bg-white dark:bg-[#1F2623] rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
       <div className="md:flex">
         <div className="p-6 md:w-1/2">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Frame Profitability Calculator</h2>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Frame Profitability Calculator</h2>
           
           {/* Insurance Toggle */}
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg border">
+          <div className="mb-6 p-4 bg-gray-50 dark:bg-[#181F1C]/50 rounded-lg border border-gray-300 dark:border-gray-600">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-medium text-gray-900">Insurance Billing</h3>
-                <p className="text-xs text-gray-500 mt-1">
+                <h3 className="text-sm font-medium text-gray-900 dark:text-white">Insurance Billing</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   {insuranceEnabled 
                     ? "Calculate profit with insurance provider billing" 
                     : "Calculate profit for cash-pay customers (2x wholesale pricing)"
@@ -477,7 +477,7 @@ const ProfitCalculator: React.FC = () => {
                 <label
                   htmlFor="insuranceToggle"
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                    insuranceEnabled ? 'bg-blue-600' : 'bg-gray-200'
+                    insuranceEnabled ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'
                   }`}
                 >
                   <span
@@ -486,7 +486,7 @@ const ProfitCalculator: React.FC = () => {
                     }`}
                   />
                 </label>
-                <span className="ml-3 text-sm font-medium text-gray-700">
+                <span className="ml-3 text-sm font-medium text-gray-700 dark:text-gray-200">
                   {insuranceEnabled ? 'On' : 'Off'}
                 </span>
               </div>
@@ -500,7 +500,7 @@ const ProfitCalculator: React.FC = () => {
               <div className="space-y-4">
                 {/* Company Dropdown */}
                 <div className="space-y-2">
-                  <label htmlFor="company" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="company" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                     Company
                   </label>
                   <div className="relative" ref={companyDropdownRef}>
@@ -508,21 +508,21 @@ const ProfitCalculator: React.FC = () => {
                       type="button"
                       data-demo="company-dropdown"
                       data-tour="company-dropdown"
-                      className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       onClick={() => setShowCompanyDropdown(!showCompanyDropdown)}
                     >
                       <div className="flex items-center">
-                        <BuildingIcon className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="truncate">{selectedCompany?.name || 'Select a company'}</span>
+                        <BuildingIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
+                        <span className="truncate text-gray-800 dark:text-white">{selectedCompany?.name || 'Select a company'}</span>
                       </div>
-                      <ChevronDownIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <ChevronDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                     </button>
-                    
+
                     {showCompanyDropdown && (
-                      <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-60 overflow-auto">
+                      <div className="absolute z-10 mt-1 w-full bg-white dark:bg-[#1F2623] shadow-lg rounded-md border border-gray-200 dark:border-gray-700 max-h-60 overflow-auto">
                         <ul className="py-1">
                           {loadingCompanies ? (
-                            <li className="px-4 py-2 text-gray-500 text-sm">
+                            <li className="px-4 py-2 text-gray-500 dark:text-gray-400 text-sm">
                               Loading companies...
                             </li>
                           ) : companiesError ? (
@@ -530,7 +530,7 @@ const ProfitCalculator: React.FC = () => {
                               {companiesError}
                             </li>
                           ) : companies.length === 0 ? (
-                            <li className="px-4 py-2 text-gray-500 text-sm">
+                            <li className="px-4 py-2 text-gray-500 dark:text-gray-400 text-sm">
                               No companies available. Add companies in Brands & Costs.
                             </li>
                           ) : (
@@ -538,7 +538,7 @@ const ProfitCalculator: React.FC = () => {
                               <li key={company.id}>
                                 <button
                                   type="button"
-                                  className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${selectedCompany?.id === company.id ? 'bg-blue-50 text-blue-700' : ''}`}
+                                  className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${selectedCompany?.id === company.id ? 'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'text-gray-800 dark:text-white'}`}
                                   onClick={() => handleCompanySelect(company)}
                                 >
                                   {company.name}
@@ -555,30 +555,30 @@ const ProfitCalculator: React.FC = () => {
                 {/* Insurance Provider Dropdown */}
                 {insuranceEnabled && (
                   <div className="space-y-2">
-                    <label htmlFor="insurance" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="insurance" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                       Insurance Provider
                     </label>
                   <div className="relative" ref={insuranceDropdownRef}>
                     <button
                       type="button"
-                      className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       onClick={() => setShowInsuranceDropdown(!showInsuranceDropdown)}
                     >
                       <div className="flex items-center">
-                        <ShieldIcon className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="truncate">{selectedInsurance || 'Select insurance provider'}</span>
+                        <ShieldIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
+                        <span className="truncate text-gray-800 dark:text-white">{selectedInsurance || 'Select insurance provider'}</span>
                       </div>
-                      <ChevronDownIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <ChevronDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                     </button>
-                    
+
                     {showInsuranceDropdown && (
-                      <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-60 overflow-auto">
+                      <div className="absolute z-10 mt-1 w-full bg-white dark:bg-[#1F2623] shadow-lg rounded-md border border-gray-200 dark:border-gray-700 max-h-60 overflow-auto">
                         <ul className="py-1">
                           {INSURANCE_PROVIDERS.map((provider) => (
                             <li key={provider}>
                               <button
                                 type="button"
-                                className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${selectedInsurance === provider ? 'bg-blue-50 text-blue-700' : ''}`}
+                                className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${selectedInsurance === provider ? 'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'text-gray-800 dark:text-white'}`}
                                 onClick={() => handleInsuranceSelect(provider)}
                               >
                                 {provider}
@@ -588,11 +588,11 @@ const ProfitCalculator: React.FC = () => {
                         </ul>
                         
                         {showCustomInsurance && (
-                          <div className="p-3 border-t border-gray-200">
+                          <div className="p-3 border-t border-gray-200 dark:border-gray-700">
                             <div className="flex space-x-2">
                               <input
                                 type="text"
-                                className="flex-grow px-3 py-1 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                className="flex-grow px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                                 placeholder="Custom insurance provider"
                                 value={customInsurance}
                                 onChange={(e) => setCustomInsurance(e.target.value)}
@@ -623,7 +623,7 @@ const ProfitCalculator: React.FC = () => {
               <div className="space-y-4">
                 {/* Brand Dropdown */}
                 <div className="space-y-2">
-                  <label htmlFor="brand" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="brand" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                     Brand
                   </label>
                   <div className="relative" ref={brandDropdownRef}>
@@ -631,35 +631,35 @@ const ProfitCalculator: React.FC = () => {
                       type="button"
                       data-demo="brand-dropdown"
                       data-tour="brand-dropdown"
-                      className={`w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                      className={`w-full flex items-center justify-between px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                         !selectedCompany ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
                       onClick={() => selectedCompany && setShowBrandDropdown(!showBrandDropdown)}
                       disabled={!selectedCompany}
                     >
                       <div className="flex items-center">
-                        <TagIcon className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="truncate">
+                        <TagIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
+                        <span className="truncate text-gray-800 dark:text-white">
                           {selectedBrand?.name || (selectedCompany ? 'Select a brand' : 'Select company first')}
                         </span>
                       </div>
-                      <ChevronDownIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <ChevronDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                     </button>
-                    
+
                     {showBrandDropdown && selectedCompany && (
-                      <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-60 overflow-auto">
+                      <div className="absolute z-10 mt-1 w-full bg-white dark:bg-[#1F2623] shadow-lg rounded-md border border-gray-200 dark:border-gray-700 max-h-60 overflow-auto">
                         <ul className="py-1">
                           {selectedCompany.brands.map((brand) => (
                             <li key={brand.id}>
                               <button
                                 type="button"
-                                className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${selectedBrand?.id === brand.id ? 'bg-blue-50 text-blue-700' : ''}`}
+                                className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${selectedBrand?.id === brand.id ? 'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'text-gray-800 dark:text-white'}`}
                                 onClick={() => handleBrandSelect(brand)}
                               >
                                 <div>
                                   <div className="font-medium">{brand.name}</div>
                                   {(brand.wholesale_cost || brand.your_cost) && (
-                                    <div className="text-xs text-gray-500">
+                                    <div className="text-xs text-gray-500 dark:text-gray-400">
                                       {brand.your_cost !== null && brand.your_cost !== undefined && `Your Cost: $${brand.your_cost}`}
                                       {brand.wholesale_cost !== null && brand.wholesale_cost !== undefined && ` • Wholesale: $${brand.wholesale_cost}`}
                                       {brand.tariff_tax !== null && brand.tariff_tax !== undefined && ` • Tariff: $${brand.tariff_tax}`}
@@ -670,7 +670,7 @@ const ProfitCalculator: React.FC = () => {
                             </li>
                           ))}
                           {selectedCompany.brands.length === 0 && (
-                            <li className="px-4 py-2 text-gray-500 text-sm">
+                            <li className="px-4 py-2 text-gray-500 dark:text-gray-400 text-sm">
                               No brands available for this company.
                             </li>
                           )}
@@ -683,30 +683,30 @@ const ProfitCalculator: React.FC = () => {
                 {/* Insurance Plan Dropdown */}
                 {insuranceEnabled && (
                   <div className="space-y-2">
-                    <label htmlFor="insurancePlan" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="insurancePlan" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                       Insurance Plan
                     </label>
                   <div className="relative" ref={insurancePlanDropdownRef}>
                     <button
                       type="button"
-                      className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       onClick={() => setShowInsurancePlanDropdown(!showInsurancePlanDropdown)}
                     >
                       <div className="flex items-center">
-                        <ShieldIcon className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="truncate">{selectedInsurancePlan || 'Select insurance plan'}</span>
+                        <ShieldIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
+                        <span className="truncate text-gray-800 dark:text-white">{selectedInsurancePlan || 'Select insurance plan'}</span>
                       </div>
-                      <ChevronDownIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <ChevronDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                     </button>
-                    
+
                     {showInsurancePlanDropdown && (
-                      <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-60 overflow-auto">
+                      <div className="absolute z-10 mt-1 w-full bg-white dark:bg-[#1F2623] shadow-lg rounded-md border border-gray-200 dark:border-gray-700 max-h-60 overflow-auto">
                         <ul className="py-1">
                           {INSURANCE_PLANS.map((plan) => (
                             <li key={plan}>
                               <button
                                 type="button"
-                                className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${selectedInsurancePlan === plan ? 'bg-blue-50 text-blue-700' : ''}`}
+                                className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${selectedInsurancePlan === plan ? 'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'text-gray-800 dark:text-white'}`}
                                 onClick={() => handleInsurancePlanSelect(plan)}
                               >
                                 {plan}
@@ -714,13 +714,13 @@ const ProfitCalculator: React.FC = () => {
                             </li>
                           ))}
                         </ul>
-                        
+
                         {showCustomInsurancePlan && (
-                          <div className="p-3 border-t border-gray-200">
+                          <div className="p-3 border-t border-gray-200 dark:border-gray-700">
                             <div className="flex space-x-2">
                               <input
                                 type="text"
-                                className="flex-grow px-3 py-1 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                className="flex-grow px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                                 placeholder="Custom insurance plan"
                                 value={customInsurancePlan}
                                 onChange={(e) => setCustomInsurancePlan(e.target.value)}
@@ -751,31 +751,31 @@ const ProfitCalculator: React.FC = () => {
             
             {/* Legacy Brand Dropdown - shown when no companies are available or still loading */}
             {(companies.length === 0 && !loadingCompanies) && (
-              <div className="space-y-2 border-t border-gray-200 pt-4">
-                <label htmlFor="legacyBrand" className="block text-sm font-medium text-gray-700">
+              <div className="space-y-2 border-t border-gray-200 dark:border-gray-700 pt-4">
+                <label htmlFor="legacyBrand" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                   Brand (Legacy)
                 </label>
                 <div className="relative" ref={legacyBrandDropdownRef}>
                   <button
                     type="button"
-                    className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-left focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     onClick={() => setShowLegacyBrandDropdown(!showLegacyBrandDropdown)}
                   >
                     <div className="flex items-center">
-                      <TagIcon className="h-4 w-4 text-gray-400 mr-2" />
-                      <span className="truncate">{legacySelectedBrand || 'Select a brand'}</span>
+                      <TagIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
+                      <span className="truncate text-gray-800 dark:text-white">{legacySelectedBrand || 'Select a brand'}</span>
                     </div>
-                    <ChevronDownIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                    <ChevronDownIcon className="h-4 w-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                   </button>
-                  
+
                   {showLegacyBrandDropdown && (
-                    <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-60 overflow-auto">
+                    <div className="absolute z-10 mt-1 w-full bg-white dark:bg-[#1F2623] shadow-lg rounded-md border border-gray-200 dark:border-gray-700 max-h-60 overflow-auto">
                       <ul className="py-1">
                         {brands.map((brand) => (
                           <li key={brand}>
                             <button
                               type="button"
-                              className={`w-full text-left px-4 py-2 hover:bg-gray-100 ${legacySelectedBrand === brand ? 'bg-blue-50 text-blue-700' : ''}`}
+                              className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${legacySelectedBrand === brand ? 'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'text-gray-800 dark:text-white'}`}
                               onClick={() => {
                                 setLegacySelectedBrand(brand);
                                 setShowLegacyBrandDropdown(false);
@@ -785,10 +785,10 @@ const ProfitCalculator: React.FC = () => {
                             </button>
                           </li>
                         ))}
-                        <li className="border-t border-gray-200">
+                        <li className="border-t border-gray-200 dark:border-gray-700">
                           <button
                             type="button"
-                            className="w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-50 flex items-center"
+                            className="w-full text-left px-4 py-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-gray-700 flex items-center"
                             onClick={() => {
                               setShowAddBrand(true);
                             }}
@@ -798,13 +798,13 @@ const ProfitCalculator: React.FC = () => {
                           </button>
                         </li>
                       </ul>
-                      
+
                       {showAddBrand && (
-                        <div className="p-3 border-t border-gray-200">
+                        <div className="p-3 border-t border-gray-200 dark:border-gray-700">
                           <div className="flex space-x-2">
                             <input
                               type="text"
-                              className="flex-grow px-3 py-1 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                              className="flex-grow px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                               placeholder="New brand name"
                               value={newBrandName}
                               onChange={(e) => setNewBrandName(e.target.value)}
@@ -827,7 +827,7 @@ const ProfitCalculator: React.FC = () => {
                     </div>
                   )}
                 </div>
-                <p className="text-xs text-gray-500 italic">
+                <p className="text-xs text-gray-500 dark:text-gray-400 italic">
                   Add companies in the Brands & Costs section to use the enhanced company/brand system.
                 </p>
               </div>
@@ -836,12 +836,12 @@ const ProfitCalculator: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4" data-demo="cost-fields" data-tour="cost-fields">
               {/* Your Actual Cost */}
               <div className="space-y-2">
-                <label htmlFor="yourCost" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="yourCost" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                   Your Actual Cost
                 </label>
                 <div className="relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSignIcon className="h-4 w-4 text-gray-400" />
+                    <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                   </div>
                   <input
                     type="number"
@@ -849,7 +849,7 @@ const ProfitCalculator: React.FC = () => {
                     min="0"
                     inputMode="decimal"
                     id="yourCost"
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                     value={yourCost.toFixed(2)}
                     onFocus={() => setIsEditingYourCost(true)}
                     onChange={(e) => {
@@ -863,19 +863,19 @@ const ProfitCalculator: React.FC = () => {
                     onBlur={() => setIsEditingYourCost(false)}
                   />
                 </div>
-                <p className="text-xs text-gray-500 italic">
+                <p className="text-xs text-gray-500 dark:text-gray-400 italic">
                   Calculated from wholesale cost - {discountPercentage.toFixed(1)}% discount
                 </p>
               </div>
 
               {/* Discount Percentage */}
               <div className="space-y-2">
-                <label htmlFor="discountPercentage" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="discountPercentage" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                   Discount %
                 </label>
                 <div className="relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-gray-400 text-sm">%</span>
+                    <span className="text-gray-400 dark:text-gray-500 text-sm">%</span>
                   </div>
                   <input
                     type="number"
@@ -884,7 +884,7 @@ const ProfitCalculator: React.FC = () => {
                     max="100"
                     inputMode="decimal"
                     id="discountPercentage"
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                     value={discountPercentage.toFixed(1)}
                     onFocus={() => setIsEditingDiscount(true)}
                     onChange={(e) => {
@@ -896,25 +896,25 @@ const ProfitCalculator: React.FC = () => {
                     onBlur={() => setIsEditingDiscount(false)}
                   />
                 </div>
-                <p className="text-xs text-gray-500 italic">
+                <p className="text-xs text-gray-500 dark:text-gray-400 italic">
                   Your cost = ${calculateYourCostFromDiscount(wholesaleCost, discountPercentage).toFixed(2)}
                 </p>
               </div>
             </div>
-            
+
             <div className="space-y-2">
-              <label htmlFor="wholesaleCost" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="wholesaleCost" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Wholesale Cost (Frame Book Price)
               </label>
               <div className="relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <DollarSignIcon className="h-4 w-4 text-gray-400" />
+                  <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
                   type="text"
                   inputMode="decimal"
                   id="wholesaleCost"
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                   value={wholesaleCost}
                   onChange={(e) => {
                     const value = e.target.value.replace(/^0+(?=\d)/, '');
@@ -925,19 +925,19 @@ const ProfitCalculator: React.FC = () => {
             </div>
             
             <div className="space-y-2">
-              <label htmlFor="tariffTax" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="tariffTax" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Tariff Tax
               </label>
               <div className="relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <DollarSignIcon className="h-4 w-4 text-gray-400" />
+                  <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
                   type="number"
                   step="0.01"
                   min="0"
                   id="tariffTax"
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                   value={tariffTax}
                   onChange={(e) => setTariffTax(parseFloat(e.target.value) || 0)}
                 />
@@ -945,17 +945,17 @@ const ProfitCalculator: React.FC = () => {
             </div>
             
             <div className="space-y-2">
-              <label htmlFor="insuranceMultiplier" className="block text-sm font-medium text-gray-700 flex justify-between">
+              <label htmlFor="insuranceMultiplier" className="block text-sm font-medium text-gray-700 dark:text-gray-200 flex justify-between">
                 <span>{insuranceEnabled ? 'Insurance ' : ''}Multiplier: {insuranceMultiplier.toFixed(1)}x</span>
                 <div className="flex items-center">
                   <input
                     type="checkbox"
                     id="useManualPrice"
-                    className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
                     checked={useManualRetailPrice}
                     onChange={(e) => setUseManualRetailPrice(e.target.checked)}
                   />
-                  <label htmlFor="useManualPrice" className="text-xs text-gray-500">
+                  <label htmlFor="useManualPrice" className="text-xs text-gray-500 dark:text-gray-400">
                     Manual Price
                   </label>
                 </div>
@@ -963,7 +963,7 @@ const ProfitCalculator: React.FC = () => {
               {!useManualRetailPrice && (
                 <div className="relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <SlidersIcon className="h-4 w-4 text-gray-400" />
+                    <SlidersIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                   </div>
                   <input
                     type="range"
@@ -975,7 +975,7 @@ const ProfitCalculator: React.FC = () => {
                     value={insuranceMultiplier}
                     onChange={(e) => setInsuranceMultiplier(parseFloat(e.target.value))}
                   />
-                  <div className="flex justify-between text-xs text-gray-400 px-3">
+                  <div className="flex justify-between text-xs text-gray-400 dark:text-gray-500 px-3">
                     <span>1x</span>
                     <span>2x</span>
                     <span>3x</span>
@@ -986,18 +986,18 @@ const ProfitCalculator: React.FC = () => {
             </div>
             
             <div className="space-y-2" data-demo="retail-price" data-tour="retail-price">
-              <label htmlFor="retailPrice" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="retailPrice" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Retail Price
               </label>
               <div className="relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <DollarSignIcon className="h-4 w-4 text-gray-400" />
+                  <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
                   type="text"
                   inputMode="decimal"
                   id="retailPrice"
-                  className={`block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 ${!useManualRetailPrice ? 'bg-gray-100' : ''}`}
+                  className={`block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500 ${!useManualRetailPrice ? 'bg-gray-100 dark:bg-[#181F1C]/50' : ''}`}
                   value={retailPrice}
                   onChange={(e) => {
                     const value = e.target.value.replace(/^0+(?=\d)/, '');
@@ -1017,27 +1017,27 @@ const ProfitCalculator: React.FC = () => {
                 />
               </div>
               {!useManualRetailPrice && (
-                <p className="text-xs text-gray-500 italic">
+                <p className="text-xs text-gray-500 dark:text-gray-400 italic">
                   Auto-calculated based on wholesale cost and multiplier
                 </p>
               )}
             </div>
-            
+
             {insuranceEnabled && (
               <>
                 <div className="space-y-2">
-                  <label htmlFor="insuranceCoverage" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="insuranceCoverage" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                     Insurance Coverage Amount
                   </label>
               <div className="relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <DollarSignIcon className="h-4 w-4 text-gray-400" />
+                  <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
                   type="text"
                   inputMode="decimal"
                   id="insuranceCoverage"
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                   value={insuranceCoverage}
                   onChange={(e) => {
                     const value = e.target.value.replace(/^0+(?=\d)/, '');
@@ -1045,7 +1045,7 @@ const ProfitCalculator: React.FC = () => {
                   }}
                 />
               </div>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 {retailPrice > insuranceCoverage ? (
                   <>Patient will pay ${profitData.patientPayment.toFixed(2)} after 20% discount</>
                 ) : (
@@ -1053,20 +1053,20 @@ const ProfitCalculator: React.FC = () => {
                 )}
               </p>
             </div>
-            
+
             <div className="space-y-2">
-              <label htmlFor="insuranceReimbursement" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="insuranceReimbursement" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                 Insurance Reimbursement
               </label>
               <div className="relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <DollarSignIcon className="h-4 w-4 text-gray-400" />
+                  <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
                   type="text"
                   inputMode="decimal"
                   id="insuranceReimbursement"
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                   value={insuranceReimbursement}
                   onChange={(e) => {
                     const value = e.target.value.replace(/^0+(?=\d)/, '');
@@ -1093,7 +1093,7 @@ const ProfitCalculator: React.FC = () => {
             </button>
             <button
               onClick={handlePrint}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md shadow-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-[#1F2623] hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               <PrinterIcon className="h-4 w-4 mr-2" />
               Print
@@ -1103,52 +1103,52 @@ const ProfitCalculator: React.FC = () => {
           {/* Save Dialog */}
           {showSaveDialog && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div ref={saveDialogRef} className="bg-white rounded-lg p-6 max-w-md w-full">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Save Frame Calculation</h3>
+              <div ref={saveDialogRef} className="bg-white dark:bg-[#1F2623] rounded-lg p-6 max-w-md w-full">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Save Frame Calculation</h3>
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="frameName" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="frameName" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                       Frame or Patient Name
                     </label>
                     <input
                       type="text"
                       id="frameName"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Enter a name"
                       value={saveFrameName}
                       onChange={(e) => setSaveFrameName(e.target.value)}
                       autoFocus
                     />
                   </div>
-                  
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                       Selected Brand
                     </label>
-                    <div className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
-                      {selectedBrand ? 
-                        `${selectedCompany?.name} - ${selectedBrand.name}` : 
+                    <div className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-[#181F1C]/50 text-gray-800 dark:text-white">
+                      {selectedBrand ?
+                        `${selectedCompany?.name} - ${selectedBrand.name}` :
                         legacySelectedBrand || 'No brand selected'
                       }
                     </div>
                   </div>
-                  
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                       Insurance Details
                     </label>
-                    <div className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
-                      <div>{selectedInsurance || 'No insurance provider selected'}</div>
+                    <div className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-[#181F1C]/50">
+                      <div className="text-gray-800 dark:text-white">{selectedInsurance || 'No insurance provider selected'}</div>
                       {selectedInsurancePlan && (
-                        <div className="text-sm text-gray-600 mt-1">Plan: {selectedInsurancePlan}</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">Plan: {selectedInsurancePlan}</div>
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="flex justify-end space-x-3 pt-2">
                     <button
                       type="button"
-                      className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-[#1F2623] hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                       onClick={() => setShowSaveDialog(false)}
                     >
                       Cancel
@@ -1169,26 +1169,26 @@ const ProfitCalculator: React.FC = () => {
           {/* Saved Calculations */}
           {savedCalculations.length > 0 && (
             <div className="mt-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-3">Saved Calculations</h3>
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                <ul className="divide-y divide-gray-200">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Saved Calculations</h3>
+              <div className="bg-white dark:bg-[#1F2623] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <ul className="divide-y divide-gray-200 dark:divide-gray-700">
                   {savedCalculations.map((calc) => (
-                    <li 
+                    <li
                       key={calc.id}
-                      className="p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                      className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                       onClick={() => handleLoadSavedCalculation(calc)}
                     >
                       <div className="flex justify-between items-start">
                         <div>
-                          <h4 className="text-sm font-medium text-gray-900">{calc.name}</h4>
-                          <div className="mt-1 flex items-center text-xs text-gray-500 space-x-2">
+                          <h4 className="text-sm font-medium text-gray-900 dark:text-white">{calc.name}</h4>
+                          <div className="mt-1 flex items-center text-xs text-gray-500 dark:text-gray-400 space-x-2">
                             {calc.brand && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
                                 {calc.brand}
                               </span>
                             )}
                             {calc.insurance && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
                                 {calc.insurance}
                                 {calc.insurancePlan && ` - ${calc.insurancePlan}`}
                               </span>
@@ -1197,8 +1197,8 @@ const ProfitCalculator: React.FC = () => {
                           </div>
                         </div>
                         <div className="text-right">
-                          <span className="text-sm font-medium text-gray-900">{formatCurrency(calc.profit)}</span>
-                          <p className="text-xs text-gray-500 mt-0.5">{calc.margin}% margin</p>
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">{formatCurrency(calc.profit)}</span>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{calc.margin}% margin</p>
                         </div>
                       </div>
                     </li>
@@ -1208,8 +1208,8 @@ const ProfitCalculator: React.FC = () => {
             </div>
           )}
         </div>
-        
-        <div className="p-6 md:w-1/2 bg-gradient-to-br from-blue-50 to-gray-50 border-t md:border-t-0 md:border-l border-gray-200" data-demo="profit-display" data-tour="profit-display">
+
+        <div className="p-6 md:w-1/2 bg-gradient-to-br from-blue-50 to-gray-50 dark:from-[#181F1C] dark:to-gray-800 border-t md:border-t-0 md:border-l border-gray-200 dark:border-gray-700" data-demo="profit-display" data-tour="profit-display">
           <ProfitDisplay 
             profitData={profitData} 
             animate={animateCalculation}

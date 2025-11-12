@@ -138,7 +138,7 @@ const MissingBrands: React.FC<MissingBrandsProps> = ({
 
   if (isLoading) {
     return (
-      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+      <div className="bg-gray-50 dark:bg-[#1F2623] rounded-lg p-4 border border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-center py-4">
           <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-600 border-t-transparent" />
         </div>
@@ -151,22 +151,22 @@ const MissingBrands: React.FC<MissingBrandsProps> = ({
   }
 
   return (
-    <div className="bg-amber-50 rounded-lg border border-amber-200 overflow-hidden">
+    <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-700 overflow-hidden">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-4 hover:bg-amber-100 transition-colors"
+        className="w-full flex items-center justify-between p-4 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
       >
         <div className="flex items-center space-x-3">
           {isExpanded ? (
-            <ChevronDown className="h-5 w-5 text-amber-600" />
+            <ChevronDown className="h-5 w-5 text-amber-600 dark:text-amber-400" />
           ) : (
-            <ChevronRight className="h-5 w-5 text-amber-600" />
+            <ChevronRight className="h-5 w-5 text-amber-600 dark:text-amber-400" />
           )}
           <div className="text-left">
-            <h4 className="text-sm font-medium text-amber-900">
+            <h4 className="text-sm font-medium text-amber-900 dark:text-amber-200">
               Missing Brands from {vendorName}
             </h4>
-            <p className="text-xs text-amber-700">
+            <p className="text-xs text-amber-700 dark:text-amber-400">
               {missingBrands.length} brand{missingBrands.length !== 1 ? 's' : ''} available to add
             </p>
           </div>
@@ -177,7 +177,7 @@ const MissingBrands: React.FC<MissingBrandsProps> = ({
             handleAddAll();
           }}
           disabled={addingAll}
-          className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-amber-600 rounded-md hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-amber-600 dark:bg-amber-700 rounded-md hover:bg-amber-700 dark:hover:bg-amber-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {addingAll ? (
             <>
@@ -200,7 +200,7 @@ const MissingBrands: React.FC<MissingBrandsProps> = ({
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="border-t border-amber-200"
+            className="border-t border-amber-200 dark:border-amber-700"
           >
             <div className="p-4 space-y-2">
               {missingBrands.map((brand) => (
@@ -209,12 +209,12 @@ const MissingBrands: React.FC<MissingBrandsProps> = ({
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 10 }}
-                  className="flex items-center justify-between bg-white rounded-lg p-3 border border-amber-200"
+                  className="flex items-center justify-between bg-white dark:bg-[#1F2623] rounded-lg p-3 border border-amber-200 dark:border-amber-700"
                 >
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{brand.name}</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{brand.name}</p>
                     {brand.wholesale_cost && (
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         Wholesale: ${brand.wholesale_cost.toFixed(2)}
                         {brand.msrp && ` | Retail: $${brand.msrp.toFixed(2)}`}
                       </p>
@@ -223,11 +223,11 @@ const MissingBrands: React.FC<MissingBrandsProps> = ({
                   <button
                     onClick={() => handleAddBrand(brand.id)}
                     disabled={addingBrands.has(brand.id)}
-                    className="inline-flex items-center px-2 py-1 text-xs font-medium text-amber-700 bg-amber-100 rounded hover:bg-amber-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center px-2 py-1 text-xs font-medium text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/30 rounded hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {addingBrands.has(brand.id) ? (
                       <>
-                        <div className="animate-spin rounded-full h-3 w-3 border-2 border-amber-700 border-t-transparent mr-1" />
+                        <div className="animate-spin rounded-full h-3 w-3 border-2 border-amber-700 dark:border-amber-300 border-t-transparent mr-1" />
                         Adding...
                       </>
                     ) : (
