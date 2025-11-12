@@ -260,11 +260,11 @@ export const demoSteps: ExtendedDemoStep[] = [
       title: '🏢 Step 6: Vendor Management',
       description: `
         <p class="text-sm"><strong>Modern Optical</strong> was automatically added from the email with account <strong>#93277</strong>.</p>
-        <p class="text-sm mt-2">The system detected <strong>3 brands</strong> from your order:</p>
+        <p class="text-sm mt-2">Watch as the vendor card <strong>automatically expands</strong> to show <strong>3 brands</strong> from your order:</p>
         <ul class="text-xs mt-2 space-y-0.5 ml-2">
-          <li>• <strong>B.M.E.C.</strong> (7 frames)</li>
-          <li>• <strong>GB+ COLLECTION</strong> (3 frames)</li>
-          <li>• <strong>MODERN PLASTICS II</strong> (8 frames)</li>
+          <li>• <strong>B.M.E.C.</strong> (7 frames) - $55.25 your cost</li>
+          <li>• <strong>GB+ COLLECTION</strong> (3 frames) - $45.00 your cost</li>
+          <li>• <strong>MODERN PLASTICS II</strong> (8 frames) - $35.75 your cost</li>
         </ul>
       `,
       side: 'top',
@@ -278,11 +278,11 @@ export const demoSteps: ExtendedDemoStep[] = [
   {
     id: 'edit-brand-pricing',
     page: '/brands',
-    element: '[data-demo="edit-brand-btn"]',
+    element: '[data-demo="view-brand-details-btn"]',
     popover: {
-      title: '💰 Step 7: Edit Brand Pricing',
+      title: '💰 Step 7: View Brand Pricing',
       description: `
-        <p class="text-sm">Click on any brand card to <strong>view and edit pricing details</strong>.</p>
+        <p class="text-sm">Click the <strong>"View Details"</strong> button next to any brand to see and edit pricing.</p>
         <p class="text-sm mt-2">You can customize:</p>
         <ul class="text-xs mt-2 space-y-0.5 ml-2 list-disc list-inside">
           <li>Your negotiated cost</li>
@@ -292,7 +292,7 @@ export const demoSteps: ExtendedDemoStep[] = [
         </ul>
         <p class="text-sm mt-2 text-purple-600">✨ This data auto-populates in the profit calculator!</p>
       `,
-      side: 'right',
+      side: 'left',
       align: 'center'
     }
   },
@@ -402,7 +402,7 @@ export const demoSteps: ExtendedDemoStep[] = [
     popover: {
       title: '💵 Step 12: Set Retail Price',
       description: `
-        <p class="text-sm">Enter your retail price (try <strong>$150</strong>).</p>
+        <p class="text-sm">The retail price field is now <strong>editable</strong> – try changing it to <strong>$150</strong> (or any value).</p>
         <p class="text-sm mt-2">Watch as profit and margin calculations update <strong>in real-time</strong>!</p>
         <p class="text-sm mt-2 text-gray-600">💡 Toggle insurance on/off to see how it affects profit.</p>
       `,

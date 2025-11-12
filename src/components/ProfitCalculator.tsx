@@ -179,6 +179,13 @@ const ProfitCalculator: React.FC = () => {
     }
   }, [wholesaleCost, tariffTax, insuranceMultiplier, useManualRetailPrice]);
 
+  // Enable manual retail price mode during demo for better interactivity
+  useEffect(() => {
+    if (isDemo) {
+      setUseManualRetailPrice(true);
+    }
+  }, [isDemo]);
+
   // Update multiplier when insurance toggle changes
   useEffect(() => {
     if (!insuranceEnabled && insuranceMultiplier !== 2.0) {

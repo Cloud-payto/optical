@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ChevronUp, Eye, Building2, Package, Edit3, Percent, Plus } from 'lucide-react';
 import { Company } from '../../types';
@@ -12,6 +12,17 @@ interface CompanyCardProps {
 
 const CompanyCard: React.FC<CompanyCardProps> = ({ company, onViewBrandDetails, onEditCompany, isDemo }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Auto-expand when in demo mode
+  useEffect(() => {
+    if (isDemo) {
+      // Delay expansion slightly for better visual effect
+      const timer = setTimeout(() => {
+        setIsExpanded(true);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isDemo]);
 
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
@@ -37,6 +48,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company, onViewBrandDetails, 
       {/* Company Header - Clickable */}
       <div className="relative">
         <button
+          data-demo="vendor-expand-btn"
           onClick={toggleExpanded}
           className="w-full p-6 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
         >
@@ -142,6 +154,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company, onViewBrandDetails, 
                         </div>
                       </div>
                       <button
+                        data-demo="view-brand-details-btn"
                         onClick={() => onViewBrandDetails(company.id, brand.id)}
                         className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-md hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors duration-200"
                       >
