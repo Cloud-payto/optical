@@ -68,7 +68,7 @@ const ProfitCalculator: React.FC = () => {
   const [discountPercentage, setDiscountPercentage] = useState<number>(10); // Default 10% discount
   const [isEditingDiscount, setIsEditingDiscount] = useState<boolean>(false); // Track if user is manually editing discount
   const [isEditingYourCost, setIsEditingYourCost] = useState<boolean>(false); // Track if user is manually editing your cost
-  const [retailPrice, setRetailPrice] = useState<number>(150);
+  const [retailPrice, setRetailPrice] = useState<number>(180);
   const [insuranceMultiplier, setInsuranceMultiplier] = useState<number>(2.5);
   const [useManualRetailPrice, setUseManualRetailPrice] = useState<boolean>(false);
   const [insuranceCoverage, setInsuranceCoverage] = useState<number>(150);
