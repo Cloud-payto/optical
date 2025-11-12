@@ -12,6 +12,7 @@ import { Company, Brand } from '../types';
 import { fetchCompaniesWithPricing, saveAccountBrand } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useDemo } from '../contexts/DemoContext';
+import { DEMO_DATA_IDS } from '../demo/demoConstants';
 
 // Function to load companies with account-specific brand data from Supabase
 const loadCompaniesFromSupabase = async (): Promise<Company[]> => {
@@ -45,10 +46,32 @@ const BrandsCostsPage: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      // If in demo mode, show ONLY demo vendors (hide real data)
       if (isDemo) {
-        setCompanies(demoData.vendors as Company[]);
+        console.log('🎭 Demo mode: Loading demo vendor data from API');
+
+        // Clear any existing real user data
+        setCompanies([]);
+
+        // Fetch data from API (will automatically use demo user ID via api.ts)
+        const companiesData = await loadCompaniesFromSupabase();
+
+        console.log('📊 API returned companies:', companiesData.map(c => c.name));
+
+        // Filter to show ONLY Modern Optical in demo mode
+        const modernOptical = companiesData.find(c =>
+          c.name === 'Modern Optical' ||
+          c.id === DEMO_DATA_IDS.VENDOR_ID
+        );
+
+        if (modernOptical) {
+          console.log('✅ Found Modern Optical:', modernOptical);
+          setCompanies([modernOptical]); // Show only demo vendor
+        } else {
+          console.warn('⚠️ Modern Optical not found in API response, using all companies');
+          setCompanies(companiesData); // Fallback to all companies
+        }
       } else {
+        // Normal mode: Load user's real vendors
         const companiesData = await loadCompaniesFromSupabase();
         setCompanies(companiesData);
       }
@@ -63,7 +86,17 @@ const BrandsCostsPage: React.FC = () => {
   // Load companies from Supabase on component mount or when demo state changes
   useEffect(() => {
     loadCompanies();
-  }, [isDemo, demoData?.vendors]);
+  }, [isDemo]); // Only depend on isDemo flag, not mock data
+
+  // Debug effect to track demo state changes
+  useEffect(() => {
+    console.log('🎭 BrandsCostsPage Demo State:', {
+      isDemo,
+      hasDemoData: !!demoData,
+      companiesCount: companies.length,
+      companies: companies.map(c => ({ id: c.id, name: c.name, brandCount: c.brands.length }))
+    });
+  }, [isDemo, demoData, companies]);
 
   // Filter companies based on search term
   const filteredCompanies = useMemo(() => {
@@ -293,7 +326,7 @@ const BrandsCostsPage: React.FC = () => {
                       company={company}
                       onViewBrandDetails={handleViewBrandDetails}
                       onEditCompany={handleEditCompany}
-                      isDemo={isDemo && index === 0}
+                      isDemo={isDemo && (company.name === 'Modern Optical' || company.id === DEMO_DATA_IDS.VENDOR_ID)}
                     />
                     {user?.id && (
                       <MissingBrands

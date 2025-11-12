@@ -16,13 +16,17 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company, onViewBrandDetails, 
   // Auto-expand when in demo mode
   useEffect(() => {
     if (isDemo) {
-      // Delay expansion slightly for better visual effect
+      console.log('🎭 CompanyCard: Auto-expanding in demo mode for', company.name);
+
+      // Longer delay to coordinate with Driver.js animation
       const timer = setTimeout(() => {
         setIsExpanded(true);
-      }, 300);
+        console.log('✅ CompanyCard: Expansion complete for', company.name);
+      }, 800); // Increased from 300ms to 800ms for better coordination with Driver.js
+
       return () => clearTimeout(timer);
     }
-  }, [isDemo]);
+  }, [isDemo, company.name]);
 
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
