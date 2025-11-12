@@ -281,18 +281,14 @@ export const demoSteps: ExtendedDemoStep[] = [
     }
   },
 
-  // Step 12: Navigate to Vendors/Brands (FIXED) - NOW WITH AUTOMATION
+  // Step 12: Navigate to Vendors/Brands (FIXED) - AUTO-EXPANDS VIA COMPONENT
   {
     id: 'navigate-to-vendors',
     page: '/brands',
     element: '[data-demo="vendor-card"]',
-    automatedAction: {
-      type: 'click',
-      selector: '[data-demo="vendor-expand-btn"]',
-      delay: 1500, // Wait for page to load and render
-      animationDuration: 800
-    },
-    autoAdvanceDelay: 4000, // Give time to see the expanded brands
+    // ❌ REMOVED: automatedAction click that was causing race condition
+    // The CompanyCard component handles auto-expansion via useEffect when isDemo={true}
+    autoAdvanceDelay: 5000, // Increased to give time to see the expanded brands
     popover: {
       title: '🏢 Step 6: Vendor Management',
       description: `
@@ -359,6 +355,7 @@ export const demoSteps: ExtendedDemoStep[] = [
   {
     id: 'calculator-navigation',
     page: '/calculator',
+    element: '[data-demo="company-dropdown"]', // ✅ FIXED: Added target element to wait for
     popover: {
       title: '🧮 Step 8: Profit Calculator',
       description: `
@@ -383,6 +380,7 @@ export const demoSteps: ExtendedDemoStep[] = [
     id: 'select-vendor-dropdown',
     page: '/calculator',
     element: '[data-demo="company-dropdown"]',
+    waitForElement: true, // ✅ ADDED: Wait for element to be fully rendered
     popover: {
       title: '🏢 Step 9: Select Vendor',
       description: `
@@ -399,6 +397,7 @@ export const demoSteps: ExtendedDemoStep[] = [
     id: 'select-brand-dropdown',
     page: '/calculator',
     element: '[data-demo="brand-dropdown"]',
+    waitForElement: true, // ✅ ADDED: Wait for element to be fully rendered
     popover: {
       title: '🎨 Step 10: Select Brand',
       description: `
@@ -415,6 +414,7 @@ export const demoSteps: ExtendedDemoStep[] = [
     id: 'cost-auto-populate',
     page: '/calculator',
     element: '[data-demo="cost-fields"]',
+    waitForElement: true, // ✅ ADDED: Wait for element to be fully rendered
     popover: {
       title: '✨ Step 11: Auto-Population Magic',
       description: `
@@ -436,6 +436,7 @@ export const demoSteps: ExtendedDemoStep[] = [
     id: 'retail-price-input',
     page: '/calculator',
     element: '[data-demo="retail-price"]',
+    waitForElement: true, // ✅ ADDED: Wait for element to be fully rendered
     popover: {
       title: '💵 Step 12: Set Retail Price',
       description: `
@@ -453,6 +454,7 @@ export const demoSteps: ExtendedDemoStep[] = [
     id: 'profit-calculation-display',
     page: '/calculator',
     element: '[data-demo="profit-display"]',
+    waitForElement: true, // ✅ ADDED: Wait for element to be fully rendered
     popover: {
       title: '📊 Step 13: Live Profit Analysis',
       description: `

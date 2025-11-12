@@ -117,8 +117,8 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
                     }
                   }
 
-                  // Additional wait for React rendering
-                  await new Promise(resolve => setTimeout(resolve, 300));
+                  // Additional wait for React rendering and component mounting
+                  await new Promise(resolve => setTimeout(resolve, 800)); // INCREASED: 300ms → 800ms for better stability
                 } catch (navError) {
                   console.error(`❌ Navigation failed:`, navError);
                 }
@@ -210,8 +210,35 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
             const targetElement = step.element === 'body' ? document.body : document.querySelector(step.element);
             if (!targetElement) {
               console.warn(`⚠️ Target element not found: ${step.element}`);
+
+              // P1 FIX: Skip to next step if critical element is missing
+              if (currentStepData?.requiresNavigation || currentStepData?.waitForElement) {
+                console.error(`❌ Critical element missing, auto-advancing to next step in 2 seconds`);
+                setTimeout(() => {
+                  if (driverRef.current && isActive) {
+                    driverRef.current.moveNext();
+                  }
+                }, 2000);
+                return; // Exit early
+              }
             } else {
               console.log(`✅ Element found and ready for highlighting`);
+            }
+
+            // P1 FIX: Scroll expanded vendor content into view for navigate-to-vendors step
+            if (currentStepData?.id === 'navigate-to-vendors' && targetElement) {
+              // Wait for vendor card expansion animation to complete
+              setTimeout(async () => {
+                const brandsContainer = document.querySelector('[data-demo="vendor-card"] .bg-gray-50');
+                if (brandsContainer) {
+                  console.log('📜 Scrolling expanded vendor brands into view');
+                  brandsContainer.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest',
+                    inline: 'nearest'
+                  });
+                }
+              }, 800); // Wait for expansion (600ms) + animation (200ms)
             }
 
             // 🆕 NEW: Execute automated action if defined

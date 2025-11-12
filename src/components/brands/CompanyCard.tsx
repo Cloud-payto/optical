@@ -12,23 +12,37 @@ interface CompanyCardProps {
 
 const CompanyCard: React.FC<CompanyCardProps> = ({ company, onViewBrandDetails, onEditCompany, isDemo }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [demoLocked, setDemoLocked] = useState(false); // Prevent toggling during demo
 
-  // Auto-expand when in demo mode
+  // Auto-expand when in demo mode and KEEP IT EXPANDED
   useEffect(() => {
     if (isDemo) {
       console.log('🎭 CompanyCard: Auto-expanding in demo mode for', company.name);
 
-      // Longer delay to coordinate with Driver.js animation
-      const timer = setTimeout(() => {
+      // Set demo lock immediately to prevent race conditions
+      setDemoLocked(true);
+
+      // Expand after a short delay to ensure page is rendered
+      const expandTimer = setTimeout(() => {
         setIsExpanded(true);
         console.log('✅ CompanyCard: Expansion complete for', company.name);
-      }, 800); // Increased from 300ms to 800ms for better coordination with Driver.js
+      }, 600); // Optimized timing - 600ms balances page load and Driver.js coordination
 
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(expandTimer);
+      };
+    } else {
+      // Reset lock when exiting demo mode
+      setDemoLocked(false);
     }
   }, [isDemo, company.name]);
 
   const toggleExpanded = () => {
+    // Prevent toggling if demo is active and card is locked
+    if (demoLocked) {
+      console.log('🔒 CompanyCard: Toggle blocked during demo mode');
+      return;
+    }
     setIsExpanded(!isExpanded);
   };
 
@@ -101,7 +115,10 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company, onViewBrandDetails, 
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            transition={{
+              duration: isDemo ? 0.2 : 0.3, // Faster animation in demo mode
+              ease: 'easeInOut'
+            }}
             className="border-t border-gray-100 dark:border-gray-700"
           >
             <div className="p-6 bg-gray-50 dark:bg-[#181F1C]">
