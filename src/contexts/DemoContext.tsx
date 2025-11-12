@@ -63,38 +63,21 @@ export const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
     console.log('🎬 Starting Driver.js demo...');
 
     // Set demo mode flag in sessionStorage for API calls
-    // This tells the API service to use the demo user ID
+    // This tells the API service to use the demo user ID (3251cae7-ee61-4c5f-be4c-4312c17ef4fd)
     sessionStorage.setItem('demo_session_id', 'active');
-    console.log('🎭 Demo mode flag set in sessionStorage');
+    console.log('🎭 Demo mode activated - API will return demo account data');
 
     setState(prev => ({
       ...prev,
       isActive: true,
-      isLoading: true,
-      currentStep: 1
+      isLoading: false, // No async loading needed
+      currentStep: 1,
+      demoData: DEMO_DATA // Used for type structure, actual data comes from backend API
     }));
 
-    try {
-      // Fetch demo data from API (or use mock data as fallback)
-      const demoData = await fetchDemoData();
-
-      setState(prev => ({
-        ...prev,
-        demoData,
-        isLoading: false
-      }));
-
-      console.log('✅ Demo data loaded successfully');
-    } catch (error) {
-      console.error('❌ Error loading demo data:', error);
-
-      // Fallback to mock data
-      setState(prev => ({
-        ...prev,
-        demoData: DEMO_DATA,
-        isLoading: false
-      }));
-    }
+    console.log('✅ Demo initialized');
+    console.log('📊 Backend API will return Order #6817 with 18 frames from database');
+    console.log('🎯 Navigate to /frames/orders to see demo data');
   }, []);
 
   const nextStep = useCallback(async () => {
