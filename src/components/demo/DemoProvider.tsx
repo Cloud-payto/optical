@@ -214,6 +214,34 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
               console.log(`✅ Element found and ready for highlighting`);
             }
 
+            // 🆕 NEW: Execute automated action if defined
+            if (currentStepData?.automatedAction) {
+              console.log(`🤖 Step has automated action: ${currentStepData.automatedAction.type}`);
+
+              // Use the step's element as selector if not explicitly provided
+              const actionSelector = currentStepData.automatedAction.selector || currentStepData.element;
+
+              try {
+                await demoController.executeAutomatedAction(
+                  currentStepData.automatedAction,
+                  actionSelector
+                );
+
+                // 🆕 NEW: Auto-advance to next step after action completes
+                const advanceDelay = currentStepData.autoAdvanceDelay ?? 2500; // Default 2.5s
+                console.log(`⏭️ Auto-advancing to next step in ${advanceDelay}ms`);
+
+                setTimeout(() => {
+                  if (driverRef.current && isActive) {
+                    console.log(`▶️ Moving to next step automatically`);
+                    driverRef.current.moveNext();
+                  }
+                }, advanceDelay);
+              } catch (error) {
+                console.error(`❌ Error executing automated action:`, error);
+              }
+            }
+
             // Handle tab clicks if specified (for within-page navigation)
             if (currentStepData?.tabToClick) {
               setTimeout(() => {

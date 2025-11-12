@@ -1,11 +1,24 @@
 import { DriveStep } from 'driver.js';
 
+/**
+ * Automated action configuration for demo steps
+ */
+export interface AutomatedAction {
+  type: 'select' | 'input' | 'click' | 'toggle';
+  selector?: string; // CSS selector (if not provided, uses step.element)
+  value?: any; // Value to set (for select/input types)
+  delay?: number; // Delay AFTER popover appears, BEFORE action executes (ms)
+  animationDuration?: number; // How long to show the action happening (ms)
+}
+
 export interface ExtendedDemoStep extends DriveStep {
   id: string;
   page: string;
   requiresNavigation?: boolean;
   waitForElement?: boolean;
   tabToClick?: string;
+  automatedAction?: AutomatedAction; // Automated action to perform when step is highlighted
+  autoAdvanceDelay?: number; // How long to wait before auto-advancing to next step (ms, default 3000)
 }
 
 /**
@@ -117,6 +130,7 @@ export const demoSteps: ExtendedDemoStep[] = [
     id: 'show-filters',
     page: '/frames/inventory',
     element: '[data-demo="brand-filter"]',
+    autoAdvanceDelay: 3000, // Give user time to read before auto-selecting
     popover: {
       title: '🎯 Step 3: Smart Filtering',
       description: `
@@ -126,23 +140,30 @@ export const demoSteps: ExtendedDemoStep[] = [
           <li>Filter by <strong>Brand</strong></li>
           <li>Filter by <strong>Color</strong></li>
         </ul>
-        <p class="text-sm mt-2">Let's filter to see only <strong>B.M.E.C.</strong> frames.</p>
+        <p class="text-sm mt-2">Watch as we filter to see only <strong>B.M.E.C.</strong> frames...</p>
       `,
       side: 'bottom',
       align: 'start'
     }
   },
 
-  // Step 6: Filter by Brand (NEW)
+  // Step 6: Filter by Brand (NEW) - NOW WITH AUTOMATION
   {
     id: 'filter-by-brand',
     page: '/frames/inventory',
     element: '[data-demo="brand-filter"]',
+    automatedAction: {
+      type: 'select',
+      value: 'B.M.E.C.',
+      delay: 1000, // Wait 1s after popover appears
+      animationDuration: 800
+    },
+    autoAdvanceDelay: 3000, // Wait 3s to see filtered results
     popover: {
       title: '🎨 Filter by Brand',
       description: `
-        <p class="text-sm">Click the <strong>Brand</strong> dropdown and select <strong>"B.M.E.C."</strong></p>
-        <p class="text-sm mt-2">Watch how the table instantly updates to show only B.M.E.C. frames!</p>
+        <p class="text-sm">Watch as we select <strong>"B.M.E.C."</strong> from the brand filter...</p>
+        <p class="text-sm mt-2">The table will instantly update to show only B.M.E.C. frames!</p>
       `,
       side: 'bottom',
       align: 'start'
@@ -153,6 +174,7 @@ export const demoSteps: ExtendedDemoStep[] = [
   {
     id: 'view-filtered-results',
     page: '/frames/inventory',
+    autoAdvanceDelay: 4000, // Give time to see filtered results
     popover: {
       title: '✅ Filtered Results',
       description: `
@@ -178,6 +200,7 @@ export const demoSteps: ExtendedDemoStep[] = [
     id: 'show-sorting',
     page: '/frames/inventory',
     element: '[data-demo="sort-dropdown"]',
+    autoAdvanceDelay: 3000,
     popover: {
       title: '📊 Step 4: Smart Sorting',
       description: `
@@ -188,22 +211,29 @@ export const demoSteps: ExtendedDemoStep[] = [
           <li>Brand (A-Z)</li>
           <li>Stock (High-Low)</li>
         </ul>
-        <p class="text-sm mt-2 text-orange-600">Let's see frames with the shortest return window!</p>
+        <p class="text-sm mt-2 text-orange-600">Watch as we sort by shortest return window...</p>
       `,
       side: 'bottom',
       align: 'start'
     }
   },
 
-  // Step 9: Sort by Return Window (NEW)
+  // Step 9: Sort by Return Window (NEW) - NOW WITH AUTOMATION
   {
     id: 'sort-by-return-window',
     page: '/frames/inventory',
     element: '[data-demo="sort-dropdown"]',
+    automatedAction: {
+      type: 'select',
+      value: 'return_window',
+      delay: 1000,
+      animationDuration: 800
+    },
+    autoAdvanceDelay: 3500, // Give time to see sorted results
     popover: {
       title: '⏰ Return Window Priority',
       description: `
-        <p class="text-sm">Select <strong>"Return Window (Closing Soon)"</strong> from the sort dropdown.</p>
+        <p class="text-sm">Watch as we select <strong>"Return Window (Closing Soon)"</strong>...</p>
         <p class="text-sm mt-2">This shows frames with the <strong>shortest time left</strong> to process returns – critical for managing vendor return policies!</p>
         <p class="text-sm mt-2 text-xs text-gray-600">💡 Most vendors have 30-90 day return windows</p>
       `,

@@ -1,4 +1,5 @@
 import { NavigateFunction } from 'react-router-dom';
+import { AutomatedAction } from './demoSteps';
 // Driver type removed - using any type for compatibility
 
 export interface DemoNavigationHelper {
@@ -83,6 +84,156 @@ export class DemoController {
         element.click();
       }
     }
+  }
+
+  /**
+   * Execute an automated action (select dropdown, fill input, click button, etc.)
+   */
+  async executeAutomatedAction(action: AutomatedAction, fallbackSelector?: string): Promise<void> {
+    // Wait for specified delay
+    if (action.delay) {
+      console.log(`⏳ Waiting ${action.delay}ms before automated action...`);
+      await new Promise(resolve => setTimeout(resolve, action.delay));
+    }
+
+    const selector = action.selector || fallbackSelector;
+    if (!selector) {
+      console.error('❌ No selector provided for automated action');
+      return;
+    }
+
+    const element = document.querySelector(selector);
+    if (!element) {
+      console.warn(`⚠️ Automated action failed: Element not found: ${selector}`);
+      return;
+    }
+
+    console.log(`🤖 Executing automated ${action.type} on ${selector}`, action.value ? `with value: ${action.value}` : '');
+
+    try {
+      switch (action.type) {
+        case 'select':
+          await this.automateSelect(element as HTMLSelectElement, action.value, action.animationDuration);
+          break;
+        case 'input':
+          await this.automateInput(element as HTMLInputElement, action.value, action.animationDuration);
+          break;
+        case 'click':
+          await this.automateClick(element as HTMLElement, action.animationDuration);
+          break;
+        case 'toggle':
+          await this.automateToggle(element as HTMLElement, action.animationDuration);
+          break;
+      }
+      console.log(`✅ Automated action completed successfully`);
+    } catch (error) {
+      console.error(`❌ Error executing automated action:`, error);
+    }
+  }
+
+  /**
+   * Automate selecting a value from a dropdown
+   */
+  private async automateSelect(
+    select: HTMLSelectElement,
+    value: string,
+    animationDuration = 500
+  ): Promise<void> {
+    // Add visual feedback class
+    select.classList.add('demo-animating');
+
+    // Wait a bit to show the element is being interacted with
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    // Set the value
+    select.value = value;
+
+    // Trigger React's onChange event (must use React's synthetic event system)
+    // This creates a native event that React can intercept
+    const changeEvent = new Event('change', { bubbles: true });
+    select.dispatchEvent(changeEvent);
+
+    console.log(`  ↳ Selected value: "${value}"`);
+
+    // Visual feedback duration
+    await new Promise(resolve => setTimeout(resolve, animationDuration));
+    select.classList.remove('demo-animating');
+  }
+
+  /**
+   * Automate typing into an input field
+   */
+  private async automateInput(
+    input: HTMLInputElement,
+    value: string,
+    animationDuration = 1000
+  ): Promise<void> {
+    input.classList.add('demo-animating');
+    input.focus();
+
+    // Simulate typing character by character for visual effect
+    const valueStr = value.toString();
+    const chars = valueStr.split('');
+
+    for (let i = 0; i <= chars.length; i++) {
+      await new Promise(resolve => setTimeout(resolve, 50));
+      input.value = valueStr.substring(0, i);
+
+      // Trigger input event for React (for controlled components)
+      const inputEvent = new Event('input', { bubbles: true });
+      input.dispatchEvent(inputEvent);
+    }
+
+    // Trigger change event at the end
+    const changeEvent = new Event('change', { bubbles: true });
+    input.dispatchEvent(changeEvent);
+
+    console.log(`  ↳ Typed value: "${value}"`);
+
+    await new Promise(resolve => setTimeout(resolve, 300));
+    input.blur();
+    input.classList.remove('demo-animating');
+  }
+
+  /**
+   * Automate clicking an element
+   */
+  private async automateClick(
+    element: HTMLElement,
+    animationDuration = 500
+  ): Promise<void> {
+    // Add visual feedback
+    element.classList.add('demo-animating');
+
+    // Show a "pulse" effect
+    const originalTransform = element.style.transform;
+    element.style.transition = 'transform 0.2s ease';
+    element.style.transform = 'scale(0.95)';
+
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    element.style.transform = 'scale(1)';
+
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    // Trigger the click
+    element.click();
+
+    console.log(`  ↳ Element clicked`);
+
+    await new Promise(resolve => setTimeout(resolve, animationDuration));
+    element.classList.remove('demo-animating');
+    element.style.transform = originalTransform;
+  }
+
+  /**
+   * Automate toggling a switch/checkbox
+   */
+  private async automateToggle(
+    element: HTMLElement,
+    animationDuration = 500
+  ): Promise<void> {
+    return this.automateClick(element, animationDuration);
   }
 
   // Handle keyboard navigation
