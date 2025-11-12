@@ -160,6 +160,7 @@ export function ModernInventoryTable({
                   {/* Return Report Quick Button (for current items with valid return window) */}
                   {onAddToReturnReport && returnWindow && returnWindow.status !== 'expired' && item.status === 'current' && (
                     <button
+                      data-demo="add-to-return"
                       onClick={(e) => {
                         e.stopPropagation();
                         onAddToReturnReport(item);
