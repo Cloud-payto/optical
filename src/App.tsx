@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { DemoProvider } from './contexts/DemoContext';
+import { PracticeProfileProvider } from './contexts/PracticeProfileContext';
 import DemoProviderComponent from './components/demo/DemoProvider';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -23,6 +24,7 @@ import InventoryPage from './features/inventory/InventoryPage';
 import ReturnsPage from './features/reports/ReturnsPage';
 import Debug from './pages/Debug';
 import Onboarding from './pages/Onboarding';
+import QuestionnairePage from './pages/QuestionnairePage';
 
 // Configure React Query client
 const queryClient = new QueryClient({
@@ -40,22 +42,30 @@ function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <Router>
-            <ThemeProvider>
-              <DemoProvider>
-              <DemoProviderComponent>
-                <div className="min-h-screen">
-                <Toaster position="top-center" />
-                <Routes>
-                  {/* Debug route - accessible without authentication */}
-                  <Route path="/debug" element={<Debug />} />
+          <PracticeProfileProvider>
+            <Router>
+              <ThemeProvider>
+                <DemoProvider>
+                <DemoProviderComponent>
+                  <div className="min-h-screen">
+                  <Toaster position="top-center" />
+                  <Routes>
+                    {/* Debug route - accessible without authentication */}
+                    <Route path="/debug" element={<Debug />} />
 
-                  {/* Onboarding route - accessible after signup */}
-                  <Route path="/onboarding" element={
-                    <ProtectedRoute>
-                      <Onboarding />
-                    </ProtectedRoute>
-                  } />
+                    {/* Onboarding route - accessible after signup */}
+                    <Route path="/onboarding" element={
+                      <ProtectedRoute>
+                        <Onboarding />
+                      </ProtectedRoute>
+                    } />
+
+                    {/* Questionnaire route - accessible after onboarding */}
+                    <Route path="/onboarding/questionnaire" element={
+                      <ProtectedRoute>
+                        <QuestionnairePage />
+                      </ProtectedRoute>
+                    } />
 
                   {/* Protected routes */}
                   <Route path="/*" element={
@@ -84,12 +94,13 @@ function App() {
                       </MainLayout>
                     </ProtectedRoute>
                   } />
-                </Routes>
-                </div>
-              </DemoProviderComponent>
-              </DemoProvider>
-            </ThemeProvider>
-          </Router>
+                  </Routes>
+                  </div>
+                </DemoProviderComponent>
+                </DemoProvider>
+              </ThemeProvider>
+            </Router>
+          </PracticeProfileProvider>
         </AuthProvider>
         {/* React Query DevTools - only visible in development */}
         <ReactQueryDevtools initialIsOpen={false} />

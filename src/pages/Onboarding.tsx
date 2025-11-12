@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { Building2, MapPin, Phone, Mail, Loader2, CheckCircle } from 'lucide-react';
+import { Building2, MapPin, Phone, Mail, Loader2, CheckCircle, Sparkles, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { updateAccount } from '../services/api';
 
@@ -36,19 +36,29 @@ export default function Onboarding() {
       // Update account with business information
       await updateAccount(formData);
 
-      toast.success('Welcome to OptiProfit!', {
-        icon: '🎉',
-        duration: 4000,
+      toast.success('Business information saved!', {
+        icon: '✅',
+        duration: 2000,
       });
 
-      // Navigate to dashboard
-      navigate('/dashboard');
+      // Move to next step (questionnaire prompt)
+      setCurrentStep(3);
     } catch (error) {
       console.error('Onboarding error:', error);
       toast.error('Failed to save business information');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCompleteProfile = () => {
+    // Navigate to questionnaire page
+    navigate('/onboarding/questionnaire');
+  };
+
+  const handleSkipQuestionnaire = () => {
+    // Navigate directly to dashboard
+    navigate('/dashboard');
   };
 
   const handleSkip = () => {
@@ -90,6 +100,7 @@ export default function Onboarding() {
         </div>
 
         {/* Form Card */}
+        {currentStep === 2 && (
         <Card className="p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Business Name */}
@@ -251,6 +262,77 @@ export default function Onboarding() {
             </p>
           </form>
         </Card>
+        )}
+
+        {/* Step 3: Questionnaire Prompt */}
+        {currentStep === 3 && (
+          <Card className="p-8">
+            <div className="text-center space-y-6">
+              <div className="flex justify-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <Sparkles className="h-8 w-8 text-white" />
+                </div>
+              </div>
+
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  One More Step!
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Complete your practice profile to unlock personalized recommendations and insights
+                </p>
+              </div>
+
+              <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-6 text-left">
+                <h3 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-3">
+                  What you'll tell us:
+                </h3>
+                <ul className="space-y-2 text-sm text-blue-700 dark:text-blue-300">
+                  <li className="flex items-start space-x-2">
+                    <CheckCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                    <span>Your practice type and specialty</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <CheckCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                    <span>Brands you currently stock</span>
+                  </li>
+                  <li className="flex items-start space-x-2">
+                    <CheckCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                    <span>Your pricing preferences and business goals</span>
+                  </li>
+                </ul>
+                <p className="mt-4 text-xs text-blue-600 dark:text-blue-400">
+                  ⏱️ Takes just 2 minutes
+                </p>
+              </div>
+
+              <div className="flex flex-col space-y-3">
+                <Button
+                  type="button"
+                  variant="primary"
+                  onClick={handleCompleteProfile}
+                  className="w-full"
+                  icon={<ArrowRight className="h-4 w-4" />}
+                  iconPosition="right"
+                >
+                  Complete My Profile
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={handleSkipQuestionnaire}
+                  className="w-full"
+                >
+                  Skip for Now
+                </Button>
+              </div>
+
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                You can complete this anytime from your account settings
+              </p>
+            </div>
+          </Card>
+        )}
       </div>
     </div>
   );

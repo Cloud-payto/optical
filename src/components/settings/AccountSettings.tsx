@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Building2, Lock, Palette, Loader2 } from 'lucide-react';
+import { User, Building2, Lock, Palette, Loader2, Stethoscope } from 'lucide-react';
 import { ProfileSection } from './ProfileSection';
 import { BusinessSection } from './BusinessSection';
 import { SecuritySection } from './SecuritySection';
 import { ThemeSection } from './ThemeSection';
+import { PracticeProfileSection } from './PracticeProfileSection';
 import { getCurrentAccount } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
-type TabId = 'profile' | 'business' | 'security' | 'theme';
+type TabId = 'profile' | 'business' | 'practice' | 'security' | 'theme';
 
 interface Tab {
   id: TabId;
@@ -20,6 +21,7 @@ interface Tab {
 const tabs: Tab[] = [
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'business', label: 'Business', icon: Building2 },
+  { id: 'practice', label: 'Practice Profile', icon: Stethoscope },
   { id: 'security', label: 'Security', icon: Lock },
   { id: 'theme', label: 'Theme', icon: Palette },
 ];
@@ -138,6 +140,8 @@ export const AccountSettings: React.FC = () => {
                   onUpdate={handleUpdate}
                 />
               )}
+
+              {activeTab === 'practice' && <PracticeProfileSection />}
 
               {activeTab === 'security' && <SecuritySection />}
 

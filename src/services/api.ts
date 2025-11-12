@@ -643,3 +643,162 @@ export async function getCurrentAccount(): Promise<any> {
 
   return data;
 }
+
+// ============================================================
+// PRACTICE PROFILE API FUNCTIONS
+// ============================================================
+
+import type { PracticeProfile } from '../types/practiceProfile';
+
+export interface PracticeProfileData {
+  practice_type: string | null;
+  practice_specialty: string | null;
+  years_in_business: number | null;
+  patient_volume_range: string | null;
+  current_brands: string[];
+  average_frame_price_range: string | null;
+  primary_goals: string[];
+}
+
+/**
+ * Fetch the current user's practice profile
+ */
+export async function fetchPracticeProfile(userId?: string): Promise<PracticeProfile | null> {
+  const currentUserId = userId || await getCurrentUserIdFromSession();
+
+  const { data, error } = await supabase
+    .from('practice_profiles')
+    .select('*')
+    .eq('account_id', currentUserId)
+    .maybeSingle();
+
+  if (error && error.code !== 'PGRST116') { // PGRST116 = not found, which is OK
+    console.error('Failed to fetch practice profile:', error);
+    throw new Error('Failed to fetch practice profile');
+  }
+
+  return data;
+}
+
+/**
+ * Save or update the practice profile (upsert)
+ */
+export async function savePracticeProfile(
+  profileData: PracticeProfileData,
+  userId?: string
+): Promise<PracticeProfile> {
+  const currentUserId = userId || await getCurrentUserIdFromSession();
+
+  const dataToSave = {
+    account_id: currentUserId,
+    ...profileData,
+    is_completed: true,
+    completed_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  const { data, error } = await supabase
+    .from('practice_profiles')
+    .upsert(dataToSave, {
+      onConflict: 'account_id',
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Failed to save practice profile:', error);
+    throw new Error('Failed to save practice profile');
+  }
+
+  // Also update accounts table to mark questionnaire as completed
+  const { error: accountError } = await supabase
+    .from('accounts')
+    .update({
+      questionnaire_completed: true,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', currentUserId);
+
+  if (accountError) {
+    console.error('Failed to update account questionnaire status:', accountError);
+    // Don't throw - profile was saved successfully
+  }
+
+  return data;
+}
+
+/**
+ * Update an existing practice profile
+ */
+export async function updatePracticeProfile(
+  profileData: Partial<PracticeProfileData>,
+  userId?: string
+): Promise<PracticeProfile> {
+  const currentUserId = userId || await getCurrentUserIdFromSession();
+
+  const { data, error } = await supabase
+    .from('practice_profiles')
+    .update({
+      ...profileData,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('account_id', currentUserId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Failed to update practice profile:', error);
+    throw new Error('Failed to update practice profile');
+  }
+
+  return data;
+}
+
+/**
+ * Mark the questionnaire as skipped by the user
+ */
+export async function markQuestionnaireSkipped(userId?: string): Promise<void> {
+  const currentUserId = userId || await getCurrentUserIdFromSession();
+
+  const { error } = await supabase
+    .from('accounts')
+    .update({
+      questionnaire_skipped: true,
+      questionnaire_last_prompted: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', currentUserId);
+
+  if (error) {
+    console.error('Failed to mark questionnaire as skipped:', error);
+    throw new Error('Failed to update questionnaire status');
+  }
+}
+
+/**
+ * Check if user has completed or skipped the questionnaire
+ */
+export async function getQuestionnaireStatus(userId?: string): Promise<{
+  completed: boolean;
+  skipped: boolean;
+  lastPrompted: string | null;
+}> {
+  const currentUserId = userId || await getCurrentUserIdFromSession();
+
+  const { data, error } = await supabase
+    .from('accounts')
+    .select('questionnaire_completed, questionnaire_skipped, questionnaire_last_prompted')
+    .eq('id', currentUserId)
+    .single();
+
+  if (error) {
+    console.error('Failed to get questionnaire status:', error);
+    return { completed: false, skipped: false, lastPrompted: null };
+  }
+
+  return {
+    completed: data.questionnaire_completed || false,
+    skipped: data.questionnaire_skipped || false,
+    lastPrompted: data.questionnaire_last_prompted,
+  };
+}
