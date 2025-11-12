@@ -881,14 +881,8 @@ const ProfitCalculator: React.FC = () => {
                     onChange={(e) => {
                       const validated = validateCurrencyInput(e.target.value, 0, 10000);
                       if (validated !== null) {
-                        // Keep editing state true during onChange to prevent useEffect override
-                        setIsEditingYourCost(true);
                         setYourCost(validated);
                         setIsEditingDiscount(false);
-                        // Update discount % based on new Your Cost
-                        const newDiscount = calculateDiscountFromYourCost(wholesaleCost, validated);
-                        // Format discount to avoid floating-point precision issues
-                        setDiscountPercentage(formatToDecimals(newDiscount, 1));
                         // Check for warnings
                         const warning = getValidationWarning('Your Actual Cost', validated, 0.01, 10000);
                         setYourCostWarning(warning);
@@ -898,6 +892,9 @@ const ProfitCalculator: React.FC = () => {
                       const formatted = formatToDecimals(yourCost, 2);
                       setYourCost(formatted);
                       setIsEditingYourCost(false);
+                      // Update discount % based on finalized Your Cost
+                      const newDiscount = calculateDiscountFromYourCost(wholesaleCost, formatted);
+                      setDiscountPercentage(formatToDecimals(newDiscount, 1));
                     }}
                   />
                 </div>
