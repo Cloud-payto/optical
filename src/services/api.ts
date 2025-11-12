@@ -802,3 +802,144 @@ export async function getQuestionnaireStatus(userId?: string): Promise<{
     lastPrompted: data.questionnaire_last_prompted,
   };
 }
+
+// =============================================================================
+// Return Reports API Functions
+// =============================================================================
+
+export interface ReturnReport {
+  id: string;
+  account_id: string;
+  vendor_id?: string;
+  vendor_name: string;
+  report_number: string;
+  filename: string;
+  pdf_path: string;
+  item_count: number;
+  total_quantity: number;
+  status: 'pending' | 'submitted' | 'completed';
+  generated_date: string;
+  created_at: string;
+  updated_at: string;
+  notes?: string;
+  sent_to_email?: string;
+  sent_at?: string;
+}
+
+export interface SaveReturnReportRequest {
+  account_id: string;
+  vendor_id?: string;
+  vendor_name: string;
+  report_number: string;
+  filename: string;
+  pdf_path: string;
+  item_count: number;
+  total_quantity: number;
+  status?: 'pending' | 'submitted' | 'completed';
+}
+
+/**
+ * Save return report metadata to database
+ */
+export async function saveReturnReportMetadata(
+  metadata: SaveReturnReportRequest,
+  userId?: string
+): Promise<{ success: boolean; data: ReturnReport }> {
+  const currentUserId = userId || await getCurrentUserIdFromSession();
+  const apiUrl = getApiEndpoint();
+
+  // Ensure the account_id matches current user
+  const requestData = {
+    ...metadata,
+    account_id: currentUserId
+  };
+
+  return await apiRequest<{ success: boolean; data: ReturnReport }>(
+    `${apiUrl}/api/return-reports`,
+    {
+      method: 'POST',
+      body: JSON.stringify(requestData)
+    }
+  );
+}
+
+/**
+ * Fetch all return reports for current user
+ */
+export async function fetchReturnReports(
+  userId?: string,
+  statusFilter?: 'all' | 'pending' | 'submitted' | 'completed'
+): Promise<ReturnReport[]> {
+  const currentUserId = userId || await getCurrentUserIdFromSession();
+  const apiUrl = getApiEndpoint();
+
+  const queryParams = new URLSearchParams();
+  if (statusFilter && statusFilter !== 'all') {
+    queryParams.append('status', statusFilter);
+  }
+
+  const queryString = queryParams.toString();
+  const url = `${apiUrl}/api/return-reports${queryString ? '?' + queryString : ''}`;
+
+  const response = await apiRequest<{ success: boolean; data: ReturnReport[] }>(url);
+  return response.data;
+}
+
+/**
+ * Fetch a specific return report by ID
+ */
+export async function fetchReturnReportById(
+  reportId: string,
+  userId?: string
+): Promise<ReturnReport> {
+  const currentUserId = userId || await getCurrentUserIdFromSession();
+  const apiUrl = getApiEndpoint();
+
+  const response = await apiRequest<{ success: boolean; data: ReturnReport }>(
+    `${apiUrl}/api/return-reports/${reportId}`
+  );
+  return response.data;
+}
+
+/**
+ * Update return report status or metadata
+ */
+export async function updateReturnReport(
+  reportId: string,
+  updates: {
+    status?: 'pending' | 'submitted' | 'completed';
+    notes?: string;
+    sent_to_email?: string;
+    sent_at?: string;
+  },
+  userId?: string
+): Promise<{ success: boolean; data: ReturnReport }> {
+  const currentUserId = userId || await getCurrentUserIdFromSession();
+  const apiUrl = getApiEndpoint();
+
+  return await apiRequest<{ success: boolean; data: ReturnReport }>(
+    `${apiUrl}/api/return-reports/${reportId}`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify(updates)
+    }
+  );
+}
+
+/**
+ * Delete a return report (removes metadata and PDF from storage)
+ */
+export async function deleteReturnReport(
+  reportId: string,
+  userId?: string
+): Promise<{ success: boolean; message: string }> {
+  const currentUserId = userId || await getCurrentUserIdFromSession();
+  const apiUrl = getApiEndpoint();
+
+  return await apiRequest<{ success: boolean; message: string }>(
+    `${apiUrl}/api/return-reports/${reportId}`,
+    {
+      method: 'DELETE'
+    }
+  );
+}

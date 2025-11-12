@@ -5,62 +5,36 @@
 
 import React, { useState } from 'react';
 import { Download, FileText, Calendar, Package, Search, Loader2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { downloadReturnReport } from '../../lib/storage';
 import { downloadPDF } from '../inventory/utils/generateReturnReportPDF';
+import { fetchReturnReports, type ReturnReport } from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
-interface ReturnReport {
-  id: string;
-  reportNumber: string;
-  vendorName: string;
-  itemCount: number;
-  totalQuantity: number;
-  generatedDate: string;
-  filename: string;
-  pdfPath?: string; // Storage path for the PDF
-  status: 'pending' | 'submitted' | 'completed';
-}
-
-// Mock data - this will be replaced with real data from your database
-const mockReports: ReturnReport[] = [
-  {
-    id: '1',
-    reportNumber: 'RR-2025-001',
-    vendorName: 'Safilo Group',
-    itemCount: 5,
-    totalQuantity: 8,
-    generatedDate: '2025-01-15',
-    filename: 'Return_Report_Safilo_RR-2025-001.pdf',
-    pdfPath: 'demo-user-id/2025/Return_Report_Safilo_RR-2025-001.pdf',
-    status: 'pending'
-  },
-  {
-    id: '2',
-    reportNumber: 'RR-2025-002',
-    vendorName: 'Luxottica',
-    itemCount: 3,
-    totalQuantity: 5,
-    generatedDate: '2025-01-14',
-    filename: 'Return_Report_Luxottica_RR-2025-002.pdf',
-    pdfPath: 'demo-user-id/2025/Return_Report_Luxottica_RR-2025-002.pdf',
-    status: 'submitted'
-  },
-];
-
 export function ReturnsPage() {
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'submitted' | 'completed'>('all');
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
-  // Filter reports based on search and status
-  const filteredReports = mockReports.filter(report => {
+  // Fetch real return reports from API
+  const { data: reports = [], isLoading, error } = useQuery({
+    queryKey: ['return-reports', user?.id, statusFilter],
+    queryFn: () => fetchReturnReports(user?.id, statusFilter),
+    enabled: !!user,
+    refetchInterval: 30000, // Refetch every 30 seconds to catch new reports
+  });
+
+  // Filter reports based on search query only (status filter is handled by API)
+  const filteredReports = reports.filter(report => {
+    if (!searchQuery) return true;
+
     const matchesSearch =
-      report.reportNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      report.vendorName.toLowerCase().includes(searchQuery.toLowerCase());
+      report.report_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      report.vendor_name.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesStatus = statusFilter === 'all' || report.status === statusFilter;
-
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
 
   const getStatusBadge = (status: string) => {
@@ -77,7 +51,7 @@ export function ReturnsPage() {
    */
   const handleDownload = async (report: ReturnReport) => {
     // Check if we have a storage path
-    if (!report.pdfPath) {
+    if (!report.pdf_path) {
       toast.error('PDF file path not found. Please regenerate this report.');
       return;
     }
@@ -86,7 +60,7 @@ export function ReturnsPage() {
 
     try {
       // Download the PDF blob from Supabase Storage
-      const blob = await downloadReturnReport(report.pdfPath);
+      const blob = await downloadReturnReport(report.pdf_path);
 
       if (!blob) {
         // Error toast already shown by downloadReturnReport
@@ -145,7 +119,18 @@ export function ReturnsPage() {
 
       {/* Reports List */}
       <div className="bg-white dark:bg-[#1F2623] rounded-lg shadow-sm overflow-hidden">
-        {filteredReports.length === 0 ? (
+        {isLoading ? (
+          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+            <Loader2 className="h-16 w-16 mx-auto mb-4 opacity-50 animate-spin" />
+            <p className="text-lg font-medium">Loading return reports...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-12 text-red-500 dark:text-red-400">
+            <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
+            <p className="text-lg font-medium">Failed to load return reports</p>
+            <p className="text-sm mt-2">{error instanceof Error ? error.message : 'Unknown error'}</p>
+          </div>
+        ) : filteredReports.length === 0 ? (
           <div className="text-center py-12 text-gray-500 dark:text-gray-400">
             <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
             <p className="text-lg font-medium">No return reports found</p>
@@ -186,25 +171,25 @@ export function ReturnsPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <FileText className="h-5 w-5 text-purple-600 dark:text-purple-400 mr-2" />
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">{report.reportNumber}</span>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">{report.report_number}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <Package className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
-                        <span className="text-sm text-gray-900 dark:text-white">{report.vendorName}</span>
+                        <span className="text-sm text-gray-900 dark:text-white">{report.vendor_name}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-700 dark:text-gray-300">
-                        {report.itemCount} frame{report.itemCount !== 1 ? 's' : ''} ({report.totalQuantity} units)
+                        {report.item_count} frame{report.item_count !== 1 ? 's' : ''} ({report.total_quantity} units)
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <Calendar className="h-4 w-4 text-gray-400 dark:text-gray-500 mr-2" />
                         <span className="text-sm text-gray-700 dark:text-gray-300">
-                          {new Date(report.generatedDate).toLocaleDateString('en-US', {
+                          {new Date(report.generated_date).toLocaleDateString('en-US', {
                             year: 'numeric',
                             month: 'short',
                             day: 'numeric'
@@ -254,13 +239,13 @@ export function ReturnsPage() {
           <div className="bg-white dark:bg-[#1F2623] rounded-lg shadow-sm p-4">
             <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Items</div>
             <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              {filteredReports.reduce((sum, r) => sum + r.itemCount, 0)}
+              {filteredReports.reduce((sum, r) => sum + r.item_count, 0)}
             </div>
           </div>
           <div className="bg-white dark:bg-[#1F2623] rounded-lg shadow-sm p-4">
             <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Units</div>
             <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              {filteredReports.reduce((sum, r) => sum + r.totalQuantity, 0)}
+              {filteredReports.reduce((sum, r) => sum + r.total_quantity, 0)}
             </div>
           </div>
         </div>

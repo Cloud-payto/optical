@@ -29,6 +29,8 @@ const enrichRoutes = require('./routes/enrich');
 const statsRoutes = require('./routes/stats');
 const catalogRoutes = require('./routes/catalog');
 const feedbackRoutes = require('./routes/feedback');
+const userRoutes = require('./routes/users');
+const returnReportsRoutes = require('./routes/returnReports');
 
 // Import Supabase client
 const { supabase } = require('./lib/supabase');
@@ -146,6 +148,8 @@ app.use('/api/vendors', apiLimiter, vendorRoutes);
 app.use('/api/stats', apiLimiter, statsRoutes);
 app.use('/api/catalog', apiLimiter, catalogRoutes);
 app.use('/api/feedback', apiLimiter, feedbackRoutes);
+app.use('/api/users', apiLimiter, userRoutes);
+app.use('/api/return-reports', apiLimiter, returnReportsRoutes);
 
 // ==============================================
 // ERROR HANDLING (Production-Safe)

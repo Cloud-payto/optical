@@ -24,6 +24,9 @@ import {
   generateReportFilename,
   downloadPDF
 } from './utils/generateReturnReportPDF';
+import { uploadReturnReport } from '../../lib/storage';
+import { saveReturnReportMetadata } from '../../services/api';
+import toast from 'react-hot-toast';
 
 export function InventoryPage() {
   const { user } = useAuth();
@@ -131,37 +134,98 @@ export function InventoryPage() {
   };
 
   const handleGenerateReport = async (vendorName: string, items: InventoryItem[]) => {
+    // Check authentication first
+    if (!user) {
+      toast.error('You must be logged in to generate reports');
+      return;
+    }
+
+    const loadingToast = toast.loading('Generating return report...');
+
     try {
       const reportNumber = generateReportNumber();
       const reportDate = formatReportDate();
-      const contactEmail = user?.email || 'contact@optiprofit.com';
+      const contactEmail = user.email || 'contact@optiprofit.com';
+      const filename = generateReportFilename(vendorName, reportNumber);
 
-      // Generate PDF
+      // Step 1: Generate PDF blob
       const pdfBlob = await generateReturnReportPDF(items, {
         reportNumber,
         date: reportDate,
         vendorName,
         contactEmail,
-        accountNumber: user?.id?.toString() // Optional account number
+        accountNumber: user.id?.toString()
       });
 
-      // Download PDF
-      const filename = generateReportFilename(vendorName, reportNumber);
-      downloadPDF(pdfBlob, filename);
-
-      // TODO: Save report metadata to database for Returns page
-      console.log('Generated report:', {
+      console.log('[REPORT] PDF generated:', {
         reportNumber,
         vendorName,
         filename,
-        itemCount: items.length
+        size: pdfBlob.size
       });
 
-      // Show success message (you can add a toast notification here)
-      alert(`Return report generated successfully!\n\nReport: ${reportNumber}\nVendor: ${vendorName}\nItems: ${items.length}`);
+      // Step 2: Upload PDF to Supabase Storage
+      toast.loading('Uploading to cloud storage...', { id: loadingToast });
+      const storagePath = await uploadReturnReport(pdfBlob, filename, user.id);
+
+      if (!storagePath) {
+        throw new Error('Failed to upload PDF to storage');
+      }
+
+      console.log('[REPORT] PDF uploaded to storage:', storagePath);
+
+      // Step 3: Save report metadata to database
+      toast.loading('Saving report metadata...', { id: loadingToast });
+
+      // Extract vendor_id from items (they should all have same vendor)
+      const vendorId = items[0]?.vendor?.id;
+
+      const reportMetadata = {
+        account_id: user.id,
+        vendor_id: vendorId,
+        vendor_name: vendorName,
+        report_number: reportNumber,
+        filename: filename,
+        pdf_path: storagePath,
+        item_count: items.length,
+        total_quantity: items.reduce((sum, item) => sum + item.quantity, 0),
+        status: 'pending' as const
+      };
+
+      await saveReturnReportMetadata(reportMetadata);
+
+      console.log('[REPORT] Metadata saved to database');
+
+      // Step 4: Download PDF to user's browser
+      downloadPDF(pdfBlob, filename);
+
+      // Step 5: Clear items from return cart
+      items.forEach(item => {
+        setReturnReportItems(prev => prev.filter(i => i.id !== item.id));
+      });
+
+      // Show success message
+      toast.success(
+        `Return report ${reportNumber} generated successfully!`,
+        { id: loadingToast, duration: 5000 }
+      );
+
+      // Close the modal
+      setIsReturnModalOpen(false);
+
+      console.log('[REPORT] Report generation complete:', {
+        reportNumber,
+        vendorName,
+        itemCount: items.length,
+        totalQuantity: reportMetadata.total_quantity
+      });
+
     } catch (error) {
-      console.error('Error generating return report:', error);
-      alert('Failed to generate return report. Please try again.');
+      console.error('[REPORT] Error generating return report:', error);
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to generate return report. Please try again.',
+        { id: loadingToast }
+      );
     }
   };
 
