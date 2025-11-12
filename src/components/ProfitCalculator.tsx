@@ -62,8 +62,8 @@ const loadSavedCalculations = (): SavedCalculation[] => {
 
 const ProfitCalculator: React.FC = () => {
   const { isDemo, demoData, notifyUserAction } = useDemo();
-  const [yourCost, setYourCost] = useState<number>(5);
-  const [wholesaleCost, setWholesaleCost] = useState<number>(50);
+  const [yourCost, setYourCost] = useState<number>(47);
+  const [wholesaleCost, setWholesaleCost] = useState<number>(72);
   const [tariffTax, setTariffTax] = useState<number>(0);
   const [discountPercentage, setDiscountPercentage] = useState<number>(10); // Default 10% discount
   const [isEditingDiscount, setIsEditingDiscount] = useState<boolean>(false); // Track if user is manually editing discount
