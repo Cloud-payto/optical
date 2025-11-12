@@ -180,7 +180,8 @@ const ProfitCalculator: React.FC = () => {
   useEffect(() => {
     if (!isEditingYourCost) {
       const newYourCost = calculateYourCostFromDiscount(wholesaleCost, discountPercentage);
-      setYourCost(newYourCost);
+      // Format to avoid floating-point precision issues
+      setYourCost(formatToDecimals(newYourCost, 2));
     }
   }, [wholesaleCost, discountPercentage, isEditingYourCost]);
 
@@ -308,7 +309,8 @@ const ProfitCalculator: React.FC = () => {
     if (brand.yourCost !== undefined && brand.yourCost !== null && brand.wholesaleCost) {
       const calculatedDiscount = calculateDiscountFromYourCost(brand.wholesaleCost, brand.yourCost);
       console.log('🔥 DEBUG: Calculated discount from brand yourCost:', calculatedDiscount);
-      setDiscountPercentage(calculatedDiscount);
+      // Format to avoid floating-point precision issues
+      setDiscountPercentage(formatToDecimals(calculatedDiscount, 1));
       // Your Cost will auto-update via useEffect
     }
 
