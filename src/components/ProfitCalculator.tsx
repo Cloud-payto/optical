@@ -75,6 +75,7 @@ const ProfitCalculator: React.FC = () => {
   const [discountPercentage, setDiscountPercentage] = useState<number>(10); // Default 10% discount
   const [isEditingDiscount, setIsEditingDiscount] = useState<boolean>(false); // Track if user is manually editing discount
   const [isEditingYourCost, setIsEditingYourCost] = useState<boolean>(false); // Track if user is manually editing your cost
+  const isUpdatingFromYourCostRef = useRef<boolean>(false); // Track if discount is being updated from yourCost input
   const [retailPrice, setRetailPrice] = useState<number>(180);
   const [insuranceMultiplier, setInsuranceMultiplier] = useState<number>(2.5);
   const [useManualRetailPrice, setUseManualRetailPrice] = useState<boolean>(false);
@@ -178,11 +179,14 @@ const ProfitCalculator: React.FC = () => {
 
   // Update Your Cost when wholesale cost or discount % changes (but not when user is manually editing Your Cost)
   useEffect(() => {
-    if (!isEditingYourCost) {
+    // Skip if user is editing yourCost OR if discount was just updated from yourCost input
+    if (!isEditingYourCost && !isUpdatingFromYourCostRef.current) {
       const newYourCost = calculateYourCostFromDiscount(wholesaleCost, discountPercentage);
       // Format to avoid floating-point precision issues
       setYourCost(formatToDecimals(newYourCost, 2));
     }
+    // Reset the ref after checking
+    isUpdatingFromYourCostRef.current = false;
   }, [wholesaleCost, discountPercentage, isEditingYourCost]);
 
   // Calculate retail price based on multiplier when not using manual price
@@ -891,12 +895,13 @@ const ProfitCalculator: React.FC = () => {
                     onBlur={() => {
                       const formatted = formatToDecimals(yourCost, 2);
                       setYourCost(formatted);
+                      // ✅ FIX: Set ref BEFORE updating discount to signal this change came from yourCost
+                      isUpdatingFromYourCostRef.current = true;
                       // Update discount % based on finalized Your Cost
                       const newDiscount = calculateDiscountFromYourCost(wholesaleCost, formatted);
                       setDiscountPercentage(formatToDecimals(newDiscount, 1));
-                      // ✅ FIX: Set isEditingYourCost to false AFTER discount is updated
-                      // This prevents the useEffect from recalculating yourCost from the new discount
-                      setTimeout(() => setIsEditingYourCost(false), 0);
+                      // Now safe to reset editing flag
+                      setIsEditingYourCost(false);
                     }}
                   />
                 </div>
