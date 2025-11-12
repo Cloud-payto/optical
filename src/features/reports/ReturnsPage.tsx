@@ -4,7 +4,10 @@
  */
 
 import React, { useState } from 'react';
-import { Download, FileText, Calendar, Package, Search } from 'lucide-react';
+import { Download, FileText, Calendar, Package, Search, Loader2 } from 'lucide-react';
+import { downloadReturnReport } from '../../lib/storage';
+import { downloadPDF } from '../inventory/utils/generateReturnReportPDF';
+import toast from 'react-hot-toast';
 
 interface ReturnReport {
   id: string;
@@ -14,6 +17,7 @@ interface ReturnReport {
   totalQuantity: number;
   generatedDate: string;
   filename: string;
+  pdfPath?: string; // Storage path for the PDF
   status: 'pending' | 'submitted' | 'completed';
 }
 
@@ -27,6 +31,7 @@ const mockReports: ReturnReport[] = [
     totalQuantity: 8,
     generatedDate: '2025-01-15',
     filename: 'Return_Report_Safilo_RR-2025-001.pdf',
+    pdfPath: 'demo-user-id/2025/Return_Report_Safilo_RR-2025-001.pdf',
     status: 'pending'
   },
   {
@@ -37,6 +42,7 @@ const mockReports: ReturnReport[] = [
     totalQuantity: 5,
     generatedDate: '2025-01-14',
     filename: 'Return_Report_Luxottica_RR-2025-002.pdf',
+    pdfPath: 'demo-user-id/2025/Return_Report_Luxottica_RR-2025-002.pdf',
     status: 'submitted'
   },
 ];
@@ -44,6 +50,7 @@ const mockReports: ReturnReport[] = [
 export function ReturnsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'submitted' | 'completed'>('all');
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   // Filter reports based on search and status
   const filteredReports = mockReports.filter(report => {
@@ -63,6 +70,38 @@ export function ReturnsPage() {
       completed: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
     };
     return styles[status as keyof typeof styles] || styles.pending;
+  };
+
+  /**
+   * Handle PDF download from Supabase Storage
+   */
+  const handleDownload = async (report: ReturnReport) => {
+    // Check if we have a storage path
+    if (!report.pdfPath) {
+      toast.error('PDF file path not found. Please regenerate this report.');
+      return;
+    }
+
+    setDownloadingId(report.id);
+
+    try {
+      // Download the PDF blob from Supabase Storage
+      const blob = await downloadReturnReport(report.pdfPath);
+
+      if (!blob) {
+        // Error toast already shown by downloadReturnReport
+        return;
+      }
+
+      // Trigger browser download
+      downloadPDF(blob, report.filename);
+      toast.success('Report downloaded successfully!');
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error('Failed to download report. Please try again.');
+    } finally {
+      setDownloadingId(null);
+    }
   };
 
   return (
@@ -180,14 +219,21 @@ export function ReturnsPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <button
-                        onClick={() => {
-                          // TODO: Re-download the PDF from storage or regenerate
-                          alert(`Download ${report.filename}\n\nNote: This feature will be connected to your file storage system.`);
-                        }}
-                        className="text-purple-600 dark:text-purple-400 hover:text-purple-900 dark:hover:text-purple-300 font-medium text-sm inline-flex items-center gap-1"
+                        onClick={() => handleDownload(report)}
+                        disabled={downloadingId === report.id}
+                        className="text-purple-600 dark:text-purple-400 hover:text-purple-900 dark:hover:text-purple-300 font-medium text-sm inline-flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
                       >
-                        <Download className="h-4 w-4" />
-                        Download
+                        {downloadingId === report.id ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Downloading...
+                          </>
+                        ) : (
+                          <>
+                            <Download className="h-4 w-4" />
+                            Download
+                          </>
+                        )}
                       </button>
                     </td>
                   </tr>

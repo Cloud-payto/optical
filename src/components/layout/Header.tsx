@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, LogOut, User } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { NotificationBell } from '../notifications/NotificationBell';
+import { NotificationPanel } from '../notifications/NotificationPanel';
+import { useNotifications } from '../../hooks/useNotifications';
 
 const navigation = [
   { name: 'Calculator', to: '/calculator' },
@@ -14,7 +17,10 @@ const Header = ({ isScrolled }: { isScrolled: boolean }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolledDown, setIsScrolledDown] = useState(false);
   const [prevScrollPos, setPrevScrollPos] = useState(0);
+  const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications(20);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -71,11 +77,33 @@ const Header = ({ isScrolled }: { isScrolled: boolean }) => {
               </Link>
             ))}
             <div className="flex items-center space-x-4">
+              {/* Notifications */}
+              <div className="relative">
+                <NotificationBell
+                  unreadCount={unreadCount}
+                  onClick={() => setNotificationPanelOpen(!notificationPanelOpen)}
+                  isOpen={notificationPanelOpen}
+                />
+                <NotificationPanel
+                  isOpen={notificationPanelOpen}
+                  onClose={() => setNotificationPanelOpen(false)}
+                  notifications={notifications}
+                  onMarkAsRead={markAsRead}
+                  onMarkAllAsRead={markAllAsRead}
+                  onNotificationClick={(notification) => {
+                    setNotificationPanelOpen(false);
+                    if (notification.action_url) {
+                      navigate(notification.action_url);
+                    }
+                  }}
+                />
+              </div>
+
               <div className="flex items-center space-x-2 text-sm text-gray-600">
                 <User className="h-4 w-4" />
                 <span>Welcome, {user?.email}</span>
               </div>
-              <button 
+              <button
                 onClick={signOut}
                 className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
               >
@@ -85,8 +113,30 @@ const Header = ({ isScrolled }: { isScrolled: boolean }) => {
             </div>
           </nav>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          {/* Mobile menu button and notifications */}
+          <div className="md:hidden flex items-center space-x-2">
+            {/* Mobile Notifications */}
+            <div className="relative">
+              <NotificationBell
+                unreadCount={unreadCount}
+                onClick={() => setNotificationPanelOpen(!notificationPanelOpen)}
+                isOpen={notificationPanelOpen}
+              />
+              <NotificationPanel
+                isOpen={notificationPanelOpen}
+                onClose={() => setNotificationPanelOpen(false)}
+                notifications={notifications}
+                onMarkAsRead={markAsRead}
+                onMarkAllAsRead={markAllAsRead}
+                onNotificationClick={(notification) => {
+                  setNotificationPanelOpen(false);
+                  if (notification.action_url) {
+                    navigate(notification.action_url);
+                  }
+                }}
+              />
+            </div>
+
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-blue-600 hover:bg-gray-100 focus:outline-none"
