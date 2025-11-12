@@ -5,6 +5,13 @@ import { calculateProfit, calculateNonInsuranceProfit, calculateRetailPrice } fr
 import ProfitDisplay from './ProfitDisplay';
 import { DollarSignIcon, SaveIcon, PrinterIcon, SlidersIcon, ChevronDownIcon, PlusIcon, TagIcon, ShieldIcon, BuildingIcon } from 'lucide-react';
 import { useDemo } from '../contexts/DemoContext';
+import {
+  validateCurrencyInput,
+  validatePercentageInput,
+  formatToDecimals,
+  getValidationWarning,
+  parseNumericInput
+} from '../utils/inputValidation';
 
 // Helper function to format currency values
 const formatCurrency = (value: number): string => {
@@ -76,6 +83,11 @@ const ProfitCalculator: React.FC = () => {
   const [savedCalculations, setSavedCalculations] = useState<SavedCalculation[]>(loadSavedCalculations());
   const [animateCalculation, setAnimateCalculation] = useState<boolean>(false);
   const [insuranceEnabled, setInsuranceEnabled] = useState<boolean>(true);
+
+  // Validation warning state
+  const [yourCostWarning, setYourCostWarning] = useState<string | null>(null);
+  const [wholesaleCostWarning, setWholesaleCostWarning] = useState<string | null>(null);
+  const [retailPriceWarning, setRetailPriceWarning] = useState<string | null>(null);
 
   // Company and Brand selection state
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -854,22 +866,46 @@ const ProfitCalculator: React.FC = () => {
                     type="number"
                     step="0.01"
                     min="0"
+                    max="10000"
                     inputMode="decimal"
                     id="yourCost"
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
-                    value={yourCost.toFixed(2)}
+                    className={`block w-full pl-10 pr-3 py-2 border ${
+                      yourCostWarning
+                        ? 'border-yellow-500 focus:ring-yellow-500 focus:border-yellow-500'
+                        : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
+                    } rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white`}
+                    value={yourCost}
                     onFocus={() => setIsEditingYourCost(true)}
                     onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      setYourCost(value);
-                      setIsEditingDiscount(false);
-                      // Update discount % based on new Your Cost
-                      const newDiscount = calculateDiscountFromYourCost(wholesaleCost, value);
-                      setDiscountPercentage(newDiscount);
+                      const validated = validateCurrencyInput(e.target.value, 0, 10000);
+                      if (validated !== null) {
+                        setYourCost(validated);
+                        setIsEditingDiscount(false);
+                        // Update discount % based on new Your Cost
+                        const newDiscount = calculateDiscountFromYourCost(wholesaleCost, validated);
+                        setDiscountPercentage(newDiscount);
+                        // Check for warnings
+                        const warning = getValidationWarning('Your Actual Cost', validated, 0.01, 10000);
+                        setYourCostWarning(warning);
+                      }
                     }}
-                    onBlur={() => setIsEditingYourCost(false)}
+                    onBlur={() => {
+                      const formatted = formatToDecimals(yourCost, 2);
+                      setYourCost(formatted);
+                      setIsEditingYourCost(false);
+                    }}
                   />
                 </div>
+
+                {yourCostWarning && (
+                  <div className="flex items-start space-x-2 mt-1">
+                    <svg className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+                    </svg>
+                    <p className="text-xs text-yellow-600 dark:text-yellow-400">{yourCostWarning}</p>
+                  </div>
+                )}
+
                 <p className="text-xs text-gray-500 dark:text-gray-400 italic">
                   Calculated from wholesale cost - {discountPercentage.toFixed(1)}% discount
                 </p>
@@ -892,15 +928,21 @@ const ProfitCalculator: React.FC = () => {
                     inputMode="decimal"
                     id="discountPercentage"
                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
-                    value={discountPercentage.toFixed(1)}
+                    value={discountPercentage}
                     onFocus={() => setIsEditingDiscount(true)}
                     onChange={(e) => {
-                      const value = parseFloat(e.target.value) || 0;
-                      setDiscountPercentage(Math.min(100, Math.max(0, value))); // Clamp between 0-100
-                      setIsEditingYourCost(false);
-                      // Your Cost will auto-update via useEffect
+                      const validated = validatePercentageInput(e.target.value);
+                      if (validated !== null) {
+                        setDiscountPercentage(validated);
+                        setIsEditingYourCost(false);
+                        // Your Cost will auto-update via useEffect
+                      }
                     }}
-                    onBlur={() => setIsEditingDiscount(false)}
+                    onBlur={() => {
+                      const formatted = formatToDecimals(discountPercentage, 1);
+                      setDiscountPercentage(formatted);
+                      setIsEditingDiscount(false);
+                    }}
                   />
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 italic">
@@ -918,17 +960,40 @@ const ProfitCalculator: React.FC = () => {
                   <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
-                  type="text"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="10000"
                   inputMode="decimal"
                   id="wholesaleCost"
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+                  className={`block w-full pl-10 pr-3 py-2 border ${
+                    wholesaleCostWarning
+                      ? 'border-yellow-500 focus:ring-yellow-500 focus:border-yellow-500'
+                      : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
+                  } rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white`}
                   value={wholesaleCost}
                   onChange={(e) => {
-                    const value = e.target.value.replace(/^0+(?=\d)/, '');
-                    setWholesaleCost(parseFloat(value) || 0);
+                    const validated = validateCurrencyInput(e.target.value, 0, 10000);
+                    if (validated !== null) {
+                      setWholesaleCost(validated);
+                      const warning = getValidationWarning('Wholesale Cost', validated, 0.01, 10000);
+                      setWholesaleCostWarning(warning);
+                    }
+                  }}
+                  onBlur={() => {
+                    const formatted = formatToDecimals(wholesaleCost, 2);
+                    setWholesaleCost(formatted);
                   }}
                 />
               </div>
+              {wholesaleCostWarning && (
+                <div className="flex items-start space-x-2 mt-1">
+                  <svg className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+                  </svg>
+                  <p className="text-xs text-yellow-600 dark:text-yellow-400">{wholesaleCostWarning}</p>
+                </div>
+              )}
             </div>
             
             <div className="space-y-2">
@@ -943,10 +1008,23 @@ const ProfitCalculator: React.FC = () => {
                   type="number"
                   step="0.01"
                   min="0"
+                  max="1000"
+                  inputMode="decimal"
                   id="tariffTax"
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                   value={tariffTax}
-                  onChange={(e) => setTariffTax(parseFloat(e.target.value) || 0)}
+                  onChange={(e) => {
+                    const validated = validateCurrencyInput(e.target.value, 0, 1000);
+                    if (validated !== null) {
+                      setTariffTax(validated);
+                    } else if (e.target.value === '') {
+                      setTariffTax(0);
+                    }
+                  }}
+                  onBlur={() => {
+                    const formatted = formatToDecimals(tariffTax, 2);
+                    setTariffTax(formatted);
+                  }}
                 />
               </div>
             </div>
@@ -1001,28 +1079,53 @@ const ProfitCalculator: React.FC = () => {
                   <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
-                  type="text"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="50000"
                   inputMode="decimal"
                   id="retailPrice"
-                  className={`block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500 ${!useManualRetailPrice ? 'bg-gray-100 dark:bg-[#181F1C]/50' : ''}`}
+                  className={`block w-full pl-10 pr-3 py-2 border ${
+                    retailPriceWarning
+                      ? 'border-yellow-500 focus:ring-yellow-500 focus:border-yellow-500'
+                      : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
+                  } rounded-md ${
+                    !useManualRetailPrice
+                      ? 'bg-gray-100 dark:bg-[#181F1C]/50 cursor-not-allowed'
+                      : 'bg-white dark:bg-[#1F2623]'
+                  } text-gray-800 dark:text-white`}
                   value={retailPrice}
                   onChange={(e) => {
-                    const value = e.target.value.replace(/^0+(?=\d)/, '');
-                    setRetailPrice(parseFloat(value) || 0);
-                    if (!useManualRetailPrice) {
-                      // If they manually change the retail price, switch to manual mode
-                      setUseManualRetailPrice(true);
-                    }
+                    const validated = validateCurrencyInput(e.target.value, 0, 50000);
+                    if (validated !== null) {
+                      setRetailPrice(validated);
+                      if (!useManualRetailPrice) {
+                        setUseManualRetailPrice(true);
+                      }
+                      const warning = getValidationWarning('Retail Price', validated, 0.01, 50000);
+                      setRetailPriceWarning(warning);
 
-                    // Notify demo system that user entered retail price
-                    if (isDemo && value) {
-                      console.log('🎬 Demo: User entered retail price:', value);
-                      notifyUserAction('input', { retailPrice: value });
+                      // Notify demo system
+                      if (isDemo) {
+                        notifyUserAction('input', { retailPrice: validated });
+                      }
                     }
+                  }}
+                  onBlur={() => {
+                    const formatted = formatToDecimals(retailPrice, 2);
+                    setRetailPrice(formatted);
                   }}
                   readOnly={!useManualRetailPrice}
                 />
               </div>
+              {retailPriceWarning && (
+                <div className="flex items-start space-x-2 mt-1">
+                  <svg className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+                  </svg>
+                  <p className="text-xs text-yellow-600 dark:text-yellow-400">{retailPriceWarning}</p>
+                </div>
+              )}
               {!useManualRetailPrice && (
                 <p className="text-xs text-gray-500 dark:text-gray-400 italic">
                   Auto-calculated based on wholesale cost and multiplier
@@ -1041,14 +1144,23 @@ const ProfitCalculator: React.FC = () => {
                   <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
-                  type="text"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="50000"
                   inputMode="decimal"
                   id="insuranceCoverage"
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                   value={insuranceCoverage}
                   onChange={(e) => {
-                    const value = e.target.value.replace(/^0+(?=\d)/, '');
-                    setInsuranceCoverage(parseFloat(value) || 0);
+                    const validated = validateCurrencyInput(e.target.value, 0, 50000);
+                    if (validated !== null) {
+                      setInsuranceCoverage(validated);
+                    }
+                  }}
+                  onBlur={() => {
+                    const formatted = formatToDecimals(insuranceCoverage, 2);
+                    setInsuranceCoverage(formatted);
                   }}
                 />
               </div>
@@ -1070,14 +1182,23 @@ const ProfitCalculator: React.FC = () => {
                   <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
-                  type="text"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="1000"
                   inputMode="decimal"
                   id="insuranceReimbursement"
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                   value={insuranceReimbursement}
                   onChange={(e) => {
-                    const value = e.target.value.replace(/^0+(?=\d)/, '');
-                    setInsuranceReimbursement(parseFloat(value) || 0);
+                    const validated = validateCurrencyInput(e.target.value, 0, 1000);
+                    if (validated !== null) {
+                      setInsuranceReimbursement(validated);
+                    }
+                  }}
+                  onBlur={() => {
+                    const formatted = formatToDecimals(insuranceReimbursement, 2);
+                    setInsuranceReimbursement(formatted);
                   }}
                 />
               </div>
