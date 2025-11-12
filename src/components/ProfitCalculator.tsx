@@ -891,10 +891,12 @@ const ProfitCalculator: React.FC = () => {
                     onBlur={() => {
                       const formatted = formatToDecimals(yourCost, 2);
                       setYourCost(formatted);
-                      setIsEditingYourCost(false);
                       // Update discount % based on finalized Your Cost
                       const newDiscount = calculateDiscountFromYourCost(wholesaleCost, formatted);
                       setDiscountPercentage(formatToDecimals(newDiscount, 1));
+                      // ✅ FIX: Set isEditingYourCost to false AFTER discount is updated
+                      // This prevents the useEffect from recalculating yourCost from the new discount
+                      setTimeout(() => setIsEditingYourCost(false), 0);
                     }}
                   />
                 </div>

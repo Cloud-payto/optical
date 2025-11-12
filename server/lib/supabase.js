@@ -209,7 +209,7 @@ const inventoryOperations = {
         .eq('account_id', userId)
         .neq('status', 'archived')
         .order('created_at', { ascending: false });
-      
+
       if (error) throw error;
       return data || [];
     } catch (error) {

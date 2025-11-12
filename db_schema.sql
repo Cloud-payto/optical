@@ -110,6 +110,44 @@ CREATE TABLE public.bug_reports (
   CONSTRAINT bug_reports_pkey PRIMARY KEY (id),
   CONSTRAINT bug_reports_account_id_fkey FOREIGN KEY (account_id) REFERENCES public.accounts(id)
 );
+CREATE TABLE public.demo_analytics (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  session_id uuid,
+  user_id uuid,
+  step_number integer NOT NULL,
+  step_name text NOT NULL,
+  time_spent_seconds integer,
+  completed boolean DEFAULT false,
+  skipped boolean DEFAULT false,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT demo_analytics_pkey PRIMARY KEY (id),
+  CONSTRAINT demo_analytics_session_id_fkey FOREIGN KEY (session_id) REFERENCES public.demo_data(session_id),
+  CONSTRAINT demo_analytics_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.demo_data (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  session_id uuid NOT NULL UNIQUE,
+  user_id uuid,
+  created_at timestamp with time zone DEFAULT now(),
+  expires_at timestamp with time zone DEFAULT (now() + '01:00:00'::interval),
+  is_active boolean DEFAULT true,
+  vendor_id text NOT NULL DEFAULT 'demo-modern-optical'::text,
+  vendor_name text NOT NULL DEFAULT 'Modern Optical'::text,
+  vendor_account_number text NOT NULL DEFAULT 'MO-12345'::text,
+  vendor_email text DEFAULT 'orders@modernoptical.com'::text,
+  vendor_phone text DEFAULT '(555) 123-4567'::text,
+  vendor_rep_name text DEFAULT 'Sarah Johnson'::text,
+  vendor_rep_email text DEFAULT 'sarah.johnson@modernoptical.com'::text,
+  vendor_rep_phone text DEFAULT '(555) 123-4569'::text,
+  order_data jsonb NOT NULL DEFAULT '{"id": "demo-order-1", "status": "pending", "vendor": "Modern Optical", "order_number": "MO-2024-DEMO", "total_pieces": 3, "customer_name": "Downtown Vision Center", "account_number": "MO-12345"}'::jsonb,
+  inventory_items jsonb NOT NULL DEFAULT '[{"id": "demo-item-1", "sku": "MOC-001-BLK-52", "size": "52-18-140", "brand": "Modern Optics Collection", "color": "Black", "model": "Metropolitan", "status": "pending", "quantity": 1, "your_cost": 55, "retail_price": 150, "wholesale_cost": 85}, {"id": "demo-item-2", "sku": "MOC-002-TOR-54", "size": "54-16-142", "brand": "Modern Optics Collection", "color": "Tortoise", "model": "Executive", "status": "pending", "quantity": 1, "your_cost": 55, "retail_price": 150, "wholesale_cost": 85}, {"id": "demo-item-3", "sku": "CS-101-BRN-50", "size": "50-19-145", "brand": "Classic Series", "color": "Brown", "model": "Heritage", "status": "pending", "quantity": 1, "your_cost": 45, "retail_price": 120, "wholesale_cost": 65}]'::jsonb,
+  brand_pricing jsonb NOT NULL DEFAULT '[{"id": "demo-modern-collection", "msrp": 150, "name": "Modern Optics Collection", "tier": "Premium", "category": "Fashion", "is_active": true, "map_price": 135, "your_cost": 55, "tariff_tax": 3, "wholesale_cost": 85, "discount_percentage": 35.29}, {"id": "demo-classic-series", "msrp": 120, "name": "Classic Series", "tier": "Standard", "category": "Traditional", "is_active": true, "map_price": 110, "your_cost": 45, "tariff_tax": 2, "wholesale_cost": 65, "discount_percentage": 30.77}]'::jsonb,
+  step_progress integer DEFAULT 0,
+  completed_steps ARRAY DEFAULT ARRAY[]::integer[],
+  last_activity_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT demo_data_pkey PRIMARY KEY (id),
+  CONSTRAINT demo_data_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
+);
 CREATE TABLE public.emails (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
   account_id uuid NOT NULL,

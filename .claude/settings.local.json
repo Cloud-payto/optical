@@ -5,7 +5,22 @@
       "Bash(rm:*)",
       "Bash(npm uninstall:*)",
       "Bash(tree:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "mcp__render__list_services",
+      "mcp__render__list_logs",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git rev-list:*)",
+      "Bash(npx tsc:*)",
+      "mcp__Jam__getDetails",
+      "mcp__Jam__analyzeVideo",
+      "mcp__Jam__getConsoleLogs",
+      "mcp__Jam__getUserEvents",
+      "mcp__Jam__getNetworkRequests",
+      "Bash(npm run build:*)",
+      "mcp__Jam__fetch",
+      "mcp__Jam__getScreenshots",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
