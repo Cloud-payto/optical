@@ -40,28 +40,49 @@ export class DemoController {
   async navigateToPage(targetPage: string): Promise<void> {
     if (!this.navigation) {
       console.warn('Navigation helper not available');
-      return;
+      throw new Error('Navigation helper not available');
     }
 
     if (this.navigation.currentPath !== targetPage) {
       console.log(`🧭 Navigating from ${this.navigation.currentPath} to ${targetPage}`);
       this.navigation.navigate(targetPage);
-      
+
       // Wait for actual navigation to complete by checking the URL
       let attempts = 0;
-      const maxAttempts = 20; // 2 seconds total
-      
+      const maxAttempts = 30; // INCREASED: 3 seconds total for slower page loads
+
       while (attempts < maxAttempts && window.location.pathname !== targetPage) {
         await new Promise(resolve => setTimeout(resolve, 100));
         attempts++;
       }
-      
+
       if (window.location.pathname === targetPage) {
         // Update current path after actual navigation
         this.navigation.currentPath = targetPage;
         console.log(`✅ Navigation to ${targetPage} completed (took ${attempts * 100}ms)`);
       } else {
-        console.warn(`⚠️ Navigation to ${targetPage} failed - still at ${window.location.pathname} after ${maxAttempts * 100}ms`);
+        // P1 FIX: Retry navigation once if first attempt failed
+        console.warn(`⚠️ First navigation attempt failed - still at ${window.location.pathname}. Retrying...`);
+
+        // Retry navigation
+        this.navigation.navigate(targetPage);
+        await new Promise(resolve => setTimeout(resolve, 500)); // Wait longer for retry
+
+        let retryAttempts = 0;
+        const maxRetryAttempts = 20; // 2 more seconds
+        while (retryAttempts < maxRetryAttempts && window.location.pathname !== targetPage) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          retryAttempts++;
+        }
+
+        if (window.location.pathname === targetPage) {
+          this.navigation.currentPath = targetPage;
+          console.log(`✅ Navigation succeeded on retry (took ${retryAttempts * 100}ms)`);
+        } else {
+          const errorMsg = `Navigation to ${targetPage} failed after retry - still at ${window.location.pathname}`;
+          console.error(`❌ ${errorMsg}`);
+          throw new Error(errorMsg);
+        }
       }
     } else {
       console.log(`📍 Already at ${targetPage}`);

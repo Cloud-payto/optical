@@ -15,16 +15,17 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const driverRef = useRef<any | null>(null);
-  const { 
-    isActive, 
-    currentStep, 
-    totalSteps, 
-    nextStep, 
-    previousStep, 
-    skipDemo, 
+  const isNavigatingRef = useRef(false); // NEW: Lock to prevent concurrent navigation
+  const {
+    isActive,
+    currentStep,
+    totalSteps,
+    nextStep,
+    previousStep,
+    skipDemo,
     endDemo,
     injectDemoData,
-    demoData 
+    demoData
   } = useDemo();
 
   // Initialize Driver.js when demo becomes active
@@ -64,6 +65,12 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
         popoverOffset: 10,
         
         onNextClick: async (element, step) => {
+          // P1 FIX: Prevent concurrent navigation attempts
+          if (isNavigatingRef.current) {
+            console.warn('⚠️ Navigation already in progress, ignoring click');
+            return;
+          }
+
           const currentIndex = driverRef.current?.getActiveIndex() ?? 0;
           const nextIndex = currentIndex + 1;
           console.log(`▶️ Next button clicked - preparing step ${nextIndex + 1}`);
@@ -75,6 +82,9 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
 
           // Store original button text
           const originalNextText = nextButton?.textContent;
+
+          // Set navigation lock
+          isNavigatingRef.current = true;
 
           try {
             // Handle navigation and validation for next step
@@ -103,24 +113,47 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
                 if (closeButton) closeButton.disabled = true;
 
                 try {
+                  // Step 1: Navigate to the page
                   await demoController.navigateToPage(nextStep.page);
+                  console.log(`✅ URL changed to: ${window.location.pathname}`);
 
-                  // Wait for target element if specified
+                  // Step 2: Wait for React to finish rendering (check for loading states to disappear)
+                  console.log(`⏳ Waiting for page to finish loading...`);
+                  let loadingAttempts = 0;
+                  const maxLoadingAttempts = 20; // 2 seconds
+                  while (loadingAttempts < maxLoadingAttempts) {
+                    const loadingIndicator = document.querySelector('.animate-spin, [data-loading="true"]');
+                    if (!loadingIndicator) {
+                      console.log(`✅ Page loading complete (no loading indicators found)`);
+                      break;
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    loadingAttempts++;
+                  }
+
+                  // Step 3: Wait for target element if specified (with retry logic)
                   if (nextStep.element && nextStep.element !== 'body') {
-                    console.log(`⏳ Waiting for element: ${nextStep.element}`);
-                    const targetElement = await demoController.waitForElement(nextStep.element, 5000);
+                    console.log(`⏳ Waiting for target element: ${nextStep.element}`);
+                    const targetElement = await demoController.waitForElement(nextStep.element, 8000, 5); // Increased timeout and retries
 
                     if (!targetElement) {
                       console.error(`❌ Element not found after navigation: ${nextStep.element}`);
+                      console.error(`❌ Current page: ${window.location.pathname}, Expected: ${nextStep.page}`);
+                      // Don't proceed to moveNext() if critical element is missing
+                      return;
                     } else {
-                      console.log(`✅ Element ready: ${nextStep.element}`);
+                      console.log(`✅ Target element ready: ${nextStep.element}`);
                     }
                   }
 
-                  // Additional wait for React rendering and component mounting
-                  await new Promise(resolve => setTimeout(resolve, 800)); // INCREASED: 300ms → 800ms for better stability
+                  // Step 4: Additional wait for React rendering and component mounting
+                  console.log(`⏳ Final stability wait...`);
+                  await new Promise(resolve => setTimeout(resolve, 1000)); // INCREASED: 800ms → 1000ms for maximum stability
+                  console.log(`✅ Page fully ready for Driver.js`);
                 } catch (navError) {
                   console.error(`❌ Navigation failed:`, navError);
+                  // Don't call moveNext() if navigation failed
+                  return;
                 }
               } else {
                 // Validate element exists if not navigating
@@ -133,7 +166,7 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
               }
             }
 
-            // ✅ CRITICAL: Call moveNext() to progress to next step
+            // ✅ CRITICAL: Call moveNext() to progress to next step (ONLY after page is ready)
             if (driverRef.current) {
               console.log(`✅ Moving to step ${nextIndex + 1}`);
               driverRef.current.moveNext();
@@ -146,6 +179,9 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
             }
             if (prevButton) prevButton.disabled = false;
             if (closeButton) closeButton.disabled = false;
+
+            // Release navigation lock
+            isNavigatingRef.current = false;
           }
         },
         
