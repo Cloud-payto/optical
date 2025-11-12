@@ -883,7 +883,8 @@ const ProfitCalculator: React.FC = () => {
                         setIsEditingDiscount(false);
                         // Update discount % based on new Your Cost
                         const newDiscount = calculateDiscountFromYourCost(wholesaleCost, validated);
-                        setDiscountPercentage(newDiscount);
+                        // Format discount to avoid floating-point precision issues
+                        setDiscountPercentage(formatToDecimals(newDiscount, 1));
                         // Check for warnings
                         const warning = getValidationWarning('Your Actual Cost', validated, 0.01, 10000);
                         setYourCostWarning(warning);
