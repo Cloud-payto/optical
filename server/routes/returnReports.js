@@ -6,13 +6,13 @@
 const express = require('express');
 const router = express.Router();
 const { supabase } = require('../lib/supabase');
-const { authenticateToken } = require('../middleware/auth');
+const { requireAuth } = require('../middleware/auth');
 
 /**
  * POST /api/return-reports
  * Save return report metadata to database
  */
-router.post('/', authenticateToken, async (req, res) => {
+router.post('/', requireAuth, async (req, res) => {
   try {
     const {
       account_id,
@@ -95,7 +95,7 @@ router.post('/', authenticateToken, async (req, res) => {
  * GET /api/return-reports
  * Get all return reports for authenticated user
  */
-router.get('/', authenticateToken, async (req, res) => {
+router.get('/', requireAuth, async (req, res) => {
   try {
     const userId = req.user.id;
     const { status, limit = 100 } = req.query;
@@ -137,7 +137,7 @@ router.get('/', authenticateToken, async (req, res) => {
  * GET /api/return-reports/:id
  * Get a specific return report by ID
  */
-router.get('/:id', authenticateToken, async (req, res) => {
+router.get('/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
@@ -170,7 +170,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
  * PATCH /api/return-reports/:id
  * Update return report status or metadata
  */
-router.patch('/:id', authenticateToken, async (req, res) => {
+router.patch('/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
@@ -214,7 +214,7 @@ router.patch('/:id', authenticateToken, async (req, res) => {
  * DELETE /api/return-reports/:id
  * Delete a return report and its associated PDF from storage
  */
-router.delete('/:id', authenticateToken, async (req, res) => {
+router.delete('/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
