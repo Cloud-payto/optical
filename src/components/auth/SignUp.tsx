@@ -1,21 +1,45 @@
 import React, { useState } from 'react';
-import { EyeIcon, EyeOffIcon, LockIcon, UserIcon, MailIcon } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { EyeIcon, EyeOffIcon, LockIcon, MailIcon, CheckCircle2, XCircle } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { validateEmail, validatePasswordStrength, validatePasswordsMatch } from '../../utils/validation';
+import toast from 'react-hot-toast';
 
 interface SignUpProps {
   onToggleMode: () => void;
 }
 
 const SignUp: React.FC<SignUpProps> = ({ onToggleMode }) => {
+  const { signUp, loading } = useAuth();
+
   const [formData, setFormData] = useState({
-    username: '',
     email: '',
     password: '',
     confirmPassword: ''
   });
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [touched, setTouched] = useState({
+    email: false,
+    password: false,
+    confirmPassword: false
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Validation states
+  const emailValidation = validateEmail(formData.email);
+  const passwordStrength = validatePasswordStrength(formData.password);
+  const passwordsMatch = validatePasswordsMatch(formData.password, formData.confirmPassword);
+
+  // Check if form is valid
+  const isFormValid =
+    emailValidation.isValid &&
+    passwordStrength.score >= 3 && // Require at least medium strength
+    passwordsMatch.isValid &&
+    formData.email &&
+    formData.password &&
+    formData.confirmPassword;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -24,112 +48,165 @@ const SignUp: React.FC<SignUpProps> = ({ onToggleMode }) => {
     });
   };
 
+  const handleBlur = (field: keyof typeof touched) => {
+    setTouched({
+      ...touched,
+      [field]: true
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+
+    // Mark all fields as touched
+    setTouched({
+      email: true,
+      password: true,
+      confirmPassword: true
+    });
 
     // Validate form
-    if (!formData.username || !formData.email || !formData.password || !formData.confirmPassword) {
-      setError('Please fill in all fields');
+    if (!isFormValid) {
+      if (!emailValidation.isValid) {
+        toast.error(emailValidation.error || 'Invalid email');
+      } else if (passwordStrength.score < 3) {
+        toast.error('Please use a stronger password');
+      } else if (!passwordsMatch.isValid) {
+        toast.error(passwordsMatch.error || 'Passwords do not match');
+      }
       return;
     }
 
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
+    setIsSubmitting(true);
 
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
+    try {
+      await signUp(formData.email, formData.password);
+      // Success handling is done in AuthContext
+    } catch (error) {
+      // Error handling is done in AuthContext
+      console.error('Signup error:', error);
+    } finally {
+      setIsSubmitting(false);
     }
+  };
 
-    // For demo purposes, just show success message
-    // In production, this would make an API call to create the user
-    setSuccess('Account created successfully! Please use the admin credentials to log in.');
-    
-    // Reset form
-    setFormData({
-      username: '',
-      email: '',
-      password: '',
-      confirmPassword: ''
-    });
+  // Get border color based on validation state
+  const getInputBorderColor = (field: keyof typeof touched, isValid: boolean) => {
+    if (!touched[field]) return 'border-gray-300 dark:border-gray-600';
+    return isValid
+      ? 'border-green-500 dark:border-green-500'
+      : 'border-red-500 dark:border-red-500';
+  };
+
+  // Password strength indicator
+  const renderPasswordStrengthBar = () => {
+    if (!formData.password) return null;
+
+    const widthPercentage = (passwordStrength.score / 5) * 100;
+    const colorClass = {
+      red: 'bg-red-500',
+      yellow: 'bg-yellow-500',
+      green: 'bg-green-500',
+    }[passwordStrength.color];
+
+    return (
+      <div className="mt-2">
+        <div className="h-1.5 w-full bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          <motion.div
+            className={`h-full ${colorClass}`}
+            initial={{ width: 0 }}
+            animate={{ width: `${widthPercentage}%` }}
+            transition={{ duration: 0.3 }}
+          />
+        </div>
+        <p className={`mt-1 text-xs ${
+          passwordStrength.color === 'red' ? 'text-red-600 dark:text-red-400' :
+          passwordStrength.color === 'yellow' ? 'text-yellow-600 dark:text-yellow-400' :
+          'text-green-600 dark:text-green-400'
+        }`}>
+          {passwordStrength.feedback}
+        </p>
+      </div>
+    );
   };
 
   return (
     <div className="w-full max-w-md space-y-8">
       <div className="text-center">
-        <h2 className="mt-6 text-3xl font-bold text-gray-900">
+        <h2 className="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
           Create your account
         </h2>
-        <p className="mt-2 text-sm text-gray-600">
-          Sign up for OptiProfit
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          Start managing your optical inventory with OptiProfit
         </p>
       </div>
-      
-      <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-              Username
-            </label>
-            <div className="mt-1 relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <UserIcon className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                required
-                className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Choose a username"
-                value={formData.username}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
 
+      <motion.form
+        className="mt-8 space-y-6"
+        onSubmit={handleSubmit}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <div className="space-y-5">
+          {/* Email Field */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Email Address
             </label>
-            <div className="mt-1 relative">
+            <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <MailIcon className="h-5 w-5 text-gray-400" />
+                <MailIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
               </div>
               <input
                 id="email"
                 name="email"
                 type="email"
+                autoComplete="email"
                 required
-                className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Enter your email"
+                className={`block w-full pl-10 pr-10 py-2.5 border ${getInputBorderColor('email', emailValidation.isValid)} rounded-lg bg-white dark:bg-[#1F2623] text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
+                placeholder="you@example.com"
                 value={formData.email}
                 onChange={handleChange}
+                onBlur={() => handleBlur('email')}
               />
+              {touched.email && formData.email && (
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  {emailValidation.isValid ? (
+                    <CheckCircle2 className="h-5 w-5 text-green-500" />
+                  ) : (
+                    <XCircle className="h-5 w-5 text-red-500" />
+                  )}
+                </div>
+              )}
             </div>
+            {touched.email && !emailValidation.isValid && emailValidation.error && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                {emailValidation.error}
+              </p>
+            )}
           </div>
-          
+
+          {/* Password Field */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Password
             </label>
-            <div className="mt-1 relative">
+            <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <LockIcon className="h-5 w-5 text-gray-400" />
+                <LockIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
               </div>
               <input
                 id="password"
                 name="password"
                 type={showPassword ? 'text' : 'password'}
+                autoComplete="new-password"
                 required
-                className="appearance-none relative block w-full pl-10 pr-10 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Create a password"
+                className={`block w-full pl-10 pr-10 py-2.5 border ${getInputBorderColor('password', passwordStrength.score >= 3)} rounded-lg bg-white dark:bg-[#1F2623] text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
+                placeholder="Create a strong password"
                 value={formData.password}
                 onChange={handleChange}
+                onBlur={() => handleBlur('password')}
               />
               <button
                 type="button"
@@ -137,31 +214,35 @@ const SignUp: React.FC<SignUpProps> = ({ onToggleMode }) => {
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (
-                  <EyeOffIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  <EyeOffIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" />
                 ) : (
-                  <EyeIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  <EyeIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" />
                 )}
               </button>
             </div>
+            {formData.password && renderPasswordStrengthBar()}
           </div>
 
+          {/* Confirm Password Field */}
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Confirm Password
             </label>
-            <div className="mt-1 relative">
+            <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <LockIcon className="h-5 w-5 text-gray-400" />
+                <LockIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
               </div>
               <input
                 id="confirmPassword"
                 name="confirmPassword"
                 type={showConfirmPassword ? 'text' : 'password'}
+                autoComplete="new-password"
                 required
-                className="appearance-none relative block w-full pl-10 pr-10 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                className={`block w-full pl-10 pr-10 py-2.5 border ${getInputBorderColor('confirmPassword', passwordsMatch.isValid)} rounded-lg bg-white dark:bg-[#1F2623] text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors`}
                 placeholder="Confirm your password"
                 value={formData.confirmPassword}
                 onChange={handleChange}
+                onBlur={() => handleBlur('confirmPassword')}
               />
               <button
                 type="button"
@@ -169,51 +250,51 @@ const SignUp: React.FC<SignUpProps> = ({ onToggleMode }) => {
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               >
                 {showConfirmPassword ? (
-                  <EyeOffIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  <EyeOffIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" />
                 ) : (
-                  <EyeIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  <EyeIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" />
                 )}
               </button>
             </div>
+            {touched.confirmPassword && !passwordsMatch.isValid && passwordsMatch.error && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                {passwordsMatch.error}
+              </p>
+            )}
           </div>
         </div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
-            {error}
-          </div>
-        )}
-
-        {success && (
-          <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-md text-sm">
-            {success}
-          </div>
-        )}
-
-        <div className="bg-yellow-50 border border-yellow-200 text-yellow-600 px-4 py-3 rounded-md text-sm">
-          <p className="font-medium">Demo Notice:</p>
-          <p>This is a demo signup form. Use the admin credentials to log in.</p>
-        </div>
-
+        {/* Submit Button */}
         <div>
-          <button
+          <motion.button
             type="submit"
-            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            disabled={isSubmitting || !isFormValid}
+            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg"
+            whileHover={{ scale: isSubmitting || !isFormValid ? 1 : 1.02 }}
+            whileTap={{ scale: isSubmitting || !isFormValid ? 1 : 0.98 }}
           >
-            Create Account
-          </button>
+            {isSubmitting ? (
+              <div className="flex items-center space-x-2">
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+                <span>Creating Account...</span>
+              </div>
+            ) : (
+              'Create Account'
+            )}
+          </motion.button>
         </div>
 
+        {/* Toggle to Sign In */}
         <div className="text-center">
           <button
             type="button"
-            className="text-blue-600 hover:text-blue-500 text-sm font-medium"
+            className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 text-sm font-medium transition-colors"
             onClick={onToggleMode}
           >
             Already have an account? Sign in
           </button>
         </div>
-      </form>
+      </motion.form>
     </div>
   );
 };

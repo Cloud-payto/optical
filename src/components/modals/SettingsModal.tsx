@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sun, Moon, Monitor, Settings as SettingsIcon } from 'lucide-react';
-import { useTheme } from '../../contexts/ThemeContext';
+import { X, Settings as SettingsIcon } from 'lucide-react';
+import { AccountSettings } from '../settings/AccountSettings';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -9,14 +9,6 @@ interface SettingsModalProps {
 }
 
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
-  const { theme, setTheme } = useTheme();
-
-  const themeOptions = [
-    { value: 'light', label: 'Light', icon: Sun },
-    { value: 'dark', label: 'Dark', icon: Moon },
-    { value: 'system', label: 'System', icon: Monitor },
-  ] as const;
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -28,80 +20,48 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             className="fixed inset-0 bg-black bg-opacity-50"
             onClick={onClose}
           />
-          
+
           <motion.div
             initial={{ scale: 0.95, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
-            transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="relative w-full max-w-md rounded-lg bg-white dark:bg-[#1F2623] shadow-xl border border-gray-200 dark:border-gray-700"
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            className="relative w-full max-w-4xl max-h-[90vh] rounded-xl bg-white dark:bg-[#1F2623] shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-800">
               <div className="flex items-center space-x-3">
-                <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-md">
                   <SettingsIcon className="h-5 w-5 text-white" />
                 </div>
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Settings
-                </h2>
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                    Account Settings
+                  </h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Manage your account preferences and security
+                  </p>
+                </div>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                aria-label="Close settings"
               >
                 <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
               </button>
             </div>
 
-            {/* Content */}
-            <div className="p-6">
-              <div className="space-y-6">
-                {/* Theme Selection */}
-                <div>
-                  <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
-                    Theme
-                  </h3>
-                  <div className="space-y-2">
-                    {themeOptions.map((option) => {
-                      const Icon = option.icon;
-                      return (
-                        <button
-                          key={option.value}
-                          onClick={() => setTheme(option.value)}
-                          className={`w-full flex items-center justify-between p-3 rounded-lg border transition-all ${
-                            theme === option.value
-                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-                              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
-                          }`}
-                        >
-                          <div className="flex items-center space-x-3">
-                            <Icon className="h-4 w-4" />
-                            <span className="font-medium">{option.label}</span>
-                          </div>
-                          {theme === option.value && (
-                            <div className="w-2 h-2 rounded-full bg-blue-500" />
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Additional Settings (for future expansion) */}
-                <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    More settings coming soon...
-                  </p>
-                </div>
-              </div>
+            {/* Content - Scrollable */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <AccountSettings />
             </div>
 
             {/* Footer */}
-            <div className="flex justify-end p-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex justify-end px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
               <button
                 onClick={onClose}
-                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg"
+                className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium"
               >
                 Done
               </button>
