@@ -206,6 +206,7 @@ export function InventoryPage() {
             return (
               <button
                 key={tab.key}
+                data-demo={tab.key === 'pending' ? 'inventory-pending-tab' : undefined}
                 onClick={() => {
                   setActiveTab(tab.key);
                   setFilters(prev => ({ ...prev, status: tab.key }));
