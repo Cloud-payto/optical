@@ -846,7 +846,6 @@ export async function saveReturnReportMetadata(
   userId?: string
 ): Promise<{ success: boolean; data: ReturnReport }> {
   const currentUserId = userId || await getCurrentUserIdFromSession();
-  const apiUrl = getApiEndpoint();
 
   // Ensure the account_id matches current user
   const requestData = {
@@ -855,7 +854,7 @@ export async function saveReturnReportMetadata(
   };
 
   return await apiRequest<{ success: boolean; data: ReturnReport }>(
-    `${apiUrl}/api/return-reports`,
+    '/return-reports',
     {
       method: 'POST',
       body: JSON.stringify(requestData)
@@ -871,7 +870,6 @@ export async function fetchReturnReports(
   statusFilter?: 'all' | 'pending' | 'submitted' | 'completed'
 ): Promise<ReturnReport[]> {
   const currentUserId = userId || await getCurrentUserIdFromSession();
-  const apiUrl = getApiEndpoint();
 
   const queryParams = new URLSearchParams();
   if (statusFilter && statusFilter !== 'all') {
@@ -879,9 +877,9 @@ export async function fetchReturnReports(
   }
 
   const queryString = queryParams.toString();
-  const url = `${apiUrl}/api/return-reports${queryString ? '?' + queryString : ''}`;
+  const endpoint = `/return-reports${queryString ? '?' + queryString : ''}`;
 
-  const response = await apiRequest<{ success: boolean; data: ReturnReport[] }>(url);
+  const response = await apiRequest<{ success: boolean; data: ReturnReport[] }>(endpoint);
   return response.data;
 }
 
@@ -893,10 +891,9 @@ export async function fetchReturnReportById(
   userId?: string
 ): Promise<ReturnReport> {
   const currentUserId = userId || await getCurrentUserIdFromSession();
-  const apiUrl = getApiEndpoint();
 
   const response = await apiRequest<{ success: boolean; data: ReturnReport }>(
-    `${apiUrl}/api/return-reports/${reportId}`
+    `/return-reports/${reportId}`
   );
   return response.data;
 }
@@ -915,10 +912,9 @@ export async function updateReturnReport(
   userId?: string
 ): Promise<{ success: boolean; data: ReturnReport }> {
   const currentUserId = userId || await getCurrentUserIdFromSession();
-  const apiUrl = getApiEndpoint();
 
   return await apiRequest<{ success: boolean; data: ReturnReport }>(
-    `${apiUrl}/api/return-reports/${reportId}`,
+    `/return-reports/${reportId}`,
     {
       method: 'PATCH',
       body: JSON.stringify(updates)
@@ -934,10 +930,9 @@ export async function deleteReturnReport(
   userId?: string
 ): Promise<{ success: boolean; message: string }> {
   const currentUserId = userId || await getCurrentUserIdFromSession();
-  const apiUrl = getApiEndpoint();
 
   return await apiRequest<{ success: boolean; message: string }>(
-    `${apiUrl}/api/return-reports/${reportId}`,
+    `/return-reports/${reportId}`,
     {
       method: 'DELETE'
     }
