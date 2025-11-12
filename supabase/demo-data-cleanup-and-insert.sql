@@ -67,8 +67,8 @@ ON CONFLICT (id) DO UPDATE SET
 
 -- STEP 3: Insert Brands (or update if exists)
 -- ============================================================================
+-- Note: Using brand name for conflict detection since name is the unique constraint
 INSERT INTO public.brands (
-  id,
   name,
   vendor_id,
   category,
@@ -79,7 +79,6 @@ INSERT INTO public.brands (
   is_active
 ) VALUES
   (
-    'b1d2aaf8-0001-0000-0000-000000000001',
     'B.M.E.C.',
     'f1d2aaf8-1877-4579-9ed0-083541dae7e7',
     'Men''s Frames',
@@ -90,7 +89,6 @@ INSERT INTO public.brands (
     true
   ),
   (
-    'b1d2aaf8-0002-0000-0000-000000000002',
     'GB+ COLLECTION',
     'f1d2aaf8-1877-4579-9ed0-083541dae7e7',
     'Women''s Frames',
@@ -101,7 +99,6 @@ INSERT INTO public.brands (
     true
   ),
   (
-    'b1d2aaf8-0003-0000-0000-000000000003',
     'MODERN PLASTICS II',
     'f1d2aaf8-1877-4579-9ed0-083541dae7e7',
     'Unisex Frames',
@@ -111,8 +108,7 @@ INSERT INTO public.brands (
     45.00,
     true
   )
-ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name,
+ON CONFLICT (name) DO UPDATE SET
   vendor_id = EXCLUDED.vendor_id,
   category = EXCLUDED.category,
   tier = EXCLUDED.tier,
@@ -123,27 +119,24 @@ ON CONFLICT (id) DO UPDATE SET
 
 -- STEP 4: Link Demo User to Vendor
 -- ============================================================================
+-- Note: No ON CONFLICT needed since we delete demo data at the start
 INSERT INTO public.account_vendors (
-  id,
   account_id,
   vendor_id,
   vendor_account_number,
   notes
 ) VALUES (
-  'av-demo-0001-0000-0000-000000000001',
   '3251cae7-ee61-4c5f-be4c-4312c17ef4fd',
   'f1d2aaf8-1877-4579-9ed0-083541dae7e7',
   '93277',
   'Demo vendor relationship - Modern Optical'
-)
-ON CONFLICT (id) DO UPDATE SET
-  vendor_account_number = EXCLUDED.vendor_account_number,
-  notes = EXCLUDED.notes;
+);
 
 -- STEP 5: Link Demo User to Brands with Pricing
 -- ============================================================================
+-- Note: Using subqueries to get actual brand IDs in case they already exist with different IDs
+-- Note: No ON CONFLICT needed since we delete demo data at the start
 INSERT INTO public.account_brands (
-  id,
   account_id,
   vendor_id,
   brand_id,
@@ -151,42 +144,26 @@ INSERT INTO public.account_brands (
   wholesale_cost,
   vendor_account_number,
   is_active
-) VALUES
-  (
-    'ab-demo-0001-0000-0000-000000000001',
-    '3251cae7-ee61-4c5f-be4c-4312c17ef4fd',
-    'f1d2aaf8-1877-4579-9ed0-083541dae7e7',
-    'b1d2aaf8-0001-0000-0000-000000000001', -- B.M.E.C.
-    35.00,
-    55.25, -- $85 - 35% = $55.25
-    '93277',
-    true
-  ),
-  (
-    'ab-demo-0002-0000-0000-000000000002',
-    '3251cae7-ee61-4c5f-be4c-4312c17ef4fd',
-    'f1d2aaf8-1877-4579-9ed0-083541dae7e7',
-    'b1d2aaf8-0002-0000-0000-000000000002', -- GB+ COLLECTION
-    40.00,
-    45.00, -- $75 - 40% = $45
-    '93277',
-    true
-  ),
-  (
-    'ab-demo-0003-0000-0000-000000000003',
-    '3251cae7-ee61-4c5f-be4c-4312c17ef4fd',
-    'f1d2aaf8-1877-4579-9ed0-083541dae7e7',
-    'b1d2aaf8-0003-0000-0000-000000000003', -- MODERN PLASTICS II
-    45.00,
-    35.75, -- $65 - 45% = $35.75
-    '93277',
-    true
-  )
-ON CONFLICT (id) DO UPDATE SET
-  discount_percentage = EXCLUDED.discount_percentage,
-  wholesale_cost = EXCLUDED.wholesale_cost,
-  vendor_account_number = EXCLUDED.vendor_account_number,
-  is_active = EXCLUDED.is_active;
+)
+SELECT
+  '3251cae7-ee61-4c5f-be4c-4312c17ef4fd',
+  'f1d2aaf8-1877-4579-9ed0-083541dae7e7',
+  b.id,
+  CASE
+    WHEN b.name = 'B.M.E.C.' THEN 35.00
+    WHEN b.name = 'GB+ COLLECTION' THEN 40.00
+    WHEN b.name = 'MODERN PLASTICS II' THEN 45.00
+  END as discount_percentage,
+  CASE
+    WHEN b.name = 'B.M.E.C.' THEN 55.25
+    WHEN b.name = 'GB+ COLLECTION' THEN 45.00
+    WHEN b.name = 'MODERN PLASTICS II' THEN 35.75
+  END as wholesale_cost,
+  '93277',
+  true
+FROM public.brands b
+WHERE b.name IN ('B.M.E.C.', 'GB+ COLLECTION', 'MODERN PLASTICS II')
+  AND b.vendor_id = 'f1d2aaf8-1877-4579-9ed0-083541dae7e7';
 
 -- STEP 6: Insert Email
 -- ============================================================================
@@ -198,8 +175,8 @@ INSERT INTO public.emails (
   from_email,
   to_email,
   received_at,
-  body_text,
-  body_html,
+  plain_text,
+  html_text,
   parse_status,
   parsed_data,
   raw_data
@@ -240,15 +217,15 @@ INSERT INTO public.emails (
     "order_number": "6817",
     "order_date": "2025-09-05",
     "account_number": "93277",
-    "total_pieces": 18,
-    "rep_name": "Payton Millet"
+    "total_pieces": 18
   }'::jsonb,
   jsonb_build_object('source', 'demo', 'timestamp', NOW()::text)
 )
 ON CONFLICT (id) DO UPDATE SET
   subject = EXCLUDED.subject,
   parse_status = EXCLUDED.parse_status,
-  parsed_data = EXCLUDED.parsed_data;
+  parsed_data = EXCLUDED.parsed_data,
+  account_id = EXCLUDED.account_id;
 
 -- STEP 7: Insert Order
 -- ============================================================================
@@ -262,8 +239,7 @@ INSERT INTO public.orders (
   total_pieces,
   customer_name,
   account_number,
-  status,
-  rep_name
+  status
 ) VALUES (
   '50fa0961-9d44-4190-95ce-b57be229ba62',
   '3251cae7-ee61-4c5f-be4c-4312c17ef4fd',
@@ -274,14 +250,15 @@ INSERT INTO public.orders (
   18,
   'MARANA EYE CARE',
   '93277',
-  'pending',
-  'Payton Millet'
+  'pending'
 )
 ON CONFLICT (id) DO UPDATE SET
   order_date = EXCLUDED.order_date,
   total_pieces = EXCLUDED.total_pieces,
   customer_name = EXCLUDED.customer_name,
-  status = EXCLUDED.status;
+  account_number = EXCLUDED.account_number,
+  status = EXCLUDED.status,
+  account_id = EXCLUDED.account_id;
 
 -- STEP 8: Insert Inventory (18 frames)
 -- ============================================================================
