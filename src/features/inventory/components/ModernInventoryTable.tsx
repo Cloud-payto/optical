@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Archive, Trash2, RotateCcw, DollarSign } from 'lucide-react';
 import type { InventoryItem } from '../types/inventory.types';
 import {
@@ -16,6 +16,7 @@ interface ModernInventoryTableProps {
   onDelete?: (itemId: string) => void;
   onMarkAsSold?: (itemId: string) => void;
   isLoading?: boolean;
+  isDemo?: boolean; // Demo mode flag
 }
 
 export function ModernInventoryTable({
@@ -25,12 +26,39 @@ export function ModernInventoryTable({
   onRestore,
   onDelete,
   onMarkAsSold,
-  isLoading = false
+  isLoading = false,
+  isDemo = false
 }: ModernInventoryTableProps) {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [demoLocked, setDemoLocked] = useState(false); // Prevent collapse during demo
+
+  // Auto-expand first row in demo mode
+  useEffect(() => {
+    if (isDemo && items.length > 0) {
+      console.log('🎭 ModernInventoryTable: Auto-expanding first frame in demo mode');
+      setDemoLocked(true);
+
+      // Expand first item after short delay
+      const timer = setTimeout(() => {
+        const firstItemId = items[0].id;
+        setExpandedRows(new Set([firstItemId]));
+        console.log('✅ ModernInventoryTable: First frame expanded:', firstItemId);
+      }, 500);
+
+      return () => clearTimeout(timer);
+    } else {
+      setDemoLocked(false);
+    }
+  }, [isDemo, items]);
 
   const toggleExpanded = (itemId: string) => {
+    // Prevent toggling if demo is active and locked
+    if (demoLocked) {
+      console.log('🔒 ModernInventoryTable: Toggle blocked during demo mode');
+      return;
+    }
+
     setExpandedRows(prev => {
       const newSet = new Set(prev);
       if (newSet.has(itemId)) {
@@ -217,6 +245,8 @@ export function ModernInventoryTable({
                   {/* Expand/Collapse Button */}
                   <button
                     onClick={() => toggleExpanded(item.id)}
+                    data-demo="frame-expand-btn"
+                    data-frame-id={item.id}
                     className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                     title="View Details"
                   >

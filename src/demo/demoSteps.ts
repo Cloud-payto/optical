@@ -242,16 +242,45 @@ export const demoSteps: ExtendedDemoStep[] = [
     }
   },
 
-  // Step 10: Add to Return Report (NEW)
+  // Step 9.5: Expand Frame Details (NEW)
+  {
+    id: 'expand-frame-details',
+    page: '/frames/inventory',
+    element: '[data-demo="frame-expand-btn"]',
+    automatedAction: {
+      type: 'click',
+      selector: '[data-demo="frame-expand-btn"]',
+      delay: 1000,
+      animationDuration: 600
+    },
+    autoAdvanceDelay: 4000, // Give time to see expanded details
+    popover: {
+      title: '🔍 Step 5: View Frame Details',
+      description: `
+        <p class="text-sm">Watch as we <strong>expand the first frame</strong> to show complete details.</p>
+        <p class="text-sm mt-2">The expanded view shows:</p>
+        <ul class="text-xs mt-2 space-y-0.5 ml-2 list-disc list-inside">
+          <li>High-resolution frame image</li>
+          <li>Complete specifications (UPC, SKU, dimensions)</li>
+          <li>Order information and vendor details</li>
+          <li>Return window status</li>
+        </ul>
+      `,
+      side: 'left',
+      align: 'center'
+    }
+  },
+
+  // Step 10: Add to Return Report (UPDATED)
   {
     id: 'add-to-return-report',
     page: '/frames/inventory',
     element: '[data-demo="add-to-return"]',
     popover: {
-      title: '🔄 Step 5: Return Report Feature',
+      title: '🔄 Step 6: Add to Return Report',
       description: `
-        <p class="text-sm">Found frames you need to return to the vendor?</p>
-        <p class="text-sm mt-2">Click the <strong>shopping cart icon</strong> to add frames to your return report.</p>
+        <p class="text-sm">Now that you can see all the frame details, you can add it to your return report.</p>
+        <p class="text-sm mt-2">Click the <strong>🔄 icon</strong> to add this frame to your return list.</p>
         <p class="text-sm mt-2 text-purple-600">✨ OptiProfit will generate a professional PDF return form!</p>
       `,
       side: 'left',
@@ -375,37 +404,99 @@ export const demoSteps: ExtendedDemoStep[] = [
     waitForElement: true
   },
 
-  // Step 16: Company Dropdown Selection
+  // Step 16: Open Company Dropdown
   {
-    id: 'select-vendor-dropdown',
+    id: 'open-vendor-dropdown',
     page: '/calculator',
     element: '[data-demo="company-dropdown"]',
-    waitForElement: true, // ✅ ADDED: Wait for element to be fully rendered
+    waitForElement: true,
+    automatedAction: {
+      type: 'click',
+      selector: '[data-demo="company-dropdown"]',
+      delay: 800,
+      animationDuration: 600
+    },
+    autoAdvanceDelay: 2000, // Wait for dropdown to open
     popover: {
       title: '🏢 Step 9: Select Vendor',
       description: `
-        <p class="text-sm">Click the <strong>Company</strong> dropdown and select <strong>"Modern Optical"</strong>.</p>
-        <p class="text-sm mt-2">Notice how it auto-populates from your vendor list – no manual entry!</p>
+        <p class="text-sm">Watch as we open the <strong>Company</strong> dropdown.</p>
+        <p class="text-sm mt-2">Your vendors from the Brands page automatically populate here!</p>
       `,
-      side: 'bottom',
+      side: 'top',
       align: 'start'
     }
   },
 
-  // Step 17: Brand Dropdown Selection (FIXED)
+  // Step 16.5: Select Modern Optical
   {
-    id: 'select-brand-dropdown',
+    id: 'select-modern-optical',
+    page: '/calculator',
+    element: '[data-demo="company-option-modern-optical"]',
+    waitForElement: true,
+    automatedAction: {
+      type: 'click',
+      selector: '[data-demo="company-option-modern-optical"]',
+      delay: 500,
+      animationDuration: 800
+    },
+    autoAdvanceDelay: 2500, // Wait for selection to complete
+    popover: {
+      title: '✨ Selecting Modern Optical',
+      description: `
+        <p class="text-sm">We're automatically selecting <strong>"Modern Optical"</strong> from the list.</p>
+        <p class="text-sm mt-2">This triggers the brand dropdown to populate with Modern Optical's brands!</p>
+      `,
+      side: 'left',
+      align: 'center'
+    }
+  },
+
+  // Step 17: Open Brand Dropdown
+  {
+    id: 'open-brand-dropdown',
     page: '/calculator',
     element: '[data-demo="brand-dropdown"]',
-    waitForElement: true, // ✅ ADDED: Wait for element to be fully rendered
+    waitForElement: true,
+    automatedAction: {
+      type: 'click',
+      selector: '[data-demo="brand-dropdown"]',
+      delay: 800,
+      animationDuration: 600
+    },
+    autoAdvanceDelay: 2000, // Wait for dropdown to open
     popover: {
       title: '🎨 Step 10: Select Brand',
       description: `
-        <p class="text-sm">Now select <strong>"B.M.E.C."</strong> from the brand dropdown.</p>
-        <p class="text-sm mt-2 font-medium text-purple-600">✨ Watch the magic happen in the next step!</p>
+        <p class="text-sm">Now we'll open the <strong>Brand</strong> dropdown.</p>
+        <p class="text-sm mt-2">All brands from Modern Optical are now available!</p>
       `,
-      side: 'bottom',
+      side: 'top',
       align: 'start'
+    }
+  },
+
+  // Step 17.5: Select B.M.E.C.
+  {
+    id: 'select-bmec-brand',
+    page: '/calculator',
+    element: '[data-demo="brand-option-bmec"]',
+    waitForElement: true,
+    automatedAction: {
+      type: 'click',
+      selector: '[data-demo="brand-option-bmec"]',
+      delay: 500,
+      animationDuration: 800
+    },
+    autoAdvanceDelay: 3000, // Wait for auto-population to complete
+    popover: {
+      title: '✨ Selecting B.M.E.C.',
+      description: `
+        <p class="text-sm">Automatically selecting <strong>"B.M.E.C."</strong> from Modern Optical's brands.</p>
+        <p class="text-sm mt-2 font-medium text-purple-600">✨ Watch the costs auto-populate in the next step!</p>
+      `,
+      side: 'left',
+      align: 'center'
     }
   },
 
@@ -414,17 +505,17 @@ export const demoSteps: ExtendedDemoStep[] = [
     id: 'cost-auto-populate',
     page: '/calculator',
     element: '[data-demo="cost-fields"]',
-    waitForElement: true, // ✅ ADDED: Wait for element to be fully rendered
+    waitForElement: true,
     popover: {
       title: '✨ Step 11: Auto-Population Magic',
       description: `
-        <p class="text-sm font-medium text-green-600">🎉 See how the costs automatically filled in?</p>
+        <p class="text-sm font-medium text-green-600">🎉 The costs automatically filled in!</p>
         <ul class="text-sm mt-2 space-y-1 bg-green-50 border border-green-200 rounded p-3">
           <li>• Wholesale Cost: <strong>$85.00</strong></li>
           <li>• Your Cost: <strong>$55.25</strong></li>
-          <li>• Tariff Tax: <strong>$0</strong></li>
+          <li>• Tariff Tax: <strong>$0.00</strong></li>
         </ul>
-        <p class="text-sm mt-2">This data came directly from your B.M.E.C. pricing setup – <strong>zero manual entry</strong>!</p>
+        <p class="text-sm mt-2">This data came directly from your <strong>B.M.E.C.</strong> pricing setup in the Brands page – <strong>zero manual entry required</strong>!</p>
       `,
       side: 'right',
       align: 'center'

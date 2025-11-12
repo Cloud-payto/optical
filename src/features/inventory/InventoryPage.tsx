@@ -13,6 +13,7 @@ import { ReturnReportModal } from './components/ReturnReportModal';
 import { ManualEntryModal, ManualInventoryData } from './components/ManualEntryModal';
 import { ForwardingEmailDisplay } from '../../components/ForwardingEmailDisplay';
 import { useAuth } from '../../contexts/AuthContext';
+import { useDemo } from '../../contexts/DemoContext';
 import { createManualInventoryItem } from '../../services/api';
 import { Button } from '../../components/ui/Button';
 import type { InventoryFilters as FilterState, InventoryItem } from './types/inventory.types';
@@ -30,6 +31,7 @@ import toast from 'react-hot-toast';
 
 export function InventoryPage() {
   const { user } = useAuth();
+  const { isDemo } = useDemo(); // Get demo state
   const [activeTab, setActiveTab] = useState<'pending' | 'current' | 'archived' | 'sold'>('current');
   const [filters, setFilters] = useState<FilterState>({
     status: 'current',
@@ -319,6 +321,7 @@ export function InventoryPage() {
       <ModernInventoryTable
         items={filteredInventory}
         isLoading={isLoading}
+        isDemo={isDemo}
         onAddToReturnReport={handleAddToReturnReport}
         onArchive={(itemId) => archiveItem.mutate(itemId)}
         onRestore={(itemId) => restoreItem.mutate(itemId)}

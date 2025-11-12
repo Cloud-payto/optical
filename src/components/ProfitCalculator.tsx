@@ -563,6 +563,8 @@ const ProfitCalculator: React.FC = () => {
                               <li key={company.id}>
                                 <button
                                   type="button"
+                                  data-demo={`company-option-${company.name.toLowerCase().replace(/\s+/g, '-')}`}
+                                  data-company-id={company.id}
                                   className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${selectedCompany?.id === company.id ? 'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'text-gray-800 dark:text-white'}`}
                                   onClick={() => handleCompanySelect(company)}
                                 >
@@ -678,6 +680,8 @@ const ProfitCalculator: React.FC = () => {
                             <li key={brand.id}>
                               <button
                                 type="button"
+                                data-demo={`brand-option-${brand.name.toLowerCase().replace(/\s+/g, '-').replace(/\./g, '')}`}
+                                data-brand-id={brand.id}
                                 className={`w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 ${selectedBrand?.id === brand.id ? 'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'text-gray-800 dark:text-white'}`}
                                 onClick={() => handleBrandSelect(brand)}
                               >
