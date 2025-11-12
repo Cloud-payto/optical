@@ -39,27 +39,6 @@ const ProfitDisplay: React.FC<ProfitDisplayProps> = ({ profitData, animate, save
     <div>
       <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-5">Profit Analysis</h3>
 
-      <div className={`mb-6 p-4 rounded-lg ${profitColor} dark:bg-opacity-20 transition-all duration-300 ${animate ? 'scale-105' : 'scale-100'}`}>
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">Total Profit</span>
-          <span className="text-2xl font-bold">{formatCurrency(profit)}</span>
-        </div>
-        <div className="flex items-center justify-between mt-2">
-          <span className="text-sm font-medium">Profit Margin</span>
-          <span className="text-lg font-semibold">{profitMargin}%</span>
-        </div>
-      </div>
-
-      {/* Money Flow Diagram */}
-      <MoneyFlowDiagram
-        insuranceEnabled={insuranceEnabled}
-        retailPrice={retailPrice}
-        insuranceCoverage={profitData.insuranceCoverage}
-        patientPayment={patientPayment}
-        insuranceReimbursement={reimbursement}
-        totalOfficeRevenue={total}
-      />
-
       <div className="space-y-4">
         {/* Revenue Breakdown - Restructured */}
         <div className="bg-white dark:bg-[#1F2623] rounded-lg shadow-sm p-4">
@@ -247,6 +226,16 @@ const ProfitDisplay: React.FC<ProfitDisplayProps> = ({ profitData, animate, save
             </div>
           )}
         </div>
+
+        {/* Money Flow Diagram - Moved to bottom for better visual hierarchy */}
+        <MoneyFlowDiagram
+          insuranceEnabled={insuranceEnabled}
+          retailPrice={retailPrice}
+          insuranceCoverage={profitData.insuranceCoverage}
+          patientPayment={patientPayment}
+          insuranceReimbursement={reimbursement}
+          totalOfficeRevenue={total}
+        />
       </div>
       
       {savedCalculations.length > 0 && (
