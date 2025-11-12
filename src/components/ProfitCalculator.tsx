@@ -881,6 +881,8 @@ const ProfitCalculator: React.FC = () => {
                     onChange={(e) => {
                       const validated = validateCurrencyInput(e.target.value, 0, 10000);
                       if (validated !== null) {
+                        // Keep editing state true during onChange to prevent useEffect override
+                        setIsEditingYourCost(true);
                         setYourCost(validated);
                         setIsEditingDiscount(false);
                         // Update discount % based on new Your Cost
