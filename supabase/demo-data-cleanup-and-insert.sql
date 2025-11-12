@@ -7,6 +7,7 @@
 
 -- STEP 1: Clean up any existing demo data
 -- ============================================================================
+-- NOTE: Only deletes demo user's data, preserves vendor/brands if they exist elsewhere
 BEGIN;
 
 -- Delete in correct order (respecting foreign keys)
@@ -15,12 +16,12 @@ DELETE FROM public.account_brands WHERE account_id = '3251cae7-ee61-4c5f-be4c-43
 DELETE FROM public.account_vendors WHERE account_id = '3251cae7-ee61-4c5f-be4c-4312c17ef4fd';
 DELETE FROM public.orders WHERE account_id = '3251cae7-ee61-4c5f-be4c-4312c17ef4fd';
 DELETE FROM public.emails WHERE account_id = '3251cae7-ee61-4c5f-be4c-4312c17ef4fd';
-DELETE FROM public.brands WHERE vendor_id = 'f1d2aaf8-1877-4579-9ed0-083541dae7e7';
-DELETE FROM public.vendors WHERE id = 'f1d2aaf8-1877-4579-9ed0-083541dae7e7';
+
+-- DON'T delete vendor or brands - they might be used by other users
 
 COMMIT;
 
--- STEP 2: Insert Vendor
+-- STEP 2: Insert Vendor (or update if exists)
 -- ============================================================================
 INSERT INTO public.vendors (
   id,
@@ -55,9 +56,16 @@ INSERT INTO public.vendors (
   }'::jsonb,
   'modern_optical',
   true
-);
+)
+ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  code = EXCLUDED.code,
+  domain = EXCLUDED.domain,
+  email_patterns = EXCLUDED.email_patterns,
+  parser_service = EXCLUDED.parser_service,
+  is_active = EXCLUDED.is_active;
 
--- STEP 3: Insert Brands
+-- STEP 3: Insert Brands (or update if exists)
 -- ============================================================================
 INSERT INTO public.brands (
   id,
@@ -102,7 +110,16 @@ INSERT INTO public.brands (
     120.00,
     45.00,
     true
-  );
+  )
+ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  vendor_id = EXCLUDED.vendor_id,
+  category = EXCLUDED.category,
+  tier = EXCLUDED.tier,
+  wholesale_cost = EXCLUDED.wholesale_cost,
+  msrp = EXCLUDED.msrp,
+  entry_level_discount = EXCLUDED.entry_level_discount,
+  is_active = EXCLUDED.is_active;
 
 -- STEP 4: Link Demo User to Vendor
 -- ============================================================================
@@ -118,7 +135,10 @@ INSERT INTO public.account_vendors (
   'f1d2aaf8-1877-4579-9ed0-083541dae7e7',
   '93277',
   'Demo vendor relationship - Modern Optical'
-);
+)
+ON CONFLICT (id) DO UPDATE SET
+  vendor_account_number = EXCLUDED.vendor_account_number,
+  notes = EXCLUDED.notes;
 
 -- STEP 5: Link Demo User to Brands with Pricing
 -- ============================================================================
@@ -161,7 +181,12 @@ INSERT INTO public.account_brands (
     35.75, -- $65 - 45% = $35.75
     '93277',
     true
-  );
+  )
+ON CONFLICT (id) DO UPDATE SET
+  discount_percentage = EXCLUDED.discount_percentage,
+  wholesale_cost = EXCLUDED.wholesale_cost,
+  vendor_account_number = EXCLUDED.vendor_account_number,
+  is_active = EXCLUDED.is_active;
 
 -- STEP 6: Insert Email
 -- ============================================================================
@@ -219,7 +244,11 @@ INSERT INTO public.emails (
     "rep_name": "Payton Millet"
   }'::jsonb,
   jsonb_build_object('source', 'demo', 'timestamp', NOW()::text)
-);
+)
+ON CONFLICT (id) DO UPDATE SET
+  subject = EXCLUDED.subject,
+  parse_status = EXCLUDED.parse_status,
+  parsed_data = EXCLUDED.parsed_data;
 
 -- STEP 7: Insert Order
 -- ============================================================================
@@ -247,7 +276,12 @@ INSERT INTO public.orders (
   '93277',
   'pending',
   'Payton Millet'
-);
+)
+ON CONFLICT (id) DO UPDATE SET
+  order_date = EXCLUDED.order_date,
+  total_pieces = EXCLUDED.total_pieces,
+  customer_name = EXCLUDED.customer_name,
+  status = EXCLUDED.status;
 
 -- STEP 8: Insert Inventory (18 frames)
 -- ============================================================================
