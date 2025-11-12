@@ -281,11 +281,18 @@ export const demoSteps: ExtendedDemoStep[] = [
     }
   },
 
-  // Step 12: Navigate to Vendors/Brands (FIXED)
+  // Step 12: Navigate to Vendors/Brands (FIXED) - NOW WITH AUTOMATION
   {
     id: 'navigate-to-vendors',
     page: '/brands',
     element: '[data-demo="vendor-card"]',
+    automatedAction: {
+      type: 'click',
+      selector: '[data-demo="vendor-expand-btn"]',
+      delay: 1500, // Wait for page to load and render
+      animationDuration: 800
+    },
+    autoAdvanceDelay: 4000, // Give time to see the expanded brands
     popover: {
       title: '🏢 Step 6: Vendor Management',
       description: `

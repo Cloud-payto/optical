@@ -250,10 +250,11 @@ const DemoProvider: React.FC<DemoProviderProps> = ({ children }) => {
               }, 500);
             }
 
-            // Create spotlight effect
-            if (targetElement) {
-              demoController.createSpotlight(`[data-driver-element-id="${step.element}"]`);
-            }
+            // Create spotlight effect (disabled for now due to selector conflicts)
+            // Driver.js already provides highlighting, so spotlight is redundant
+            // if (targetElement) {
+            //   demoController.createSpotlight(step.element);
+            // }
           } catch (error) {
             console.error('❌ Error in onHighlightStarted:', error);
           }

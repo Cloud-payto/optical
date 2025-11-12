@@ -11,7 +11,7 @@ import ImportFromInventory from '../components/brands/ImportFromInventory';
 import { Company, Brand } from '../types';
 import { fetchCompaniesWithPricing, saveAccountBrand } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
-import { useDemo } from '../contexts/DemoContext';
+import { useDemo } from '../hooks/useDemo';
 import { DEMO_DATA_IDS } from '../demo/demoConstants';
 
 // Function to load companies with account-specific brand data from Supabase
@@ -27,7 +27,7 @@ const loadCompaniesFromSupabase = async (): Promise<Company[]> => {
 
 const BrandsCostsPage: React.FC = () => {
   const { user } = useAuth();
-  const { isDemo, demoData, notifyUserAction } = useDemo();
+  const { isActive: isDemo, demoData } = useDemo();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
