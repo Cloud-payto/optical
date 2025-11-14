@@ -91,11 +91,11 @@ export function useOrders() {
 /**
  * Hook to get orders filtered by status
  */
-export function useOrdersByStatus(status: 'pending' | 'confirmed' | 'archived') {
+export function useOrdersByStatus(status: 'pending' | 'partial' | 'confirmed' | 'archived') {
   const { data: orders, ...rest } = useOrders();
-  
+
   const filteredOrders = orders?.filter(order => order.status === status) || [];
-  
+
   return {
     data: filteredOrders,
     ...rest,
@@ -105,22 +105,22 @@ export function useOrdersByStatus(status: 'pending' | 'confirmed' | 'archived') 
 /**
  * Hook to get orders grouped by vendor and order number
  */
-export function useGroupedOrders(status?: 'pending' | 'confirmed' | 'archived') {
+export function useGroupedOrders(status?: 'pending' | 'partial' | 'confirmed' | 'archived') {
   const { data: orders, ...rest } = useOrders();
-  
+
   const grouped: Record<string, Record<string, Order>> = {};
-  
-  const filteredOrders = status 
+
+  const filteredOrders = status
     ? orders?.filter(order => order.status === status) || []
     : orders || [];
-  
+
   filteredOrders.forEach(order => {
     if (!grouped[order.vendor]) {
       grouped[order.vendor] = {};
     }
     grouped[order.vendor][order.order_number] = order;
   });
-  
+
   return {
     data: grouped,
     ...rest,

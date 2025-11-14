@@ -28,20 +28,36 @@ export function FrameSelectionModal({
   // Initialize with all frames selected by default
   const [selectedFrames, setSelectedFrames] = useState<Set<string>>(new Set());
 
+  // Filter items to show only unreceived frames for partial orders
+  // For new/pending orders, show all items
+  const displayItems = React.useMemo(() => {
+    if (!order?.items) return [];
+
+    // For partial orders, only show items that haven't been received yet
+    // The backend should already be returning only unreceived items,
+    // but we filter here as a safety measure
+    if (order.status === 'partial') {
+      return order.items.filter((item: any) => {
+        // If item has a 'received' field, use it
+        if ('received' in item) {
+          return item.received === null || item.received === false;
+        }
+        // Otherwise, show all items (backend hasn't sent received field)
+        return true;
+      });
+    }
+
+    // For new orders, show all items
+    return order.items;
+  }, [order]);
+
   // Initialize selection when modal opens or order changes
   useEffect(() => {
-    if (isOpen && order?.items) {
-      // For partial orders, select only pending items. For new orders, select all.
-      if (order.status === 'partial' && order.pending_items) {
-        // Select items that are still pending (not received yet)
-        const pendingItems = order.items.slice(-order.pending_items);
-        setSelectedFrames(new Set(pendingItems.map(item => item.id.toString())));
-      } else {
-        // Select all items for new orders
-        setSelectedFrames(new Set(order.items.map(item => item.id.toString())));
-      }
+    if (isOpen && displayItems.length > 0) {
+      // Select all displayed items by default
+      setSelectedFrames(new Set(displayItems.map(item => item.id.toString())));
     }
-  }, [isOpen, order]);
+  }, [isOpen, displayItems]);
 
   const toggleFrame = (frameId: string) => {
     setSelectedFrames(prev => {
@@ -56,12 +72,12 @@ export function FrameSelectionModal({
   };
 
   const toggleAll = () => {
-    if (selectedFrames.size === order.items.length) {
+    if (selectedFrames.size === displayItems.length) {
       // Deselect all
       setSelectedFrames(new Set());
     } else {
       // Select all
-      setSelectedFrames(new Set(order.items.map(item => item.id.toString())));
+      setSelectedFrames(new Set(displayItems.map(item => item.id.toString())));
     }
   };
 
@@ -72,11 +88,11 @@ export function FrameSelectionModal({
     onConfirm(Array.from(selectedFrames));
   };
 
-  const allSelected = selectedFrames.size === order.items.length;
+  const allSelected = selectedFrames.size === displayItems.length;
   const noneSelected = selectedFrames.size === 0;
 
   // Check if any item has wholesale price for conditional column rendering
-  const hasWholesalePrice = order.items.some(item => item.wholesale_price !== undefined);
+  const hasWholesalePrice = displayItems.some(item => item.wholesale_price !== undefined);
 
   return (
     <AnimatePresence>
@@ -134,7 +150,7 @@ export function FrameSelectionModal({
                       {selectedFrames.size}
                     </span>
                     <span className="text-gray-600 dark:text-gray-400 ml-1">
-                      of {order.items.length} selected
+                      of {displayItems.length} selected
                     </span>
                   </div>
                   {order.status === 'partial' && order.received_items && (
@@ -215,7 +231,7 @@ export function FrameSelectionModal({
 
                 {/* Table Body - Zebra Striping */}
                 <tbody>
-                  {order.items.map((item, index) => (
+                  {displayItems.map((item, index) => (
                     <FrameSelectionItem
                       key={item.id}
                       item={item}
@@ -228,7 +244,7 @@ export function FrameSelectionModal({
               </table>
 
               {/* Empty State */}
-              {order.items.length === 0 && (
+              {displayItems.length === 0 && (
                 <div className="flex items-center justify-center py-12 text-gray-500 dark:text-gray-400">
                   <div className="text-center">
                     <Package className="h-12 w-12 mx-auto mb-3 opacity-30" />
@@ -241,7 +257,7 @@ export function FrameSelectionModal({
             {/* Footer - More Compact */}
             <div className="flex items-center justify-between px-6 py-3 border-t-2 border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800">
               <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">
-                {selectedFrames.size === order.items.length
+                {selectedFrames.size === displayItems.length
                   ? 'All frames will be confirmed'
                   : selectedFrames.size > 0
                   ? `${selectedFrames.size} frame${selectedFrames.size !== 1 ? 's' : ''} will be confirmed`
