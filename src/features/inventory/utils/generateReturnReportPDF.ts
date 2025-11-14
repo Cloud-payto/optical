@@ -26,57 +26,230 @@ export async function generateReturnReportPDF(
 
   const pageWidth = 8.5;
   const pageHeight = 11;
-  const margin = 0.5;
+  const margin = 0.6;
   const contentWidth = pageWidth - (margin * 2);
+
+  // Professional color palette
+  const colors = {
+    primary: [99, 102, 241],      // Purple - primary brand
+    primaryLight: [224, 231, 255], // Light purple
+    accent: [79, 70, 229],         // Deeper purple for contrast
+    dark: [30, 41, 59],            // Slate for headings
+    text: [51, 65, 85],            // Slate for body text
+    textLight: [100, 116, 139],    // Light slate for secondary text
+    border: [226, 232, 240],       // Light border
+    background: [248, 250, 252],   // Subtle background
+    white: [255, 255, 255]
+  };
 
   let yPosition = margin;
 
-  // Helper function to add text
+  // Helper to set color
+  const setColor = (color: number[], type: 'fill' | 'draw' | 'text') => {
+    if (type === 'fill') doc.setFillColor(...color);
+    else if (type === 'draw') doc.setDrawColor(...color);
+    else doc.setTextColor(...color);
+  };
+
+  // Helper function to add text with color support
   const addText = (text: string, x: number, y: number, options: any = {}) => {
     doc.setFontSize(options.fontSize || 10);
     doc.setFont(options.font || 'helvetica', options.style || 'normal');
+    if (options.color) setColor(options.color, 'text');
     doc.text(text, x, y, options);
+    if (options.color) setColor(colors.text, 'text'); // Reset to default
   };
 
-  // Helper function to draw a line
-  const drawLine = (x1: number, y1: number, x2: number, y2: number) => {
-    doc.setDrawColor(200, 200, 200);
-    doc.line(x1, y1, x2, y2);
-  };
+  // ============================================================================
+  // HEADER SECTION - Professional masthead with brand accent
+  // ============================================================================
 
-  // Title
-  doc.setFillColor(99, 102, 241); // Purple
-  doc.rect(margin, yPosition, contentWidth, 0.6, 'F');
-  addText('RETURN AUTHORIZATION REQUEST', pageWidth / 2, yPosition + 0.4, {
-    fontSize: 18,
+  // Top accent bar - thin modern line
+  setColor(colors.primary, 'fill');
+  doc.rect(0, 0, pageWidth, 0.15, 'F');
+
+  // Header background - subtle gradient effect using layered rectangles
+  setColor(colors.white, 'fill');
+  doc.rect(margin, 0.15, contentWidth, 1.4, 'F');
+  setColor(colors.primaryLight, 'fill');
+  doc.rect(margin, 0.15, contentWidth, 0.05, 'F');
+
+  yPosition = 0.45;
+
+  // Document title - bold and prominent
+  addText('RETURN AUTHORIZATION REQUEST', margin, yPosition, {
+    fontSize: 20,
     style: 'bold',
-    align: 'center',
-    textColor: [255, 255, 255]
+    color: colors.dark
   });
-  doc.setTextColor(0, 0, 0); // Reset to black
-  yPosition += 0.8;
+  yPosition += 0.3;
 
-  // Header section
-  drawLine(margin, yPosition, pageWidth - margin, yPosition);
-  yPosition += 0.2;
+  // Subtitle line for context
+  addText('Vendor Return Request for Authorization', margin, yPosition, {
+    fontSize: 9,
+    color: colors.textLight
+  });
 
-  addText(`Report #: ${metadata.reportNumber}`, margin + 0.2, yPosition, { fontSize: 11 });
-  yPosition += 0.25;
-  addText(`Date: ${metadata.date}`, margin + 0.2, yPosition, { fontSize: 11 });
-  yPosition += 0.25;
+  // Right-aligned report metadata box
+  const metaBoxX = pageWidth - margin - 2.2;
+  const metaBoxY = 0.35;
+  const metaBoxWidth = 2.2;
+  const metaBoxHeight = 0.85;
+
+  // Metadata box with border
+  setColor(colors.border, 'draw');
+  setColor(colors.background, 'fill');
+  doc.setLineWidth(0.01);
+  doc.roundedRect(metaBoxX, metaBoxY, metaBoxWidth, metaBoxHeight, 0.05, 0.05, 'FD');
+
+  // Report metadata content
+  let metaY = metaBoxY + 0.22;
+  addText('REPORT NUMBER', metaBoxX + 0.15, metaY, {
+    fontSize: 7,
+    style: 'bold',
+    color: colors.textLight
+  });
+  metaY += 0.14;
+  addText(metadata.reportNumber, metaBoxX + 0.15, metaY, {
+    fontSize: 11,
+    style: 'bold',
+    color: colors.primary
+  });
+  metaY += 0.22;
+  addText('DATE ISSUED', metaBoxX + 0.15, metaY, {
+    fontSize: 7,
+    style: 'bold',
+    color: colors.textLight
+  });
+  metaY += 0.14;
+  addText(metadata.date, metaBoxX + 0.15, metaY, {
+    fontSize: 9,
+    color: colors.text
+  });
+
+  yPosition = 1.7;
+
+  // ============================================================================
+  // VENDOR INFORMATION SECTION - Prominent and clear
+  // ============================================================================
+
+  // Section divider line
+  setColor(colors.border, 'draw');
+  doc.setLineWidth(0.015);
+  doc.line(margin, yPosition, pageWidth - margin, yPosition);
+  yPosition += 0.35;
+
+  // Vendor information card
+  const vendorCardHeight = metadata.accountNumber ? 0.85 : 0.68;
+  setColor(colors.primaryLight, 'fill');
+  setColor(colors.primary, 'draw');
+  doc.setLineWidth(0.02);
+  doc.roundedRect(margin, yPosition, contentWidth, vendorCardHeight, 0.08, 0.08, 'FD');
+
+  let vendorY = yPosition + 0.25;
+
+  // Vendor label
+  addText('VENDOR', margin + 0.25, vendorY, {
+    fontSize: 8,
+    style: 'bold',
+    color: colors.accent,
+    letterSpacing: 0.05
+  });
+  vendorY += 0.18;
+
+  // Vendor name - large and prominent
+  addText(metadata.vendorName.toUpperCase(), margin + 0.25, vendorY, {
+    fontSize: 14,
+    style: 'bold',
+    color: colors.dark
+  });
+
+  // Account number if available - right side
   if (metadata.accountNumber) {
-    addText(`Account #: ${metadata.accountNumber}`, margin + 0.2, yPosition, { fontSize: 11 });
-    yPosition += 0.25;
+    const accountX = pageWidth - margin - 0.25;
+    let accountY = yPosition + 0.25;
+    addText('ACCOUNT NUMBER', accountX, accountY, {
+      fontSize: 8,
+      style: 'bold',
+      color: colors.accent,
+      align: 'right'
+    });
+    accountY += 0.18;
+    addText(metadata.accountNumber, accountX, accountY, {
+      fontSize: 12,
+      style: 'bold',
+      color: colors.dark,
+      align: 'right'
+    });
   }
-  addText(`Vendor: ${metadata.vendorName}`, margin + 0.2, yPosition, { fontSize: 11, style: 'bold' });
-  yPosition += 0.3;
 
-  drawLine(margin, yPosition, pageWidth - margin, yPosition);
-  yPosition += 0.3;
+  yPosition += vendorCardHeight + 0.45;
 
-  // Items section header
-  addText('ITEMS FOR RETURN', margin + 0.2, yPosition, { fontSize: 12, style: 'bold' });
-  yPosition += 0.3;
+  // ============================================================================
+  // ITEMS SECTION - Clean table layout
+  // ============================================================================
+
+  // Section header
+  addText('ITEMS REQUESTED FOR RETURN', margin, yPosition, {
+    fontSize: 11,
+    style: 'bold',
+    color: colors.dark
+  });
+  yPosition += 0.08;
+
+  // Decorative underline
+  setColor(colors.primary, 'draw');
+  doc.setLineWidth(0.025);
+  doc.line(margin, yPosition, margin + 1.8, yPosition);
+  yPosition += 0.35;
+
+  // Table header
+  const tableX = margin + 0.15;
+  const colWidths = {
+    brand: 1.4,
+    model: 1.8,
+    color: 1.2,
+    size: 0.9,
+    qty: 0.7
+  };
+
+  // Header background
+  setColor(colors.dark, 'fill');
+  doc.roundedRect(tableX, yPosition - 0.15, contentWidth - 0.3, 0.25, 0.04, 0.04, 'F');
+
+  // Column headers
+  let colX = tableX + 0.12;
+  addText('BRAND', colX, yPosition, {
+    fontSize: 8,
+    style: 'bold',
+    color: colors.white
+  });
+  colX += colWidths.brand;
+  addText('MODEL', colX, yPosition, {
+    fontSize: 8,
+    style: 'bold',
+    color: colors.white
+  });
+  colX += colWidths.model;
+  addText('COLOR', colX, yPosition, {
+    fontSize: 8,
+    style: 'bold',
+    color: colors.white
+  });
+  colX += colWidths.color;
+  addText('SIZE', colX, yPosition, {
+    fontSize: 8,
+    style: 'bold',
+    color: colors.white
+  });
+  colX += colWidths.size;
+  addText('QTY', colX, yPosition, {
+    fontSize: 8,
+    style: 'bold',
+    color: colors.white
+  });
+
+  yPosition += 0.32;
 
   // Sort items by brand, then model
   const sortedItems = [...items].sort((a, b) => {
@@ -85,52 +258,176 @@ export async function generateReturnReportPDF(
     return (a.model || '').localeCompare(b.model || '');
   });
 
-  // Draw items
+  // Draw items in table rows
   sortedItems.forEach((item, index) => {
     // Check if we need a new page
-    if (yPosition > pageHeight - 1.5) {
+    if (yPosition > pageHeight - 1.8) {
       doc.addPage();
       yPosition = margin;
+
+      // Add page header
+      addText('RETURN AUTHORIZATION REQUEST (CONTINUED)', margin, yPosition, {
+        fontSize: 10,
+        color: colors.textLight
+      });
+      addText(`Report: ${metadata.reportNumber}`, pageWidth - margin, yPosition, {
+        fontSize: 10,
+        color: colors.textLight,
+        align: 'right'
+      });
+      yPosition += 0.4;
     }
 
-    // Item box
-    const boxHeight = 0.9;
-    doc.setDrawColor(200, 200, 200);
-    doc.setFillColor(250, 250, 250);
-    doc.rect(margin + 0.2, yPosition, contentWidth - 0.4, boxHeight, 'FD');
+    // Alternating row colors for readability
+    const rowHeight = 0.28;
+    if (index % 2 === 0) {
+      setColor(colors.background, 'fill');
+      doc.rect(tableX, yPosition - 0.18, contentWidth - 0.3, rowHeight, 'F');
+    }
 
-    let itemY = yPosition + 0.2;
-    addText(`Brand: ${item.brand || 'N/A'}`, margin + 0.4, itemY, { fontSize: 10, style: 'bold' });
-    itemY += 0.18;
-    addText(`Model: ${item.model || 'N/A'}`, margin + 0.4, itemY, { fontSize: 10 });
-    itemY += 0.18;
-    addText(`Color: ${item.color || 'N/A'}`, margin + 0.4, itemY, { fontSize: 10 });
-    itemY += 0.18;
-    addText(`Size: ${item.full_size || item.size || 'N/A'}`, margin + 0.4, itemY, { fontSize: 10 });
-    itemY += 0.18;
-    addText(`Quantity: ${item.quantity}`, margin + 0.4, itemY, { fontSize: 10, style: 'bold' });
+    // Row border for definition
+    setColor(colors.border, 'draw');
+    doc.setLineWidth(0.005);
+    doc.line(tableX, yPosition + 0.1, tableX + contentWidth - 0.3, yPosition + 0.1);
 
-    yPosition += boxHeight + 0.15;
+    // Item data
+    let colX = tableX + 0.12;
+    addText(item.brand || 'N/A', colX, yPosition, {
+      fontSize: 9,
+      style: 'bold',
+      color: colors.dark
+    });
+    colX += colWidths.brand;
+    addText(item.model || 'N/A', colX, yPosition, {
+      fontSize: 9,
+      color: colors.text
+    });
+    colX += colWidths.model;
+    addText(item.color || 'N/A', colX, yPosition, {
+      fontSize: 9,
+      color: colors.text
+    });
+    colX += colWidths.color;
+    addText(item.full_size || item.size || 'N/A', colX, yPosition, {
+      fontSize: 9,
+      color: colors.text
+    });
+    colX += colWidths.size;
+    addText(String(item.quantity), colX, yPosition, {
+      fontSize: 9,
+      style: 'bold',
+      color: colors.accent
+    });
+
+    yPosition += rowHeight;
   });
 
-  // Total
-  yPosition += 0.1;
-  const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
-  addText(`Total Items: ${totalQuantity}`, margin + 0.2, yPosition, { fontSize: 11, style: 'bold' });
-  yPosition += 0.4;
-
-  // Footer section
-  drawLine(margin, yPosition, pageWidth - margin, yPosition);
-  yPosition += 0.3;
-
-  addText(
-    'Please provide return authorization and shipping instructions for the above items.',
-    margin + 0.2,
-    yPosition,
-    { fontSize: 10 }
-  );
+  // Bottom border of table
+  setColor(colors.dark, 'draw');
+  doc.setLineWidth(0.02);
+  doc.line(tableX, yPosition, tableX + contentWidth - 0.3, yPosition);
   yPosition += 0.25;
-  addText(`Contact: ${metadata.contactEmail}`, margin + 0.2, yPosition, { fontSize: 10 });
+
+  // ============================================================================
+  // SUMMARY SECTION
+  // ============================================================================
+
+  const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Summary box
+  const summaryBoxX = pageWidth - margin - 2.5;
+  setColor(colors.accent, 'fill');
+  doc.roundedRect(summaryBoxX, yPosition, 2.5, 0.45, 0.06, 0.06, 'F');
+
+  addText('TOTAL ITEMS TO RETURN', summaryBoxX + 0.2, yPosition + 0.2, {
+    fontSize: 8,
+    style: 'bold',
+    color: colors.white
+  });
+  addText(String(totalQuantity), summaryBoxX + 2.1, yPosition + 0.35, {
+    fontSize: 16,
+    style: 'bold',
+    color: colors.white,
+    align: 'right'
+  });
+
+  yPosition += 0.7;
+
+  // ============================================================================
+  // FOOTER SECTION - Instructions and contact
+  // ============================================================================
+
+  // Check if we need space for footer
+  if (yPosition > pageHeight - 1.5) {
+    doc.addPage();
+    yPosition = margin;
+  }
+
+  // Footer divider
+  setColor(colors.border, 'draw');
+  doc.setLineWidth(0.015);
+  doc.line(margin, yPosition, pageWidth - margin, yPosition);
+  yPosition += 0.35;
+
+  // Return instructions header
+  addText('RETURN INSTRUCTIONS', margin, yPosition, {
+    fontSize: 10,
+    style: 'bold',
+    color: colors.dark
+  });
+  yPosition += 0.25;
+
+  // Instructions text
+  const instructionText = 'Please review the items listed above and provide return authorization along with shipping instructions. ' +
+    'Once approved, we will process the return according to your specifications.';
+
+  const instructionLines = doc.splitTextToSize(instructionText, contentWidth - 0.4);
+  addText(instructionLines, margin + 0.2, yPosition, {
+    fontSize: 9,
+    color: colors.text
+  });
+  yPosition += (instructionLines.length * 0.18) + 0.3;
+
+  // Contact information box
+  setColor(colors.background, 'fill');
+  setColor(colors.border, 'draw');
+  doc.setLineWidth(0.01);
+  doc.roundedRect(margin, yPosition, contentWidth, 0.45, 0.05, 0.05, 'FD');
+
+  yPosition += 0.2;
+  addText('CONTACT INFORMATION', margin + 0.2, yPosition, {
+    fontSize: 8,
+    style: 'bold',
+    color: colors.textLight
+  });
+  yPosition += 0.18;
+  addText(metadata.contactEmail, margin + 0.2, yPosition, {
+    fontSize: 10,
+    color: colors.primary
+  });
+
+  // ============================================================================
+  // PAGE FOOTER - Branding element
+  // ============================================================================
+
+  const footerY = pageHeight - 0.35;
+  setColor(colors.border, 'draw');
+  doc.setLineWidth(0.005);
+  doc.line(margin, footerY, pageWidth - margin, footerY);
+
+  addText('Return Authorization Request', margin, footerY + 0.15, {
+    fontSize: 7,
+    color: colors.textLight
+  });
+  addText(`Generated: ${new Date().toLocaleDateString('en-US')}`, pageWidth - margin, footerY + 0.15, {
+    fontSize: 7,
+    color: colors.textLight,
+    align: 'right'
+  });
+
+  // Bottom accent bar
+  setColor(colors.primary, 'fill');
+  doc.rect(0, pageHeight - 0.15, pageWidth, 0.15, 'F');
 
   // Return as blob
   return doc.output('blob');
