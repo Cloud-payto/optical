@@ -856,6 +856,7 @@ export interface SaveReturnReportRequest {
   account_id: string;
   vendor_id?: string;
   vendor_name: string;
+  vendor_account_number?: string;
   report_number: string;
   filename: string;
   pdf_path: string;

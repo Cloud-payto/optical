@@ -204,6 +204,7 @@ export function InventoryPage() {
         account_id: user.id,
         vendor_id: vendorId,
         vendor_name: vendorName,
+        vendor_account_number: vendorAccountNumber || undefined,
         report_number: reportNumber,
         filename: filename,
         pdf_path: storagePath,
