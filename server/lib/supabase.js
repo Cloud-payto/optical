@@ -313,17 +313,18 @@ const inventoryOperations = {
           }, {}));
         }
 
-        // Get all pending items for this user and filter in JavaScript
+        // Get all unreceived items for this user and filter in JavaScript
         // since we can't easily query the enriched_data JSONB field with Supabase
+        // Filter for items that have NOT been received yet (received=NULL or received=FALSE)
         const { data: allPendingItems, error: inventoryError } = await supabase
           .from('inventory')
           .select('*, vendors(name), order:orders(order_number, customer_name, order_date)')
           .eq('account_id', userId)
-          .eq('status', 'pending');
+          .or('received.is.null,received.eq.false');
 
         if (inventoryError) throw inventoryError;
 
-        console.log(`🔍 Found ${allPendingItems?.length || 0} total pending items for user`);
+        console.log(`🔍 Found ${allPendingItems?.length || 0} total unreceived items for user`);
 
         // Log sample of enriched_data to debug
         if (allPendingItems && allPendingItems.length > 0) {
@@ -358,13 +359,14 @@ const inventoryOperations = {
         pendingItems = items;
         vendorName = items[0]?.vendors?.name || items[0]?.vendor?.name || 'Unknown';
       } else {
-        // Get pending inventory items for this order
+        // Get inventory items for this order that have NOT been received yet
+        // This includes items with received=NULL (not shipped) or received=FALSE (shipped but not received)
         const { data: items, error: fetchError } = await supabase
           .from('inventory')
           .select('*')
           .eq('order_id', order.id)
           .eq('account_id', userId)
-          .eq('status', 'pending');
+          .or('received.is.null,received.eq.false');
 
         if (fetchError) throw fetchError;
 
@@ -373,7 +375,7 @@ const inventoryOperations = {
       }
 
       if (!pendingItems || pendingItems.length === 0) {
-        return { success: false, message: `No pending items found for order ${orderNumber}` };
+        return { success: false, message: `No unreceived items found for order ${orderNumber}` };
       }
 
       // Filter items to confirm based on options
