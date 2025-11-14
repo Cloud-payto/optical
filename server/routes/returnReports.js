@@ -17,6 +17,7 @@ router.post('/', requireAuth, async (req, res) => {
     const {
       account_id,
       vendor_name,
+      vendor_account_number,
       report_number,
       filename,
       pdf_path,
@@ -42,6 +43,7 @@ router.post('/', requireAuth, async (req, res) => {
     console.log('💾 Saving return report metadata:', {
       account_id,
       vendor_name,
+      vendor_account_number,
       report_number,
       filename,
       item_count,
@@ -54,6 +56,7 @@ router.post('/', requireAuth, async (req, res) => {
         account_id,
         vendor_id,
         vendor_name,
+        vendor_account_number,
         report_number,
         filename,
         pdf_path,
