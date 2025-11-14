@@ -22,7 +22,7 @@ router.post('/', requireAuth, async (req, res) => {
       pdf_path,
       item_count,
       total_quantity,
-      status = 'pending',
+      status = 'generated',
       vendor_id
     } = req.body;
 

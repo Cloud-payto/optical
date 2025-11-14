@@ -15,7 +15,7 @@ import toast from 'react-hot-toast';
 export function ReturnsPage() {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'submitted' | 'completed'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'generated' | 'sent' | 'cancelled'>('all');
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   // Fetch real return reports from API
@@ -39,11 +39,12 @@ export function ReturnsPage() {
 
   const getStatusBadge = (status: string) => {
     const styles = {
-      pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
-      submitted: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-      completed: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+      draft: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300',
+      generated: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+      sent: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+      cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
     };
-    return styles[status as keyof typeof styles] || styles.pending;
+    return styles[status as keyof typeof styles] || styles.generated;
   };
 
   /**
@@ -110,9 +111,10 @@ export function ReturnsPage() {
             className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
           >
             <option value="all">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="submitted">Submitted</option>
-            <option value="completed">Completed</option>
+            <option value="draft">Draft</option>
+            <option value="generated">Generated</option>
+            <option value="sent">Sent</option>
+            <option value="cancelled">Cancelled</option>
           </select>
         </div>
       </div>
