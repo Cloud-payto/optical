@@ -206,11 +206,11 @@ export async function generateReturnReportPDF(
   // Table header
   const tableX = margin + 0.15;
   const colWidths = {
-    brand: 1.4,
-    model: 1.8,
-    color: 1.2,
-    size: 0.9,
-    qty: 0.7
+    brand: 1.2,    // Reduced from 1.4
+    model: 1.5,    // Reduced from 1.8
+    color: 1.4,    // Increased from 1.2
+    size: 1.1,     // Increased from 0.9
+    qty: 0.9       // Increased from 0.7 and moved to right
   };
 
   // Header background
@@ -243,10 +243,11 @@ export async function generateReturnReportPDF(
     color: colors.white
   });
   colX += colWidths.size;
-  addText('QTY', colX, yPosition, {
+  addText('QTY', colX + colWidths.qty - 0.12, yPosition, {
     fontSize: 8,
     style: 'bold',
-    color: colors.white
+    color: colors.white,
+    align: 'right'
   });
 
   yPosition += 0.32;
@@ -313,10 +314,11 @@ export async function generateReturnReportPDF(
       color: colors.text
     });
     colX += colWidths.size;
-    addText(String(item.quantity), colX, yPosition, {
+    addText(String(item.quantity), colX + colWidths.qty - 0.12, yPosition, {
       fontSize: 9,
       style: 'bold',
-      color: colors.accent
+      color: colors.accent,
+      align: 'right'
     });
 
     yPosition += rowHeight;

@@ -158,10 +158,17 @@ export function InventoryPage() {
       if (vendorId) {
         try {
           vendorAccountNumber = await fetchVendorAccountNumber(user.id, vendorId);
+          console.log('[REPORT] Vendor account number fetched:', {
+            vendorId,
+            vendorAccountNumber,
+            hasAccountNumber: !!vendorAccountNumber
+          });
         } catch (error) {
           console.warn('Could not fetch vendor account number:', error);
           // Continue with null account number rather than failing
         }
+      } else {
+        console.warn('[REPORT] No vendor ID found in items');
       }
 
       // Step 1: Generate PDF blob
