@@ -27,7 +27,9 @@
       "mcp__render__get_deploy",
       "Bash(npm install:*)",
       "Bash(git reset:*)",
-      "WebFetch(domain:jam.dev)"
+      "WebFetch(domain:jam.dev)",
+      "Bash(node scripts/seedVendorPatterns.js:*)",
+      "Bash(node server/scripts/seedVendorPatterns.js:*)"
     ],
     "deny": [],
     "ask": []

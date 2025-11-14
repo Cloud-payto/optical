@@ -124,6 +124,50 @@ const vendorPatterns = {
       weight: 60,
       required_matches: 2
     }
+  },
+
+  KENMARK: {
+    tier1: {
+      domains: ['kenmarkeyewear.com'],
+      weight: 95
+    },
+    tier2: {
+      body_signatures: [
+        'kenmark eyewear',
+        'kenmarkeyewear.com',
+        'imageserver.jiecosystem.net/image/kenmark/',
+        'kenmark'
+      ],
+      weight: 85
+    },
+    tier3: {
+      subject_keywords: ['kenmark eyewear', 'kenmark', 'receipt for order number'],
+      body_keywords: ['kenmark', 'order number', 'placed by rep'],
+      weight: 60,
+      required_matches: 2
+    }
+  },
+
+  kenmark: {
+    tier1: {
+      domains: ['kenmarkeyewear.com'],
+      weight: 95
+    },
+    tier2: {
+      body_signatures: [
+        'kenmark eyewear',
+        'kenmarkeyewear.com',
+        'imageserver.jiecosystem.net/image/kenmark/',
+        'kenmark'
+      ],
+      weight: 85
+    },
+    tier3: {
+      subject_keywords: ['kenmark eyewear', 'kenmark', 'receipt for order number'],
+      body_keywords: ['kenmark', 'order number', 'placed by rep'],
+      weight: 60,
+      required_matches: 2
+    }
   }
 };
 

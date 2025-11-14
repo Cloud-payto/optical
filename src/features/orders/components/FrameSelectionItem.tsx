@@ -1,110 +1,92 @@
 /**
  * Frame Selection Item Component
- * Individual frame card with checkbox for selection during order confirmation
+ * Compact table row for frame selection during order confirmation
+ * Paper-like design for easy scanning of large orders
  */
 
 import React from 'react';
 import { OrderItem } from '../types/order.types';
-import { Package } from 'lucide-react';
 
 interface FrameSelectionItemProps {
   item: OrderItem;
+  index: number;
   isSelected: boolean;
   onToggle: () => void;
 }
 
-export function FrameSelectionItem({ item, isSelected, onToggle }: FrameSelectionItemProps) {
+export function FrameSelectionItem({ item, index, isSelected, onToggle }: FrameSelectionItemProps) {
   return (
-    <label
+    <tr
+      onClick={onToggle}
       className={`
-        flex items-start gap-4 p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer
+        cursor-pointer transition-all duration-150 border-b border-gray-200 dark:border-gray-700
         ${isSelected
-          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/10 dark:border-blue-400'
-          : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-[#1F2623] hover:border-gray-300 dark:hover:border-gray-600'
+          ? 'bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/40'
+          : index % 2 === 0
+            ? 'bg-white dark:bg-[#1F2623] hover:bg-gray-50 dark:hover:bg-gray-800'
+            : 'bg-gray-50 dark:bg-[#181F1C] hover:bg-gray-100 dark:hover:bg-gray-800'
         }
       `}
     >
-      {/* Checkbox */}
-      <div className="flex-shrink-0 pt-1">
+      {/* Checkbox Column */}
+      <td className="px-3 py-2 w-10">
         <input
           type="checkbox"
           checked={isSelected}
-          onChange={onToggle}
-          className="h-5 w-5 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-[#1F2623] cursor-pointer"
+          onChange={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggle();
+          }}
+          className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
           aria-label={`Select ${item.brand} ${item.model}`}
         />
-      </div>
+      </td>
 
-      {/* Frame Details */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-4">
-          {/* Main Info */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
-              <Package className="h-4 w-4 text-blue-500 flex-shrink-0" />
-              <h4 className="font-semibold text-gray-900 dark:text-white truncate">
-                {item.brand} {item.model}
-              </h4>
-            </div>
-
-            {/* Details Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2 text-sm">
-              {/* UPC/SKU */}
-              <div>
-                <span className="text-gray-500 dark:text-gray-400">
-                  {item.upc ? 'UPC' : 'SKU'}:
-                </span>{' '}
-                <span className="font-medium text-gray-900 dark:text-gray-100 font-mono">
-                  {item.upc || item.sku}
-                </span>
-              </div>
-
-              {/* Color */}
-              <div>
-                <span className="text-gray-500 dark:text-gray-400">Color:</span>{' '}
-                <span className="font-medium text-gray-900 dark:text-gray-100">
-                  {item.color}
-                </span>
-              </div>
-
-              {/* Size */}
-              <div>
-                <span className="text-gray-500 dark:text-gray-400">Size:</span>{' '}
-                <span className="font-medium text-gray-900 dark:text-gray-100">
-                  {item.size}
-                </span>
-              </div>
-
-              {/* Quantity */}
-              <div>
-                <span className="text-gray-500 dark:text-gray-400">Qty:</span>{' '}
-                <span className="font-semibold text-gray-900 dark:text-gray-100">
-                  {item.quantity}
-                </span>
-              </div>
-
-              {/* Wholesale Price (if available) */}
-              {item.wholesale_price && (
-                <div>
-                  <span className="text-gray-500 dark:text-gray-400">Price:</span>{' '}
-                  <span className="font-medium text-gray-900 dark:text-gray-100">
-                    ${item.wholesale_price.toFixed(2)}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Selection Indicator */}
-          {isSelected && (
-            <div className="flex-shrink-0">
-              <div className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full">
-                Selected
-              </div>
-            </div>
-          )}
+      {/* UPC/SKU Column */}
+      <td className="px-3 py-2 font-mono text-xs text-gray-700 dark:text-gray-300">
+        <div className="truncate" title={item.upc || item.sku}>
+          {item.upc || item.sku}
         </div>
-      </div>
-    </label>
+      </td>
+
+      {/* Brand Column */}
+      <td className="px-3 py-2 text-sm font-medium text-gray-900 dark:text-white">
+        <div className="truncate" title={item.brand}>
+          {item.brand}
+        </div>
+      </td>
+
+      {/* Model Column */}
+      <td className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300">
+        <div className="truncate" title={item.model}>
+          {item.model}
+        </div>
+      </td>
+
+      {/* Color Column */}
+      <td className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300">
+        <div className="truncate" title={item.color}>
+          {item.color}
+        </div>
+      </td>
+
+      {/* Size Column */}
+      <td className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 text-center">
+        {item.size}
+      </td>
+
+      {/* Quantity Column */}
+      <td className="px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white text-right">
+        {item.quantity}
+      </td>
+
+      {/* Price Column (Optional) */}
+      {item.wholesale_price !== undefined && (
+        <td className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 text-right">
+          ${item.wholesale_price.toFixed(2)}
+        </td>
+      )}
+    </tr>
   );
 }
