@@ -94,6 +94,16 @@ const testCases = [
     expectedVendor: 'etnia_barcelona',
     expectedMethod: 'domain',
     minConfidence: 90
+  },
+  {
+    name: 'Kenmark - Order Receipt',
+    vendor: 'kenmark',
+    from: 'noreply@kenmarkeyewear.com',
+    subject: 'Kenmark Eyewear: Your Receipt for Order Number 102870',
+    plainText: 'Order Number: 102870\nPlaced By Rep: Alicia\nDate: 8/9/2025\nKenmark Eyewear',
+    expectedVendor: 'kenmark',
+    expectedMethod: 'domain',
+    minConfidence: 90
   }
 ];
 

@@ -66,7 +66,7 @@ ADD COLUMN IF NOT EXISTS email_patterns JSONB;
 
 ### 3. Seed Vendor Patterns
 
-Run the seeding script to populate email patterns for all 5 vendors:
+Run the seeding script to populate email patterns for all 6 vendors:
 
 ```bash
 cd server
@@ -76,7 +76,7 @@ node scripts/seedVendorPatterns.js
 Expected output:
 ```
 🌱 Starting vendor pattern seeding...
-📋 Found 5 active vendors
+📋 Found 8 active vendors
 
 📝 Updating Safilo (safilo)...
    Tier 1 domains: 2
@@ -84,10 +84,16 @@ Expected output:
    Tier 3 patterns: 4
    ✅ Successfully updated Safilo
 
+📝 Updating Kenmark (kenmark)...
+   Tier 1 domains: 1
+   Tier 2 signatures: 4
+   Tier 3 patterns: 6
+   ✅ Successfully updated Kenmark
+
 ...
 
 🎉 Seeding complete!
-   ✅ Updated: 5 vendors
+   ✅ Updated: 6 vendors
 ```
 
 ### 4. Start the Server
@@ -109,13 +115,13 @@ node tests/vendorDetection.test.js
 Expected output:
 ```
 🚀 VENDOR DETECTION TEST SUITE
-Total Tests: 8
+Total Tests: 9
 
 ...
 
 📊 TEST SUMMARY
-Total Tests: 8
-Passed: 8 ✅
+Total Tests: 9
+Passed: 9 ✅
 Failed: 0 ❌
 Success Rate: 100.0%
 Avg Response Time: 45ms
@@ -364,7 +370,7 @@ The service outputs detailed logs:
 - ✅ Safilo email detects correctly with 95% confidence (domain match)
 - ✅ API responds in <200ms
 - ✅ Domain matching always wins (Tier 1 short-circuits)
-- ✅ All 5 vendors have patterns seeded in database
+- ✅ All 6 vendors (Safilo, Luxottica, Modern Optical, Etnia Barcelona, Europa, Kenmark) have patterns seeded in database
 - ✅ Returns detailed signals for debugging
 - ✅ Handles edge cases (missing html, missing plainText, malformed from field)
 - ✅ Clear logging (console.log key decisions)
