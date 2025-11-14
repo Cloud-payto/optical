@@ -191,7 +191,7 @@ export function InventoryPage() {
         pdf_path: storagePath,
         item_count: items.length,
         total_quantity: items.reduce((sum, item) => sum + item.quantity, 0),
-        status: 'pending' as const
+        status: 'generated' as const
       };
 
       await saveReturnReportMetadata(reportMetadata);
