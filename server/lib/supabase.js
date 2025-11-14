@@ -879,21 +879,51 @@ const orderOperations = {
 
       if (error) throw error;
 
-      // Flatten vendor object to vendor string for easier access
-      const ordersWithVendorName = data?.map(order => ({
-        ...order,
-        vendor: order.vendor?.name || 'Unknown Vendor'
-      })) || [];
+      // Process orders: filter items based on order status
+      const processedOrders = data?.map(order => {
+        let filteredItems = order.items || [];
+
+        // For partial orders, only include unreceived items
+        // This ensures users only see frames they still need to confirm
+        if (order.status === 'partial') {
+          const allItems = order.items || [];
+          filteredItems = allItems.filter(item =>
+            item.received === null || item.received === false
+          );
+
+          console.log(`📦 Partial order ${order.order_number}: filtered from ${allItems.length} to ${filteredItems.length} unreceived items`);
+
+          // Calculate accurate counts for partial orders
+          const receivedCount = allItems.filter(item => item.received === true).length;
+
+          return {
+            ...order,
+            vendor: order.vendor?.name || 'Unknown Vendor',
+            items: filteredItems,
+            total_items: allItems.length,
+            received_items: receivedCount,
+            pending_items: filteredItems.length
+          };
+        }
+
+        // For non-partial orders, return all items as-is
+        return {
+          ...order,
+          vendor: order.vendor?.name || 'Unknown Vendor',
+          items: filteredItems,
+          total_items: filteredItems.length
+        };
+      }) || [];
 
       // Debug: Log order dates
-      if (ordersWithVendorName.length > 0) {
+      if (processedOrders.length > 0) {
         console.log('📅 Sample order dates from DB:');
-        ordersWithVendorName.slice(0, 3).forEach(order => {
+        processedOrders.slice(0, 3).forEach(order => {
           console.log(`  Order ${order.order_number}: order_date = ${order.order_date}, customer = ${order.customer_name}`);
         });
       }
 
-      return ordersWithVendorName;
+      return processedOrders;
     } catch (error) {
       handleSupabaseError(error, 'getOrdersByAccount');
     }
@@ -914,10 +944,36 @@ const orderOperations = {
 
       if (error) throw error;
 
+      let filteredItems = data.items || [];
+
+      // For partial orders, only include unreceived items
+      if (data.status === 'partial') {
+        const allItems = data.items || [];
+        filteredItems = allItems.filter(item =>
+          item.received === null || item.received === false
+        );
+
+        console.log(`📦 Partial order ${data.order_number}: filtered from ${allItems.length} to ${filteredItems.length} unreceived items`);
+
+        // Calculate accurate counts for partial orders
+        const receivedCount = allItems.filter(item => item.received === true).length;
+
+        return {
+          ...data,
+          vendor: data.vendor?.name || 'Unknown Vendor',
+          items: filteredItems,
+          total_items: allItems.length,
+          received_items: receivedCount,
+          pending_items: filteredItems.length
+        };
+      }
+
       // Flatten vendor object to vendor string for consistency with getOrdersByAccount
       return {
         ...data,
-        vendor: data.vendor?.name || 'Unknown Vendor'
+        vendor: data.vendor?.name || 'Unknown Vendor',
+        items: filteredItems,
+        total_items: filteredItems.length
       };
     } catch (error) {
       handleSupabaseError(error, 'getOrderById');

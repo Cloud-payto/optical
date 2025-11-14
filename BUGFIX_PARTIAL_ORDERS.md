@@ -2,19 +2,30 @@
 
 ## Problem
 
-When a user partially confirmed an order (e.g., 33 out of 36 frames), and then revisited the order in the "Partial Orders" column, all 36 frames were still showing instead of just the 3 remaining unreceived frames.
+When a user partially confirmed an order (e.g., 14 out of 18 frames), and then revisited the order in the "Partial Orders" section, all 18 frames were still showing in the modal instead of just the 4 remaining unreceived frames.
+
+This made it impossible for users to see at a glance which frames still needed to be received.
 
 ## Root Cause
 
+### Issue 1: confirmPendingOrder Query (FIXED)
 The `confirmPendingOrder` function was querying for items with `status = 'pending'`, but when frames are confirmed, they are updated to:
 - `received = TRUE`
 - `status = 'current'`
 
 This meant the query was only finding frames that were never touched, not frames that had already been received.
 
-## Solution
+### Issue 2: getOrdersByAccount Not Filtering (FIXED - Current Update)
+The `getOrdersByAccount` and `getOrderById` functions were returning ALL inventory items for every order, regardless of:
+- The order's status (pending/partial/confirmed)
+- The items' received status
 
-Changed the query logic to filter by the `received` column instead of the `status` column:
+For partial orders, this caused the frontend to receive all 18 frames instead of just the 4 unreceived ones.
+
+## Solutions Implemented
+
+### Fix 1: Confirm Order Endpoint (Previously Fixed)
+Changed the query logic in `confirmPendingOrder` to filter by the `received` column instead of the `status` column:
 
 **Before:**
 ```javascript
@@ -32,14 +43,52 @@ This correctly filters for frames that have NOT been received yet, which include
 
 Frames with `received = TRUE` (already confirmed) are now excluded.
 
+### Fix 2: Get Orders Endpoints (Current Update)
+Modified `getOrdersByAccount` and `getOrderById` to filter items based on order status:
+
+**Location:** `server/lib/supabase.js:868-981`
+
+**Changes:**
+- Added post-processing logic to filter items for partial orders
+- Only returns unreceived items (received = null or false) for partial orders
+- Calculates accurate counts: `total_items`, `received_items`, `pending_items`
+- Returns all items for non-partial orders (backward compatible)
+
+**Code:**
+```javascript
+// For partial orders, only include unreceived items
+if (order.status === 'partial') {
+  const allItems = order.items || [];
+  filteredItems = allItems.filter(item =>
+    item.received === null || item.received === false
+  );
+
+  const receivedCount = allItems.filter(item => item.received === true).length;
+
+  return {
+    ...order,
+    vendor: order.vendor?.name || 'Unknown Vendor',
+    items: filteredItems, // Only unreceived items
+    total_items: allItems.length, // Total frames in order
+    received_items: receivedCount, // Already received
+    pending_items: filteredItems.length // Still pending
+  };
+}
+```
+
 ## Files Changed
 
 **File:** `server/lib/supabase.js`
 
-**Changes:**
+**Confirm Order Fix (Previously):**
 1. Line 319-323: Updated query for fallback path (when order not in orders table)
 2. Line 363-369: Updated query for main path (when order exists in orders table)
 3. Line 377: Updated error message to say "No unreceived items" instead of "No pending items"
+
+**Get Orders Fix (Current Update):**
+1. Line 868-930: Updated `getOrdersByAccount()` to filter partial order items
+2. Line 932-981: Updated `getOrderById()` to filter partial order items
+3. Added logging to track filtered item counts for debugging
 
 ## Expected Behavior Now
 
