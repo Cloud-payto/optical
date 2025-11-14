@@ -82,7 +82,7 @@ export function FrameSelectionItem({ item, index, isSelected, onToggle }: FrameS
       </td>
 
       {/* Price Column (Optional) */}
-      {item.wholesale_price !== undefined && (
+      {item.wholesale_price != null && (
         <td className="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 text-right">
           ${item.wholesale_price.toFixed(2)}
         </td>
