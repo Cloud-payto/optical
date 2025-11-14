@@ -817,7 +817,7 @@ export interface ReturnReport {
   pdf_path: string;
   item_count: number;
   total_quantity: number;
-  status: 'pending' | 'submitted' | 'completed';
+  status: 'draft' | 'generated' | 'sent' | 'cancelled';
   generated_date: string;
   created_at: string;
   updated_at: string;
