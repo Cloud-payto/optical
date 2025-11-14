@@ -14,9 +14,30 @@ interface ReportMetadata {
   contactEmail: string;
 }
 
+interface ColumnWidths {
+  brand: number;
+  model: number;
+  color: number;
+  size: number;
+  qty: number;
+}
+
+interface ColumnConstraints {
+  min: number;
+  max: number;
+  priority: number; // Lower number = higher priority to maintain width
+}
+
+interface CellContent {
+  text: string;
+  lines: string[];
+  height: number;
+}
+
 export async function generateReturnReportPDF(
   items: InventoryItem[],
-  metadata: ReportMetadata
+  metadata: ReportMetadata,
+  options?: { debug?: boolean }
 ): Promise<Blob> {
   const doc = new jsPDF({
     orientation: 'portrait',
@@ -28,6 +49,171 @@ export async function generateReturnReportPDF(
   const pageHeight = 11;
   const margin = 0.6;
   const contentWidth = pageWidth - (margin * 2);
+
+  // ============================================================================
+  // HELPER FUNCTIONS
+  // ============================================================================
+
+  /**
+   * Measure optimal column widths based on actual content
+   */
+  const measureColumnWidths = (items: InventoryItem[], doc: jsPDF): ColumnWidths => {
+    // Define constraints for each column
+    const constraints: Record<keyof ColumnWidths, ColumnConstraints> = {
+      brand: { min: 0.7, max: 1.5, priority: 2 },
+      model: { min: 0.8, max: 2.0, priority: 1 },
+      color: { min: 0.9, max: 2.5, priority: 1 },
+      size: { min: 0.5, max: 1.2, priority: 3 },
+      qty: { min: 0.5, max: 0.7, priority: 4 }
+    };
+
+    const fontSize = 9;
+    const headerFontSize = 8;
+    const padding = 0.24; // Padding per column (0.12 on each side)
+
+    // Track maximum width needed for each column
+    const maxWidths: ColumnWidths = {
+      brand: 0,
+      model: 0,
+      color: 0,
+      size: 0,
+      qty: 0
+    };
+
+    // Measure header widths first
+    doc.setFontSize(headerFontSize);
+    doc.setFont('helvetica', 'bold');
+    maxWidths.brand = Math.max(maxWidths.brand, doc.getTextWidth('BRAND'));
+    maxWidths.model = Math.max(maxWidths.model, doc.getTextWidth('MODEL'));
+    maxWidths.color = Math.max(maxWidths.color, doc.getTextWidth('COLOR'));
+    maxWidths.size = Math.max(maxWidths.size, doc.getTextWidth('SIZE'));
+    maxWidths.qty = Math.max(maxWidths.qty, doc.getTextWidth('QTY'));
+
+    // Measure content widths
+    items.forEach(item => {
+      // Brand (bold)
+      doc.setFontSize(fontSize);
+      doc.setFont('helvetica', 'bold');
+      const brandWidth = doc.getTextWidth(item.brand || 'N/A');
+      maxWidths.brand = Math.max(maxWidths.brand, brandWidth);
+
+      // Model, Color, Size (normal)
+      doc.setFont('helvetica', 'normal');
+      const modelWidth = doc.getTextWidth(item.model || 'N/A');
+      maxWidths.model = Math.max(maxWidths.model, modelWidth);
+
+      const colorWidth = doc.getTextWidth(item.color || 'N/A');
+      maxWidths.color = Math.max(maxWidths.color, colorWidth);
+
+      const sizeText = item.full_size || item.size || 'N/A';
+      const sizeWidth = doc.getTextWidth(sizeText);
+      maxWidths.size = Math.max(maxWidths.size, sizeWidth);
+
+      // Quantity (bold)
+      doc.setFont('helvetica', 'bold');
+      const qtyWidth = doc.getTextWidth(String(item.quantity));
+      maxWidths.qty = Math.max(maxWidths.qty, qtyWidth);
+    });
+
+    // Add padding to each measurement
+    Object.keys(maxWidths).forEach(key => {
+      maxWidths[key as keyof ColumnWidths] += padding;
+    });
+
+    // Apply constraints (min/max)
+    Object.keys(maxWidths).forEach(key => {
+      const k = key as keyof ColumnWidths;
+      maxWidths[k] = Math.max(constraints[k].min, Math.min(constraints[k].max, maxWidths[k]));
+    });
+
+    // Calculate total width needed
+    const totalNeeded = Object.values(maxWidths).reduce((sum, w) => sum + w, 0);
+    const availableWidth = contentWidth - 0.3; // Account for table margins
+
+    // If we fit perfectly or have extra space, distribute proportionally
+    if (totalNeeded <= availableWidth) {
+      const extraSpace = availableWidth - totalNeeded;
+
+      // Distribute extra space to columns that can grow (not at max), prioritizing lower priority columns
+      const canGrow = Object.entries(maxWidths).filter(([key, width]) =>
+        width < constraints[key as keyof ColumnWidths].max
+      );
+
+      if (canGrow.length > 0) {
+        const spacePerColumn = extraSpace / canGrow.length;
+        canGrow.forEach(([key]) => {
+          const k = key as keyof ColumnWidths;
+          maxWidths[k] = Math.min(constraints[k].max, maxWidths[k] + spacePerColumn);
+        });
+      }
+    } else {
+      // Need to shrink columns - prioritize by priority value (higher priority = shrink first)
+      const deficit = totalNeeded - availableWidth;
+
+      // Sort columns by priority (descending) to shrink lower priority columns first
+      const sortedColumns = (Object.keys(maxWidths) as Array<keyof ColumnWidths>)
+        .sort((a, b) => constraints[b].priority - constraints[a].priority);
+
+      let remainingDeficit = deficit;
+
+      for (const key of sortedColumns) {
+        if (remainingDeficit <= 0) break;
+
+        const currentWidth = maxWidths[key];
+        const minWidth = constraints[key].min;
+        const canShrink = currentWidth - minWidth;
+
+        if (canShrink > 0) {
+          const shrinkAmount = Math.min(canShrink, remainingDeficit);
+          maxWidths[key] = currentWidth - shrinkAmount;
+          remainingDeficit -= shrinkAmount;
+        }
+      }
+    }
+
+    return maxWidths;
+  };
+
+  /**
+   * Wrap text to fit within a specific width
+   */
+  const wrapText = (text: string, maxWidth: number, doc: jsPDF): string[] => {
+    const words = text.split(' ');
+    const lines: string[] = [];
+    let currentLine = '';
+
+    words.forEach(word => {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      const testWidth = doc.getTextWidth(testLine);
+
+      if (testWidth <= maxWidth - 0.24) { // Account for padding
+        currentLine = testLine;
+      } else {
+        if (currentLine) lines.push(currentLine);
+        currentLine = word;
+      }
+    });
+
+    if (currentLine) lines.push(currentLine);
+    return lines.length > 0 ? lines : [text];
+  };
+
+  /**
+   * Prepare cell content with wrapping if needed
+   */
+  const prepareCellContent = (
+    text: string,
+    maxWidth: number,
+    doc: jsPDF,
+    fontSize: number
+  ): CellContent => {
+    doc.setFontSize(fontSize);
+    const lines = wrapText(text, maxWidth, doc);
+    const lineHeight = 0.15; // inches per line
+    const height = lines.length * lineHeight;
+
+    return { text, lines, height };
+  };
 
   // Professional color palette
   const colors = {
@@ -186,8 +372,27 @@ export async function generateReturnReportPDF(
   yPosition += vendorCardHeight + 0.45;
 
   // ============================================================================
-  // ITEMS SECTION - Clean table layout
+  // ITEMS SECTION - Clean table layout with dynamic column widths
   // ============================================================================
+
+  // Sort items by brand, then model (before measuring)
+  const sortedItems = [...items].sort((a, b) => {
+    const brandCompare = (a.brand || '').localeCompare(b.brand || '');
+    if (brandCompare !== 0) return brandCompare;
+    return (a.model || '').localeCompare(b.model || '');
+  });
+
+  // Calculate optimal column widths based on content
+  const colWidths = measureColumnWidths(sortedItems, doc);
+
+  // Debug logging (optional)
+  if (options?.debug) {
+    console.log('=== PDF Column Width Calculation ===');
+    console.log('Available width:', contentWidth - 0.3);
+    console.log('Calculated widths:', colWidths);
+    console.log('Total width used:', Object.values(colWidths).reduce((sum, w) => sum + w, 0));
+    console.log('Item count:', sortedItems.length);
+  }
 
   // Section header
   addText('ITEMS REQUESTED FOR RETURN', margin, yPosition, {
@@ -205,13 +410,6 @@ export async function generateReturnReportPDF(
 
   // Table header
   const tableX = margin + 0.15;
-  const colWidths = {
-    brand: 1.2,    // Reduced from 1.4
-    model: 1.5,    // Reduced from 1.8
-    color: 1.4,    // Increased from 1.2
-    size: 1.1,     // Increased from 0.9
-    qty: 0.9       // Increased from 0.7 and moved to right
-  };
 
   // Header background
   setColor(colors.dark, 'fill');
@@ -252,17 +450,33 @@ export async function generateReturnReportPDF(
 
   yPosition += 0.32;
 
-  // Sort items by brand, then model
-  const sortedItems = [...items].sort((a, b) => {
-    const brandCompare = (a.brand || '').localeCompare(b.brand || '');
-    if (brandCompare !== 0) return brandCompare;
-    return (a.model || '').localeCompare(b.model || '');
-  });
-
-  // Draw items in table rows
+  // Draw items in table rows with dynamic heights
   sortedItems.forEach((item, index) => {
+    // Prepare all cell contents with wrapping
+    const cellFontSize = 9;
+    doc.setFont('helvetica', 'bold');
+    const brandContent = prepareCellContent(item.brand || 'N/A', colWidths.brand, doc, cellFontSize);
+
+    doc.setFont('helvetica', 'normal');
+    const modelContent = prepareCellContent(item.model || 'N/A', colWidths.model, doc, cellFontSize);
+    const colorContent = prepareCellContent(item.color || 'N/A', colWidths.color, doc, cellFontSize);
+    const sizeContent = prepareCellContent(item.full_size || item.size || 'N/A', colWidths.size, doc, cellFontSize);
+
+    doc.setFont('helvetica', 'bold');
+    const qtyContent = prepareCellContent(String(item.quantity), colWidths.qty, doc, cellFontSize);
+
+    // Calculate row height based on tallest cell
+    const maxCellHeight = Math.max(
+      brandContent.height,
+      modelContent.height,
+      colorContent.height,
+      sizeContent.height,
+      qtyContent.height
+    );
+    const rowHeight = Math.max(0.28, maxCellHeight + 0.13); // Minimum height + padding
+
     // Check if we need a new page
-    if (yPosition > pageHeight - 1.8) {
+    if (yPosition + rowHeight > pageHeight - 1.8) {
       doc.addPage();
       yPosition = margin;
 
@@ -277,10 +491,47 @@ export async function generateReturnReportPDF(
         align: 'right'
       });
       yPosition += 0.4;
+
+      // Redraw table header on new page
+      setColor(colors.dark, 'fill');
+      doc.roundedRect(tableX, yPosition - 0.15, contentWidth - 0.3, 0.25, 0.04, 0.04, 'F');
+
+      let colX = tableX + 0.12;
+      addText('BRAND', colX, yPosition, {
+        fontSize: 8,
+        style: 'bold',
+        color: colors.white
+      });
+      colX += colWidths.brand;
+      addText('MODEL', colX, yPosition, {
+        fontSize: 8,
+        style: 'bold',
+        color: colors.white
+      });
+      colX += colWidths.model;
+      addText('COLOR', colX, yPosition, {
+        fontSize: 8,
+        style: 'bold',
+        color: colors.white
+      });
+      colX += colWidths.color;
+      addText('SIZE', colX, yPosition, {
+        fontSize: 8,
+        style: 'bold',
+        color: colors.white
+      });
+      colX += colWidths.size;
+      addText('QTY', colX + colWidths.qty - 0.12, yPosition, {
+        fontSize: 8,
+        style: 'bold',
+        color: colors.white,
+        align: 'right'
+      });
+
+      yPosition += 0.32;
     }
 
     // Alternating row colors for readability
-    const rowHeight = 0.28;
     if (index % 2 === 0) {
       setColor(colors.background, 'fill');
       doc.rect(tableX, yPosition - 0.18, contentWidth - 0.3, rowHeight, 'F');
@@ -289,37 +540,42 @@ export async function generateReturnReportPDF(
     // Row border for definition
     setColor(colors.border, 'draw');
     doc.setLineWidth(0.005);
-    doc.line(tableX, yPosition + 0.1, tableX + contentWidth - 0.3, yPosition + 0.1);
+    doc.line(tableX, yPosition + rowHeight - 0.18, tableX + contentWidth - 0.3, yPosition + rowHeight - 0.18);
 
-    // Item data
+    // Helper to render multi-line cell content
+    const renderCell = (content: CellContent, x: number, fontStyle: string, color: number[], align?: string) => {
+      doc.setFont('helvetica', fontStyle);
+      setColor(color, 'text');
+      doc.setFontSize(cellFontSize);
+
+      const lineHeight = 0.15;
+      let lineY = yPosition;
+
+      content.lines.forEach((line, lineIndex) => {
+        if (align === 'right') {
+          doc.text(line, x, lineY, { align: 'right' });
+        } else {
+          doc.text(line, x, lineY);
+        }
+        lineY += lineHeight;
+      });
+    };
+
+    // Render all cells
     let colX = tableX + 0.12;
-    addText(item.brand || 'N/A', colX, yPosition, {
-      fontSize: 9,
-      style: 'bold',
-      color: colors.dark
-    });
+    renderCell(brandContent, colX, 'bold', colors.dark);
+
     colX += colWidths.brand;
-    addText(item.model || 'N/A', colX, yPosition, {
-      fontSize: 9,
-      color: colors.text
-    });
+    renderCell(modelContent, colX, 'normal', colors.text);
+
     colX += colWidths.model;
-    addText(item.color || 'N/A', colX, yPosition, {
-      fontSize: 9,
-      color: colors.text
-    });
+    renderCell(colorContent, colX, 'normal', colors.text);
+
     colX += colWidths.color;
-    addText(item.full_size || item.size || 'N/A', colX, yPosition, {
-      fontSize: 9,
-      color: colors.text
-    });
+    renderCell(sizeContent, colX, 'normal', colors.text);
+
     colX += colWidths.size;
-    addText(String(item.quantity), colX + colWidths.qty - 0.12, yPosition, {
-      fontSize: 9,
-      style: 'bold',
-      color: colors.accent,
-      align: 'right'
-    });
+    renderCell(qtyContent, colX + colWidths.qty - 0.12, 'bold', colors.accent, 'right');
 
     yPosition += rowHeight;
   });
