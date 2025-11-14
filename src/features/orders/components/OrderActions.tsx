@@ -13,23 +13,32 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { FrameSelectionModal } from './FrameSelectionModal';
 import { Order } from '../types/order.types';
 
 interface OrderActionsProps {
   order: Order;
-  onConfirm?: (orderNumber: string) => void;
+  onConfirm?: (orderNumber: string, frameIds?: string[]) => void;
   onArchive?: (orderId: number) => void;
   onDelete?: (orderId: number) => void;
+  isConfirming?: boolean;
 }
 
-type ConfirmAction = 'confirm' | 'archive' | 'delete' | null;
+type ConfirmAction = 'archive' | 'delete' | null;
 
-export function OrderActions({ order, onConfirm, onArchive, onDelete }: OrderActionsProps) {
+export function OrderActions({
+  order,
+  onConfirm,
+  onArchive,
+  onDelete,
+  isConfirming = false
+}: OrderActionsProps) {
   const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
+  const [showFrameSelection, setShowFrameSelection] = useState(false);
 
-  const handleConfirm = (e: React.MouseEvent) => {
+  const handleConfirmClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setConfirmAction('confirm');
+    setShowFrameSelection(true);
   };
 
   const handleArchive = (e: React.MouseEvent) => {
@@ -43,24 +52,22 @@ export function OrderActions({ order, onConfirm, onArchive, onDelete }: OrderAct
   };
 
   const executeAction = () => {
-    if (confirmAction === 'confirm' && onConfirm) {
-      onConfirm(order.order_number);
-    } else if (confirmAction === 'archive' && onArchive) {
+    if (confirmAction === 'archive' && onArchive) {
       onArchive(order.id);
     } else if (confirmAction === 'delete' && onDelete) {
       onDelete(order.id);
     }
   };
 
+  const handleFrameConfirmation = (frameIds: string[]) => {
+    if (onConfirm) {
+      onConfirm(order.order_number, frameIds);
+      setShowFrameSelection(false);
+    }
+  };
+
   const getDialogConfig = () => {
     switch (confirmAction) {
-      case 'confirm':
-        return {
-          title: 'Confirm Order',
-          message: `Are you sure you want to confirm order ${order.order_number} from ${order.vendor}? This will move all items to your current inventory.`,
-          confirmText: 'Confirm Order',
-          variant: 'success' as const,
-        };
       case 'archive':
         return {
           title: 'Archive Order',
@@ -90,15 +97,15 @@ export function OrderActions({ order, onConfirm, onArchive, onDelete }: OrderAct
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger className="p-2 hover:bg-gray-100 rounded-md transition-colors">
-          <MoreVertical className="h-4 w-4 text-gray-500" />
+        <DropdownMenuTrigger className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors">
+          <MoreVertical className="h-4 w-4 text-gray-500 dark:text-gray-400" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          {order.status === 'pending' && onConfirm && (
+          {(order.status === 'pending' || order.status === 'partial') && onConfirm && (
             <>
-              <DropdownMenuItem onClick={handleConfirm} className="cursor-pointer">
+              <DropdownMenuItem onClick={handleConfirmClick} className="cursor-pointer">
                 <Check className="h-4 w-4 mr-2 text-green-600" />
-                Confirm Order
+                {order.status === 'partial' ? 'Complete Order' : 'Confirm Order'}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
             </>
@@ -123,7 +130,18 @@ export function OrderActions({ order, onConfirm, onArchive, onDelete }: OrderAct
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Modern Confirmation Dialog */}
+      {/* Frame Selection Modal */}
+      {showFrameSelection && (
+        <FrameSelectionModal
+          isOpen={showFrameSelection}
+          onClose={() => setShowFrameSelection(false)}
+          order={order}
+          onConfirm={handleFrameConfirmation}
+          isLoading={isConfirming}
+        />
+      )}
+
+      {/* Confirmation Dialog for Archive/Delete */}
       <ConfirmDialog
         isOpen={confirmAction !== null}
         onClose={() => setConfirmAction(null)}

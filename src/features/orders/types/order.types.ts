@@ -23,12 +23,14 @@ export interface Order {
   vendor: string;
   email_id: number;
   total_items: number;
+  received_items?: number;
+  pending_items?: number;
   customer_name?: string;
   account_number?: string;
   rep_name?: string;
   order_date?: string;
   confirmed_at: string;
-  status: 'pending' | 'confirmed' | 'archived';
+  status: 'pending' | 'partial' | 'confirmed' | 'archived';
   items: OrderItem[];
 }
 
@@ -41,7 +43,7 @@ export interface OrdersResponse {
 }
 
 export interface OrderFilters {
-  status?: 'pending' | 'confirmed' | 'archived';
+  status?: 'pending' | 'partial' | 'confirmed' | 'archived';
   vendor?: string;
   searchTerm?: string;
 }

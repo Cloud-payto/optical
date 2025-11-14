@@ -247,19 +247,42 @@ router.delete('/:userId/:itemId', async (req, res) => {
 });
 
 // POST /api/inventory/:userId/confirm/:orderNumber - Confirm pending order items
+// Supports both full and partial order confirmation
+// Body: { frameIds?: string[], confirmAll?: boolean }
 router.post('/:userId/confirm/:orderNumber', async (req, res) => {
   try {
     const { userId, orderNumber } = req.params;
+    const { frameIds, confirmAll } = req.body || {};
 
     console.log(`📦 Confirming order ${orderNumber} for user ${userId}`);
 
-    const result = await inventoryOperations.confirmPendingOrder(orderNumber, userId);
+    // Backward compatibility: if no body, confirm all
+    const shouldConfirmAll = !frameIds || frameIds.length === 0 || confirmAll === true;
+
+    if (shouldConfirmAll) {
+      console.log(`  → Full confirmation (all pending items)`);
+    } else {
+      console.log(`  → Partial confirmation (${frameIds.length} frames)`);
+    }
+
+    const result = await inventoryOperations.confirmPendingOrder(
+      orderNumber,
+      userId,
+      {
+        frameIds: shouldConfirmAll ? null : frameIds,
+        confirmAll: shouldConfirmAll
+      }
+    );
 
     if (result && result.success) {
       res.json({
         success: true,
-        message: `Confirmed ${result.updatedCount} items with enrichment`,
-        updatedCount: result.updatedCount
+        message: `Confirmed ${result.updatedCount} items`,
+        updatedCount: result.updatedCount,
+        orderStatus: result.orderStatus,  // 'partial', 'confirmed', etc.
+        totalItems: result.totalItems,
+        receivedItems: result.receivedItems,
+        pendingItems: result.pendingItems
       });
     } else {
       res.status(200).json({
@@ -269,6 +292,85 @@ router.post('/:userId/confirm/:orderNumber', async (req, res) => {
     }
   } catch (error) {
     console.error('Error confirming pending order:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// GET /api/inventory/:accountId/receipt-status/:orderNumber - Get frame-level receipt status
+router.get('/:accountId/receipt-status/:orderNumber', async (req, res) => {
+  try {
+    const { accountId, orderNumber } = req.params;
+
+    console.log(`📊 Getting receipt status for order ${orderNumber}`);
+
+    const result = await inventoryOperations.getOrderReceiptStatus(orderNumber, accountId);
+
+    if (result.success) {
+      res.json({
+        success: true,
+        orderNumber: result.orderNumber,
+        orderStatus: result.orderStatus,
+        totalItems: result.totalItems,
+        receivedItems: result.receivedItems,
+        pendingItems: result.pendingItems,
+        frames: result.frames
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: result.error || 'Order not found'
+      });
+    }
+  } catch (error) {
+    console.error('Error getting order receipt status:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// PUT /api/inventory/:accountId/frames/mark-received - Mark specific frames as received or unreceived
+router.put('/:accountId/frames/mark-received', async (req, res) => {
+  try {
+    const { accountId } = req.params;
+    const { frameIds, received } = req.body;
+
+    if (!frameIds || !Array.isArray(frameIds) || frameIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'frameIds array is required'
+      });
+    }
+
+    if (typeof received !== 'boolean') {
+      return res.status(400).json({
+        success: false,
+        error: 'received must be true or false'
+      });
+    }
+
+    console.log(`📦 Marking ${frameIds.length} frames as ${received ? 'received' : 'unreceived'}`);
+
+    const result = await inventoryOperations.markFramesReceived(accountId, frameIds, received);
+
+    if (result.success) {
+      res.json({
+        success: true,
+        updatedCount: result.updatedCount,
+        affectedOrders: result.affectedOrders
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: result.error || 'Frames not found'
+      });
+    }
+  } catch (error) {
+    console.error('Error marking frames as received:', error);
     res.status(500).json({
       success: false,
       error: error.message

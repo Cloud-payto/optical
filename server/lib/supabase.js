@@ -270,9 +270,12 @@ const inventoryOperations = {
     }
   },
 
-  async confirmPendingOrder(orderNumber, userId) {
+  async confirmPendingOrder(orderNumber, userId, options = {}) {
     try {
+      const { frameIds = null, confirmAll = false } = options;
+
       console.log(`🔍 confirmPendingOrder called with orderNumber: "${orderNumber}", userId: "${userId}"`);
+      console.log(`📋 Options:`, { frameIds: frameIds?.length || 'all', confirmAll });
 
       // First, try to find the order with vendor information
       const { data: order, error: orderError } = await supabase
@@ -373,14 +376,36 @@ const inventoryOperations = {
         return { success: false, message: `No pending items found for order ${orderNumber}` };
       }
 
-      // Update each item to current status (enrichment should have already happened in n8n)
-      console.log(`🔄 Updating ${pendingItems.length} items to current status...`);
-      console.log(`📝 Sample item IDs to update:`, pendingItems.slice(0, 3).map(i => i.id));
+      // Filter items to confirm based on options
+      let itemsToConfirm = pendingItems;
+      const shouldConfirmAll = confirmAll || !frameIds || frameIds.length === 0;
 
-      const updatePromises = pendingItems.map(item =>
+      if (!shouldConfirmAll && frameIds && frameIds.length > 0) {
+        itemsToConfirm = pendingItems.filter(item => frameIds.includes(item.id));
+        console.log(`🎯 Partial confirmation: filtered to ${itemsToConfirm.length} specific frames out of ${pendingItems.length} pending`);
+      } else {
+        console.log(`✅ Full confirmation: confirming all ${pendingItems.length} pending items`);
+      }
+
+      if (itemsToConfirm.length === 0) {
+        return {
+          success: false,
+          message: `No matching items to confirm for order ${orderNumber}`
+        };
+      }
+
+      // Update items to received=true, status='current', and set received_date
+      console.log(`🔄 Marking ${itemsToConfirm.length} items as received...`);
+      console.log(`📝 Sample item IDs to update:`, itemsToConfirm.slice(0, 3).map(i => i.id));
+
+      const currentDate = new Date().toISOString().split('T')[0];
+
+      const updatePromises = itemsToConfirm.map(item =>
         supabase
           .from('inventory')
           .update({
+            received: true,
+            received_date: currentDate,
             status: 'current'
           })
           .eq('id', item.id)
@@ -397,19 +422,29 @@ const inventoryOperations = {
 
       const updatedItems = results.map(r => r.data?.[0]).filter(Boolean);
 
-      console.log(`✅ Successfully updated ${updatedItems.length} items to current status`);
+      console.log(`✅ Successfully marked ${updatedItems.length} items as received`);
 
-      if (updatedItems.length === 0 && pendingItems.length > 0) {
-        console.error(`⚠️ WARNING: Tried to update ${pendingItems.length} items but 0 were updated!`);
-        console.error(`📊 First pending item structure:`, JSON.stringify(pendingItems[0], null, 2));
+      if (updatedItems.length === 0 && itemsToConfirm.length > 0) {
+        console.error(`⚠️ WARNING: Tried to update ${itemsToConfirm.length} items but 0 were updated!`);
+        console.error(`📊 First item structure:`, JSON.stringify(itemsToConfirm[0], null, 2));
       }
 
-      // Update order status to 'confirmed' after all items are confirmed (if order exists)
+      // Calculate new order status using the helper function
+      let statusResult = { status: 'pending', totalItems: 0, receivedItems: 0, pendingItems: 0 };
       if (order) {
-        console.log(`📋 Updating order ${order.id} status to confirmed...`);
+        statusResult = await this.calculateOrderStatus(order.id);
+
+        console.log(`📊 Order status calculated: ${statusResult.status}`);
+        console.log(`   Total: ${statusResult.totalItems}, Received: ${statusResult.receivedItems}, Pending: ${statusResult.pendingItems}`);
+
+        // Update order status (the trigger will also do this, but we do it explicitly for immediate feedback)
+        console.log(`📋 Updating order ${order.id} status to ${statusResult.status}...`);
         await supabase
           .from('orders')
-          .update({ status: 'confirmed' })
+          .update({
+            status: statusResult.status,
+            updated_at: new Date().toISOString()
+          })
           .eq('id', order.id);
         console.log(`✅ Order status updated successfully`);
       } else {
@@ -541,10 +576,176 @@ const inventoryOperations = {
 
       console.log(`✅ Median calculation complete\n`);
 
-      return { success: true, message: `Confirmed ${updatedItems.length} items`, updatedCount: updatedItems.length };
+      return {
+        success: true,
+        message: `Confirmed ${updatedItems.length} items`,
+        updatedCount: updatedItems.length,
+        orderStatus: statusResult.status,
+        totalItems: statusResult.totalItems,
+        receivedItems: statusResult.receivedItems,
+        pendingItems: statusResult.pendingItems
+      };
     } catch (error) {
       handleSupabaseError(error, 'confirmPendingOrder');
       return { success: false, error: error.message || 'Unknown error confirming order' };
+    }
+  },
+
+  async calculateOrderStatus(orderId) {
+    try {
+      // Get all items for this order
+      const { data: items, error } = await supabase
+        .from('inventory')
+        .select('id, received')
+        .eq('order_id', orderId);
+
+      if (error) throw error;
+
+      if (!items || items.length === 0) {
+        return {
+          status: 'pending',
+          totalItems: 0,
+          receivedItems: 0,
+          pendingItems: 0
+        };
+      }
+
+      const totalItems = items.length;
+      const receivedItems = items.filter(item => item.received === true).length;
+      const pendingItems = totalItems - receivedItems;
+
+      let status = 'pending';
+      if (receivedItems === totalItems) {
+        status = 'confirmed';  // All received
+      } else if (receivedItems > 0) {
+        status = 'partial';    // Some received
+      }
+      // else stays 'pending'  // None received
+
+      return {
+        status,
+        totalItems,
+        receivedItems,
+        pendingItems
+      };
+    } catch (error) {
+      console.error('Error calculating order status:', error);
+      throw error;
+    }
+  },
+
+  async getOrderReceiptStatus(orderNumber, userId) {
+    try {
+      // Find order
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .select('id, status, total_pieces')
+        .eq('order_number', orderNumber)
+        .eq('account_id', userId)
+        .single();
+
+      if (orderError || !order) {
+        return { success: false, error: 'Order not found' };
+      }
+
+      // Get all items with receipt status
+      const { data: items, error: itemsError } = await supabase
+        .from('inventory')
+        .select('id, sku, brand, model, color, size, quantity, received, received_date, status')
+        .eq('order_id', order.id)
+        .order('created_at', { ascending: true });
+
+      if (itemsError) throw itemsError;
+
+      const frames = (items || []).map(item => ({
+        id: item.id,
+        sku: item.sku,
+        brand: item.brand,
+        model: item.model,
+        color: item.color,
+        size: item.size,
+        quantity: item.quantity,
+        received: item.received,
+        receivedDate: item.received_date,
+        status: item.status
+      }));
+
+      const receivedItems = frames.filter(f => f.received === true).length;
+      const pendingItems = frames.filter(f => f.received !== true).length;
+
+      return {
+        success: true,
+        orderNumber,
+        orderStatus: order.status,
+        totalItems: frames.length,
+        receivedItems,
+        pendingItems,
+        frames
+      };
+    } catch (error) {
+      handleSupabaseError(error, 'getOrderReceiptStatus');
+      return { success: false, error: error.message };
+    }
+  },
+
+  async markFramesReceived(accountId, frameIds, received) {
+    try {
+      const currentDate = new Date().toISOString().split('T')[0];
+
+      // Update frames
+      const updateData = {
+        received: received,
+        received_date: received ? currentDate : null,
+        status: received ? 'current' : 'pending',
+        updated_at: new Date().toISOString()
+      };
+
+      const { data: updatedItems, error } = await supabase
+        .from('inventory')
+        .update(updateData)
+        .in('id', frameIds)
+        .eq('account_id', accountId)
+        .select('id, order_id');
+
+      if (error) throw error;
+
+      // Get unique order IDs that were affected
+      const affectedOrderIds = [...new Set(
+        updatedItems
+          .map(item => item.order_id)
+          .filter(Boolean)
+      )];
+
+      // Recalculate status for each affected order
+      const affectedOrders = [];
+      for (const orderId of affectedOrderIds) {
+        const statusResult = await this.calculateOrderStatus(orderId);
+
+        // Update order status (trigger will also do this, but we do it explicitly)
+        await supabase
+          .from('orders')
+          .update({
+            status: statusResult.status,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', orderId);
+
+        affectedOrders.push({
+          orderId,
+          newStatus: statusResult.status,
+          receivedItems: statusResult.receivedItems,
+          totalItems: statusResult.totalItems
+        });
+      }
+
+      return {
+        success: true,
+        updatedCount: updatedItems.length,
+        affectedOrders
+      };
+    } catch (error) {
+      handleSupabaseError(error, 'markFramesReceived');
+      return { success: false, error: error.message };
     }
   },
 

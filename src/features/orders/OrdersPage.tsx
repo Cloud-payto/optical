@@ -13,7 +13,7 @@ import { Filter } from 'lucide-react';
 
 export function OrdersPage() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'pending' | 'confirmed'>('pending');
+  const [activeTab, setActiveTab] = useState<'pending' | 'partial' | 'confirmed'>('pending');
   const [selectedVendor, setSelectedVendor] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'date' | 'vendor'>('date');
 
@@ -60,9 +60,16 @@ export function OrdersPage() {
   }, [orders, selectedVendor, sortBy]);
 
   const tabs = [
-    { key: 'pending' as const, label: 'Pending Orders', count: orders?.length || 0 },
-    { key: 'confirmed' as const, label: 'Confirmed Orders', count: 0 }, // Will be calculated when we fetch all orders
+    { key: 'pending' as const, label: 'Pending Orders', count: 0 },
+    { key: 'partial' as const, label: 'Partial Orders', count: 0 },
+    { key: 'confirmed' as const, label: 'Confirmed Orders', count: 0 },
   ];
+
+  // Update the count for the active tab
+  const activeTabIndex = tabs.findIndex(tab => tab.key === activeTab);
+  if (activeTabIndex !== -1) {
+    tabs[activeTabIndex].count = orders?.length || 0;
+  }
 
   return (
     <div className="space-y-6 p-6 bg-gray-50 dark:bg-[#181F1C] min-h-screen">
@@ -165,9 +172,14 @@ export function OrdersPage() {
       <OrdersTable
         orders={filteredAndSortedOrders}
         isLoading={isLoading}
-        onConfirm={activeTab === 'pending' ? (orderNumber) => confirmOrder.mutate(orderNumber) : undefined}
+        onConfirm={
+          (activeTab === 'pending' || activeTab === 'partial')
+            ? (orderNumber, frameIds) => confirmOrder.mutate({ orderNumber, frameIds })
+            : undefined
+        }
         onArchive={activeTab === 'confirmed' ? (orderId) => archiveOrder.mutate(orderId) : undefined}
         onDelete={(orderId) => deleteOrder.mutate(orderId)}
+        isConfirming={confirmOrder.isPending}
       />
     </div>
   );

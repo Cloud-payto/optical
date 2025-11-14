@@ -20,7 +20,14 @@
       "Bash(npm run build:*)",
       "mcp__Jam__fetch",
       "mcp__Jam__getScreenshots",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "SlashCommand(/lyra:lyra:*)",
+      "mcp__render__list_workspaces",
+      "mcp__render__list_deploys",
+      "mcp__render__get_deploy",
+      "Bash(npm install:*)",
+      "Bash(git reset:*)",
+      "WebFetch(domain:jam.dev)"
     ],
     "deny": [],
     "ask": []

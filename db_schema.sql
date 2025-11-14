@@ -57,7 +57,19 @@ CREATE TABLE public.accounts (
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
   metadata jsonb DEFAULT '{}'::jsonb,
-  CONSTRAINT accounts_pkey PRIMARY KEY (id)
+  user_id uuid,
+  avatar_url text,
+  full_name character varying,
+  notification_preferences jsonb DEFAULT '{"email_orders": true, "email_inventory": true, "email_marketing": false}'::jsonb,
+  display_preferences jsonb DEFAULT '{"theme": "light", "language": "en"}'::jsonb,
+  onboarding_completed boolean DEFAULT false,
+  email_verified boolean DEFAULT false,
+  last_login_at timestamp with time zone,
+  questionnaire_completed boolean DEFAULT false,
+  questionnaire_skipped boolean DEFAULT false,
+  questionnaire_last_prompted timestamp with time zone,
+  CONSTRAINT accounts_pkey PRIMARY KEY (id),
+  CONSTRAINT accounts_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );
 CREATE TABLE public.api_logs (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
@@ -215,6 +227,21 @@ CREATE TABLE public.inventory (
   CONSTRAINT inventory_vendor_id_fkey FOREIGN KEY (vendor_id) REFERENCES public.vendors(id),
   CONSTRAINT inventory_order_id_fkey FOREIGN KEY (order_id) REFERENCES public.orders(id)
 );
+CREATE TABLE public.notifications (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  account_id uuid NOT NULL,
+  type text NOT NULL CHECK (type = ANY (ARRAY['return_report_generated'::text, 'return_report_submitted'::text, 'return_report_completed'::text, 'order_received'::text, 'inventory_updated'::text, 'system_alert'::text, 'info'::text])),
+  title text NOT NULL CHECK (length(TRIM(BOTH FROM title)) > 0),
+  message text NOT NULL CHECK (length(TRIM(BOTH FROM message)) > 0),
+  priority text NOT NULL DEFAULT 'medium'::text CHECK (priority = ANY (ARRAY['low'::text, 'medium'::text, 'high'::text, 'urgent'::text])),
+  read boolean NOT NULL DEFAULT false,
+  action_url text,
+  metadata jsonb DEFAULT '{}'::jsonb,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  read_at timestamp with time zone,
+  CONSTRAINT notifications_pkey PRIMARY KEY (id),
+  CONSTRAINT notifications_account_id_fkey FOREIGN KEY (account_id) REFERENCES public.accounts(id)
+);
 CREATE TABLE public.orders (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
   account_id uuid NOT NULL,
@@ -241,6 +268,23 @@ CREATE TABLE public.orders (
   CONSTRAINT orders_account_id_fkey FOREIGN KEY (account_id) REFERENCES public.accounts(id),
   CONSTRAINT orders_vendor_id_fkey FOREIGN KEY (vendor_id) REFERENCES public.vendors(id),
   CONSTRAINT orders_email_id_fkey FOREIGN KEY (email_id) REFERENCES public.emails(id)
+);
+CREATE TABLE public.practice_profiles (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  account_id uuid NOT NULL UNIQUE,
+  practice_type character varying,
+  practice_specialty character varying,
+  years_in_business integer,
+  patient_volume_range character varying,
+  current_brands jsonb DEFAULT '[]'::jsonb,
+  average_frame_price_range character varying,
+  primary_goals jsonb DEFAULT '[]'::jsonb,
+  completed_at timestamp with time zone,
+  is_completed boolean DEFAULT false,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT practice_profiles_pkey PRIMARY KEY (id),
+  CONSTRAINT practice_profiles_account_id_fkey FOREIGN KEY (account_id) REFERENCES public.accounts(id)
 );
 CREATE TABLE public.return_report_items (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
@@ -271,12 +315,17 @@ CREATE TABLE public.return_reports (
   total_items integer DEFAULT 0,
   total_value numeric DEFAULT 0,
   generated_at timestamp with time zone,
-  pdf_path character varying,
+  pdf_path character varying CHECK (pdf_path IS NULL OR pdf_path::text ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/\d{4}/.+\.pdf$'::text),
   sent_to_email character varying,
   sent_at timestamp with time zone,
   notes text,
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  vendor_name character varying,
+  filename character varying,
+  item_count integer DEFAULT 0,
+  total_quantity integer DEFAULT 0,
+  generated_date timestamp with time zone DEFAULT now(),
   CONSTRAINT return_reports_pkey PRIMARY KEY (id),
   CONSTRAINT return_reports_account_id_fkey FOREIGN KEY (account_id) REFERENCES public.accounts(id),
   CONSTRAINT return_reports_vendor_id_fkey FOREIGN KEY (vendor_id) REFERENCES public.vendors(id)

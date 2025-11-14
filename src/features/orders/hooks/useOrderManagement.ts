@@ -11,12 +11,25 @@ export function useOrderManagement() {
   const queryClient = useQueryClient();
 
   const confirmOrder = useMutation({
-    mutationFn: (orderNumber: string) => confirmPendingOrder(orderNumber),
+    mutationFn: ({ orderNumber, frameIds }: { orderNumber: string; frameIds?: string[] }) =>
+      confirmPendingOrder(orderNumber, frameIds),
     onSuccess: (data) => {
       // Invalidate both orders and inventory since confirming affects both
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
-      toast.success(`Order confirmed! ${data.updatedCount} items moved to current inventory.`);
+
+      // Show appropriate success message based on order status
+      if (data.orderStatus === 'partial') {
+        toast.success(
+          `Order partially confirmed! ${data.receivedItems} of ${data.totalItems} frames received.`,
+          { duration: 5000 }
+        );
+      } else {
+        toast.success(
+          `Order confirmed! ${data.updatedCount} items moved to current inventory.`,
+          { duration: 4000 }
+        );
+      }
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to confirm order');

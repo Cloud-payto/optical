@@ -199,11 +199,30 @@ export async function deleteInventoryItem(itemId: string, userId?: string): Prom
   });
 }
 
-// New inventory workflow functions
-export async function confirmPendingOrder(orderNumber: string, userId?: string): Promise<{ success: boolean; message: string; updatedCount: number }> {
+// New inventory workflow functions - Updated for partial confirmation
+export interface ConfirmOrderResponse {
+  success: boolean;
+  message: string;
+  updatedCount: number;
+  orderStatus: 'partial' | 'confirmed';
+  receivedItems: number;
+  totalItems: number;
+  pendingItems: number;
+}
+
+export async function confirmPendingOrder(
+  orderNumber: string,
+  frameIds?: string[],
+  userId?: string
+): Promise<ConfirmOrderResponse> {
   const currentUserId = userId || await getCurrentUserIdFromSession();
-  return apiRequest<{ success: boolean; message: string; updatedCount: number }>(`/inventory/${currentUserId}/confirm/${orderNumber}`, {
+
+  return apiRequest<ConfirmOrderResponse>(`/inventory/${currentUserId}/confirm/${orderNumber}`, {
     method: 'POST',
+    body: JSON.stringify({
+      frameIds,
+      confirmAll: !frameIds || frameIds.length === 0
+    }),
   });
 }
 
