@@ -448,6 +448,13 @@ export async function fetchBrandsByVendor(vendorId: string): Promise<Brand[]> {
   return apiRequest<Brand[]>(`/vendors/${vendorId}/brands`);
 }
 
+export async function fetchVendorAccountNumber(userId: string, vendorId: string): Promise<string | null> {
+  const response = await apiRequest<{ vendor_account_number: string | null }>(
+    `/vendors/account-number/${userId}/${vendorId}`
+  );
+  return response.vendor_account_number;
+}
+
 export async function fetchAccountBrands(userId?: string): Promise<UserVendorPricing[]> {
   const currentUserId = userId || await getCurrentUserIdFromSession();
   return apiRequest<UserVendorPricing[]>(`/vendors/pricing/${currentUserId}`);

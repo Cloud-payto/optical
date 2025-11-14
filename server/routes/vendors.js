@@ -103,6 +103,30 @@ router.get('/missing/:userId/:vendorId/brands', async (req, res) => {
   }
 });
 
+// Get vendor account number for a user (BEFORE /:vendorId to avoid conflict)
+router.get('/account-number/:userId/:vendorId', async (req, res) => {
+  try {
+    const { userId, vendorId } = req.params;
+    const { supabase } = require('../lib/supabase');
+
+    const { data, error } = await supabase
+      .from('account_vendors')
+      .select('vendor_account_number')
+      .eq('account_id', userId)
+      .eq('vendor_id', vendorId)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    res.json({
+      vendor_account_number: data?.vendor_account_number || null
+    });
+  } catch (error) {
+    console.error('Error fetching vendor account number:', error);
+    res.status(500).json({ error: 'Failed to fetch vendor account number' });
+  }
+});
+
 // Get vendor by ID (AFTER specific routes)
 router.get('/:vendorId', async (req, res) => {
   try {

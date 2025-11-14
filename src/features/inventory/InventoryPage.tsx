@@ -26,7 +26,7 @@ import {
   downloadPDF
 } from './utils/generateReturnReportPDF';
 import { uploadReturnReport } from '../../lib/storage';
-import { saveReturnReportMetadata } from '../../services/api';
+import { saveReturnReportMetadata, fetchVendorAccountNumber } from '../../services/api';
 import toast from 'react-hot-toast';
 
 export function InventoryPage() {
@@ -150,13 +150,27 @@ export function InventoryPage() {
       const contactEmail = user.email || 'contact@optiprofit.com';
       const filename = generateReportFilename(vendorName, reportNumber);
 
+      // Extract vendor_id from items (they should all have same vendor)
+      const vendorId = items[0]?.vendor?.id;
+
+      // Fetch vendor account number from database
+      let vendorAccountNumber: string | null = null;
+      if (vendorId) {
+        try {
+          vendorAccountNumber = await fetchVendorAccountNumber(user.id, vendorId);
+        } catch (error) {
+          console.warn('Could not fetch vendor account number:', error);
+          // Continue with null account number rather than failing
+        }
+      }
+
       // Step 1: Generate PDF blob
       const pdfBlob = await generateReturnReportPDF(items, {
         reportNumber,
         date: reportDate,
         vendorName,
         contactEmail,
-        accountNumber: user.id?.toString()
+        accountNumber: vendorAccountNumber || undefined
       });
 
       console.log('[REPORT] PDF generated:', {
@@ -178,9 +192,6 @@ export function InventoryPage() {
 
       // Step 3: Save report metadata to database
       toast.loading('Saving report metadata...', { id: loadingToast });
-
-      // Extract vendor_id from items (they should all have same vendor)
-      const vendorId = items[0]?.vendor?.id;
 
       const reportMetadata = {
         account_id: user.id,
