@@ -148,28 +148,28 @@ export const PracticeProfileSection: React.FC = () => {
         </div>
       </Card>
 
-      {/* Brands & Pricing */}
+      {/* Vendors & Pricing */}
       <Card>
         <div className="p-6 space-y-4">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Brands & Pricing
+            Vendors & Pricing
           </h3>
 
           <div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Current Brands</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Current Vendors</p>
             {profile.current_brands.length > 0 ? (
               <div className="flex flex-wrap gap-2">
-                {profile.current_brands.map((brand) => (
+                {profile.current_brands.map((vendor) => (
                   <span
-                    key={brand}
+                    key={vendor}
                     className="inline-flex items-center px-3 py-1 bg-blue-100 dark:bg-blue-950/30 text-blue-800 dark:text-blue-300 rounded-full text-sm"
                   >
-                    {brand}
+                    {vendor}
                   </span>
                 ))}
               </div>
             ) : (
-              <p className="text-base text-gray-500 dark:text-gray-400">No brands specified</p>
+              <p className="text-base text-gray-500 dark:text-gray-400">No vendors specified</p>
             )}
           </div>
 
