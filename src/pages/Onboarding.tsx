@@ -9,7 +9,7 @@ import { updateAccount } from '../services/api';
 export default function Onboarding() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(2);
 
   const [formData, setFormData] = useState({
     businessName: '',
