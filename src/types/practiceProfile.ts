@@ -26,8 +26,8 @@ export interface PracticeProfile {
   years_in_business: number | null;
   patient_volume_range: PatientVolumeRange | null;
 
-  // Brand & Product Preferences
-  current_brands: string[]; // Array of brand names
+  // Vendor & Product Preferences
+  current_brands: string[]; // Array of vendor names (historical field name)
   average_frame_price_range: FramePriceRange | null;
 
   // Preferences & Goals
@@ -47,8 +47,8 @@ export interface PracticeProfileFormData {
   years_in_business: string; // String for input, converted to number on submit
   patient_volume_range: PatientVolumeRange | '';
 
-  // Step 2: Brands & Products
-  current_brands: string[];
+  // Step 2: Vendors & Pricing
+  current_brands: string[]; // Stores vendor names (historical field name)
   average_frame_price_range: FramePriceRange | '';
 
   // Step 3: Goals & Preferences

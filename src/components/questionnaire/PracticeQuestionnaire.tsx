@@ -16,7 +16,7 @@ interface PracticeQuestionnaireProps {
   onSkip?: () => void;
 }
 
-const STEP_LABELS = ['Practice Info', 'Brands & Pricing', 'Goals'];
+const STEP_LABELS = ['Practice Info', 'Vendors & Pricing', 'Goals'];
 
 export const PracticeQuestionnaire: React.FC<PracticeQuestionnaireProps> = ({
   onComplete,

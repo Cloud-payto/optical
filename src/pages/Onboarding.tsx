@@ -294,7 +294,7 @@ export default function Onboarding() {
                   </li>
                   <li className="flex items-start space-x-2">
                     <CheckCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                    <span>Brands you currently stock</span>
+                    <span>Vendors you currently work with</span>
                   </li>
                   <li className="flex items-start space-x-2">
                     <CheckCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
