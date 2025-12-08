@@ -1,4 +1,4 @@
-const { parseModernOpticalHtml } = require('./modernopticalparser');
+const { parseModernOpticalHtml } = require('./modernOpticalParser');
 const ModernOpticalWebService = require('./ModernOpticalWebService');
 
 /**
