@@ -6,6 +6,10 @@ const LamyamericaService = require('./LamyamericaService');
 const { parseKenmarkHtml } = require('./kenmarkParser');
 const KenmarkService = require('./KenmarkService');
 const { parseLuxotticaHtml } = require('./luxotticaParser');
+const { parseEuropaHtml } = require('./europaParser');
+const EuropaService = require('./EuropaService');
+const { parseMarchonHtml } = require('./marchonParser');
+const MarchonService = require('./MarchonService');
 
 /**
  * Parser Registry - Maps vendor domains to their parsers
@@ -24,6 +28,8 @@ class ParserRegistry {
             ['lamyamerica.com', this.processLamyamericaWithService.bind(this)],
             ['kenmarkeyewear.com', this.processKenmarkWithService.bind(this)],
             ['luxottica.com', parseLuxotticaHtml],
+            ['europaeye.com', this.processEuropaWithService.bind(this)],
+            ['marchon.com', this.processMarchonWithService.bind(this)],
             // Add more vendor parsers here as needed
         ]);
 
@@ -65,6 +71,22 @@ class ParserRegistry {
             timeout: 15000,
             maxRetries: 3,
             batchSize: 5
+        });
+
+        // Initialize MarchonService instance
+        this.marchonService = new MarchonService({
+            debug: process.env.NODE_ENV !== 'production',
+            timeout: 15000,
+            maxRetries: 3,
+            batchSize: 5
+        });
+
+        // Initialize EuropaService instance
+        this.europaService = new EuropaService({
+            debug: process.env.NODE_ENV !== 'production',
+            timeout: 15000,
+            maxRetries: 3,
+            batchSize: 3 // Lower for web scraping
         });
     }
 
@@ -292,6 +314,222 @@ class ParserRegistry {
             parsed_at: new Date().toISOString(),
             parser_version: 'LamyamericaService-1.0',
             enrichment_stats: lamyResult.enrichment
+        };
+    }
+
+    /**
+     * Process Marchon HTML using MarchonService
+     * @param {string} html - HTML content
+     * @param {string} plainText - Plain text content
+     * @returns {Promise<object>} Processed order data
+     */
+    async processMarchonWithService(html, plainText) {
+        try {
+            console.log('🚀 Processing Marchon email with MarchonService...');
+
+            // Parse the email first
+            const parsedResult = parseMarchonHtml(html, plainText);
+
+            console.log('📊 Initial Parse Result:');
+            console.log('- Vendor:', parsedResult.vendor);
+            console.log('- Order Number:', parsedResult.orderNumber);
+            console.log('- Account Number:', parsedResult.accountNumber);
+            console.log('- Customer:', parsedResult.customerName);
+            console.log('- Items Count:', parsedResult.items?.length);
+
+            // Enrich with API data using style names and color codes
+            const enrichedResult = await this.marchonService.enrichOrderData(parsedResult);
+
+            console.log('📊 Enrichment Complete:');
+            console.log('- Enriched Items:', enrichedResult.enrichment?.enrichedItems || 0);
+            console.log('- Failed Items:', enrichedResult.enrichment?.failedItems || 0);
+
+            // Transform to standard format
+            return this.transformMarchonResult(enrichedResult);
+
+        } catch (error) {
+            console.error('MarchonService processing failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Transform Marchon result to match existing database schema
+     * @param {object} marchonResult - Result from MarchonService
+     * @returns {object} Transformed data for database
+     */
+    transformMarchonResult(marchonResult) {
+        const items = marchonResult.items.map(item => ({
+            sku: `${item.brand.replace(/\s+/g, '_')}-${item.model.replace(/\s+/g, '_')}-${item.enrichedData?.colorCode || item.colorCode || item.color.replace(/\s+/g, '_')}`,
+            brand: item.brand,
+            model: item.model,
+            color: item.enrichedData?.colorDescription || item.colorName || item.color,
+            color_code: item.enrichedData?.colorCode || item.colorCode,
+            color_name: item.enrichedData?.colorDescription || item.colorName,
+            size: item.size,
+            full_size: item.size,
+            temple_length: item.enrichedData?.temple || null,
+            quantity: item.quantity || 1,
+            vendor: 'Marchon',
+
+            // UPC from API enrichment
+            upc: item.enrichedData?.upc || null,
+
+            // Enriched API data
+            wholesale_price: item.enrichedData?.wholesale || null,
+            msrp: item.enrichedData?.msrp || null,
+            in_stock: item.enrichedData?.inStock || null,
+            stock_status: item.enrichedData?.stockStatus || null,
+            material: item.enrichedData?.material || null,
+            gender: item.enrichedData?.gender || null,
+            rim_type: item.enrichedData?.rimType || null,
+            case_name: item.enrichedData?.caseName || null,
+
+            // Marketing info
+            marketing_group: item.enrichedData?.marketingGroupDescription || null,
+
+            // Validation data
+            api_verified: item.validation?.validated || false,
+            confidence_score: item.validation?.confidence || 0
+        }));
+
+        return {
+            vendor: 'Marchon',
+            account_number: marchonResult.accountNumber,
+            brands: [...new Set(items.map(i => i.brand))],
+            order: {
+                order_number: marchonResult.orderNumber,
+                vendor: 'Marchon',
+                account_number: marchonResult.accountNumber,
+                rep_name: marchonResult.repName,
+                order_date: marchonResult.orderDate,
+                customer_name: marchonResult.customerName,
+                terms: marchonResult.terms,
+                total_pieces: items.reduce((sum, item) => sum + item.quantity, 0),
+                parse_status: 'parsed'
+            },
+            items: items,
+            unique_frames: [...new Set(items.map(i => `${i.brand}-${i.model}`))].map(key => {
+                const [brand, ...modelParts] = key.split('-');
+                return { brand, model: modelParts.join('-') };
+            }),
+            parsed_at: new Date().toISOString(),
+            parser_version: 'MarchonService-1.0',
+            enrichment_stats: marchonResult.enrichment
+        };
+    }
+
+    /**
+     * Process Europa HTML using EuropaService
+     * @param {string} html - HTML content
+     * @param {string} plainText - Plain text content
+     * @returns {Promise<object>} Processed order data
+     */
+    async processEuropaWithService(html, plainText) {
+        try {
+            console.log('🚀 Processing Europa email with EuropaService...');
+
+            // Parse the email first
+            const parsedResult = parseEuropaHtml(html, plainText);
+
+            console.log('📊 Initial Parse Result:');
+            console.log('- Vendor:', parsedResult.vendor);
+            console.log('- Order Number:', parsedResult.orderNumber);
+            console.log('- Account Number:', parsedResult.accountNumber);
+            console.log('- Customer:', parsedResult.customerName);
+            console.log('- Items Count:', parsedResult.items?.length);
+
+            // Enrich with web scraped data (UPC, sizing, materials)
+            const enrichedResult = await this.europaService.enrichOrderData(parsedResult);
+
+            console.log('📊 Enrichment Complete:');
+            console.log('- Enriched Items:', enrichedResult.enrichment?.enrichedItems || 0);
+            console.log('- Failed Items:', enrichedResult.enrichment?.failedItems || 0);
+
+            // Transform to standard format
+            return this.transformEuropaResult(enrichedResult);
+
+        } catch (error) {
+            console.error('EuropaService processing failed:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Transform Europa result to match existing database schema
+     * @param {object} europaResult - Result from EuropaService
+     * @returns {object} Transformed data for database
+     */
+    transformEuropaResult(europaResult) {
+        const items = europaResult.items.map(item => ({
+            sku: `${item.brand.replace(/\s+/g, '_')}-${item.model.replace(/\s+/g, '_')}-${item.enrichedData?.colorNo || item.colorCode || item.color.replace(/\s+/g, '_')}`,
+            brand: item.brand,
+            model: item.model,
+            color: item.enrichedData?.color || item.colorName || item.color,
+            color_code: item.enrichedData?.colorNo?.toString() || item.colorCode,
+            color_name: item.enrichedData?.color || item.colorName,
+            color_family: item.enrichedData?.colorFamily || null,
+            size: item.size,
+            full_size: item.enrichedData ? `${item.enrichedData.eyeSize}-${item.enrichedData.bridge}-${item.enrichedData.temple}` : item.size,
+            eye_size: item.enrichedData?.eyeSize || null,
+            bridge: item.enrichedData?.bridge || null,
+            temple_length: item.enrichedData?.temple || null,
+            quantity: item.quantity || 1,
+            vendor: 'Europa',
+
+            // UPC from web scraping
+            upc: item.enrichedData?.upc || null,
+
+            // Stock number for future lookups
+            stock_no: item.stockNo || item.enrichedData?.stockNo || null,
+
+            // Materials
+            front_material: item.enrichedData?.frontMaterial || null,
+            temple_material: item.enrichedData?.templeMaterial || null,
+            hinge_type: item.enrichedData?.hinge || null,
+
+            // Product details
+            gender: item.enrichedData?.gender || null,
+            front_shape: item.enrichedData?.frontShape || null,
+            collection_name: item.enrichedData?.collectionName || null,
+
+            // Availability from email + web
+            in_stock: item.enrichedData?.isAvailable ?? item.inStock,
+            availability: item.enrichedData?.availabilityText || item.availability,
+            is_back_order: item.enrichedData?.isOnBackOrder || !item.inStock,
+
+            // Images
+            front_image_url: item.enrichedData?.frontImageUrl || null,
+            profile_image_url: item.enrichedData?.profileImageUrl || null,
+
+            // Validation data
+            api_verified: item.validation?.validated || false,
+            confidence_score: item.validation?.confidence || 0
+        }));
+
+        return {
+            vendor: 'Europa',
+            account_number: europaResult.accountNumber,
+            brands: [...new Set(items.map(i => i.brand))],
+            order: {
+                order_number: europaResult.orderNumber,
+                vendor: 'Europa',
+                account_number: europaResult.accountNumber,
+                rep_name: europaResult.repName,
+                order_date: europaResult.orderDate,
+                customer_name: europaResult.customerName,
+                phone: europaResult.customerPhone,
+                total_pieces: items.reduce((sum, item) => sum + item.quantity, 0),
+                parse_status: 'parsed'
+            },
+            items: items,
+            unique_frames: [...new Set(items.map(i => `${i.brand}-${i.model}`))].map(key => {
+                const [brand, ...modelParts] = key.split('-');
+                return { brand, model: modelParts.join('-') };
+            }),
+            parsed_at: new Date().toISOString(),
+            parser_version: 'EuropaService-1.0',
+            enrichment_stats: europaResult.enrichment
         };
     }
 
@@ -622,6 +860,22 @@ class ParserRegistry {
      */
     getKenmarkService() {
         return this.kenmarkService;
+    }
+
+    /**
+     * Get Marchon service instance for enrichment
+     * @returns {MarchonService} Service instance
+     */
+    getMarchonService() {
+        return this.marchonService;
+    }
+
+    /**
+     * Get Europa service instance for enrichment
+     * @returns {EuropaService} Service instance
+     */
+    getEuropaService() {
+        return this.europaService;
     }
 }
 

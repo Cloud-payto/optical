@@ -1,0 +1,52 @@
+{
+  "_template_info": {
+    "description": "Parser HTTP Request Node - Calls the vendor-specific parse endpoint",
+    "replace_values": {
+      "{{VENDOR_NAME}}": "e.g., Europa, Marchon, Kenmark",
+      "{{VENDOR_SLUG}}": "e.g., europa, marchon, kenmark (lowercase for URL)",
+      "{{NODE_ID}}": "Generate unique UUID",
+      "{{POSITION_Y}}": "Y position on canvas (increment by ~200 for each new vendor)"
+    }
+  },
+  "parameters": {
+    "method": "POST",
+    "url": "https://optical-express-api.onrender.com/api/parse/{{VENDOR_SLUG}}",
+    "sendHeaders": true,
+    "headerParameters": {
+      "parameters": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    "sendBody": true,
+    "bodyParameters": {
+      "parameters": [
+        {
+          "name": "html",
+          "value": "={{ $json.email.html }}"
+        },
+        {
+          "name": "plainText",
+          "value": "={{ $json.email.plain }}"
+        },
+        {
+          "name": "accountId",
+          "value": "={{ $json.accountId }}"
+        }
+      ]
+    },
+    "options": {
+      "timeout": 30000
+    }
+  },
+  "type": "n8n-nodes-base.httpRequest",
+  "typeVersion": 4.2,
+  "position": [
+    912,
+    "{{POSITION_Y}}"
+  ],
+  "id": "{{NODE_ID}}",
+  "name": "parse_{{VENDOR_NAME}}"
+}

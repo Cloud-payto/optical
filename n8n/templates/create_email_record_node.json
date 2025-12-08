@@ -1,0 +1,57 @@
+{
+  "_template_info": {
+    "description": "Create Email Record Node - Saves the parsed email to database",
+    "replace_values": {
+      "{{VENDOR_SLUG}}": "e.g., europa, marchon, kenmark (for vendor field)",
+      "{{NODE_ID}}": "Generate unique UUID",
+      "{{POSITION_Y}}": "Same Y position as parser node",
+      "{{RECORD_NUMBER}}": "Increment for each new vendor (e.g., Create Email Record8)"
+    }
+  },
+  "parameters": {
+    "method": "POST",
+    "url": "https://optical-express-api.onrender.com/api/emails/create",
+    "sendBody": true,
+    "bodyParameters": {
+      "parameters": [
+        {
+          "name": "accountId",
+          "value": "={{ $json.accountId }}"
+        },
+        {
+          "name": "from",
+          "value": "={{ $json.from }}"
+        },
+        {
+          "name": "html",
+          "value": "={{ $json.html }}"
+        },
+        {
+          "name": "plainText",
+          "value": "={{ $json.plainText }}"
+        },
+        {
+          "name": "parsedData",
+          "value": "={{ $json.parsedData }}"
+        },
+        {
+          "name": "subject",
+          "value": "={{ $json.subject }}"
+        },
+        {
+          "name": "vendor",
+          "value": "{{VENDOR_SLUG}}"
+        }
+      ]
+    },
+    "options": {}
+  },
+  "type": "n8n-nodes-base.httpRequest",
+  "typeVersion": 4.2,
+  "position": [
+    1584,
+    "{{POSITION_Y}}"
+  ],
+  "id": "{{NODE_ID}}",
+  "name": "Create Email Record{{RECORD_NUMBER}}"
+}

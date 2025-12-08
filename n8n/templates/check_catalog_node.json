@@ -1,0 +1,46 @@
+{
+  "_template_info": {
+    "description": "Check Catalog Node - Checks if items exist in vendor catalog cache",
+    "replace_values": {
+      "{{VENDOR_NAME}}": "e.g., Europa, Marchon, Kenmark",
+      "{{NODE_ID}}": "Generate unique UUID",
+      "{{POSITION_Y}}": "Same Y position as parser node",
+      "{{CATALOG_NUMBER}}": "Increment for each new vendor (e.g., Check Catalog8, Check Catalog9)"
+    }
+  },
+  "parameters": {
+    "method": "POST",
+    "url": "https://optical-express-api.onrender.com/api/catalog/check",
+    "sendHeaders": true,
+    "headerParameters": {
+      "parameters": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    "sendBody": true,
+    "bodyParameters": {
+      "parameters": [
+        {
+          "name": "vendorId",
+          "value": "={{ $('parse_{{VENDOR_NAME}}').item.json.vendorId }}"
+        },
+        {
+          "name": "items",
+          "value": "={{ $('parse_{{VENDOR_NAME}}').item.json.items }}"
+        }
+      ]
+    },
+    "options": {}
+  },
+  "type": "n8n-nodes-base.httpRequest",
+  "typeVersion": 4.2,
+  "position": [
+    1136,
+    "{{POSITION_Y}}"
+  ],
+  "id": "{{NODE_ID}}",
+  "name": "Check Catalog{{CATALOG_NUMBER}}"
+}

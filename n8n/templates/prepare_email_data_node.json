@@ -1,0 +1,24 @@
+{
+  "_template_info": {
+    "description": "Prepare Email Data Node - JavaScript code to format data for email record creation",
+    "replace_values": {
+      "{{VENDOR_NAME}}": "e.g., Europa, Marchon, Kenmark",
+      "{{VENDOR_DISPLAY_NAME}}": "e.g., 'Europa', 'Marchon', 'Kenmark' (for 'from' field)",
+      "{{VENDOR_SLUG}}": "e.g., europa, marchon, kenmark (underscore format for vendor field)",
+      "{{NODE_ID}}": "Generate unique UUID",
+      "{{POSITION_Y}}": "Same Y position as parser node",
+      "{{CATALOG_NUMBER}}": "Same number as Check Catalog node"
+    }
+  },
+  "parameters": {
+    "jsCode": "const parseResult = $('parse_{{VENDOR_NAME}}').item.json;\nconst checkCatalogResult = $('Check Catalog{{CATALOG_NUMBER}}').item.json;\nconst accountId = $('Extract Account ID').item.json.accountId;\nconst emailData = $('Extract Account ID').item.json.email;\n\nreturn [{\n  json: {\n    accountId: accountId,\n    from: '{{VENDOR_DISPLAY_NAME}}',\n    subject: `Order #${parseResult.order.order_number}`,\n    html: emailData.html,\n    plainText: emailData.plain,\n    parsedData: {\n      vendor: '{{VENDOR_SLUG}}',\n      order: parseResult.order,\n      items: checkCatalogResult.items\n    }\n  }\n}];"
+  },
+  "type": "n8n-nodes-base.code",
+  "typeVersion": 2,
+  "position": [
+    1360,
+    "{{POSITION_Y}}"
+  ],
+  "id": "{{NODE_ID}}",
+  "name": "Prepare Email Data{{CATALOG_NUMBER}}"
+}

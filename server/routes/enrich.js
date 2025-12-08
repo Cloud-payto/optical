@@ -546,4 +546,501 @@ router.post('/idealoptics/single', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/enrich/marchon
+ * Enrich Marchon items with API data (UPC, pricing, stock status)
+ *
+ * Body: {
+ *   accountId: string (UUID),
+ *   orderNumber: string,
+ *   items?: array (optional - if provided, enrich these items; otherwise fetch from DB)
+ * }
+ *
+ * Returns: {
+ *   success: boolean,
+ *   message: string,
+ *   enrichedItems: array,
+ *   enrichedCount: number
+ * }
+ */
+router.post('/marchon', async (req, res) => {
+  try {
+    const { accountId, orderNumber, items } = req.body;
+
+    console.log('[ENRICH] Marchon enrichment request received');
+    console.log('  Account ID:', accountId);
+    console.log('  Order Number:', orderNumber);
+    console.log('  Items provided:', items ? items.length : 'No, will fetch from DB');
+
+    // Validate required fields
+    if (!accountId || !orderNumber) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: accountId and orderNumber are required'
+      });
+    }
+
+    // Get the Marchon service
+    const marchonService = parserRegistry.getMarchonService();
+    if (!marchonService) {
+      return res.status(500).json({
+        success: false,
+        error: 'Marchon service not available'
+      });
+    }
+
+    let itemsToEnrich = items;
+
+    // If items not provided, fetch pending items from database
+    if (!itemsToEnrich || itemsToEnrich.length === 0) {
+      console.log('[ENRICH] Fetching pending items from database...');
+
+      // Get all pending items for this user
+      const { data: allPendingItems, error: inventoryError } = await supabase
+        .from('inventory')
+        .select('*')
+        .eq('account_id', accountId)
+        .eq('status', 'pending');
+
+      if (inventoryError) {
+        console.error('[ENRICH] Error fetching items:', inventoryError);
+        return res.status(500).json({
+          success: false,
+          error: 'Failed to fetch pending items',
+          message: inventoryError.message
+        });
+      }
+
+      // Filter items that match the order number
+      itemsToEnrich = allPendingItems?.filter(item => {
+        // Check if enriched_data contains the order number
+        if (item.enriched_data?.order_number === orderNumber) return true;
+        if (item.enriched_data?.order?.order_number === orderNumber) return true;
+        return false;
+      }) || [];
+
+      console.log(`[ENRICH] Found ${itemsToEnrich.length} pending items for order ${orderNumber}`);
+
+      if (itemsToEnrich.length === 0) {
+        return res.status(404).json({
+          success: false,
+          error: 'No pending items found for this order',
+          message: `No pending items found for order ${orderNumber}`
+        });
+      }
+    }
+
+    // Separate items that need enrichment vs already have cached data
+    const itemsNeedingEnrichment = [];
+    const itemsWithCachedData = [];
+
+    itemsToEnrich.forEach(item => {
+      // Check if item already has enriched data
+      const hasWholesalePrice = item.wholesale_price && item.wholesale_price > 0;
+      const hasUpc = item.upc && item.upc.length > 0;
+      const alreadyEnriched = item.api_verified === true;
+
+      if (alreadyEnriched || (hasWholesalePrice && hasUpc)) {
+        console.log(`✅ Skipping enrichment for ${item.brand} ${item.model} - already has cached data`);
+        itemsWithCachedData.push(item);
+      } else {
+        console.log(`🔍 Will enrich ${item.brand} ${item.model} - needs API data`);
+        itemsNeedingEnrichment.push(item);
+      }
+    });
+
+    console.log(`[ENRICH] ${itemsWithCachedData.length} items already have cached data, ${itemsNeedingEnrichment.length} need enrichment`);
+
+    let enrichedItems = [];
+
+    // Only enrich items that need it
+    if (itemsNeedingEnrichment.length > 0) {
+      console.log(`[ENRICH] Starting API enrichment for ${itemsNeedingEnrichment.length} items...`);
+      const apiEnrichedItems = await marchonService.enrichPendingItems(itemsNeedingEnrichment);
+      console.log(`[ENRICH] API enrichment completed for ${apiEnrichedItems.length} items`);
+      enrichedItems = enrichedItems.concat(apiEnrichedItems);
+    } else {
+      console.log('[ENRICH] No items need enrichment - all have cached data!');
+    }
+
+    // Add items that were already cached (no enrichment needed)
+    enrichedItems = enrichedItems.concat(itemsWithCachedData);
+
+    // Count how many were actually enriched (have api_verified = true)
+    const enrichedCount = enrichedItems.filter(item => item.api_verified === true).length;
+    console.log(`[ENRICH] Total: ${enrichedItems.length} items (${itemsNeedingEnrichment.length} enriched via API, ${itemsWithCachedData.length} from cache)`);
+
+    // Update items in database with enriched data
+    try {
+      console.log('[ENRICH] Updating items in database...');
+
+      const updatePromises = enrichedItems.map(enrichedItem => {
+        if (!enrichedItem.id) {
+          console.error('[ENRICH] Item missing ID:', enrichedItem);
+          return Promise.resolve({ error: 'Missing ID', data: null });
+        }
+
+        return supabase
+          .from('inventory')
+          .update({
+            upc: enrichedItem.upc || null,
+            wholesale_price: enrichedItem.wholesale_price || null,
+            msrp: enrichedItem.msrp || null,
+            in_stock: enrichedItem.in_stock || null,
+            api_verified: enrichedItem.api_verified || false,
+            enriched_data: {
+              ...enrichedItem.enriched_data,
+              marchon_api: enrichedItem.enriched_data?.marchon_api,
+              web_enriched: true,
+              enriched_at: new Date().toISOString(),
+              confidence_score: enrichedItem.confidence_score,
+              validation_reason: enrichedItem.validation_reason
+            }
+          })
+          .eq('id', enrichedItem.id)
+          .select();
+      });
+
+      const results = await Promise.all(updatePromises);
+      const errors = results.filter(r => r.error);
+
+      if (errors.length > 0) {
+        console.error('[ENRICH] Errors updating items:');
+        errors.forEach((err, idx) => {
+          console.error(`  Error ${idx + 1}:`, err.error);
+        });
+      }
+
+      const updatedItems = results.map(r => r.data?.[0]).filter(Boolean);
+      console.log(`[ENRICH] Successfully updated ${updatedItems.length} items in database`);
+
+      return res.status(200).json({
+        success: true,
+        message: `Enriched ${enrichedCount} of ${enrichedItems.length} items with API data`,
+        enrichedItems: enrichedItems,
+        enrichedCount: enrichedCount,
+        totalItems: enrichedItems.length,
+        updatedInDb: updatedItems.length
+      });
+
+    } catch (updateError) {
+      console.error('[ENRICH] Error updating database:', updateError);
+      // Still return enriched data even if DB update fails
+      return res.status(200).json({
+        success: true,
+        message: `Enriched ${enrichedCount} items but failed to update database`,
+        enrichedItems: enrichedItems,
+        enrichedCount: enrichedCount,
+        totalItems: enrichedItems.length,
+        dbUpdateError: updateError.message
+      });
+    }
+
+  } catch (error) {
+    console.error('[ENRICH] Error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to enrich Marchon items',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/enrich/europa
+ * Enrich Europa items via web scraping (UPC, sizing, materials)
+ *
+ * Note: Europa does NOT expose pricing to non-logged-in users.
+ * listPrice and customerPrice will always be null.
+ *
+ * Body: {
+ *   accountId: string (UUID),
+ *   orderNumber: string,
+ *   items?: array (optional - if provided, enrich these items; otherwise fetch from DB)
+ * }
+ */
+router.post('/europa', async (req, res) => {
+  try {
+    const { accountId, orderNumber, items } = req.body;
+
+    console.log('[ENRICH] Europa enrichment request received');
+    console.log('  Account ID:', accountId);
+    console.log('  Order Number:', orderNumber);
+    console.log('  Items provided:', items ? items.length : 'No, will fetch from DB');
+
+    // Validate required fields
+    if (!accountId || !orderNumber) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: accountId and orderNumber are required'
+      });
+    }
+
+    // Get the Europa service
+    const europaService = parserRegistry.getEuropaService();
+    if (!europaService) {
+      return res.status(500).json({
+        success: false,
+        error: 'Europa service not available'
+      });
+    }
+
+    let itemsToEnrich = items;
+
+    // If items not provided, fetch pending items from database
+    if (!itemsToEnrich || itemsToEnrich.length === 0) {
+      console.log('[ENRICH] Fetching pending items from database...');
+
+      const { data: allPendingItems, error: inventoryError } = await supabase
+        .from('inventory')
+        .select('*')
+        .eq('account_id', accountId)
+        .eq('status', 'pending');
+
+      if (inventoryError) {
+        console.error('[ENRICH] Error fetching items:', inventoryError);
+        return res.status(500).json({
+          success: false,
+          error: 'Failed to fetch pending items',
+          message: inventoryError.message
+        });
+      }
+
+      // Filter items that match the order number
+      itemsToEnrich = allPendingItems?.filter(item => {
+        if (item.enriched_data?.order_number === orderNumber) return true;
+        if (item.enriched_data?.order?.order_number === orderNumber) return true;
+        return false;
+      }) || [];
+
+      console.log(`[ENRICH] Found ${itemsToEnrich.length} pending items for order ${orderNumber}`);
+
+      if (itemsToEnrich.length === 0) {
+        return res.status(404).json({
+          success: false,
+          error: 'No pending items found for this order',
+          message: `No pending items found for order ${orderNumber}`
+        });
+      }
+    }
+
+    // Separate items that need enrichment vs already have cached data
+    const itemsNeedingEnrichment = [];
+    const itemsWithCachedData = [];
+
+    itemsToEnrich.forEach(item => {
+      const hasUpc = item.upc && item.upc.length > 0;
+      const alreadyEnriched = item.api_verified === true;
+
+      if (alreadyEnriched || hasUpc) {
+        console.log(`✅ Skipping enrichment for ${item.brand} ${item.model} - already has cached data`);
+        itemsWithCachedData.push(item);
+      } else {
+        console.log(`🔍 Will enrich ${item.brand} ${item.model} - needs web data`);
+        itemsNeedingEnrichment.push(item);
+      }
+    });
+
+    console.log(`[ENRICH] ${itemsWithCachedData.length} items already have cached data, ${itemsNeedingEnrichment.length} need enrichment`);
+
+    let enrichedItems = [];
+
+    // Only enrich items that need it
+    if (itemsNeedingEnrichment.length > 0) {
+      console.log(`[ENRICH] Starting web enrichment for ${itemsNeedingEnrichment.length} items...`);
+      const webEnrichedItems = await europaService.enrichPendingItems(itemsNeedingEnrichment);
+      console.log(`[ENRICH] Web enrichment completed for ${webEnrichedItems.length} items`);
+      enrichedItems = enrichedItems.concat(webEnrichedItems);
+    } else {
+      console.log('[ENRICH] No items need enrichment - all have cached data!');
+    }
+
+    // Add items that were already cached
+    enrichedItems = enrichedItems.concat(itemsWithCachedData);
+
+    // Count how many were actually enriched
+    const enrichedCount = enrichedItems.filter(item => item.api_verified === true).length;
+    console.log(`[ENRICH] Total: ${enrichedItems.length} items (${itemsNeedingEnrichment.length} enriched via web, ${itemsWithCachedData.length} from cache)`);
+
+    // Update items in database with enriched data
+    try {
+      console.log('[ENRICH] Updating items in database...');
+
+      const updatePromises = enrichedItems.map(enrichedItem => {
+        if (!enrichedItem.id) {
+          console.error('[ENRICH] Item missing ID:', enrichedItem);
+          return Promise.resolve({ error: 'Missing ID', data: null });
+        }
+
+        return supabase
+          .from('inventory')
+          .update({
+            upc: enrichedItem.upc || null,
+            api_verified: enrichedItem.api_verified || false,
+            enriched_data: {
+              ...enrichedItem.enriched_data,
+              europa_web: enrichedItem.enriched_data?.europa_web,
+              web_enriched: true,
+              enriched_at: new Date().toISOString(),
+              confidence_score: enrichedItem.confidence_score,
+              validation_reason: enrichedItem.validation_reason
+            }
+          })
+          .eq('id', enrichedItem.id)
+          .select();
+      });
+
+      const results = await Promise.all(updatePromises);
+      const errors = results.filter(r => r.error);
+
+      if (errors.length > 0) {
+        console.error('[ENRICH] Errors updating items:');
+        errors.forEach((err, idx) => {
+          console.error(`  Error ${idx + 1}:`, err.error);
+        });
+      }
+
+      const updatedItems = results.map(r => r.data?.[0]).filter(Boolean);
+      console.log(`[ENRICH] Successfully updated ${updatedItems.length} items in database`);
+
+      return res.status(200).json({
+        success: true,
+        message: `Enriched ${enrichedCount} of ${enrichedItems.length} items with web data`,
+        enrichedItems: enrichedItems,
+        enrichedCount: enrichedCount,
+        totalItems: enrichedItems.length,
+        updatedInDb: updatedItems.length,
+        note: 'Europa does not expose pricing to non-logged-in users'
+      });
+
+    } catch (updateError) {
+      console.error('[ENRICH] Error updating database:', updateError);
+      return res.status(200).json({
+        success: true,
+        message: `Enriched ${enrichedCount} items but failed to update database`,
+        enrichedItems: enrichedItems,
+        enrichedCount: enrichedCount,
+        totalItems: enrichedItems.length,
+        dbUpdateError: updateError.message
+      });
+    }
+
+  } catch (error) {
+    console.error('[ENRICH] Error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to enrich Europa items',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/enrich/europa/single
+ * Look up a single Europa product by stock number (test endpoint)
+ *
+ * Body: {
+ *   stockNo: string (e.g., "MRX104153-18")
+ * }
+ */
+router.post('/europa/single', async (req, res) => {
+  try {
+    const { stockNo } = req.body;
+
+    console.log('[ENRICH] Single Europa product lookup request');
+    console.log('  Stock Number:', stockNo);
+
+    if (!stockNo) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required field: stockNo is required'
+      });
+    }
+
+    const europaService = parserRegistry.getEuropaService();
+    if (!europaService) {
+      return res.status(500).json({
+        success: false,
+        error: 'Europa service not available'
+      });
+    }
+
+    console.log(`[ENRICH] Scraping Europa website for: ${stockNo}`);
+    const webData = await europaService.scrapeProductPage(stockNo);
+
+    console.log('[ENRICH] Web scrape completed');
+    console.log('  Found:', webData.found);
+    console.log('  Variants:', webData.totalVariants || 0);
+
+    return res.status(200).json({
+      success: true,
+      found: webData.found,
+      stockNo: stockNo,
+      webData: webData
+    });
+
+  } catch (error) {
+    console.error('[ENRICH] Error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to scrape Europa website',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/enrich/marchon/single
+ * Enrich a single Marchon product (test endpoint)
+ *
+ * Body: {
+ *   model: string (style name, e.g., "SF2223N" or "CK19119")
+ * }
+ */
+router.post('/marchon/single', async (req, res) => {
+  try {
+    const { model } = req.body;
+
+    console.log('[ENRICH] Single Marchon product enrichment request');
+    console.log('  Model:', model);
+
+    if (!model) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required field: model is required'
+      });
+    }
+
+    const marchonService = parserRegistry.getMarchonService();
+    if (!marchonService) {
+      return res.status(500).json({
+        success: false,
+        error: 'Marchon service not available'
+      });
+    }
+
+    console.log(`[ENRICH] Querying Marchon API for: ${model}`);
+    const apiData = await marchonService.makeAPIRequest(model);
+
+    console.log('[ENRICH] API query completed');
+    console.log('  Found:', apiData.found);
+    console.log('  Variants:', apiData.totalVariants || 0);
+
+    return res.status(200).json({
+      success: true,
+      found: apiData.found,
+      model: model,
+      apiData: apiData
+    });
+
+  } catch (error) {
+    console.error('[ENRICH] Error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to query Marchon API',
+      message: error.message
+    });
+  }
+});
+
 module.exports = router;

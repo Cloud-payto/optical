@@ -1,0 +1,52 @@
+{
+  "_template_info": {
+    "description": "Cache to Catalog Node - Caches vendor catalog items for faster lookups",
+    "replace_values": {
+      "{{VENDOR_NAME}}": "e.g., Europa, Marchon, Kenmark (for parser reference)",
+      "{{VENDOR_DISPLAY_NAME}}": "e.g., 'Europa', 'Marchon', 'Kenmark' (for vendorName field)",
+      "{{ENRICH_NODE_NAME}}": "e.g., Enrich8, Enrich9 (the corresponding Enrich node name)",
+      "{{NODE_ID}}": "Generate unique UUID",
+      "{{POSITION_Y}}": "Same Y position as parser node",
+      "{{CACHE_NUMBER}}": "Increment for each new vendor (e.g., Cache to Catalog8)"
+    }
+  },
+  "parameters": {
+    "method": "POST",
+    "url": "https://optical-express-api.onrender.com/api/catalog/cache",
+    "sendHeaders": true,
+    "headerParameters": {
+      "parameters": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    "sendBody": true,
+    "bodyParameters": {
+      "parameters": [
+        {
+          "name": "vendorId",
+          "value": "={{ $('parse_{{VENDOR_NAME}}').item.json.vendorId }}"
+        },
+        {
+          "name": "vendorName",
+          "value": "{{VENDOR_DISPLAY_NAME}}"
+        },
+        {
+          "name": "items",
+          "value": "={{ $('{{ENRICH_NODE_NAME}}').first().json.enrichedItems }}"
+        }
+      ]
+    },
+    "options": {}
+  },
+  "type": "n8n-nodes-base.httpRequest",
+  "typeVersion": 4.2,
+  "position": [
+    2480,
+    "{{POSITION_Y}}"
+  ],
+  "id": "{{NODE_ID}}",
+  "name": "Cache to Catalog{{CACHE_NUMBER}}"
+}

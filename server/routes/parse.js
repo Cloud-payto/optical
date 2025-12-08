@@ -8,6 +8,10 @@ const { parseLamyamericaHtml, validateParsedData } = require('../parsers/lamyame
 const LamyamericaService = require('../parsers/LamyamericaService');
 const { parseIdealOpticsHtml } = require('../parsers/idealOpticsParser');
 const IdealOpticsService = require('../parsers/IdealOpticsService');
+const { parseKenmarkHtml, validateParsedData: validateKenmarkData } = require('../parsers/kenmarkParser');
+const KenmarkService = require('../parsers/KenmarkService');
+const { parseEuropaHtml, validateParsedData: validateEuropaData } = require('../parsers/europaParser');
+const { parseMarchonHtml, validateParsedData: validateMarchonData } = require('../parsers/marchonParser');
 const { supabase } = require('../lib/supabase');
 
 /**
@@ -532,6 +536,393 @@ router.post('/idealoptics', async (req, res) => {
     return res.status(500).json({
       success: false,
       error: 'Failed to parse Ideal Optics email',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/parse/kenmark
+ * Parse Kenmark HTML email content with UPC-based API enrichment
+ *
+ * Body: { html, plainText, accountId }
+ * Returns: { success, accountId, vendor, order, items, unique_frames, enrichment }
+ */
+router.post('/kenmark', async (req, res) => {
+  try {
+    const { html, plainText, accountId } = req.body;
+
+    // Validate input
+    if (!html && !plainText) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: html or plainText must be provided'
+      });
+    }
+
+    // Phase 1: Parse the email content
+    const parsedData = parseKenmarkHtml(html, plainText);
+
+    // Validate parsed data
+    const validation = validateKenmarkData(parsedData);
+    if (!validation.valid) {
+      console.error('[PARSE] Kenmark validation failed:', validation.errors);
+      return res.status(400).json({
+        success: false,
+        error: 'Email parsing validation failed',
+        errors: validation.errors,
+        warnings: validation.warnings
+      });
+    }
+
+    if (validation.warnings.length > 0) {
+      console.warn('[PARSE] Kenmark warnings:', validation.warnings);
+    }
+
+    // Phase 2: Enrich with API data using UPCs
+    let enrichedData = parsedData;
+    try {
+      const kenmarkService = new KenmarkService({ debug: false });
+      enrichedData = await kenmarkService.enrichOrderData(parsedData);
+    } catch (enrichmentError) {
+      console.error('[PARSE] Kenmark API enrichment failed:', enrichmentError.message);
+      // Continue with non-enriched data
+    }
+
+    // Get unique frames (brand + model combinations)
+    const uniqueFramesSet = new Set();
+    const uniqueFrames = [];
+    enrichedData.items.forEach(item => {
+      const key = `${item.brand}-${item.model}`;
+      if (!uniqueFramesSet.has(key)) {
+        uniqueFramesSet.add(key);
+        uniqueFrames.push({
+          brand: item.brand,
+          model: item.model
+        });
+      }
+    });
+
+    // Map items to standard format
+    const items = enrichedData.items.map(item => ({
+      brand: item.brand,
+      model: item.model,
+      color: item.color,
+      color_code: item.colorCode,
+      color_name: item.colorName,
+      size: item.size,
+      eye_size: item.eyeSize,
+      bridge: item.bridge,
+      temple: item.temple,
+      quantity: item.quantity,
+      upc: item.upc,
+      image_url: item.imageUrl,
+      // Enriched data from API
+      wholesale_price: item.enrichedData?.wholesale,
+      msrp: item.enrichedData?.msrp,
+      in_stock: item.enrichedData?.inStock,
+      availability: item.enrichedData?.availability,
+      material: item.enrichedData?.material,
+      frame_type: item.enrichedData?.frameType,
+      shape: item.enrichedData?.shape,
+      gender: item.enrichedData?.gender,
+      country_of_origin: item.enrichedData?.countryOfOrigin,
+      // Validation info
+      validated: item.validation?.validated,
+      validation_confidence: item.validation?.confidence
+    }));
+
+    // Calculate total pieces and wholesale total
+    const totalPieces = items.reduce((sum, item) => sum + item.quantity, 0);
+    const totalWholesale = items.reduce((sum, item) => {
+      const price = item.wholesale_price || 0;
+      return sum + (price * item.quantity);
+    }, 0);
+
+    // Get vendor ID from database
+    const { data: vendor } = await supabase
+      .from('vendors')
+      .select('id')
+      .eq('code', 'KENMARK')
+      .single();
+
+    // Return the parsed and enriched data
+    return res.status(200).json({
+      success: true,
+      accountId: accountId,
+      vendor: 'kenmark',
+      vendorId: vendor?.id,
+      order: {
+        order_number: enrichedData.orderNumber,
+        customer_name: enrichedData.customerName,
+        order_date: enrichedData.orderDate,
+        rep_name: enrichedData.repName,
+        account_number: enrichedData.accountNumber,
+        total_pieces: totalPieces,
+        total_wholesale: totalWholesale > 0 ? totalWholesale : null
+      },
+      items: items,
+      unique_frames: uniqueFrames,
+      enrichment: enrichedData.enrichment || null,
+      validation: {
+        warnings: validation.warnings
+      }
+    });
+
+  } catch (error) {
+    console.error('[PARSE] Error parsing Kenmark email:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to parse Kenmark email',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/parse/europa
+ * Parse Europa HTML email content
+ *
+ * Body: { html, plainText, accountId }
+ * Returns: { success, accountId, vendor, order, items, unique_frames }
+ */
+router.post('/europa', async (req, res) => {
+  try {
+    const { html, plainText, accountId } = req.body;
+
+    // Validate input
+    if (!html && !plainText) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: html or plainText must be provided'
+      });
+    }
+
+    // Parse the email content
+    const parsedData = parseEuropaHtml(html, plainText);
+
+    // Validate parsed data
+    const validation = validateEuropaData(parsedData);
+    if (!validation.valid) {
+      console.error('[PARSE] Europa validation failed:', validation.errors);
+      return res.status(400).json({
+        success: false,
+        error: 'Email parsing validation failed',
+        errors: validation.errors,
+        warnings: validation.warnings
+      });
+    }
+
+    if (validation.warnings.length > 0) {
+      console.warn('[PARSE] Europa warnings:', validation.warnings);
+    }
+
+    // Get unique frames (brand + model combinations)
+    const uniqueFramesSet = new Set();
+    const uniqueFrames = [];
+    parsedData.items.forEach(item => {
+      const key = `${item.brand}-${item.model}`;
+      if (!uniqueFramesSet.has(key)) {
+        uniqueFramesSet.add(key);
+        uniqueFrames.push({
+          brand: item.brand,
+          model: item.model
+        });
+      }
+    });
+
+    // Map items to standard format
+    const items = parsedData.items.map(item => ({
+      brand: item.brand,
+      model: item.model,
+      color: item.color,
+      color_code: item.colorCode,
+      color_name: item.colorName,
+      size: item.size,
+      eye_size: item.eyeSize,
+      quantity: item.quantity,
+      order_type: item.orderType,
+      in_stock: item.inStock,
+      availability: item.availability
+    }));
+
+    // Calculate total pieces
+    const totalPieces = items.reduce((sum, item) => sum + item.quantity, 0);
+
+    // Get vendor ID from database
+    const { data: vendor } = await supabase
+      .from('vendors')
+      .select('id')
+      .eq('code', 'EUROPA')
+      .single();
+
+    // Return the parsed data
+    return res.status(200).json({
+      success: true,
+      accountId: accountId,
+      vendor: 'europa',
+      vendorId: vendor?.id,
+      order: {
+        order_number: parsedData.orderNumber,
+        customer_name: parsedData.customerName,
+        order_date: parsedData.orderDate,
+        rep_name: parsedData.repName,
+        account_number: parsedData.accountNumber,
+        total_pieces: totalPieces,
+        terms: parsedData.terms,
+        ship_method: parsedData.shipMethod
+      },
+      customer: {
+        name: parsedData.customerName,
+        address: parsedData.customerAddress,
+        city: parsedData.customerCity,
+        state: parsedData.customerState,
+        postal_code: parsedData.customerPostalCode,
+        phone: parsedData.customerPhone
+      },
+      shipping_address: {
+        name: parsedData.shipToName,
+        address: parsedData.shipToAddress,
+        city: parsedData.shipToCity,
+        state: parsedData.shipToState,
+        postal_code: parsedData.shipToPostalCode
+      },
+      items: items,
+      unique_frames: uniqueFrames,
+      validation: {
+        warnings: validation.warnings
+      }
+    });
+
+  } catch (error) {
+    console.error('[PARSE] Error parsing Europa email:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to parse Europa email',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/parse/marchon
+ * Parse Marchon HTML email content
+ *
+ * Body: { html, plainText, accountId }
+ * Returns: { success, accountId, vendor, order, items, unique_frames }
+ */
+router.post('/marchon', async (req, res) => {
+  try {
+    const { html, plainText, accountId } = req.body;
+
+    // Validate input
+    if (!html && !plainText) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: html or plainText must be provided'
+      });
+    }
+
+    // Parse the email content
+    const parsedData = parseMarchonHtml(html, plainText);
+
+    // Validate parsed data
+    const validation = validateMarchonData(parsedData);
+    if (!validation.valid) {
+      console.error('[PARSE] Marchon validation failed:', validation.errors);
+      return res.status(400).json({
+        success: false,
+        error: 'Email parsing validation failed',
+        errors: validation.errors,
+        warnings: validation.warnings
+      });
+    }
+
+    if (validation.warnings.length > 0) {
+      console.warn('[PARSE] Marchon warnings:', validation.warnings);
+    }
+
+    // Get unique frames (brand + model combinations)
+    const uniqueFramesSet = new Set();
+    const uniqueFrames = [];
+    parsedData.items.forEach(item => {
+      const key = `${item.brand}-${item.model}`;
+      if (!uniqueFramesSet.has(key)) {
+        uniqueFramesSet.add(key);
+        uniqueFrames.push({
+          brand: item.brand,
+          model: item.model
+        });
+      }
+    });
+
+    // Map items to standard format
+    const items = parsedData.items.map(item => ({
+      brand: item.brand,
+      model: item.model,
+      color: item.color,
+      color_code: item.colorCode,
+      color_name: item.colorName,
+      size: item.size,
+      eye_size: item.eyeSize,
+      quantity: item.quantity,
+      image_url: item.imageUrl,
+      product_url: item.productUrl
+    }));
+
+    // Calculate total pieces
+    const totalPieces = items.reduce((sum, item) => sum + item.quantity, 0);
+
+    // Get vendor ID from database
+    const { data: vendor } = await supabase
+      .from('vendors')
+      .select('id')
+      .eq('code', 'MARCHON')
+      .single();
+
+    // Return the parsed data
+    return res.status(200).json({
+      success: true,
+      accountId: accountId,
+      vendor: 'marchon',
+      vendorId: vendor?.id,
+      order: {
+        order_number: parsedData.orderNumber,
+        customer_name: parsedData.customerName,
+        order_date: parsedData.orderDate,
+        rep_name: parsedData.repName,
+        account_number: parsedData.accountNumber,
+        total_pieces: totalPieces,
+        terms: parsedData.terms,
+        promotions: parsedData.promotions,
+        order_note: parsedData.orderNote
+      },
+      customer: {
+        name: parsedData.customerName,
+        address: parsedData.customerAddress,
+        city: parsedData.customerCity,
+        state: parsedData.customerState,
+        postal_code: parsedData.customerPostalCode
+      },
+      shipping_address: {
+        name: parsedData.shipToName,
+        address: parsedData.shipToAddress,
+        city: parsedData.shipToCity,
+        state: parsedData.shipToState,
+        postal_code: parsedData.shipToPostalCode
+      },
+      items: items,
+      unique_frames: uniqueFrames,
+      validation: {
+        warnings: validation.warnings
+      }
+    });
+
+  } catch (error) {
+    console.error('[PARSE] Error parsing Marchon email:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to parse Marchon email',
       message: error.message
     });
   }

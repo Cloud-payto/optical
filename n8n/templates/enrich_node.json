@@ -1,0 +1,38 @@
+{
+  "_template_info": {
+    "description": "Enrich Node - Enriches parsed items with additional product data",
+    "replace_values": {
+      "{{VENDOR_NAME}}": "e.g., Europa, Marchon, Kenmark (for parser reference)",
+      "{{VENDOR_SLUG}}": "e.g., europa, marchon, kenmark (lowercase for URL endpoint)",
+      "{{NODE_ID}}": "Generate unique UUID",
+      "{{POSITION_Y}}": "Same Y position as parser node (offset by -72 from Bulk-Add)",
+      "{{ENRICH_NUMBER}}": "Increment for each new vendor (e.g., Enrich8, Enrich9)"
+    }
+  },
+  "parameters": {
+    "method": "POST",
+    "url": "https://optical-express-api.onrender.com/api/enrich/{{VENDOR_SLUG}}",
+    "sendBody": true,
+    "bodyParameters": {
+      "parameters": [
+        {
+          "name": "accountId",
+          "value": "={{ $('parse_{{VENDOR_NAME}}').item.json.accountId }}"
+        },
+        {
+          "name": "orderNumber",
+          "value": "={{ $('parse_{{VENDOR_NAME}}').item.json.order.order_number }}"
+        }
+      ]
+    },
+    "options": {}
+  },
+  "type": "n8n-nodes-base.httpRequest",
+  "typeVersion": 4.2,
+  "position": [
+    2256,
+    "{{POSITION_Y}}"
+  ],
+  "id": "{{NODE_ID}}",
+  "name": "Enrich{{ENRICH_NUMBER}}"
+}

@@ -1,0 +1,55 @@
+{
+  "_template_info": {
+    "description": "Bulk Add Node - Adds parsed items to inventory",
+    "replace_values": {
+      "{{VENDOR_NAME}}": "e.g., Europa, Marchon, Kenmark (for parser reference)",
+      "{{VENDOR_DISPLAY_NAME}}": "e.g., 'Europa', 'Marchon', 'Kenmark' (for vendor field)",
+      "{{NODE_ID}}": "Generate unique UUID",
+      "{{POSITION_Y}}": "Same Y position as parser node",
+      "{{BULK_ADD_NUMBER}}": "Increment for each new vendor (e.g., Bulk-Add8, Bulk-Add9)"
+    }
+  },
+  "parameters": {
+    "method": "POST",
+    "url": "https://optical-express-api.onrender.com/api/inventory/bulk-add",
+    "sendHeaders": true,
+    "headerParameters": {
+      "parameters": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ]
+    },
+    "sendBody": true,
+    "bodyParameters": {
+      "parameters": [
+        {
+          "name": "accountId",
+          "value": "={{ $('parse_{{VENDOR_NAME}}').item.json.accountId }}"
+        },
+        {
+          "name": "vendor",
+          "value": "{{VENDOR_DISPLAY_NAME}}"
+        },
+        {
+          "name": "order",
+          "value": "={{ $('parse_{{VENDOR_NAME}}').item.json.order }}"
+        },
+        {
+          "name": "items",
+          "value": "={{ $('parse_{{VENDOR_NAME}}').item.json.items }}"
+        }
+      ]
+    },
+    "options": {}
+  },
+  "type": "n8n-nodes-base.httpRequest",
+  "typeVersion": 4.2,
+  "position": [
+    1808,
+    "{{POSITION_Y}}"
+  ],
+  "id": "{{NODE_ID}}",
+  "name": "Bulk-Add{{BULK_ADD_NUMBER}}"
+}

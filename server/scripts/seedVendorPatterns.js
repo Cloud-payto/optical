@@ -168,6 +168,26 @@ const vendorPatterns = {
       weight: 60,
       required_matches: 2
     }
+  },
+
+  MARCHON: {
+    tier1: {
+      domains: ['marchon.com', 'marchoneyewear.com'],
+      weight: 95
+    },
+    tier2: {
+      body_signatures: [
+        'marchon',
+        'marchon eyewear'
+      ],
+      weight: 85
+    },
+    tier3: {
+      subject_keywords: ['marchon', 'order'],
+      body_keywords: ['marchon', 'order'],
+      weight: 60,
+      required_matches: 2
+    }
   }
 };
 
