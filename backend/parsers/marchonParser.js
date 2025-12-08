@@ -165,6 +165,10 @@ function extractCustomerInfo(html, textToUse) {
  * Extract items from HTML table
  * Marchon table structure:
  * Style (with image link) | Style Name + Color | Qty
+ *
+ * Handles two HTML formats:
+ * 1. Original format: text directly in <td> with newlines
+ * 2. Forwarded email format: <p> tags with <br> separating style/size
  */
 function extractItems(html) {
     const items = [];
@@ -184,13 +188,25 @@ function extractItems(html) {
             rows.each((rowIndex, row) => {
                 const cells = $(row).find('td');
 
-                // Skip header rows (bgcolor="#B2B4B2")
-                if ($(row).attr('bgcolor') === '#B2B4B2') return;
+                // Skip header rows (bgcolor="#B2B4B2" or background: rgb(178, 180, 178))
+                const bgColor = $(row).attr('bgcolor');
+                const style = $(row).attr('style') || '';
+                if (bgColor === '#B2B4B2' || style.includes('178, 180, 178')) return;
+
+                // Also check first cell's background
+                const firstCellStyle = $(cells[0]).attr('style') || '';
+                if (firstCellStyle.includes('178, 180, 178')) return;
 
                 // Looking for rows with 3 cells (image, style info, qty)
                 if (cells.length !== 3) return;
 
-                const styleCell = $(cells[1]).text().trim();
+                // Get the style cell - handle both plain text and nested <p>/<span> elements
+                const $styleCell = $(cells[1]);
+                let styleCell = $styleCell.text().trim();
+
+                // Get HTML to check for <br> tags which separate style from size
+                const styleCellHtml = $styleCell.html() || '';
+
                 const qtyCell = $(cells[2]).text().trim();
 
                 // Skip if no style info or qty is not a number
@@ -198,8 +214,20 @@ function extractItems(html) {
                 const quantity = parseInt(qtyCell);
                 if (isNaN(quantity) || quantity === 0) return;
 
-                // Parse style: "SF2223N LIGHT GOLD/BURGUNDY\n(54 eye)"
-                const styleLines = styleCell.split('\n').map(l => l.trim()).filter(l => l);
+                // Parse style: "SF2223N LIGHT GOLD/BURGUNDY\n(54 eye)" or "SF2223N LIGHT GOLD/BURGUNDY (54 eye)"
+                let styleLines = styleCell.split('\n').map(l => l.trim()).filter(l => l);
+
+                // If only 1 line but contains eye size pattern, try to split on it
+                if (styleLines.length === 1) {
+                    // Check if the HTML has <br> tags - indicates format where br separates style from size
+                    if (styleCellHtml.includes('<br')) {
+                        // Split by the eye size pattern: "MODEL COLOR (XX eye)"
+                        const eyeMatch = styleCell.match(/^(.+?)\s*\((\d+)\s*eye\)\s*$/i);
+                        if (eyeMatch) {
+                            styleLines = [eyeMatch[1].trim(), `(${eyeMatch[2]} eye)`];
+                        }
+                    }
+                }
 
                 if (styleLines.length < 2) return;
 
@@ -256,7 +284,26 @@ function extractItems(html) {
         console.error('❌ Error parsing Marchon items:', error.message);
     }
 
-    return items;
+    // Deduplicate items - nested tables can cause the same item to appear multiple times
+    // Use model + color + size as a unique key and aggregate quantities
+    const itemMap = new Map();
+    for (const item of items) {
+        const key = `${item.model}-${item.colorCode || item.color}-${item.size}`;
+        if (itemMap.has(key)) {
+            // Item already exists - don't double count (duplicates are from nested tables, not actual quantity)
+            // Keep the first occurrence which typically has the most complete data
+            continue;
+        }
+        itemMap.set(key, item);
+    }
+
+    const deduplicatedItems = Array.from(itemMap.values());
+
+    if (deduplicatedItems.length !== items.length) {
+        console.log(`  📋 Deduplicated: ${items.length} raw -> ${deduplicatedItems.length} unique items`);
+    }
+
+    return deduplicatedItems;
 }
 
 /**

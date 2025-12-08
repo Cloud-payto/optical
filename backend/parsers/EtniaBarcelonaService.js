@@ -131,34 +131,104 @@ class EtniaBarcelonaService {
         }
 
         // Parse Date - format: 09/15/2025
-        // The date can appear in different ways:
-        // 1. In table format: "Date                09/15/2025" (with multiple spaces/tabs)
-        // 2. On line items: "09/15/2025" at the start after reference
-        const dateMatch = text.match(/Date[\s\t]+(\d{2}\/\d{2}\/\d{4})/i) ||
-                          text.match(/\n(\d{2}\/\d{2}\/\d{4})\n/);
+        // Strategy 1: Table format with spaces/tabs
+        let dateMatch = text.match(/Date[\s\t]+(\d{2}\/\d{2}\/\d{4})/i);
+
+        if (!dateMatch) {
+            // Strategy 2: Find Date label, then look for date pattern in nearby lines
+            // In the table layout, labels appear first, then values appear 4 lines later
+            const dateIdx = lines.findIndex(line => line.trim() === 'Date');
+            if (dateIdx !== -1) {
+                // Look in the next 10 lines for a date pattern
+                for (let i = dateIdx + 1; i < Math.min(dateIdx + 10, lines.length); i++) {
+                    const match = lines[i].match(/^(\d{2}\/\d{2}\/\d{4})/);
+                    if (match) {
+                        dateMatch = match;
+                        break;
+                    }
+                }
+            }
+        }
+
         if (dateMatch) {
             orderInfo.orderDate = dateMatch[1];
         }
 
-        // Parse Customer ID - can have multiple spaces/tabs like the date
-        // Also try matching across lines
-        let customerIDMatch = text.match(/Customer ID[\s\t]+(\d+)/i);
+        // Parse Customer ID - IMPROVED STRATEGY
+        // The PDF has a table layout where:
+        // Line N: "Customer ID"
+        // Line N+1: "Customer Reference"
+        // Line N+2: "20028628" (the actual Customer ID value)
+        // Line N+3: "ORDI-EB-AAAFC600071" (the actual Customer Reference value)
+
+        let customerIDMatch = null;
+
+        // Strategy 1: Try simple inline match first (spaces/tabs)
+        customerIDMatch = text.match(/Customer ID[\s\t]+(\d+)/i);
+
         if (!customerIDMatch) {
-            // Try matching across newlines
-            customerIDMatch = text.match(/Customer ID[\s\t\n]+(\d+)/i);
+            // Strategy 2: Find "Customer ID" label position and look for digit-only line nearby
+            const customerIDIdx = lines.findIndex(line => line.trim() === 'Customer ID');
+            if (customerIDIdx !== -1) {
+                // Look in the next 5 lines for a line that's purely digits (8 digits typical)
+                for (let i = customerIDIdx + 1; i < Math.min(customerIDIdx + 6, lines.length); i++) {
+                    const line = lines[i].trim();
+                    // Match a line that's 6-10 digits only
+                    if (/^\d{6,10}$/.test(line)) {
+                        customerIDMatch = { 1: line }; // Mimic regex match result
+                        this.log(`Found Customer ID using position strategy: ${line}`);
+                        break;
+                    }
+                }
+            }
         }
+
+        if (!customerIDMatch) {
+            // Strategy 3: Look for pattern "Customer Reference" followed by a digit line
+            // The Customer ID appears right before the Customer Reference value
+            const refIdx = lines.findIndex(line => line.trim() === 'Customer Reference');
+            if (refIdx !== -1 && refIdx > 0) {
+                // Check the line before the reference value for digits
+                const prevLine = lines[refIdx + 1]?.trim();
+                if (prevLine && /^\d{6,10}$/.test(prevLine)) {
+                    customerIDMatch = { 1: prevLine }; // Mimic regex match result
+                    this.log(`Found Customer ID before reference: ${prevLine}`);
+                }
+            }
+        }
+
         if (customerIDMatch) {
             orderInfo.customerID = customerIDMatch[1];
             orderInfo.accountNumber = customerIDMatch[1]; // Use Customer ID as account number
         }
 
-        // Parse Customer Reference - can have multiple spaces/tabs
-        // Also try matching across lines
-        let refMatch = text.match(/Customer Reference[\s\t]+([\w\-]+)/i);
+        // Parse Customer Reference - IMPROVED STRATEGY
+        let refMatch = null;
+
+        // Strategy 1: Try simple inline match first (same line only, no newlines)
+        refMatch = text.match(/Customer Reference[ \t]+([\w\-]+)/i);
+
         if (!refMatch) {
-            // Try matching across newlines
-            refMatch = text.match(/Customer Reference[\s\t\n]+([\w\-]+)/i);
+            // Strategy 2: Find "Customer Reference" label and look for pattern nearby
+            const refIdx = lines.findIndex(line => line.trim() === 'Customer Reference');
+            if (refIdx !== -1) {
+                // Look in the next 5 lines for the reference pattern
+                // Must contain letters AND dashes/numbers (not pure digits)
+                // Examples: "ORDI-EB-AAAFC600071"
+                for (let i = refIdx + 1; i < Math.min(refIdx + 6, lines.length); i++) {
+                    const line = lines[i].trim();
+                    // Match patterns that contain both letters and hyphens (typical reference format)
+                    // OR patterns that start with letters followed by alphanumeric
+                    if ((/[A-Z]/.test(line) && /[\-]/.test(line)) ||
+                        (/^[A-Z]{2,}[\-A-Z0-9]+$/i.test(line) && line.length >= 10)) {
+                        refMatch = { 1: line }; // Mimic regex match result
+                        this.log(`Found Customer Reference using position strategy: ${line}`);
+                        break;
+                    }
+                }
+            }
         }
+
         if (refMatch) {
             orderInfo.customerReference = refMatch[1];
         }

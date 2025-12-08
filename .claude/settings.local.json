@@ -29,7 +29,14 @@
       "Bash(git reset:*)",
       "WebFetch(domain:jam.dev)",
       "Bash(node scripts/seedVendorPatterns.js:*)",
-      "Bash(node server/scripts/seedVendorPatterns.js:*)"
+      "Bash(node server/scripts/seedVendorPatterns.js:*)",
+      "Bash(node test-etnia-parser.cjs:*)",
+      "Bash(node debug-reference.cjs:*)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(mkdir:*)",
+      "Bash(node:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []

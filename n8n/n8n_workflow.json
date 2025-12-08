@@ -11,7 +11,7 @@
       "typeVersion": 2.1,
       "position": [
         -208,
-        464
+        480
       ],
       "id": "4bf34dc6-37a1-42b1-888a-fe9be2b7fc55",
       "name": "Webhook",
@@ -61,7 +61,7 @@
       "typeVersion": 1,
       "position": [
         912,
-        560
+        576
       ],
       "id": "9f564869-34f2-401c-a7a8-8431b30c9350",
       "name": "Create a row",
@@ -112,7 +112,7 @@
       "typeVersion": 4.2,
       "position": [
         1808,
-        -224
+        -192
       ],
       "id": "f7d85efa-d62c-4905-9bd8-e221b8316f9e",
       "name": "Bulk-Add"
@@ -140,7 +140,7 @@
       "typeVersion": 4.2,
       "position": [
         2256,
-        -288
+        -264
       ],
       "id": "ecab662e-550f-4982-843c-0affc6b3c020",
       "name": "Enrich"
@@ -188,7 +188,7 @@
       "typeVersion": 4.2,
       "position": [
         1584,
-        -224
+        -192
       ],
       "id": "5a70bcbf-0138-4336-9c6c-f69b1e779331",
       "name": "Create Email Record"
@@ -231,7 +231,7 @@
       "typeVersion": 4.2,
       "position": [
         912,
-        -224
+        -192
       ],
       "id": "a87fb387-6a51-4542-aab1-ea07b48cbeda",
       "name": "parse_ModernOptical"
@@ -244,7 +244,7 @@
       "typeVersion": 2,
       "position": [
         1360,
-        -224
+        -192
       ],
       "id": "223e82ec-c5d4-440d-bcef-796bfff5c0ba",
       "name": "Prepare Email Data"
@@ -272,7 +272,7 @@
       "typeVersion": 4.2,
       "position": [
         912,
-        -32
+        0
       ],
       "id": "5f1e56e1-991e-4201-82d6-cb10aed1b854",
       "name": "parse_Safilo"
@@ -285,7 +285,7 @@
       "typeVersion": 2,
       "position": [
         1360,
-        -32
+        0
       ],
       "id": "cf2e3906-ba62-4eeb-8a11-e6f80c830532",
       "name": "Prepare Email Safilo"
@@ -333,7 +333,7 @@
       "typeVersion": 4.2,
       "position": [
         1584,
-        -32
+        0
       ],
       "id": "7f598d5c-d81a-4b20-bb52-c772392710f5",
       "name": "Create Email Record1"
@@ -378,7 +378,7 @@
       "typeVersion": 4.2,
       "position": [
         1808,
-        -32
+        0
       ],
       "id": "c4c4f906-3ae7-451b-a203-0b6b2cdad416",
       "name": "Bulk-Add1"
@@ -421,7 +421,7 @@
       "typeVersion": 4.2,
       "position": [
         912,
-        176
+        192
       ],
       "id": "377a7506-0ec6-4683-a9c5-b77dbbde12f3",
       "name": "parse_Luxottica"
@@ -434,7 +434,7 @@
       "typeVersion": 2,
       "position": [
         1360,
-        176
+        192
       ],
       "id": "cffceba3-3cad-401f-ae0b-cd3b9351c110",
       "name": "Prepare Email Luxottica"
@@ -482,7 +482,7 @@
       "typeVersion": 4.2,
       "position": [
         1584,
-        176
+        192
       ],
       "id": "62567d22-7676-429d-911d-cea17442378f",
       "name": "Create Email Record2"
@@ -527,7 +527,7 @@
       "typeVersion": 4.2,
       "position": [
         1808,
-        176
+        192
       ],
       "id": "76fb943f-e4b8-44de-bd37-b916cde3404f",
       "name": "Bulk-Add2"
@@ -540,7 +540,7 @@
       "typeVersion": 2,
       "position": [
         16,
-        464
+        480
       ],
       "id": "10905825-dd6b-4def-bdfd-f777a5e54ec6",
       "name": "Extract Account ID"
@@ -568,7 +568,7 @@
       "typeVersion": 4.2,
       "position": [
         912,
-        368
+        384
       ],
       "id": "7f63d904-67d8-4d56-823b-9c40f8d5afc1",
       "name": "parse_Etnia"
@@ -581,7 +581,7 @@
       "typeVersion": 2,
       "position": [
         1360,
-        368
+        384
       ],
       "id": "a557b33c-c0dd-4460-a695-dc669cf91932",
       "name": "Prepare Email Etnia"
@@ -629,7 +629,7 @@
       "typeVersion": 4.2,
       "position": [
         1584,
-        368
+        384
       ],
       "id": "f318499c-acf4-4852-9472-6ad44eaef731",
       "name": "Create Email Record3"
@@ -674,7 +674,7 @@
       "typeVersion": 4.2,
       "position": [
         1808,
-        368
+        384
       ],
       "id": "c52e4986-b1b6-4b79-ba2b-d6436d81853a",
       "name": "Bulk-Add3"
@@ -687,7 +687,7 @@
       "typeVersion": 2,
       "position": [
         -208,
-        1360
+        1568
       ],
       "id": "1874e613-3482-4176-b3d6-d718a6f76c73",
       "name": "Detect Vendor"
@@ -734,7 +734,7 @@
       "typeVersion": 4.2,
       "position": [
         240,
-        464
+        480
       ],
       "id": "b52414a6-3fc2-4feb-a27e-6ce2c3b4c468",
       "name": "Detect Vendor (API)"
@@ -954,7 +954,7 @@
                   {
                     "id": "6e18af72-f461-4bca-9423-aa4e8ae4e789",
                     "leftValue": "={{ $json.vendor }}",
-                    "rightValue": "kenmark",
+                    "rightValue": "KENMARK",
                     "operator": {
                       "type": "string",
                       "operation": "equals",
@@ -966,6 +966,31 @@
               },
               "renameOutput": true,
               "outputKey": "Kenmark"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "75e50a4b-98a1-4d82-b615-a78b76171797",
+                    "leftValue": "={{ $json.vendor }}",
+                    "rightValue": "MARCHON",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Marchon"
             }
           ]
         },
@@ -1020,7 +1045,7 @@
       "typeVersion": 4.2,
       "position": [
         912,
-        752
+        768
       ],
       "id": "2a72dcda-050f-494e-82fd-799f78176f75",
       "name": "parse_Idealoptics"
@@ -1033,7 +1058,7 @@
       "typeVersion": 2,
       "position": [
         1360,
-        752
+        768
       ],
       "id": "562bb95a-9ed5-4a40-9d2b-21eedcc32494",
       "name": "Prepare Email Ideal"
@@ -1081,7 +1106,7 @@
       "typeVersion": 4.2,
       "position": [
         1584,
-        752
+        768
       ],
       "id": "515b7db4-038f-4323-ba01-0eee12e38e29",
       "name": "Create Email Record4"
@@ -1126,7 +1151,7 @@
       "typeVersion": 4.2,
       "position": [
         1808,
-        752
+        768
       ],
       "id": "eca13fe3-eed0-4dd6-8b0c-ea9b6d38f2c1",
       "name": "Bulk-Add4"
@@ -1153,8 +1178,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        2288,
-        672
+        2272,
+        656
       ],
       "id": "8ecca33b-4679-47f0-8634-8de9d828f028",
       "name": "Enrich1"
@@ -1197,7 +1222,7 @@
       "typeVersion": 4.2,
       "position": [
         912,
-        944
+        960
       ],
       "id": "74494bde-60eb-4323-bc90-94fbf3ef4004",
       "name": "parse_Lamy"
@@ -1210,7 +1235,7 @@
       "typeVersion": 2,
       "position": [
         1360,
-        944
+        960
       ],
       "id": "f8b703c8-c312-40ea-9e67-8407967c2444",
       "name": "Prepare Email Lamy"
@@ -1258,7 +1283,7 @@
       "typeVersion": 4.2,
       "position": [
         1584,
-        944
+        960
       ],
       "id": "e0637b2e-ced8-417d-b15b-4d9d3e0fc95d",
       "name": "Create Email Record5"
@@ -1303,7 +1328,7 @@
       "typeVersion": 4.2,
       "position": [
         1808,
-        944
+        960
       ],
       "id": "6373aacd-56af-4b1b-b290-7ead43d8c4a6",
       "name": "Bulk-Add5"
@@ -1316,7 +1341,7 @@
       "typeVersion": 2,
       "position": [
         464,
-        464
+        480
       ],
       "id": "1d5a37c7-64ca-4a45-ae12-ddff589d206b",
       "name": "Format API Response"
@@ -1359,7 +1384,7 @@
       "typeVersion": 4.2,
       "position": [
         912,
-        1136
+        1152
       ],
       "id": "40da892c-d1c9-4009-b09b-dc314932ae2c",
       "name": "parse_kenmark"
@@ -1407,7 +1432,7 @@
       "typeVersion": 4.2,
       "position": [
         1584,
-        1136
+        1152
       ],
       "id": "71172620-98e2-45fe-8b61-f6b31a2569ea",
       "name": "Create Email Record6"
@@ -1434,7 +1459,7 @@
             },
             {
               "name": "vendor",
-              "value": "L'amyamerica"
+              "value": "kenmark"
             },
             {
               "name": "order",
@@ -1452,7 +1477,7 @@
       "typeVersion": 4.2,
       "position": [
         1808,
-        1136
+        1152
       ],
       "id": "5527c7f2-5b07-46fe-9cdc-ccc2d41b1ec1",
       "name": "Bulk-Add6"
@@ -1489,7 +1514,7 @@
       "typeVersion": 4.2,
       "position": [
         1136,
-        -224
+        -192
       ],
       "id": "61de64ca-d9cb-48c1-8bce-ac557609a436",
       "name": "Check Catalog"
@@ -1502,7 +1527,7 @@
       "typeVersion": 2,
       "position": [
         1360,
-        1136
+        1152
       ],
       "id": "c1c4ec8a-996e-4cdc-aa06-2366380ff1a9",
       "name": "Prepare Email Kenmark"
@@ -1539,7 +1564,7 @@
       "typeVersion": 4.2,
       "position": [
         1136,
-        -32
+        0
       ],
       "id": "e04a7c34-6995-4524-8b94-03fe50f4e09e",
       "name": "Check Catalog1"
@@ -1576,7 +1601,7 @@
       "typeVersion": 4.2,
       "position": [
         1136,
-        176
+        192
       ],
       "id": "e502b751-233e-4b67-82cf-6da4038ac9f9",
       "name": "Check Catalog2"
@@ -1613,7 +1638,7 @@
       "typeVersion": 4.2,
       "position": [
         1136,
-        368
+        384
       ],
       "id": "bf33ff58-be2c-40bf-a646-857271e963b3",
       "name": "Check Catalog3"
@@ -1650,7 +1675,7 @@
       "typeVersion": 4.2,
       "position": [
         1136,
-        752
+        768
       ],
       "id": "95f4e774-e998-4f80-9474-ec3bc09bc2a9",
       "name": "Check Catalog4"
@@ -1687,7 +1712,7 @@
       "typeVersion": 4.2,
       "position": [
         1136,
-        944
+        960
       ],
       "id": "54b44a0e-fa19-4e46-9e34-af45e452ecb8",
       "name": "Check Catalog5"
@@ -1724,7 +1749,7 @@
       "typeVersion": 4.2,
       "position": [
         1136,
-        1136
+        1152
       ],
       "id": "5fab100d-add6-4e72-b524-5c1f19a60070",
       "name": "Check Catalog6"
@@ -1765,7 +1790,7 @@
       "typeVersion": 4.2,
       "position": [
         2480,
-        -224
+        -192
       ],
       "id": "f59bc7f0-189c-405c-a828-a68d5ccee8f9",
       "name": "Cache to Catalog"
@@ -1806,7 +1831,7 @@
       "typeVersion": 4.2,
       "position": [
         2480,
-        752
+        768
       ],
       "id": "b43c8e89-0349-4af3-9f16-5555793cfcb2",
       "name": "Cache to Catalog1"
@@ -1847,7 +1872,7 @@
       "typeVersion": 4.2,
       "position": [
         2032,
-        -32
+        0
       ],
       "id": "7610be73-30cd-40b8-bc49-22d9ddc5c898",
       "name": "Cache to Catalog2"
@@ -1888,7 +1913,7 @@
       "typeVersion": 4.2,
       "position": [
         2032,
-        176
+        192
       ],
       "id": "a1191edc-b83d-4e8d-a989-684eb42ac168",
       "name": "Cache to Catalog3"
@@ -1929,7 +1954,7 @@
       "typeVersion": 4.2,
       "position": [
         2032,
-        368
+        384
       ],
       "id": "6829de9f-be1d-421c-8c70-33bfdf21d36c",
       "name": "Cache to Catalog4"
@@ -1970,7 +1995,7 @@
       "typeVersion": 4.2,
       "position": [
         2032,
-        944
+        960
       ],
       "id": "3e3240c1-8739-44b8-a69b-4a20109a7875",
       "name": "Cache to Catalog5"
@@ -2011,7 +2036,7 @@
       "typeVersion": 4.2,
       "position": [
         2032,
-        1136
+        1152
       ],
       "id": "303c6d7e-a77b-4f4c-95ca-bf815ab943aa",
       "name": "Cache to Catalog6"
@@ -2044,7 +2069,7 @@
       "typeVersion": 2.2,
       "position": [
         2032,
-        -224
+        -192
       ],
       "id": "62ee67f8-e053-4d2d-bd03-2bd42e5c67cf",
       "name": "If cached"
@@ -2077,10 +2102,464 @@
       "typeVersion": 2.2,
       "position": [
         2032,
-        752
+        768
       ],
       "id": "4a8f9765-8ddf-41b0-82e8-74d0d3a2965b",
       "name": "If cached1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/catalog/check",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "vendorId",
+              "value": "={{ $('parse_Europa').item.json.vendorId }}"
+            },
+            {
+              "name": "items",
+              "value": "={{ $('parse_Europa').item.json.items }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1136,
+        -384
+      ],
+      "id": "69f1ebc2-551a-4b3e-9ba8-a1b8ffe20287",
+      "name": "Check Catalog7"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parseResult = $('parse_Europa').item.json;\nconst checkCatalogResult = $('Check Catalog').item.json;\nconst accountId = $('Extract Account ID').item.json.accountId;\nconst emailData = $('Extract Account ID').item.json.email;\n\nreturn [{\n  json: {\n    accountId: accountId,\n    from: 'Europa',\n    subject: `Order #${parseResult.order.order_number}`,\n    html: emailData.html,\n    plainText: emailData.plain,\n    parsedData: {\n      vendor: 'Europa',\n      order: parseResult.order,  // Still from parse node\n      items: checkCatalogResult.items  // NOW from Check Catalog node!\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        -384
+      ],
+      "id": "1aabd852-4bfb-4dc7-a105-ca35d7143c8d",
+      "name": "Prepare Email Data1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/emails/create",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "accountId",
+              "value": "={{ $json.accountId }}"
+            },
+            {
+              "name": "from",
+              "value": "={{ $json.from }}"
+            },
+            {
+              "name": "html",
+              "value": "={{ $json.html }}"
+            },
+            {
+              "name": "plainText",
+              "value": "={{ $json.plainText }}"
+            },
+            {
+              "name": "parsedData",
+              "value": "={{ $json.parsedData }}"
+            },
+            {
+              "name": "subject",
+              "value": "={{ $json.subject }}"
+            },
+            {
+              "name": "vendor",
+              "value": "europa"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1584,
+        -384
+      ],
+      "id": "062094cc-6836-44fe-9bcb-49da322d6abd",
+      "name": "Create Email Record7"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/inventory/bulk-add",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "accountId",
+              "value": "={{ $('parse_Europa').item.json.accountId }}"
+            },
+            {
+              "name": "vendor",
+              "value": "Europa"
+            },
+            {
+              "name": "order",
+              "value": "={{ $('parse_Europa').item.json.order }}"
+            },
+            {
+              "name": "items",
+              "value": "={{ $('parse_Europa').item.json.items }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1808,
+        -384
+      ],
+      "id": "3d069c85-925f-46ee-a8ec-f5818fef1069",
+      "name": "Bulk-Add7"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/catalog/cache",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "vendorId",
+              "value": "={{ $('parse_Europa').item.json.vendorId }}"
+            },
+            {
+              "name": "vendorName",
+              "value": "Modern Optical"
+            },
+            {
+              "name": "items",
+              "value": "={{ $('Bulk-Add7').first().json.items }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2032,
+        -384
+      ],
+      "id": "cf6373ac-6c9d-49da-a88f-565836674611",
+      "name": "Cache to Catalog7"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/parse/europa",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "html",
+              "value": "={{ $json.email.html }}"
+            },
+            {
+              "name": "plainText",
+              "value": "={{ $json.email.plain }}"
+            },
+            {
+              "name": "accountId",
+              "value": "={{ $json.accountId }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        912,
+        -384
+      ],
+      "id": "a2041347-3574-487d-aff9-02d78b845a2a",
+      "name": "parse_Europa"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/parse/marchon",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "html",
+              "value": "={{ $json.email.html }}"
+            },
+            {
+              "name": "plainText",
+              "value": "={{ $json.email.plain }}"
+            },
+            {
+              "name": "accountId",
+              "value": "={{ $json.accountId }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        912,
+        1344
+      ],
+      "id": "d14e28ec-7460-4686-b798-5df42c82e3bf",
+      "name": "parse_Marchon"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/catalog/check",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "vendorId",
+              "value": "={{ $('parse_Marchon').item.json.vendorId }}"
+            },
+            {
+              "name": "items",
+              "value": "={{ $('parse_Marchon').item.json.items }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1136,
+        1344
+      ],
+      "id": "9d4c92d6-c7e0-4673-9a74-94d68ddac0fa",
+      "name": "Check Catalog8"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parseResult = $('parse_Marchon').item.json;\nconst checkCatalogResult = $('Check Catalog6').item.json;\nconst accountId = $('Extract Account ID').item.json.accountId;\nconst emailData = $('Extract Account ID').item.json.email;\n\nreturn [{\n  json: {\n    accountId: accountId,\n    from: 'Kenmark Orders',\n    subject: `Order #${parseResult.order.order_number}`,\n    html: emailData.html,\n    plainText: emailData.plain,\n    parsedData: {\n      vendor: 'Marchon',  // underscore format\n      order: parseResult.order,\n      items: checkCatalogResult.items\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        1344
+      ],
+      "id": "49e3a6ff-4851-472f-8fa0-8d790af8b648",
+      "name": "Prepare Email Kenmark1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/emails/create",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "accountId",
+              "value": "={{ $json.accountId }}"
+            },
+            {
+              "name": "from",
+              "value": "={{ $json.from }}"
+            },
+            {
+              "name": "html",
+              "value": "={{ $json.html }}"
+            },
+            {
+              "name": "plainText",
+              "value": "={{ $json.plainText }}"
+            },
+            {
+              "name": "parsedData",
+              "value": "={{ $json.parsedData }}"
+            },
+            {
+              "name": "subject",
+              "value": "={{ $json.subject }}"
+            },
+            {
+              "name": "vendor",
+              "value": "Marchon"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1584,
+        1344
+      ],
+      "id": "1cf10d3a-95f3-4845-ab23-bcd160c92f1a",
+      "name": "Create Email Record8"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/inventory/bulk-add",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "accountId",
+              "value": "={{ $('parse_Marchon').item.json.accountId }}"
+            },
+            {
+              "name": "vendor",
+              "value": "kenmark"
+            },
+            {
+              "name": "order",
+              "value": "={{ $('parse_Marchon').item.json.order }}"
+            },
+            {
+              "name": "items",
+              "value": "={{ $('parse_Marchon').item.json.items }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1808,
+        1344
+      ],
+      "id": "7236ec76-e68a-490a-be54-235eccd875af",
+      "name": "Bulk-Add8"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/catalog/cache",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "vendorId",
+              "value": "={{ $('parse_Marchon').item.json.vendorId }}"
+            },
+            {
+              "name": "vendorName",
+              "value": "Modern Optical"
+            },
+            {
+              "name": "items",
+              "value": "={{ $('Bulk-Add8').first().json.items }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2032,
+        1344
+      ],
+      "id": "912d40a3-f027-46a8-bbdc-044a12c6c61e",
+      "name": "Cache to Catalog8"
     }
   ],
   "pinData": {},
@@ -2300,7 +2779,13 @@
             "index": 0
           }
         ],
-        [],
+        [
+          {
+            "node": "parse_Europa",
+            "type": "main",
+            "index": 0
+          }
+        ],
         [
           {
             "node": "parse_Etnia",
@@ -2326,6 +2811,13 @@
         [
           {
             "node": "parse_kenmark",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "parse_Marchon",
             "type": "main",
             "index": 0
           }
@@ -2638,13 +3130,123 @@
           }
         ]
       ]
+    },
+    "Check Catalog7": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email Data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email Data1": {
+      "main": [
+        [
+          {
+            "node": "Create Email Record7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Email Record7": {
+      "main": [
+        [
+          {
+            "node": "Bulk-Add7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bulk-Add7": {
+      "main": [
+        [
+          {
+            "node": "Cache to Catalog7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse_Europa": {
+      "main": [
+        [
+          {
+            "node": "Check Catalog7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse_Marchon": {
+      "main": [
+        [
+          {
+            "node": "Check Catalog8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Catalog8": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email Kenmark1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email Kenmark1": {
+      "main": [
+        [
+          {
+            "node": "Create Email Record8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Email Record8": {
+      "main": [
+        [
+          {
+            "node": "Bulk-Add8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bulk-Add8": {
+      "main": [
+        [
+          {
+            "node": "Cache to Catalog8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "02f8f85c-b40e-48f9-abce-8c44fff9c947",
+  "versionId": "4706ad77-489a-4f69-ae56-7074c9a26c50",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "755d69fd97946ae86204aaf9353f2da391bb20edeb5619afdf676315f69f4cd2"

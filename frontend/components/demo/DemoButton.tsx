@@ -53,15 +53,38 @@ const DemoButton: React.FC<DemoButtonProps> = ({
   };
 
   const sparkleVariants = {
-    idle: { 
+    idle: {
       rotate: 0,
       scale: 1
     },
-    hover: { 
+    hover: {
       rotate: 180,
       scale: 1.1,
       transition: {
         duration: 0.3
+      }
+    }
+  };
+
+  const gradientVariants = {
+    idle: {
+      opacity: 0
+    },
+    hover: {
+      opacity: 0.7,
+      transition: { duration: 0.3 }
+    }
+  };
+
+  const shineVariants = {
+    idle: {
+      x: '-100%'
+    },
+    hover: {
+      x: '100%',
+      transition: {
+        duration: 0.6,
+        ease: 'easeInOut'
       }
     }
   };
@@ -88,25 +111,15 @@ const DemoButton: React.FC<DemoButtonProps> = ({
       {/* Animated background gradient (for primary variant) */}
       {variant === 'primary' && (
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg opacity-0"
-          whileHover={{
-            opacity: 0.7,
-            transition: { duration: 0.3 }
-          }}
+          className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg pointer-events-none"
+          variants={gradientVariants}
         />
       )}
 
       {/* Shine effect overlay */}
       <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent rounded-lg"
-        initial={{ x: '-100%' }}
-        whileHover={{
-          x: '100%',
-          transition: {
-            duration: 0.6,
-            ease: 'easeInOut'
-          }
-        }}
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent rounded-lg pointer-events-none"
+        variants={shineVariants}
       />
 
       {/* Sparkle icon with animation */}

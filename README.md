@@ -71,9 +71,12 @@ CLOUDMAILIN_WEBHOOK_SECRET=your_webhook_secret
 npm run dev              # http://localhost:5173
 
 # In another terminal, start the backend
-cd server
+cd backend
 npm install
 node index.js            # http://localhost:3001
+
+# Or run both at once
+npm run dev:all
 ```
 
 ### Building for Production
@@ -171,19 +174,36 @@ OptiProfit employs a modern microservices-inspired architecture with clear separ
 
 ```
 Version1/
-├── src/                    # Frontend source code
-│   ├── features/           # Feature-based modules
-│   ├── components/         # Reusable components
+├── frontend/              # Frontend source code (React + TypeScript)
+│   ├── components/        # Reusable UI components
 │   ├── pages/             # Page components
 │   ├── contexts/          # React contexts
-│   └── services/          # API services
-├── server/                # Backend source code
+│   ├── hooks/             # Custom React hooks
+│   ├── services/          # API services
+│   ├── types/             # TypeScript type definitions
+│   └── utils/             # Utility functions
+├── backend/               # Backend source code (Express.js)
 │   ├── routes/            # API endpoints
 │   ├── parsers/           # Vendor email parsers
 │   ├── middleware/        # Express middleware
-│   └── lib/              # Utilities
-├── public/               # Static assets
-└── docs/                # Documentation
+│   ├── lib/               # Utilities
+│   └── services/          # Backend services
+├── supabase/              # Database configuration
+│   ├── migrations/        # SQL migration files
+│   └── functions/         # Supabase edge functions
+├── n8n/                   # n8n workflow automation
+│   ├── workflows/         # Workflow JSON files
+│   └── templates/         # Workflow templates
+├── docs/                  # Documentation
+│   ├── technical/         # Technical docs (API, architecture)
+│   ├── deployment/        # Deployment guides
+│   ├── features/          # Feature documentation
+│   ├── implementation/    # Implementation details
+│   └── archive/           # Historical documentation
+├── dev/                   # Development resources
+│   ├── email-parsers/     # Test email samples by vendor
+│   └── design-inspiration/# Design reference files
+└── public/                # Static assets
 ```
 
 ## 🔄 Operational Workflow
