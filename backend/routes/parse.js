@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { parseModernOpticalHtml } = require('../parsers/modernopticalparser');
+const { parseModernOpticalHtml } = require('../parsers/modernOpticalParser');
 const SafiloService = require('../parsers/SafiloService');
 const { parseLuxotticaHtml } = require('../parsers/luxotticaParser');
 const EtniaBarcelonaService = require('../parsers/EtniaBarcelonaService');
@@ -12,6 +12,7 @@ const { parseKenmarkHtml, validateParsedData: validateKenmarkData } = require('.
 const KenmarkService = require('../parsers/KenmarkService');
 const { parseEuropaHtml, validateParsedData: validateEuropaData } = require('../parsers/europaParser');
 const { parseMarchonHtml, validateParsedData: validateMarchonData } = require('../parsers/marchonParser');
+const { normalizeEmail, detectProviders } = require('../utils/emailNormalizer');
 const { supabase } = require('../lib/supabase');
 
 /**
@@ -923,6 +924,102 @@ router.post('/marchon', async (req, res) => {
     return res.status(500).json({
       success: false,
       error: 'Failed to parse Marchon email',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/parse/clean-email
+ * Clean/normalize forwarded email HTML by stripping provider-specific wrappers
+ *
+ * This endpoint should be called BEFORE vendor-specific parsing to ensure
+ * consistent HTML structure regardless of email provider (Zoho, Gmail, Outlook).
+ *
+ * Body: { html, vendor? }
+ * - html: The raw HTML content from the forwarded email
+ * - vendor: (optional) Vendor identifier to help extract relevant content
+ *
+ * Returns: {
+ *   success: boolean,
+ *   cleanedHtml: string,        // The normalized HTML
+ *   detectedProviders: string[], // Which email providers were detected
+ *   metadata: {
+ *     originalLength: number,
+ *     cleanedLength: number,
+ *     reductionPercent: number
+ *   }
+ * }
+ */
+router.post('/clean-email', async (req, res) => {
+  try {
+    const { html, vendor } = req.body;
+
+    // Validate input
+    if (!html) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required field: html'
+      });
+    }
+
+    console.log('[CLEAN-EMAIL] Processing email...');
+    console.log('[CLEAN-EMAIL] Original HTML length:', html.length);
+
+    // Normalize the email HTML
+    const result = normalizeEmail(html);
+
+    console.log('[CLEAN-EMAIL] Detected providers:', result.detectedProviders.join(', ') || 'none');
+    console.log('[CLEAN-EMAIL] Cleaned HTML length:', result.metadata.cleanedLength);
+    console.log('[CLEAN-EMAIL] Reduction:', result.metadata.reductionPercent + '%');
+
+    return res.status(200).json({
+      success: true,
+      cleanedHtml: result.cleanedHtml,
+      detectedProviders: result.detectedProviders,
+      metadata: result.metadata
+    });
+
+  } catch (error) {
+    console.error('[CLEAN-EMAIL] Error normalizing email:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to normalize email',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/parse/detect-provider
+ * Detect which email provider(s) wrapped the email
+ *
+ * Body: { html }
+ * Returns: { success, providers: string[] }
+ */
+router.post('/detect-provider', async (req, res) => {
+  try {
+    const { html } = req.body;
+
+    if (!html) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required field: html'
+      });
+    }
+
+    const providers = detectProviders(html);
+
+    return res.status(200).json({
+      success: true,
+      providers
+    });
+
+  } catch (error) {
+    console.error('[DETECT-PROVIDER] Error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to detect email provider',
       message: error.message
     });
   }
