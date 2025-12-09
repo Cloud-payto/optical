@@ -138,19 +138,19 @@ const BrandDetailsModal: React.FC<BrandDetailsModalProps> = ({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-[#1F2623] rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">{formData.name}</h3>
-                <p className="text-sm text-gray-500">{companyName}</p>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{formData.name}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{companyName}</p>
               </div>
               <button
                 onClick={handleClose}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
               >
-                <X className="h-5 w-5 text-gray-400" />
+                <X className="h-5 w-5 text-gray-400 dark:text-gray-500" />
               </button>
             </div>
 
@@ -158,7 +158,7 @@ const BrandDetailsModal: React.FC<BrandDetailsModalProps> = ({
             <div className="p-6 space-y-6">
               {/* Wholesale Cost */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Wholesale Cost
                 </label>
                 <div className="relative">
@@ -184,7 +184,7 @@ const BrandDetailsModal: React.FC<BrandDetailsModalProps> = ({
 
               {/* Your Cost */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Your Cost
                 </label>
                 <div className="relative">
@@ -213,14 +213,14 @@ const BrandDetailsModal: React.FC<BrandDetailsModalProps> = ({
 
               {/* Discount Percentage Display */}
               {formData.wholesaleCost > 0 && formData.yourCost > 0 && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
                   <div className="flex items-center space-x-2">
-                    <Percent className="h-5 w-5 text-green-600" />
+                    <Percent className="h-5 w-5 text-green-600 dark:text-green-400" />
                     <div>
-                      <p className="text-sm font-medium text-green-800">
+                      <p className="text-sm font-medium text-green-800 dark:text-green-300">
                         Discount Percentage: {discountPercentage}%
                       </p>
-                      <p className="text-xs text-green-600">
+                      <p className="text-xs text-green-600 dark:text-green-400">
                         You save ${((formData.wholesaleCost || 0) - (formData.yourCost || 0)).toFixed(2)} per frame
                       </p>
                     </div>
@@ -230,7 +230,7 @@ const BrandDetailsModal: React.FC<BrandDetailsModalProps> = ({
 
               {/* Retail Price (MSRP) */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Retail Price (MSRP)
                 </label>
                 <div className="relative">
@@ -257,16 +257,16 @@ const BrandDetailsModal: React.FC<BrandDetailsModalProps> = ({
               {/* Tariff Tax Toggle and Input */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Tariff Tax
                   </label>
                   <div className="flex items-center space-x-2">
-                    <span className="text-xs text-gray-500">Enable tariff tax</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">Enable tariff tax</span>
                     <button
                       type="button"
                       onClick={handleTariffToggle}
-                      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                        isTariffEnabled ? 'bg-blue-600' : 'bg-gray-200'
+                      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 ${
+                        isTariffEnabled ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'
                       }`}
                     >
                       <span
@@ -303,7 +303,7 @@ const BrandDetailsModal: React.FC<BrandDetailsModalProps> = ({
                 )}
                 
                 {!isTariffEnabled && (
-                  <p className="text-xs text-gray-500 italic">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 italic">
                     Toggle on to add tariff tax to this brand
                   </p>
                 )}
@@ -311,12 +311,12 @@ const BrandDetailsModal: React.FC<BrandDetailsModalProps> = ({
 
               {/* Notes */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Notes (Optional)
                 </label>
                 <textarea
                   rows={3}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                   value={formData.notes}
                   onChange={(e) => handleInputChange('notes', e.target.value)}
                   placeholder="Add any notes about this brand..."
@@ -325,10 +325,10 @@ const BrandDetailsModal: React.FC<BrandDetailsModalProps> = ({
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200">
+            <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200 dark:border-gray-700">
               <button
                 onClick={handleClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 Cancel
               </button>

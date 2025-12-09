@@ -102,44 +102,44 @@ const VendorSuggestionModal: React.FC<VendorSuggestionModalProps> = ({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="bg-white rounded-lg shadow-xl max-w-md w-full"
+            className="bg-white dark:bg-[#1F2623] rounded-lg shadow-xl max-w-md w-full"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center space-x-3">
-                <div className="bg-blue-100 rounded-lg p-2">
-                  <Building2 className="h-6 w-6 text-blue-600" />
+                <div className="bg-blue-100 dark:bg-blue-900/30 rounded-lg p-2">
+                  <Building2 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">New Vendor Detected</h3>
-                  <p className="text-sm text-gray-500">Add to your vendors?</p>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">New Vendor Detected</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Add to your vendors?</p>
                 </div>
               </div>
               <button
                 onClick={handleDismiss}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
               >
-                <X className="h-5 w-5 text-gray-400" />
+                <X className="h-5 w-5 text-gray-400 dark:text-gray-500" />
               </button>
             </div>
 
             {/* Content */}
             <div className="p-6 space-y-4">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                 <div className="flex items-start space-x-3">
-                  <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
                   <div>
-                    <p className="text-sm text-gray-900">
+                    <p className="text-sm text-gray-900 dark:text-white">
                       We detected a new vendor: <span className="font-semibold">{vendor.name}</span>
                     </p>
                     {vendor.domain && (
-                      <p className="text-sm text-gray-600 mt-1">{vendor.domain}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{vendor.domain}</p>
                     )}
                   </div>
                 </div>
               </div>
 
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Would you like to add this vendor to your account? This will add all associated brands with default pricing (45% discount, Net 30 terms).
               </p>
 
@@ -150,19 +150,19 @@ const VendorSuggestionModal: React.FC<VendorSuggestionModalProps> = ({
                   id="neverShowAgain"
                   checked={neverShowAgain}
                   onChange={(e) => setNeverShowAgain(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800"
                 />
-                <label htmlFor="neverShowAgain" className="text-sm text-gray-700">
+                <label htmlFor="neverShowAgain" className="text-sm text-gray-700 dark:text-gray-300">
                   Don't ask me again for this vendor
                 </label>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200">
+            <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200 dark:border-gray-700">
               <button
                 onClick={handleDismiss}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 disabled={isAdding}
               >
                 Not Now

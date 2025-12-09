@@ -101,16 +101,16 @@ export function ManualEntryModal({ isOpen, onClose, onSubmit }: ManualEntryModal
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-[#1F2623] rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Add Frame Manually</h2>
-            <p className="text-sm text-gray-500 mt-1">Enter frame details to add to inventory</p>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Add Frame Manually</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Enter frame details to add to inventory</p>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
             disabled={loading}
           >
             <X className="w-6 h-6" />
@@ -122,7 +122,7 @@ export function ManualEntryModal({ isOpen, onClose, onSubmit }: ManualEntryModal
           {/* Required Fields */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="vendor" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="vendor" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Vendor *
               </label>
               <input
@@ -131,7 +131,7 @@ export function ManualEntryModal({ isOpen, onClose, onSubmit }: ManualEntryModal
                 type="text"
                 value={formData.vendor}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 placeholder="e.g., Modern Optical"
                 required
                 disabled={loading}
@@ -139,7 +139,7 @@ export function ManualEntryModal({ isOpen, onClose, onSubmit }: ManualEntryModal
             </div>
 
             <div>
-              <label htmlFor="brand" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="brand" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Brand *
               </label>
               <input
@@ -148,7 +148,7 @@ export function ManualEntryModal({ isOpen, onClose, onSubmit }: ManualEntryModal
                 type="text"
                 value={formData.brand}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 placeholder="e.g., Ray-Ban"
                 required
                 disabled={loading}
@@ -156,7 +156,7 @@ export function ManualEntryModal({ isOpen, onClose, onSubmit }: ManualEntryModal
             </div>
 
             <div>
-              <label htmlFor="model" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="model" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Model *
               </label>
               <input
@@ -165,7 +165,7 @@ export function ManualEntryModal({ isOpen, onClose, onSubmit }: ManualEntryModal
                 type="text"
                 value={formData.model}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 placeholder="e.g., RB2140"
                 required
                 disabled={loading}
@@ -173,7 +173,7 @@ export function ManualEntryModal({ isOpen, onClose, onSubmit }: ManualEntryModal
             </div>
 
             <div>
-              <label htmlFor="color" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="color" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Color *
               </label>
               <input
@@ -182,7 +182,7 @@ export function ManualEntryModal({ isOpen, onClose, onSubmit }: ManualEntryModal
                 type="text"
                 value={formData.color}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 placeholder="e.g., Tortoise"
                 required
                 disabled={loading}
@@ -193,7 +193,7 @@ export function ManualEntryModal({ isOpen, onClose, onSubmit }: ManualEntryModal
           {/* Optional Fields */}
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label htmlFor="size" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="size" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Size
               </label>
               <input
@@ -202,14 +202,14 @@ export function ManualEntryModal({ isOpen, onClose, onSubmit }: ManualEntryModal
                 type="text"
                 value={formData.size}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 placeholder="e.g., 52-20"
                 disabled={loading}
               />
             </div>
 
             <div>
-              <label htmlFor="sku" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="sku" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 SKU
               </label>
               <input
@@ -218,14 +218,14 @@ export function ManualEntryModal({ isOpen, onClose, onSubmit }: ManualEntryModal
                 type="text"
                 value={formData.sku}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 placeholder="e.g., RB2140-902"
                 disabled={loading}
               />
             </div>
 
             <div>
-              <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="quantity" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Quantity *
               </label>
               <input
@@ -235,7 +235,7 @@ export function ManualEntryModal({ isOpen, onClose, onSubmit }: ManualEntryModal
                 min="1"
                 value={formData.quantity}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 required
                 disabled={loading}
               />
@@ -245,11 +245,11 @@ export function ManualEntryModal({ isOpen, onClose, onSubmit }: ManualEntryModal
           {/* Pricing Fields */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="cost" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="cost" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Cost (Your Price)
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-2 text-gray-500">$</span>
+                <span className="absolute left-3 top-2 text-gray-500 dark:text-gray-400">$</span>
                 <input
                   id="cost"
                   name="cost"
@@ -258,7 +258,7 @@ export function ManualEntryModal({ isOpen, onClose, onSubmit }: ManualEntryModal
                   min="0"
                   value={formData.cost || ''}
                   onChange={handleChange}
-                  className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-7 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                   placeholder="0.00"
                   disabled={loading}
                 />
@@ -266,11 +266,11 @@ export function ManualEntryModal({ isOpen, onClose, onSubmit }: ManualEntryModal
             </div>
 
             <div>
-              <label htmlFor="retail_price" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="retail_price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Retail Price
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-2 text-gray-500">$</span>
+                <span className="absolute left-3 top-2 text-gray-500 dark:text-gray-400">$</span>
                 <input
                   id="retail_price"
                   name="retail_price"
@@ -279,7 +279,7 @@ export function ManualEntryModal({ isOpen, onClose, onSubmit }: ManualEntryModal
                   min="0"
                   value={formData.retail_price || ''}
                   onChange={handleChange}
-                  className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-7 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                   placeholder="0.00"
                   disabled={loading}
                 />
@@ -289,7 +289,7 @@ export function ManualEntryModal({ isOpen, onClose, onSubmit }: ManualEntryModal
 
           {/* Order Info */}
           <div>
-            <label htmlFor="order_number" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="order_number" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Order Number (Optional)
             </label>
             <input
@@ -298,7 +298,7 @@ export function ManualEntryModal({ isOpen, onClose, onSubmit }: ManualEntryModal
               type="text"
               value={formData.order_number}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               placeholder="e.g., ORD-12345"
               disabled={loading}
             />
@@ -306,7 +306,7 @@ export function ManualEntryModal({ isOpen, onClose, onSubmit }: ManualEntryModal
 
           {/* Notes */}
           <div>
-            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Notes (Optional)
             </label>
             <textarea
@@ -315,14 +315,14 @@ export function ManualEntryModal({ isOpen, onClose, onSubmit }: ManualEntryModal
               value={formData.notes}
               onChange={handleChange}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               placeholder="Any additional information..."
               disabled={loading}
             />
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
             <Button
               type="button"
               variant="outline"

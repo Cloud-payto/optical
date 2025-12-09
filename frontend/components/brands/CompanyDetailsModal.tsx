@@ -110,29 +110,29 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white dark:bg-[#1F2623] rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center space-x-3">
-                <div className="bg-blue-100 rounded-lg p-2">
-                  <Building2 className="h-6 w-6 text-blue-600" />
+                <div className="bg-blue-100 dark:bg-blue-900/30 rounded-lg p-2">
+                  <Building2 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                     {formData.name}
                     {formData.accountNumber && (
-                      <span className="text-sm text-gray-600 font-mono ml-2">(#{formData.accountNumber})</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400 font-mono ml-2">(#{formData.accountNumber})</span>
                     )}
                   </h3>
-                  <p className="text-sm text-gray-500">Company Details</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Company Details</p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
               >
-                <X className="h-5 w-5 text-gray-400" />
+                <X className="h-5 w-5 text-gray-400 dark:text-gray-500" />
               </button>
             </div>
 
@@ -140,13 +140,13 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
             <div className="p-6 space-y-8">
               {/* Company Information Section */}
               <div>
-                <h4 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                  <Building2 className="h-5 w-5 mr-2 text-gray-600" />
+                <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+                  <Building2 className="h-5 w-5 mr-2 text-gray-600 dark:text-gray-400" />
                   Company Information
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Account Number
                     </label>
                     <div className="relative">
@@ -155,19 +155,19 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                       </div>
                       <input
                         type="text"
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 font-mono"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 font-mono bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                         value={formData.accountNumber || ''}
                         onChange={(e) => setFormData(prev => ({ ...prev, accountNumber: e.target.value || null }))}
                         placeholder="Enter your account number with this vendor"
                       />
                     </div>
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                       Your account number with this vendor (e.g., 1119312)
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Company Email
                     </label>
                     <div className="relative">
@@ -176,7 +176,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                       </div>
                       <input
                         type="email"
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                         value={formData.contactInfo?.companyEmail || ''}
                         onChange={(e) => handleInputChange('companyEmail', e.target.value)}
                         placeholder="info@company.com"
@@ -185,7 +185,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Company Phone
                     </label>
                     <div className="relative">
@@ -194,7 +194,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                       </div>
                       <input
                         type="tel"
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                         value={formData.contactInfo?.companyPhone || ''}
                         onChange={(e) => handleInputChange('companyPhone', e.target.value)}
                         placeholder="(555) 123-4567"
@@ -203,7 +203,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Support Email
                     </label>
                     <div className="relative">
@@ -212,7 +212,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                       </div>
                       <input
                         type="email"
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                         value={formData.contactInfo?.supportEmail || ''}
                         onChange={(e) => handleInputChange('supportEmail', e.target.value)}
                         placeholder="support@company.com"
@@ -221,7 +221,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Support Phone
                     </label>
                     <div className="relative">
@@ -230,7 +230,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                       </div>
                       <input
                         type="tel"
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                         value={formData.contactInfo?.supportPhone || ''}
                         onChange={(e) => handleInputChange('supportPhone', e.target.value)}
                         placeholder="(555) 987-6543"
@@ -239,7 +239,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Website
                     </label>
                     <div className="relative">
@@ -248,7 +248,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                       </div>
                       <input
                         type="url"
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                         value={formData.contactInfo?.website || ''}
                         onChange={(e) => handleInputChange('website', e.target.value)}
                         placeholder="https://www.company.com"
@@ -260,13 +260,13 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
 
               {/* Rep Information Section */}
               <div>
-                <h4 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-                  <User className="h-5 w-5 mr-2 text-gray-600" />
+                <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+                  <User className="h-5 w-5 mr-2 text-gray-600 dark:text-gray-400" />
                   Sales Representative
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Rep Name
                     </label>
                     <div className="relative">
@@ -275,7 +275,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                       </div>
                       <input
                         type="text"
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                         value={formData.contactInfo?.repName || ''}
                         onChange={(e) => handleInputChange('repName', e.target.value)}
                         placeholder="John Smith"
@@ -284,7 +284,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Rep Email
                     </label>
                     <div className="relative">
@@ -293,7 +293,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                       </div>
                       <input
                         type="email"
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                         value={formData.contactInfo?.repEmail || ''}
                         onChange={(e) => handleInputChange('repEmail', e.target.value)}
                         placeholder="john.smith@company.com"
@@ -302,7 +302,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Rep Phone
                     </label>
                     <div className="relative">
@@ -311,7 +311,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                       </div>
                       <input
                         type="tel"
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                         value={formData.contactInfo?.repPhone || ''}
                         onChange={(e) => handleInputChange('repPhone', e.target.value)}
                         placeholder="(555) 123-4567"
@@ -324,28 +324,28 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
               {/* Brands Section */}
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-lg font-medium text-gray-900 flex items-center">
-                    <Package className="h-5 w-5 mr-2 text-gray-600" />
+                  <h4 className="text-lg font-medium text-gray-900 dark:text-white flex items-center">
+                    <Package className="h-5 w-5 mr-2 text-gray-600 dark:text-gray-400" />
                     Brands
                   </h4>
                   <button
                     type="button"
                     onClick={handleAddBrand}
-                    className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+                    className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
                   >
                     <Plus className="h-4 w-4 mr-1" />
                     Add Brand
                   </button>
                 </div>
-                
+
                 {formData.brands.length === 0 ? (
-                  <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
-                    <Package className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                    <p className="text-gray-500">No brands added yet</p>
+                  <div className="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <Package className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-3" />
+                    <p className="text-gray-500 dark:text-gray-400">No brands added yet</p>
                     <button
                       type="button"
                       onClick={handleAddBrand}
-                      className="mt-3 text-sm text-blue-600 hover:text-blue-700"
+                      className="mt-3 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                     >
                       Add your first brand
                     </button>
@@ -353,15 +353,15 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                 ) : (
                   <div className="space-y-4">
                     {formData.brands.map((brand) => (
-                      <div key={brand.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                      <div key={brand.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           <div className="md:col-span-2 lg:col-span-3">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                               Brand Name
                             </label>
                             <input
                               type="text"
-                              className="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                              className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                               value={brand.name}
                               onChange={(e) => handleBrandChange(brand.id, 'name', e.target.value)}
                               placeholder="Enter brand name"
@@ -369,7 +369,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                           </div>
                           
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                               Wholesale Cost
                             </label>
                             <div className="relative">
@@ -380,7 +380,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                                 type="number"
                                 step="0.01"
                                 min="0"
-                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                                 value={brand.wholesaleCost || ''}
                                 onChange={(e) => handleBrandChange(brand.id, 'wholesaleCost', e.target.value)}
                                 placeholder="0.00"
@@ -389,7 +389,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                           </div>
                           
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                               Your Cost
                             </label>
                             <div className="relative">
@@ -400,7 +400,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                                 type="number"
                                 step="0.01"
                                 min="0"
-                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                                 value={brand.yourCost || ''}
                                 onChange={(e) => handleBrandChange(brand.id, 'yourCost', e.target.value)}
                                 placeholder="0.00"
@@ -409,7 +409,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                           </div>
 
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                               Retail Price
                             </label>
                             <div className="relative">
@@ -420,7 +420,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                                 type="number"
                                 step="0.01"
                                 min="0"
-                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                                 value={brand.retailPrice || ''}
                                 onChange={(e) => handleBrandChange(brand.id, 'retailPrice', e.target.value)}
                                 placeholder="0.00"
@@ -429,7 +429,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                           </div>
                           
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                               Tariff Tax (Optional)
                             </label>
                             <div className="relative">
@@ -440,7 +440,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                                 type="number"
                                 step="0.01"
                                 min="0"
-                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                                 value={brand.tariffTax || ''}
                                 onChange={(e) => handleBrandChange(brand.id, 'tariffTax', e.target.value)}
                                 placeholder="0.00"
@@ -466,10 +466,10 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200">
+            <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200 dark:border-gray-700">
               <button
                 onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 Cancel
               </button>
