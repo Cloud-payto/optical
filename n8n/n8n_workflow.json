@@ -10,7 +10,7 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -208,
+        -320,
         480
       ],
       "id": "4bf34dc6-37a1-42b1-888a-fe9be2b7fc55",
@@ -140,7 +140,7 @@
       "typeVersion": 4.2,
       "position": [
         2256,
-        -264
+        -272
       ],
       "id": "ecab662e-550f-4982-843c-0affc6b3c020",
       "name": "Enrich"
@@ -211,7 +211,7 @@
           "parameters": [
             {
               "name": "html",
-              "value": "={{ $json.email.html }}"
+              "value": "={{ $json.cleanedHtml || $json.email.html }}"
             },
             {
               "name": "plainText",
@@ -401,7 +401,7 @@
           "parameters": [
             {
               "name": "html",
-              "value": "={{ $json.email.html }}"
+              "value": "={{ $json.cleanedHtml || $json.email.html }}"
             },
             {
               "name": "plainText",
@@ -539,7 +539,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        16,
+        -96,
         480
       ],
       "id": "10905825-dd6b-4def-bdfd-f777a5e54ec6",
@@ -733,7 +733,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        240,
+        112,
         480
       ],
       "id": "b52414a6-3fc2-4feb-a27e-6ce2c3b4c468",
@@ -1025,7 +1025,7 @@
           "parameters": [
             {
               "name": "html",
-              "value": "={{ $json.email.html }}"
+              "value": "={{ $json.cleanedHtml || $json.email.html }}"
             },
             {
               "name": "plainText",
@@ -1202,7 +1202,7 @@
           "parameters": [
             {
               "name": "html",
-              "value": "={{ $json.email.html }}"
+              "value": "={{ $json.cleanedHtml || $json.email.html }}"
             },
             {
               "name": "plainText",
@@ -1335,12 +1335,12 @@
     },
     {
       "parameters": {
-        "jsCode": "// Get API response from HTTP Request node\nconst apiResponse = $json;\n\n// Get original email data from Extract Account ID node\nconst extractedData = $('Extract Account ID').item.json;\n\nreturn [{\n  json: {\n    // Original data needed by parsers\n    accountId: extractedData.accountId,\n    senderDomain: extractedData.senderDomain,\n    email: extractedData.email,\n    \n    // Vendor detection results from API\n    vendor: apiResponse.vendor,           // \"safilo\", \"modern_optical\", etc.\n    vendor_id: apiResponse.vendorId,      // UUID from database\n    vendor_name: apiResponse.vendorName,  // \"Safilo\", \"Modern Optical\", etc.\n    confidence: apiResponse.confidence,   // 95, 85, etc.\n    detectionMethod: apiResponse.method,  // \"domain\", \"signature\", etc.\n    \n    // Debug info (useful for troubleshooting)\n    detectionDebug: {\n      confidence: apiResponse.confidence,\n      signals: apiResponse.signals,\n      allScores: apiResponse.debug?.allScores\n    }\n  }\n}];"
+        "jsCode": "// Get Clean Email API response\nconst cleanEmailResponse = $json;\n\n// Get original email data from Extract Account ID node\nconst extractedData = $('Extract Account ID').item.json;\n\n// Get vendor detection results from Detect Vendor (API) node\nconst vendorResponse = $('Detect Vendor (API)').item.json;\n\nreturn [{\n  json: {\n    // Original data needed by parsers\n    accountId: extractedData.accountId,\n    senderDomain: extractedData.senderDomain,\n    email: extractedData.email,\n    \n    // CLEANED HTML from Clean Email endpoint\n    cleanedHtml: cleanEmailResponse.cleanedHtml,\n    detectedProviders: cleanEmailResponse.detectedProviders,\n    \n    // Vendor detection results from API\n    vendor: vendorResponse.vendor,           // \"safilo\", \"modern_optical\", etc.\n    vendor_id: vendorResponse.vendorId,      // UUID from database\n    vendor_name: vendorResponse.vendorName,  // \"Safilo\", \"Modern Optical\", etc.\n    confidence: vendorResponse.confidence,   // 95, 85, etc.\n    detectionMethod: vendorResponse.method,  // \"domain\", \"signature\", etc.\n    \n    // Debug info (useful for troubleshooting)\n    detectionDebug: {\n      confidence: vendorResponse.confidence,\n      signals: vendorResponse.signals,\n      allScores: vendorResponse.debug?.allScores,\n      emailProviders: cleanEmailResponse.detectedProviders\n    }\n  }\n}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        464,
+        496,
         480
       ],
       "id": "1d5a37c7-64ca-4a45-ae12-ddff589d206b",
@@ -1364,7 +1364,7 @@
           "parameters": [
             {
               "name": "html",
-              "value": "={{ $json.email.html }}"
+              "value": "={{ $json.cleanedHtml || $json.email.html }}"
             },
             {
               "name": "plainText",
@@ -2146,19 +2146,6 @@
     },
     {
       "parameters": {
-        "jsCode": "const parseResult = $('parse_Europa').item.json;\nconst checkCatalogResult = $('Check Catalog').item.json;\nconst accountId = $('Extract Account ID').item.json.accountId;\nconst emailData = $('Extract Account ID').item.json.email;\n\nreturn [{\n  json: {\n    accountId: accountId,\n    from: 'Europa',\n    subject: `Order #${parseResult.order.order_number}`,\n    html: emailData.html,\n    plainText: emailData.plain,\n    parsedData: {\n      vendor: 'Europa',\n      order: parseResult.order,  // Still from parse node\n      items: checkCatalogResult.items  // NOW from Check Catalog node!\n    }\n  }\n}];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1360,
-        -384
-      ],
-      "id": "1aabd852-4bfb-4dc7-a105-ca35d7143c8d",
-      "name": "Prepare Email Data1"
-    },
-    {
-      "parameters": {
         "method": "POST",
         "url": "https://optical-express-api.onrender.com/api/emails/create",
         "sendBody": true,
@@ -2309,7 +2296,7 @@
           "parameters": [
             {
               "name": "html",
-              "value": "={{ $json.email.html }}"
+              "value": "={{ $json.cleanedHtml || $json.email.html }}"
             },
             {
               "name": "plainText",
@@ -2352,7 +2339,7 @@
           "parameters": [
             {
               "name": "html",
-              "value": "={{ $json.email.html }}"
+              "value": "={{ $json.cleanedHtml || $json.email.html }}"
             },
             {
               "name": "plainText",
@@ -2413,19 +2400,6 @@
       ],
       "id": "9d4c92d6-c7e0-4673-9a74-94d68ddac0fa",
       "name": "Check Catalog8"
-    },
-    {
-      "parameters": {
-        "jsCode": "const parseResult = $('parse_Marchon').item.json;\nconst checkCatalogResult = $('Check Catalog6').item.json;\nconst accountId = $('Extract Account ID').item.json.accountId;\nconst emailData = $('Extract Account ID').item.json.email;\n\nreturn [{\n  json: {\n    accountId: accountId,\n    from: 'Kenmark Orders',\n    subject: `Order #${parseResult.order.order_number}`,\n    html: emailData.html,\n    plainText: emailData.plain,\n    parsedData: {\n      vendor: 'Marchon',  // underscore format\n      order: parseResult.order,\n      items: checkCatalogResult.items\n    }\n  }\n}];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1360,
-        1344
-      ],
-      "id": "49e3a6ff-4851-472f-8fa0-8d790af8b648",
-      "name": "Prepare Email Kenmark1"
     },
     {
       "parameters": {
@@ -2560,6 +2534,56 @@
       ],
       "id": "912d40a3-f027-46a8-bbdc-044a12c6c61e",
       "name": "Cache to Catalog8"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parseResult = $('parse_Marchon').item.json;\nconst checkCatalogResult = $('Check Catalog8').item.json;\nconst accountId = $('Extract Account ID').item.json.accountId;\nconst emailData = $('Extract Account ID').item.json.email;\n\nreturn [{\n  json: {\n    accountId: accountId,\n    from: 'Marchon Orders',\n    subject: `Order #${parseResult.order.order_number}`,\n    html: emailData.html,\n    plainText: emailData.plain,\n    parsedData: {\n      vendor: 'Marchon',  // underscore format\n      order: parseResult.order,\n      items: checkCatalogResult.items\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        1344
+      ],
+      "id": "49e3a6ff-4851-472f-8fa0-8d790af8b648",
+      "name": "Prepare Email Marchon"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parseResult = $('parse_Europa').item.json;\nconst checkCatalogResult = $('Check Catalog').item.json;\nconst accountId = $('Extract Account ID').item.json.accountId;\nconst emailData = $('Extract Account ID').item.json.email;\n\nreturn [{\n  json: {\n    accountId: accountId,\n    from: 'Europa',\n    subject: `Order #${parseResult.order.order_number}`,\n    html: emailData.html,\n    plainText: emailData.plain,\n    parsedData: {\n      vendor: 'Europa',\n      order: parseResult.order,  // Still from parse node\n      items: checkCatalogResult.items  // NOW from Check Catalog node!\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        -384
+      ],
+      "id": "1aabd852-4bfb-4dc7-a105-ca35d7143c8d",
+      "name": "Prepare Email Europa"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/parse/clean-email",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "html",
+              "value": "={{ $json.email.html }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        304,
+        480
+      ],
+      "id": "78377d6f-1e20-45f8-9c70-6f95f65c785a",
+      "name": "Clean Email"
     }
   ],
   "pinData": {},
@@ -2749,7 +2773,7 @@
       "main": [
         [
           {
-            "node": "Format API Response",
+            "node": "Clean Email",
             "type": "main",
             "index": 0
           }
@@ -3135,18 +3159,7 @@
       "main": [
         [
           {
-            "node": "Prepare Email Data1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Prepare Email Data1": {
-      "main": [
-        [
-          {
-            "node": "Create Email Record7",
+            "node": "Prepare Email Europa",
             "type": "main",
             "index": 0
           }
@@ -3201,18 +3214,7 @@
       "main": [
         [
           {
-            "node": "Prepare Email Kenmark1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Prepare Email Kenmark1": {
-      "main": [
-        [
-          {
-            "node": "Create Email Record8",
+            "node": "Prepare Email Marchon",
             "type": "main",
             "index": 0
           }
@@ -3240,13 +3242,46 @@
           }
         ]
       ]
+    },
+    "Prepare Email Marchon": {
+      "main": [
+        [
+          {
+            "node": "Create Email Record8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email Europa": {
+      "main": [
+        [
+          {
+            "node": "Create Email Record7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean Email": {
+      "main": [
+        [
+          {
+            "node": "Format API Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "4706ad77-489a-4f69-ae56-7074c9a26c50",
+  "versionId": "146b0936-0675-4609-b9ab-af811c842fe3",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "755d69fd97946ae86204aaf9353f2da391bb20edeb5619afdf676315f69f4cd2"

@@ -1,0 +1,777 @@
+{
+  "name": "Optical Inventory Software - Refactored",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "9f96a3ec-cf85-40f4-9bc9-338424768726",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -320,
+        480
+      ],
+      "id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+      "name": "Webhook",
+      "webhookId": "9f96a3ec-cf85-40f4-9bc9-338424768726"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract account ID from forwarded email headers/content\nconst email = $input.item.json;\n\nlet accountId = null;\n\n// Method 1: Check forwarding headers\nif (email.headers?.['x-account-id']) {\n  accountId = email.headers['x-account-id'];\n}\n\n// Method 2: Parse from email subject\nif (!accountId && email.headers?.subject) {\n  const match = email.headers.subject.match(/Account[:\\s]+(\\d+)/i);\n  if (match) accountId = match[1];\n}\n\n// Method 3: Extract from forwarded email \"To:\" line in plain text\nif (!accountId && email.plain) {\n  const match = email.plain.match(/To:\\s*.*?(\\d{6,})/);\n  if (match) accountId = match[1];\n}\n\n// Validation\nif (!accountId) {\n  throw new Error('Unable to extract account ID from email');\n}\n\nreturn {\n  json: {\n    ...email,\n    accountId,\n    extractedAt: new Date().toISOString()\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -120,
+        480
+      ],
+      "id": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e",
+      "name": "Extract Account ID"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/emails/detect-vendor",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"html\": {{ JSON.stringify($json.html) }},\n  \"plain\": {{ JSON.stringify($json.plain) }},\n  \"subject\": {{ JSON.stringify($json.headers.subject) }},\n  \"from\": {{ JSON.stringify($json.headers.from) }}\n}",
+        "options": {
+          "retry": {
+            "enabled": true,
+            "maxTries": 3,
+            "waitBetween": 2000
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        100,
+        480
+      ],
+      "id": "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f",
+      "name": "Detect Vendor (API)",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/parse/clean-email",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"html\": {{ JSON.stringify($json.html) }}\n}",
+        "options": {
+          "retry": {
+            "enabled": true,
+            "maxTries": 2,
+            "waitBetween": 1000
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        320,
+        480
+      ],
+      "id": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a",
+      "name": "Clean Email",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const email = $('Webhook').item.json;\nconst detection = $('Detect Vendor (API)').item.json;\nconst cleaned = $('Clean Email').item.json;\n\n// Merge all data\nreturn {\n  json: {\n    // Email data\n    accountId: email.accountId,\n    subject: email.headers?.subject || '',\n    from: email.headers?.from || '',\n    receivedAt: email.headers?.date || new Date().toISOString(),\n\n    // Email content (prefer cleaned HTML)\n    html: cleaned?.cleanedHtml || email.html,\n    originalHtml: email.html,\n    plain: email.plain,\n    attachments: email.attachments || [],\n\n    // Vendor detection\n    vendor: detection.vendor || 'Unknown',\n    vendorKey: detection.vendorKey || 'unknown',\n    confidence: detection.confidence || 0,\n\n    // Cleaning metadata\n    emailCleaned: !!cleaned?.cleanedHtml,\n    detectedProviders: cleaned?.detectedProviders || [],\n\n    // Processing metadata\n    workflowStartedAt: new Date().toISOString()\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        480
+      ],
+      "id": "e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b",
+      "name": "Format API Response"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Inline vendor configuration (will be moved to Supabase later)\nconst vendorConfigs = {\n  'Modern Optical': { vendorKey: 'modernoptical', requiresEnrichment: true, usesPdfParsing: false },\n  'Safilo': { vendorKey: 'safilo', requiresEnrichment: false, usesPdfParsing: true },\n  'Luxottica': { vendorKey: 'luxottica', requiresEnrichment: false, usesPdfParsing: false },\n  'Europa': { vendorKey: 'europa', requiresEnrichment: false, usesPdfParsing: false },\n  'Etnia Barcelona': { vendorKey: 'etnia', requiresEnrichment: false, usesPdfParsing: false },\n  'Ideal Optics': { vendorKey: 'idealoptics', requiresEnrichment: true, usesPdfParsing: false },\n  \"L'amyamerica\": { vendorKey: 'lamy', requiresEnrichment: false, usesPdfParsing: false },\n  'kenmark': { vendorKey: 'kenmark', requiresEnrichment: false, usesPdfParsing: false },\n  'Marchon': { vendorKey: 'marchon', requiresEnrichment: false, usesPdfParsing: false }\n};\n\nconst data = $input.item.json;\nconst config = vendorConfigs[data.vendor];\n\nif (!config) {\n  return {\n    json: {\n      ...data,\n      vendorConfig: null,\n      routeTo: 'unknown_vendor'\n    }\n  };\n}\n\nreturn {\n  json: {\n    ...data,\n    vendorConfig: config,\n    routeTo: config.usesPdfParsing ? 'pdf_handler' :\n             config.requiresEnrichment ? 'enrichment_handler' :\n             'standard_processor'\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        760,
+        480
+      ],
+      "id": "f6a7b8c9-d0e1-4f2a-3b4c-5d6e7f8a9b0c",
+      "name": "Load Vendor Config"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.item.json;\n\n// Check if config loaded\nif (!data.vendorConfig) {\n  return {\n    json: {\n      ...data,\n      error: 'Vendor configuration not found',\n      routeTo: 'unknown_vendor'\n    }\n  };\n}\n\n// Validation passed\nreturn {\n  json: {\n    ...data\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        980,
+        480
+      ],
+      "id": "a7b8c9d0-e1f2-4a3b-4c5d-6e7f8a9b0c1d",
+      "name": "Validate Vendor Config"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.routeTo }}",
+                    "rightValue": "unknown_vendor",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "unknown_vendor"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.routeTo }}",
+                    "rightValue": "standard_processor",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "standard_processor"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        1200,
+        480
+      ],
+      "id": "b8c9d0e1-f2a3-4b4c-5d6e-7f8a9b0c1d2e",
+      "name": "Route by Vendor Type"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://optical-express-api.onrender.com/api/parse/{{ $json.vendorConfig.vendorKey }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"html\": {{ JSON.stringify($json.html) }},\n  \"accountId\": {{ JSON.stringify($json.accountId) }},\n  \"attachments\": {{ JSON.stringify($json.attachments) }}\n}",
+        "options": {
+          "retry": {
+            "enabled": true,
+            "maxTries": 3,
+            "waitBetween": 2000
+          },
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1420,
+        380
+      ],
+      "id": "c9d0e1f2-a3b4-4c5d-6e7f-8a9b0c1d2e3f",
+      "name": "Parse Vendor Email"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/catalog/check",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"vendor\": {{ JSON.stringify($json.vendor) }},\n  \"vendorKey\": {{ JSON.stringify($json.vendorKey) }},\n  \"items\": {{ JSON.stringify($json.items) }}\n}",
+        "options": {
+          "retry": {
+            "enabled": true,
+            "maxTries": 3,
+            "waitBetween": 2000
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1640,
+        380
+      ],
+      "id": "d0e1f2a3-b4c5-4d6e-7f8a-9b0c1d2e3f4a",
+      "name": "Check Catalog"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get parsed data and catalog check results\nconst parsedData = $('Parse Vendor Email').item.json;\nconst catalogCheck = $('Check Catalog').item.json;\nconst originalData = $('Validate Vendor Config').item.json;\n\n// Merge catalog check info into items\nconst itemsWithCatalogInfo = parsedData.items.map(item => {\n  const catalogInfo = catalogCheck.items?.find(c => c.sku === item.sku);\n  return {\n    ...item,\n    existsInCatalog: catalogInfo?.existsInCatalog || false,\n    catalogPrice: catalogInfo?.catalogPrice,\n    needsEnrichment: catalogInfo?.needsEnrichment || false\n  };\n});\n\n// CRITICAL: Use DYNAMIC vendor names from detection, never hardcoded\nconst vendor = parsedData.vendor || originalData.vendor;\nconst vendorKey = parsedData.vendorKey || originalData.vendorKey;\nconst accountId = parsedData.accountId || originalData.accountId;\n\nreturn {\n  json: {\n    vendor: vendor,\n    vendorKey: vendorKey,\n    accountId: accountId,\n    order: parsedData.order,\n    items: itemsWithCatalogInfo,\n    catalogCheckResult: catalogCheck,\n\n    // For API calls - DYNAMIC vendor names\n    emailData: {\n      vendor: vendor,\n      account_id: accountId,\n      order_number: parsedData.order?.order_number,\n      order_date: parsedData.order?.order_date,\n      ship_to: parsedData.order?.ship_to,\n      total_amount: parsedData.order?.total_amount,\n      items: itemsWithCatalogInfo,\n      catalog_check_summary: catalogCheck.summary\n    },\n\n    bulkAddData: {\n      vendor: vendor,  // CRITICAL: Dynamic, not hardcoded\n      account_id: accountId,\n      order_number: parsedData.order?.order_number,\n      items: itemsWithCatalogInfo.map(item => ({\n        sku: item.sku,\n        description: item.description,\n        quantity: item.quantity,\n        price: item.price,\n        upc: item.upc\n      }))\n    },\n\n    cacheData: {\n      vendorName: vendor,  // CRITICAL: Fix for Bug #1 - Dynamic vendor\n      items: itemsWithCatalogInfo.map(item => ({\n        sku: item.sku,\n        description: item.description,\n        price: item.price,\n        upc: item.upc\n      }))\n    },\n\n    // Check if enrichment needed\n    needsEnrichment: originalData.vendorConfig?.requiresEnrichment && \n                     itemsWithCatalogInfo.some(item => item.needsEnrichment)\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1860,
+        380
+      ],
+      "id": "e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a5b",
+      "name": "Prepare Email Data"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition1",
+              "leftValue": "={{ $json.needsEnrichment }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2080,
+        380
+      ],
+      "id": "f2a3b4c5-d6e7-4f8a-9b0c-1d2e3f4a5b6c",
+      "name": "If cached"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://optical-express-api.onrender.com/api/enrich/{{ $json.vendorKey }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"items\": {{ JSON.stringify($json.items.filter(item => item.needsEnrichment)) }}\n}",
+        "options": {
+          "retry": {
+            "enabled": true,
+            "maxTries": 2,
+            "waitBetween": 2000
+          },
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2300,
+        280
+      ],
+      "id": "a3b4c5d6-e7f8-4a9b-0c1d-2e3f4a5b6c7d",
+      "name": "Enrich",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge enriched data back into items\nconst preparedData = $('Prepare Email Data').item.json;\nconst enrichedResult = $('Enrich').item.json;\n\n// Create lookup map of enriched items\nconst enrichedMap = new Map();\nif (enrichedResult?.items) {\n  enrichedResult.items.forEach(item => {\n    enrichedMap.set(item.sku, item);\n  });\n}\n\n// Merge enriched data into items\nconst mergedItems = preparedData.items.map(item => {\n  const enrichedInfo = enrichedMap.get(item.sku);\n  return {\n    ...item,\n    upc: enrichedInfo?.upc || item.upc,\n    enriched: !!enrichedInfo\n  };\n});\n\n// Update all data structures with enriched items\nreturn {\n  json: {\n    ...preparedData,\n    items: mergedItems,\n    emailData: {\n      ...preparedData.emailData,\n      items: mergedItems\n    },\n    bulkAddData: {\n      ...preparedData.bulkAddData,\n      items: mergedItems.map(item => ({\n        sku: item.sku,\n        description: item.description,\n        quantity: item.quantity,\n        price: item.price,\n        upc: item.upc\n      }))\n    },\n    cacheData: {\n      ...preparedData.cacheData,\n      items: mergedItems.map(item => ({\n        sku: item.sku,\n        description: item.description,\n        price: item.price,\n        upc: item.upc\n      }))\n    },\n    enrichmentApplied: true\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2520,
+        280
+      ],
+      "id": "b4c5d6e7-f8a9-4b0c-1d2e-3f4a5b6c7d8e",
+      "name": "Merge Enrichment Results"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/emails/create",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.emailData) }}",
+        "options": {
+          "retry": {
+            "enabled": true,
+            "maxTries": 3,
+            "waitBetween": 2000
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2740,
+        180
+      ],
+      "id": "c5d6e7f8-a9b0-4c1d-2e3f-4a5b6c7d8e9f",
+      "name": "Create Email Record",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/inventory/bulk-add",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.bulkAddData) }}",
+        "options": {
+          "retry": {
+            "enabled": true,
+            "maxTries": 3,
+            "waitBetween": 2000
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2740,
+        380
+      ],
+      "id": "d6e7f8a9-b0c1-4d2e-3f4a-5b6c7d8e9f0a",
+      "name": "Bulk-Add Items",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/catalog/cache",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.cacheData) }}",
+        "options": {
+          "retry": {
+            "enabled": true,
+            "maxTries": 3,
+            "waitBetween": 2000
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2740,
+        580
+      ],
+      "id": "e7f8a9b0-c1d2-4e3f-4a5b-6c7d8e9f0a1b",
+      "name": "Cache to Catalog",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get results from all three parallel nodes\nconst emailResult = $('Create Email Record').item.json || {};\nconst bulkAddResult = $('Bulk-Add Items').item.json || {};\nconst cacheResult = $('Cache to Catalog').item.json || {};\nconst preparedData = $('Prepare Email Data').item.json;\n\n// Check for any failures\nconst failures = [];\nif (emailResult.error) failures.push('Create Email Record failed');\nif (bulkAddResult.error) failures.push('Bulk-Add Items failed');\nif (cacheResult.error) failures.push('Cache to Catalog failed');\n\nreturn {\n  json: {\n    success: failures.length === 0,\n    message: failures.length === 0 ? 'Order processed successfully' : `Partial failure: ${failures.join(', ')}`,\n\n    // Results from each step\n    emailRecordId: emailResult.id,\n    itemsAdded: bulkAddResult.itemsAdded || 0,\n    itemsCached: cacheResult.itemsCached || 0,\n\n    // Summary\n    vendor: preparedData.vendor,\n    orderId: preparedData.order?.order_number,\n    itemsProcessed: preparedData.items?.length || 0,\n\n    // For metrics\n    workflowStartedAt: $('Format API Response').item.json.workflowStartedAt,\n    workflowEndedAt: new Date().toISOString(),\n\n    // Failures (if any)\n    failures: failures.length > 0 ? failures : null\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2960,
+        380
+      ],
+      "id": "f8a9b0c1-d2e3-4f4a-5b6c-7d8e9f0a1b2c",
+      "name": "Merge Results"
+    },
+    {
+      "parameters": {
+        "tableId": "emails",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "account_id",
+              "fieldValue": "={{ $json.accountId }}"
+            },
+            {
+              "fieldId": "from_email",
+              "fieldValue": "={{ $json.from }}"
+            },
+            {
+              "fieldId": "to_email",
+              "fieldValue": ""
+            },
+            {
+              "fieldId": "subject",
+              "fieldValue": "={{ $json.subject }}"
+            },
+            {
+              "fieldId": "raw_data",
+              "fieldValue": "={{ $json }}"
+            },
+            {
+              "fieldId": "plain_text",
+              "fieldValue": "={{ $json.plain }}"
+            },
+            {
+              "fieldId": "html_text",
+              "fieldValue": "={{ $json.html }}"
+            },
+            {
+              "fieldId": "parse_status",
+              "fieldValue": "failed"
+            },
+            {
+              "fieldId": "vendor_detected",
+              "fieldValue": "={{ $json.vendor }}"
+            },
+            {
+              "fieldId": "confidence",
+              "fieldValue": "={{ $json.confidence }}"
+            },
+            {
+              "fieldId": "reason",
+              "fieldValue": "={{ $json.error || 'Vendor not configured or detection failed' }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        580
+      ],
+      "id": "a9b0c1d2-e3f4-4a5b-6c7d-8e9f0a1b2c3d",
+      "name": "Handle Unknown Vendor",
+      "credentials": {
+        "supabaseApi": {
+          "id": "TXCUnZqEhts5gkjI",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Account ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Account ID": {
+      "main": [
+        [
+          {
+            "node": "Detect Vendor (API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detect Vendor (API)": {
+      "main": [
+        [
+          {
+            "node": "Clean Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean Email": {
+      "main": [
+        [
+          {
+            "node": "Format API Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format API Response": {
+      "main": [
+        [
+          {
+            "node": "Load Vendor Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Vendor Config": {
+      "main": [
+        [
+          {
+            "node": "Validate Vendor Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Vendor Config": {
+      "main": [
+        [
+          {
+            "node": "Route by Vendor Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Vendor Type": {
+      "main": [
+        [
+          {
+            "node": "Handle Unknown Vendor",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Parse Vendor Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Vendor Email": {
+      "main": [
+        [
+          {
+            "node": "Check Catalog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Catalog": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email Data": {
+      "main": [
+        [
+          {
+            "node": "If cached",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If cached": {
+      "main": [
+        [
+          {
+            "node": "Enrich",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Email Record",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Bulk-Add Items",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Cache to Catalog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enrich": {
+      "main": [
+        [
+          {
+            "node": "Merge Enrichment Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Enrichment Results": {
+      "main": [
+        [
+          {
+            "node": "Create Email Record",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Bulk-Add Items",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Cache to Catalog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Email Record": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bulk-Add Items": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cache to Catalog": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2025-12-09T00:00:00.000Z",
+  "versionId": "1"
+}

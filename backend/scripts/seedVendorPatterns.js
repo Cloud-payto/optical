@@ -2,17 +2,23 @@ require('dotenv').config();
 const { supabase } = require('../lib/supabase');
 
 /**
- * Seed Email Patterns for Vendor Detection
+ * Vendor Email Patterns for Detection
  *
- * This script populates the email_patterns JSONB column in the vendors table
- * with real patterns extracted from actual vendor emails.
+ * This module manages email_patterns JSONB column in the vendors table.
+ * Patterns are synced on server startup (idempotent - only updates if changed).
  *
  * Pattern Structure:
  * {
- *   tier1: { domains: [], weight: 95 },
- *   tier2: { body_signatures: [], weight: 85 },
+ *   tier1: { domains: [], weight: 95 },           // Domain matching (highest priority)
+ *   tier2: { body_signatures: [], weight: 85 },   // Body content signatures
  *   tier3: { subject_keywords: [], body_keywords: [], weight: 60, required_matches: 2 }
  * }
+ *
+ * Adding a new vendor:
+ * 1. Add patterns here with vendor code as key (match your database vendor.code)
+ * 2. Create parser in /parsers/ folder
+ * 3. Register parser in /parsers/index.js
+ * 4. Patterns auto-sync on next deploy/restart
  */
 
 const vendorPatterns = {
@@ -41,7 +47,7 @@ const vendorPatterns = {
 
   LUX: {
     tier1: {
-      domains: ['luxottica.com', 'us.luxottica.com'],
+      domains: ['luxottica.com', 'us.luxottica.com', 'my.luxottica.com'],
       weight: 95
     },
     tier2: {
@@ -49,13 +55,123 @@ const vendorPatterns = {
         'my.luxottica.com',
         'luxottica',
         'cart number',
-        'customer reference'
+        'customer reference',
+        'luxottica group'
       ],
       weight: 85
     },
     tier3: {
-      subject_keywords: ['luxottica', 'cart number'],
+      subject_keywords: ['luxottica', 'cart number', 'order confirmation'],
       body_keywords: ['luxottica', 'customer code', 'agent reference'],
+      weight: 60,
+      required_matches: 2
+    }
+  },
+
+  luxottica: {
+    tier1: {
+      domains: ['luxottica.com', 'us.luxottica.com', 'my.luxottica.com'],
+      weight: 95
+    },
+    tier2: {
+      body_signatures: [
+        'my.luxottica.com',
+        'luxottica',
+        'cart number',
+        'customer reference',
+        'luxottica group'
+      ],
+      weight: 85
+    },
+    tier3: {
+      subject_keywords: ['luxottica', 'cart number', 'order confirmation'],
+      body_keywords: ['luxottica', 'customer code', 'agent reference'],
+      weight: 60,
+      required_matches: 2
+    }
+  },
+
+  // Ideal Optics
+  IDEAL: {
+    tier1: {
+      domains: ['i-dealoptics.com', 'idealoptics.com'],
+      weight: 95
+    },
+    tier2: {
+      body_signatures: [
+        'i-deal optics',
+        'ideal optics',
+        'i-dealoptics.com'
+      ],
+      weight: 85
+    },
+    tier3: {
+      subject_keywords: ['ideal optics', 'i-deal', 'order confirmation'],
+      body_keywords: ['i-deal optics', 'ideal optics', 'order number'],
+      weight: 60,
+      required_matches: 2
+    }
+  },
+
+  idealoptics: {
+    tier1: {
+      domains: ['i-dealoptics.com', 'idealoptics.com'],
+      weight: 95
+    },
+    tier2: {
+      body_signatures: [
+        'i-deal optics',
+        'ideal optics',
+        'i-dealoptics.com'
+      ],
+      weight: 85
+    },
+    tier3: {
+      subject_keywords: ['ideal optics', 'i-deal', 'order confirmation'],
+      body_keywords: ['i-deal optics', 'ideal optics', 'order number'],
+      weight: 60,
+      required_matches: 2
+    }
+  },
+
+  // L'amyamerica
+  LAMY: {
+    tier1: {
+      domains: ['lamyamerica.com', 'lamy-america.com'],
+      weight: 95
+    },
+    tier2: {
+      body_signatures: [
+        "l'amy america",
+        'lamy america',
+        'lamyamerica.com'
+      ],
+      weight: 85
+    },
+    tier3: {
+      subject_keywords: ['lamy', "l'amy", 'order confirmation'],
+      body_keywords: ['lamy america', "l'amy america", 'order number'],
+      weight: 60,
+      required_matches: 2
+    }
+  },
+
+  lamyamerica: {
+    tier1: {
+      domains: ['lamyamerica.com', 'lamy-america.com'],
+      weight: 95
+    },
+    tier2: {
+      body_signatures: [
+        "l'amy america",
+        'lamy america',
+        'lamyamerica.com'
+      ],
+      weight: 85
+    },
+    tier3: {
+      subject_keywords: ['lamy', "l'amy", 'order confirmation'],
+      body_keywords: ['lamy america', "l'amy america", 'order number'],
       weight: 60,
       required_matches: 2
     }
@@ -172,25 +288,116 @@ const vendorPatterns = {
 
   MARCHON: {
     tier1: {
-      domains: ['marchon.com', 'marchoneyewear.com'],
+      domains: ['marchon.com', 'marchoneyewear.com', 'altaireyewear.com'],
       weight: 95
     },
     tier2: {
       body_signatures: [
+        'marchon order confirmation',
+        'marchon eyewear',
         'marchon',
-        'marchon eyewear'
+        '1-800-645-1300'  // Marchon customer service number
       ],
       weight: 85
     },
     tier3: {
-      subject_keywords: ['marchon', 'order'],
-      body_keywords: ['marchon', 'order'],
+      subject_keywords: ['marchon', 'marchon order confirmation'],
+      body_keywords: ['marchon', 'order id:', 'sales rep:', 'rep stock order'],
+      weight: 60,
+      required_matches: 2
+    }
+  },
+
+  // Lowercase version for case-insensitive matching
+  marchon: {
+    tier1: {
+      domains: ['marchon.com', 'marchoneyewear.com', 'altaireyewear.com'],
+      weight: 95
+    },
+    tier2: {
+      body_signatures: [
+        'marchon order confirmation',
+        'marchon eyewear',
+        'marchon',
+        '1-800-645-1300'  // Marchon customer service number
+      ],
+      weight: 85
+    },
+    tier3: {
+      subject_keywords: ['marchon', 'marchon order confirmation'],
+      body_keywords: ['marchon', 'order id:', 'sales rep:', 'rep stock order'],
       weight: 60,
       required_matches: 2
     }
   }
 };
 
+/**
+ * Sync vendor patterns on server startup (idempotent)
+ * Only updates vendors whose patterns have changed or are missing
+ * Fast - skips vendors that already have correct patterns
+ */
+async function syncVendorPatterns() {
+  console.log('🔄 Syncing vendor email patterns...');
+
+  try {
+    // Get all active vendors with their current patterns
+    const { data: vendors, error: vendorsError } = await supabase
+      .from('vendors')
+      .select('id, name, code, email_patterns')
+      .eq('is_active', true);
+
+    if (vendorsError) {
+      throw new Error(`Failed to fetch vendors: ${vendorsError.message}`);
+    }
+
+    let updatedCount = 0;
+    let skippedCount = 0;
+    let unchangedCount = 0;
+
+    for (const vendor of vendors) {
+      const newPatterns = vendorPatterns[vendor.code];
+
+      if (!newPatterns) {
+        skippedCount++;
+        continue;
+      }
+
+      // Check if patterns need updating (compare JSON)
+      const currentPatternsJson = JSON.stringify(vendor.email_patterns || {});
+      const newPatternsJson = JSON.stringify(newPatterns);
+
+      if (currentPatternsJson === newPatternsJson) {
+        unchangedCount++;
+        continue;
+      }
+
+      // Update patterns
+      const { error: updateError } = await supabase
+        .from('vendors')
+        .update({ email_patterns: newPatterns })
+        .eq('id', vendor.id);
+
+      if (updateError) {
+        console.error(`  ❌ Failed to update ${vendor.name}:`, updateError.message);
+        continue;
+      }
+
+      console.log(`  ✅ Updated ${vendor.name} email patterns`);
+      updatedCount++;
+    }
+
+    console.log(`📧 Vendor patterns sync complete: ${updatedCount} updated, ${unchangedCount} unchanged, ${skippedCount} no patterns defined`);
+
+  } catch (error) {
+    console.error('❌ Vendor pattern sync failed:', error.message);
+    // Don't throw - allow server to start even if sync fails
+  }
+}
+
+/**
+ * Full seed function (verbose, for manual runs)
+ */
 async function seedVendorPatterns() {
   console.log('🌱 Starting vendor pattern seeding...\n');
 
@@ -270,7 +477,7 @@ async function seedVendorPatterns() {
   }
 }
 
-// Run the seeding script
+// Run the seeding script when executed directly
 if (require.main === module) {
   seedVendorPatterns()
     .then(() => {
@@ -283,4 +490,4 @@ if (require.main === module) {
     });
 }
 
-module.exports = { seedVendorPatterns, vendorPatterns };
+module.exports = { seedVendorPatterns, syncVendorPatterns, vendorPatterns };

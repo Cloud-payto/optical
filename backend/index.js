@@ -35,18 +35,24 @@ const returnReportsRoutes = require('./routes/returnReports');
 // Import Supabase client
 const { supabase } = require('./lib/supabase');
 
+// Import vendor pattern seeder
+const { syncVendorPatterns } = require('./scripts/seedVendorPatterns');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Trust Render proxy for accurate rate limiting and IP detection
 app.set('trust proxy', 1);
 
-// Test Supabase connection on startup
+// Test Supabase connection and sync vendor patterns on startup
 (async () => {
   try {
     const { data, error } = await supabase.from('emails').select('count').limit(1);
     if (error) throw error;
     console.log('✅ Supabase connection established');
+
+    // Sync vendor email patterns (idempotent - only updates if patterns changed)
+    await syncVendorPatterns();
   } catch (error) {
     console.error('❌ Supabase connection failed:', error.message);
     console.log('Please check your SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables');
