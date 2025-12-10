@@ -1409,19 +1409,38 @@ const vendorOperations = {
 
   async getCatalogBrandsByVendor() {
     try {
-      // Get unique brands from vendor_catalog grouped by vendor
-      const { data, error } = await supabase
-        .from('vendor_catalog')
-        .select('vendor_id, vendor_name, brand')
-        .not('vendor_id', 'is', null)
-        .not('brand', 'is', null);
+      // Fetch all catalog items in batches to bypass Supabase 1000 row limit
+      // This mirrors the approach used in /api/catalog/vendor/:vendorId
+      let allData = [];
+      let fromIndex = 0;
+      const batchSize = 1000;
+      let hasMore = true;
 
-      if (error) throw error;
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('vendor_catalog')
+          .select('vendor_id, vendor_name, brand')
+          .not('vendor_id', 'is', null)
+          .not('brand', 'is', null)
+          .range(fromIndex, fromIndex + batchSize - 1);
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          allData = allData.concat(data);
+          fromIndex += batchSize;
+          if (data.length < batchSize) {
+            hasMore = false;
+          }
+        } else {
+          hasMore = false;
+        }
+      }
 
       // Group brands by vendor_id
       const vendorBrandsMap = {};
 
-      (data || []).forEach(item => {
+      allData.forEach(item => {
         const vendorId = item.vendor_id;
         const vendorName = item.vendor_name;
         const brand = item.brand;
@@ -1444,7 +1463,7 @@ const vendorOperations = {
         brands: Array.from(vendor.brands).sort()
       }));
 
-      console.log(`📦 getCatalogBrandsByVendor: Found brands for ${result.length} vendors`);
+      console.log(`📦 getCatalogBrandsByVendor: Found ${allData.length} total records, brands for ${result.length} vendors`);
       result.forEach(v => console.log(`   - ${v.vendor_name}: ${v.brands.length} brands`));
 
       return result;
