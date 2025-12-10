@@ -23,14 +23,14 @@ import {
 
 // Supported vendors we can parse emails from
 const supportedVendors = [
-  { name: 'Luxottica', description: 'Ray-Ban, Oakley, Persol, Oliver Peoples, Prada, Chanel, and more' },
-  { name: 'Safilo', description: 'Carrera, Fossil, Hugo Boss, Kate Spade, Tommy Hilfiger, and more' },
-  { name: 'Marchon', description: 'Nike, Calvin Klein, Columbia, Dragon, Flexon, and more' },
-  { name: 'Modern Optical', description: 'Affordable eyewear collections for optical retailers' },
-  { name: 'Europa', description: 'Cinzia, Scott Harris, Kliik, and other quality collections' },
-  { name: 'I-Deal Optics', description: 'Independent eyewear brands and collections' },
-  { name: 'Kenmark', description: 'Lilly Pulitzer, Op, Randy Jackson, and specialty brands' },
-  { name: "L'amy America", description: 'Ann Taylor, bebe, Jones New York, and designer brands' },
+  'Luxottica',
+  'Safilo',
+  'Marchon',
+  'Modern Optical',
+  'Europa',
+  'I-Deal Optics',
+  'Kenmark',
+  "L'amy America",
 ];
 
 const HomePage = () => {
@@ -212,18 +212,17 @@ const HomePage = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
               {supportedVendors.map((vendor, index) => (
                 <motion.div
-                  key={vendor.name}
+                  key={vendor}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: index * 0.05 }}
-                  className="bg-white dark:bg-[#1F2623] rounded-xl p-5 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all duration-300"
+                  className="bg-white dark:bg-[#1F2623] rounded-lg px-4 py-3 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all duration-300 text-center"
                 >
-                  <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{vendor.name}</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{vendor.description}</p>
+                  <span className="font-medium text-gray-900 dark:text-white text-sm">{vendor}</span>
                 </motion.div>
               ))}
             </div>
