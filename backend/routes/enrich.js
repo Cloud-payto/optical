@@ -1022,6 +1022,309 @@ router.post('/europa/single', async (req, res) => {
 });
 
 /**
+ * POST /api/enrich/lamy
+ * Enrich L'amyamerica items with API data (UPC, pricing, stock status)
+ * Uses model-based search when UPC is not available
+ *
+ * Body: {
+ *   accountId: string (UUID),
+ *   orderNumber: string,
+ *   items?: array (optional - if provided, enrich these items; otherwise fetch from DB),
+ *   skipDbUpdate?: boolean (if true, only return enriched data without updating DB)
+ * }
+ *
+ * Returns: {
+ *   success: boolean,
+ *   message: string,
+ *   enrichedItems: array,
+ *   enrichedCount: number
+ * }
+ */
+router.post('/lamy', async (req, res) => {
+  try {
+    const { accountId, orderNumber, items, skipDbUpdate } = req.body;
+
+    console.log('[ENRICH] L\'amyamerica enrichment request received');
+    console.log('  Account ID:', accountId);
+    console.log('  Order Number:', orderNumber);
+    console.log('  Items provided:', items ? items.length : 'No, will fetch from DB');
+    console.log('  Skip DB Update:', skipDbUpdate ? 'Yes' : 'No');
+
+    // Validate required fields
+    if (!accountId || !orderNumber) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: accountId and orderNumber are required'
+      });
+    }
+
+    // Get the L'amyamerica service
+    const lamyService = parserRegistry.getLamyamericaService();
+    if (!lamyService) {
+      return res.status(500).json({
+        success: false,
+        error: 'L\'amyamerica service not available'
+      });
+    }
+
+    let itemsToEnrich = items;
+
+    // If items not provided, fetch pending items from database
+    if (!itemsToEnrich || itemsToEnrich.length === 0) {
+      console.log('[ENRICH] Fetching pending items from database...');
+
+      const { data: allPendingItems, error: inventoryError } = await supabase
+        .from('inventory')
+        .select('*')
+        .eq('account_id', accountId)
+        .eq('status', 'pending');
+
+      if (inventoryError) {
+        console.error('[ENRICH] Error fetching items:', inventoryError);
+        return res.status(500).json({
+          success: false,
+          error: 'Failed to fetch pending items',
+          message: inventoryError.message
+        });
+      }
+
+      // Filter items that match the order number
+      itemsToEnrich = allPendingItems?.filter(item => {
+        if (item.enriched_data?.order_number === orderNumber) return true;
+        if (item.enriched_data?.order?.order_number === orderNumber) return true;
+        return false;
+      }) || [];
+
+      console.log(`[ENRICH] Found ${itemsToEnrich.length} pending items for order ${orderNumber}`);
+
+      if (itemsToEnrich.length === 0) {
+        return res.status(404).json({
+          success: false,
+          error: 'No pending items found for this order',
+          message: `No pending items found for order ${orderNumber}`
+        });
+      }
+    }
+
+    // Separate items that need enrichment vs already have cached data
+    const itemsNeedingEnrichment = [];
+    const itemsWithCachedData = [];
+
+    itemsToEnrich.forEach(item => {
+      const hasWholesalePrice = item.wholesale_price && item.wholesale_price > 0;
+      const hasUpc = item.upc && item.upc.length > 0;
+      const alreadyEnriched = item.api_verified === true;
+
+      if (alreadyEnriched || (hasWholesalePrice && hasUpc)) {
+        console.log(`✅ Skipping enrichment for ${item.brand} ${item.model} - already has cached data`);
+        itemsWithCachedData.push(item);
+      } else {
+        console.log(`🔍 Will enrich ${item.brand} ${item.model} - needs API data`);
+        itemsNeedingEnrichment.push(item);
+      }
+    });
+
+    console.log(`[ENRICH] ${itemsWithCachedData.length} items already have cached data, ${itemsNeedingEnrichment.length} need enrichment`);
+
+    let enrichedItems = [];
+
+    // Only enrich items that need it
+    if (itemsNeedingEnrichment.length > 0) {
+      console.log(`[ENRICH] Starting API enrichment for ${itemsNeedingEnrichment.length} items...`);
+      const apiEnrichedItems = await lamyService.enrichPendingItems(itemsNeedingEnrichment);
+      console.log(`[ENRICH] API enrichment completed for ${apiEnrichedItems.length} items`);
+      enrichedItems = enrichedItems.concat(apiEnrichedItems);
+    } else {
+      console.log('[ENRICH] No items need enrichment - all have cached data!');
+    }
+
+    // Add items that were already cached (no enrichment needed)
+    enrichedItems = enrichedItems.concat(itemsWithCachedData);
+
+    // Count how many were actually enriched (have api_verified = true)
+    const enrichedCount = enrichedItems.filter(item => item.api_verified === true).length;
+    console.log(`[ENRICH] Total: ${enrichedItems.length} items (${itemsNeedingEnrichment.length} enriched via API, ${itemsWithCachedData.length} from cache)`);
+
+    // If skipDbUpdate is true, just return the enriched data
+    if (skipDbUpdate) {
+      console.log('[ENRICH] Skipping DB update - returning enriched items for bulk-add');
+      return res.status(200).json({
+        success: true,
+        message: `Enriched ${enrichedCount} of ${enrichedItems.length} items with API data (DB update skipped)`,
+        enrichedItems: enrichedItems,
+        enrichedCount: enrichedCount,
+        totalItems: enrichedItems.length,
+        skippedDbUpdate: true
+      });
+    }
+
+    // Update items in database with enriched data (only if items have IDs)
+    try {
+      console.log('[ENRICH] Updating items in database...');
+
+      const itemsWithIds = enrichedItems.filter(item => item.id);
+      const itemsWithoutIds = enrichedItems.filter(item => !item.id);
+
+      if (itemsWithoutIds.length > 0) {
+        console.log(`[ENRICH] ${itemsWithoutIds.length} items don't have DB IDs yet - skipping their DB update`);
+      }
+
+      if (itemsWithIds.length === 0) {
+        console.log('[ENRICH] No items have DB IDs - returning enriched data only');
+        return res.status(200).json({
+          success: true,
+          message: `Enriched ${enrichedCount} of ${enrichedItems.length} items with API data (no DB IDs to update)`,
+          enrichedItems: enrichedItems,
+          enrichedCount: enrichedCount,
+          totalItems: enrichedItems.length,
+          updatedInDb: 0,
+          note: 'Items do not have database IDs yet - enriched data returned for bulk-add'
+        });
+      }
+
+      const updatePromises = itemsWithIds.map(enrichedItem => {
+        return supabase
+          .from('inventory')
+          .update({
+            upc: enrichedItem.upc || null,
+            wholesale_price: enrichedItem.wholesale_price || null,
+            msrp: enrichedItem.msrp || null,
+            in_stock: enrichedItem.in_stock || null,
+            api_verified: enrichedItem.api_verified || false,
+            enriched_data: {
+              ...enrichedItem.enriched_data,
+              lamy_api: enrichedItem.enriched_data?.lamy_api,
+              web_enriched: true,
+              enriched_at: new Date().toISOString(),
+              confidence_score: enrichedItem.confidence_score,
+              validation_reason: enrichedItem.validation_reason
+            }
+          })
+          .eq('id', enrichedItem.id)
+          .select();
+      });
+
+      const results = await Promise.all(updatePromises);
+      const errors = results.filter(r => r.error);
+
+      if (errors.length > 0) {
+        console.error('[ENRICH] Errors updating items:');
+        errors.forEach((err, idx) => {
+          console.error(`  Error ${idx + 1}:`, err.error);
+        });
+      }
+
+      const updatedItems = results.map(r => r.data?.[0]).filter(Boolean);
+      console.log(`[ENRICH] Successfully updated ${updatedItems.length} items in database`);
+
+      return res.status(200).json({
+        success: true,
+        message: `Enriched ${enrichedCount} of ${enrichedItems.length} items with API data`,
+        enrichedItems: enrichedItems,
+        enrichedCount: enrichedCount,
+        totalItems: enrichedItems.length,
+        updatedInDb: updatedItems.length
+      });
+
+    } catch (updateError) {
+      console.error('[ENRICH] Error updating database:', updateError);
+      return res.status(200).json({
+        success: true,
+        message: `Enriched ${enrichedCount} items but failed to update database`,
+        enrichedItems: enrichedItems,
+        enrichedCount: enrichedCount,
+        totalItems: enrichedItems.length,
+        dbUpdateError: updateError.message
+      });
+    }
+
+  } catch (error) {
+    console.error('[ENRICH] Error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to enrich L\'amyamerica items',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/enrich/lamy/single
+ * Enrich a single L'amyamerica product by model name (test endpoint)
+ *
+ * Body: {
+ *   model: string (e.g., "CAPER", "FLOW")
+ *   color?: string (optional, e.g., "C01")
+ * }
+ */
+router.post('/lamy/single', async (req, res) => {
+  try {
+    const { model, color } = req.body;
+
+    console.log('[ENRICH] Single L\'amyamerica product enrichment request');
+    console.log('  Model:', model);
+    console.log('  Color:', color || '(all colors)');
+
+    if (!model) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required field: model is required'
+      });
+    }
+
+    const lamyService = parserRegistry.getLamyamericaService();
+    if (!lamyService) {
+      return res.status(500).json({
+        success: false,
+        error: 'L\'amyamerica service not available'
+      });
+    }
+
+    console.log(`[ENRICH] Querying L'amy API for: ${model}`);
+    const apiData = await lamyService.makeModelAPIRequest(model);
+
+    console.log('[ENRICH] API query completed');
+    console.log('  Found:', apiData.found);
+    console.log('  Variants:', apiData.totalVariants || 0);
+
+    // If color specified, filter variants
+    let filteredData = apiData;
+    if (color && apiData.found && apiData.variants) {
+      const colorUpper = color.toUpperCase().trim();
+      const matchingVariants = apiData.variants.filter(v => {
+        const variantColor = (v.colorCode || '').toUpperCase().trim();
+        return variantColor === colorUpper ||
+               variantColor.includes(colorUpper) ||
+               colorUpper.includes(variantColor);
+      });
+
+      filteredData = {
+        ...apiData,
+        variants: matchingVariants,
+        totalVariants: matchingVariants.length,
+        filteredByColor: color
+      };
+    }
+
+    return res.status(200).json({
+      success: true,
+      found: filteredData.found,
+      model: model,
+      color: color || null,
+      apiData: filteredData
+    });
+
+  } catch (error) {
+    console.error('[ENRICH] Error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to query L\'amyamerica API',
+      message: error.message
+    });
+  }
+});
+
+/**
  * POST /api/enrich/marchon/single
  * Enrich a single Marchon product (test endpoint)
  *

@@ -474,6 +474,247 @@ class LamyamericaService {
         this.cache.clear();
         console.log('🗑️  L\'amyamerica cache cleared');
     }
+
+    // ===========================================
+    // MODEL-BASED ENRICHMENT (for when UPC is missing)
+    // ===========================================
+
+    /**
+     * Make API request by MODEL NAME instead of UPC
+     * This is used when emails don't contain images (no UPC available)
+     * @param {string} model - Model name to search for (e.g., "CAPER", "FLOW")
+     * @returns {Object} API response data with all variants
+     */
+    async makeModelAPIRequest(model) {
+        const cacheKey = `model:${model.toUpperCase()}`;
+        if (this.cache.has(cacheKey)) {
+            this.log(`Cache hit: ${model}`);
+            this.stats.cacheHits++;
+            return this.cache.get(cacheKey);
+        }
+
+        for (let attempt = 1; attempt <= this.config.maxRetries; attempt++) {
+            try {
+                const response = await axios.post(this.config.apiUrl, {
+                    "Collections": [],
+                    "ColorFamily": [],
+                    "Statuses": [],
+                    "Sizes": [],
+                    "EyeSizes": [],
+                    "TempleSizes": [],
+                    "BridgeSizes": [],
+                    "Shapes": [],
+                    "FrameTypes": [],
+                    "Genders": [],
+                    "FrameMaterials": [],
+                    "HingeTypes": [],
+                    "RimTypes": [],
+                    "BridgeTypes": [],
+                    "AgeGroup": [],
+                    "Brand": [],
+                    "SpecialtyFit": [],
+                    "Clip-Ons": false,
+                    "NewStyles": false,
+                    "InStock": false,
+                    "Sunglasses": false,
+                    "ASizes": {"min": -1, "max": -1},
+                    "BSizes": {"min": -1, "max": -1},
+                    "EDSizes": {"min": -1, "max": -1},
+                    "DBLSizes": {"min": -1, "max": -1},
+                    "search": model
+                }, {
+                    headers: {
+                        ...this.config.headers,
+                        'Origin': 'https://www.lamyamerica.com',
+                        'Referer': 'https://www.lamyamerica.com/US/frames/c/frames'
+                    },
+                    timeout: this.config.timeout
+                });
+
+                const result = this.processAPIResponse(response.data, model);
+                this.cache.set(cacheKey, result);
+                return result;
+
+            } catch (error) {
+                if (attempt === this.config.maxRetries) {
+                    this.log(`API Error after ${attempt} attempts: ${error.message}`);
+                    this.stats.apiErrors++;
+                    return { found: false, error: error.message };
+                }
+
+                await new Promise(resolve => setTimeout(resolve, this.config.retryDelay * attempt));
+            }
+        }
+    }
+
+    /**
+     * Enrich pending items using model-based search
+     * Used when items don't have UPCs (e.g., emails without images)
+     * @param {Array} items - Array of items to enrich
+     * @returns {Array} Enriched items with UPC, wholesale price, etc.
+     */
+    async enrichPendingItems(items) {
+        console.log(`[LamyamericaService] Enriching ${items.length} pending items via model search...`);
+        const enrichedItems = [];
+
+        for (const item of items) {
+            console.log(`  Processing: ${item.brand || 'Unknown'} ${item.model}`);
+
+            // First try UPC if available
+            let apiData = null;
+            if (item.upc) {
+                console.log(`    Trying UPC search: ${item.upc}`);
+                apiData = await this.makeAPIRequest(item.upc);
+            }
+
+            // If no UPC or UPC search failed, try model search
+            if (!apiData?.found && item.model) {
+                console.log(`    Trying model search: ${item.model}`);
+                apiData = await this.makeModelAPIRequest(item.model);
+            }
+
+            if (!apiData?.found) {
+                console.log(`    ❌ Not found in API`);
+                enrichedItems.push({
+                    ...item,
+                    api_verified: false,
+                    enriched_data: {
+                        ...item.enriched_data,
+                        lamy_api: null,
+                        enrichment_attempted: true,
+                        enrichment_failed: true,
+                        failure_reason: 'Product not found in L\'amy API'
+                    }
+                });
+                continue;
+            }
+
+            // Find best matching variant by color
+            const bestMatch = this.findBestColorMatch(item, apiData.variants);
+
+            if (bestMatch) {
+                console.log(`    ✅ Found match: UPC ${bestMatch.upc}, wholesale $${bestMatch.wholesale}`);
+                enrichedItems.push({
+                    ...item,
+                    upc: bestMatch.upc || item.upc,
+                    wholesale_price: bestMatch.wholesale || item.wholesale_price,
+                    msrp: bestMatch.msrp || item.msrp,
+                    in_stock: bestMatch.inStock,
+                    api_verified: true,
+                    confidence_score: bestMatch.matchConfidence || 85,
+                    validation_reason: bestMatch.matchReason || 'Model and color matched via API',
+                    enriched_data: {
+                        ...item.enriched_data,
+                        lamy_api: {
+                            brand: apiData.brand,
+                            model: apiData.model,
+                            colorCode: bestMatch.colorCode,
+                            colorName: bestMatch.colorName,
+                            eyeSize: bestMatch.eyeSize,
+                            bridge: bestMatch.bridge,
+                            temple: bestMatch.temple,
+                            size: bestMatch.size,
+                            upc: bestMatch.upc,
+                            ean: bestMatch.ean,
+                            sku: bestMatch.sku,
+                            wholesale: bestMatch.wholesale,
+                            msrp: bestMatch.msrp,
+                            inStock: bestMatch.inStock,
+                            availability: bestMatch.availability,
+                            material: bestMatch.material,
+                            gender: bestMatch.gender,
+                            frameType: bestMatch.frameType,
+                            shape: bestMatch.shape
+                        },
+                        enrichment_attempted: true,
+                        enriched_at: new Date().toISOString()
+                    }
+                });
+            } else {
+                // Product found but no color match - still return first variant's data
+                const firstVariant = apiData.variants[0];
+                console.log(`    ⚠️ No color match, using first variant: UPC ${firstVariant?.upc}`);
+                enrichedItems.push({
+                    ...item,
+                    upc: firstVariant?.upc || item.upc,
+                    wholesale_price: firstVariant?.wholesale || item.wholesale_price,
+                    msrp: firstVariant?.msrp || item.msrp,
+                    in_stock: firstVariant?.inStock,
+                    api_verified: true,
+                    confidence_score: 60,
+                    validation_reason: 'Model matched but color unconfirmed',
+                    enriched_data: {
+                        ...item.enriched_data,
+                        lamy_api: {
+                            brand: apiData.brand,
+                            model: apiData.model,
+                            variants: apiData.variants.slice(0, 5), // Include first 5 variants
+                            totalVariants: apiData.totalVariants,
+                            noColorMatch: true
+                        },
+                        enrichment_attempted: true,
+                        enriched_at: new Date().toISOString()
+                    }
+                });
+            }
+        }
+
+        return enrichedItems;
+    }
+
+    /**
+     * Find best matching variant by color code/name
+     * @param {Object} item - Original item with color info
+     * @param {Array} variants - API variants to match against
+     * @returns {Object|null} Best matching variant or null
+     */
+    findBestColorMatch(item, variants) {
+        if (!variants || variants.length === 0) return null;
+        if (variants.length === 1) {
+            return { ...variants[0], matchConfidence: 90, matchReason: 'Only variant available' };
+        }
+
+        const itemColor = (item.color || item.colorCode || '').toUpperCase().trim();
+        const itemColorName = (item.colorName || '').toUpperCase().trim();
+
+        // Try exact color code match first
+        for (const variant of variants) {
+            const variantCode = (variant.colorCode || '').toUpperCase().trim();
+            if (variantCode && itemColor && variantCode === itemColor) {
+                return { ...variant, matchConfidence: 95, matchReason: 'Exact color code match' };
+            }
+        }
+
+        // Try color code contains match
+        for (const variant of variants) {
+            const variantCode = (variant.colorCode || '').toUpperCase().trim();
+            if (variantCode && itemColor) {
+                if (variantCode.includes(itemColor) || itemColor.includes(variantCode)) {
+                    return { ...variant, matchConfidence: 85, matchReason: 'Partial color code match' };
+                }
+            }
+        }
+
+        // Try color name match
+        for (const variant of variants) {
+            const variantName = (variant.colorName || '').toUpperCase().trim();
+            if (variantName && itemColorName && variantName.includes(itemColorName)) {
+                return { ...variant, matchConfidence: 80, matchReason: 'Color name match' };
+            }
+        }
+
+        // Try matching by size if available
+        if (item.eyeSize) {
+            for (const variant of variants) {
+                if (variant.eyeSize == item.eyeSize) {
+                    return { ...variant, matchConfidence: 70, matchReason: 'Eye size match' };
+                }
+            }
+        }
+
+        // No specific match found
+        return null;
+    }
 }
 
 module.exports = LamyamericaService;
