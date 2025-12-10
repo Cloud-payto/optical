@@ -212,7 +212,7 @@ const HomePage = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
               {supportedVendors.map((vendor, index) => (
                 <motion.div
                   key={vendor}
@@ -220,7 +220,7 @@ const HomePage = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: index * 0.05 }}
-                  className="bg-white dark:bg-[#1F2623] rounded-lg px-4 py-3 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all duration-300 text-center"
+                  className="bg-white dark:bg-[#1F2623] rounded-lg px-4 py-4 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all duration-300 flex items-center justify-center"
                 >
                   <span className="font-medium text-gray-900 dark:text-white text-sm">{vendor}</span>
                 </motion.div>
