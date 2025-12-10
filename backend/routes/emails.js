@@ -9,6 +9,8 @@ const vendorDetectionService = require('../services/vendorDetection');
  *
  * Body: {
  *   accountId: string,
+ *   vendorId?: string (optional - vendor UUID),
+ *   vendor?: string (optional - vendor name),
  *   from: string,
  *   subject: string,
  *   html: string,
@@ -18,10 +20,12 @@ const vendorDetectionService = require('../services/vendorDetection');
  */
 router.post('/create', async (req, res) => {
   try {
-    const { accountId, from, subject, html, plainText, parsedData } = req.body;
+    const { accountId, vendorId, vendor, from, subject, html, plainText, parsedData } = req.body;
 
     console.log('[EMAIL CREATE] Request received');
     console.log('  Account ID:', accountId);
+    console.log('  Vendor ID:', vendorId);
+    console.log('  Vendor:', vendor);
     console.log('  From:', from);
     console.log('  Subject:', subject);
     console.log('  Has HTML:', !!html);
@@ -54,6 +58,7 @@ router.post('/create', async (req, res) => {
     // Create email record
     const emailRecord = await emailOperations.saveEmail({
       account_id: accountId,
+      vendor_id: vendorId || null, // Include vendor ID from n8n workflow
       from_email: from,
       to_email: `n8n-created-${accountId}@system.local`, // Synthetic "to" address
       subject: subject,
