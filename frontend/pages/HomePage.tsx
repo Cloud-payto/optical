@@ -1,6 +1,6 @@
-import { motion, AnimatePresence, useInView } from 'framer-motion';
-import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { motion, useInView } from 'framer-motion';
+import { useRef } from 'react';
+import { Link } from 'react-router-dom';
 import FeatureCard from '../components/features/FeatureCard';
 import { Container } from '../components/ui/Container';
 import {
@@ -15,59 +15,31 @@ import {
   TrendingUp,
   Smartphone,
   Mail,
-  MessageSquare,
-  HelpCircle,
-  ChevronDown,
-  ChevronUp,
-  Star,
-  Award,
-  BarChart2,
-  Percent,
   DollarSign,
-  UserPlus,
-  PlayCircle,
   Target,
-  Lightbulb,
-  Package,
-  FileText,
-  PieChart
+  PieChart,
+  Building2
 } from 'lucide-react';
 
-interface SectionRefs {
-  features: React.RefObject<HTMLDivElement>;
-  pricing: React.RefObject<HTMLDivElement>;
-  contact: React.RefObject<HTMLDivElement>;
-  faq: React.RefObject<HTMLDivElement>;
-}
+// Supported vendors we can parse emails from
+const supportedVendors = [
+  { name: 'Luxottica', description: 'Ray-Ban, Oakley, Persol, Oliver Peoples, Prada, Chanel, and more' },
+  { name: 'Safilo', description: 'Carrera, Fossil, Hugo Boss, Kate Spade, Tommy Hilfiger, and more' },
+  { name: 'Marchon', description: 'Nike, Calvin Klein, Columbia, Dragon, Flexon, and more' },
+  { name: 'Modern Optical', description: 'Affordable eyewear collections for optical retailers' },
+  { name: 'Europa', description: 'Cinzia, Scott Harris, Kliik, and other quality collections' },
+  { name: 'I-Deal Optics', description: 'Independent eyewear brands and collections' },
+  { name: 'Kenmark', description: 'Lilly Pulitzer, Op, Randy Jackson, and specialty brands' },
+  { name: "L'amy America", description: 'Ann Taylor, bebe, Jones New York, and designer brands' },
+];
 
 const HomePage = () => {
-  const [activeFaq, setActiveFaq] = useState<number | null>(null);
-  const navigate = useNavigate();
-
   // Create refs for each section
   const heroRef = useRef<HTMLDivElement>(null);
   const featuresRef = useRef<HTMLDivElement>(null);
   const howItWorksRef = useRef<HTMLDivElement>(null);
   const benefitsRef = useRef<HTMLDivElement>(null);
-  const pricingRef = useRef<HTMLDivElement>(null);
-  const contactRef = useRef<HTMLDivElement>(null);
-  const faqRef = useRef<HTMLDivElement>(null);
-
-  // Create a refs object to pass to child components
-  const sectionRefs: SectionRefs = {
-    features: featuresRef,
-    pricing: pricingRef,
-    contact: contactRef,
-    faq: faqRef
-  };
-
-  // Check if sections are in view for animations
-  const isInViewHero = useInView(heroRef, { once: true });
-  const isInViewFeatures = useInView(featuresRef, { once: true, margin: "-100px" });
-  const isInViewHowItWorks = useInView(howItWorksRef, { once: true, margin: "-100px" });
-  const isInViewBenefits = useInView(benefitsRef, { once: true, margin: "-100px" });
-  const isInViewPricing = useInView(pricingRef, { once: true, margin: "-100px" });
-  const isInViewFaq = useInView(faqRef, { once: true, margin: "-100px" });
+  const vendorsRef = useRef<HTMLDivElement>(null);
 
   const features = [
     {
@@ -160,127 +132,114 @@ const HomePage = () => {
     <div className="h-full bg-gray-50 dark:bg-[#181F1C]">
       <div className="p-6 md:p-8">
         <Container size="xl">
-        {/* Hero Section with Animation */}
-        <section ref={heroRef} className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 rounded-2xl mb-12 shadow-2xl">
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0 bg-[url('/animations/hero-data-viz-ezgif.com-optimize.gif')] bg-cover bg-center"></div>
-          </div>
-          <div className="relative px-6 py-20 md:py-28">
-            <div className="max-w-5xl mx-auto">
-              <div className="grid md:grid-cols-2 gap-12 items-center">
-                <div className="text-white">
-                  <motion.div
-                    initial={{ opacity: 0, x: -50 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.8 }}
-                  >
-                    <span className="inline-block px-4 py-2 bg-blue-500/30 backdrop-blur-sm rounded-full text-sm font-semibold mb-4">
-                      ✨ The Future of Optical Profitability
-                    </span>
-                  </motion.div>
-                  <motion.h1
-                    initial={{ opacity: 0, x: -50 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.8, delay: 0.1 }}
-                    className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight"
-                  >
-                    Stop Guessing.<br />
-                    Start <span className="text-yellow-300">Profiting</span>.
-                  </motion.h1>
-                  <motion.p
-                    initial={{ opacity: 0, x: -50 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
-                    className="text-xl text-blue-100 mb-8 leading-relaxed"
-                  >
-                    OptiProfit transforms how optical businesses calculate frame profits, track inventory, and make purchasing decisions. Know exactly what to charge. Maximize every sale.
-                  </motion.p>
-                  <motion.div
-                    initial={{ opacity: 0, x: -50 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.8, delay: 0.3 }}
-                    className="flex flex-col sm:flex-row gap-4"
-                  >
-                    <Link
-                      to="/calculator"
-                      className="bg-yellow-400 hover:bg-yellow-300 text-blue-900 font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:-translate-y-1 shadow-xl hover:shadow-2xl flex items-center justify-center group"
-                    >
-                      Start Calculating Free
-                      <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.8, delay: 0.5 }}
-                    className="mt-8 flex items-center gap-6 text-sm text-blue-100"
-                  >
-                    <div className="flex items-center">
-                      <Check className="w-5 h-5 mr-2 text-green-300" />
-                      No credit card required
-                    </div>
-                    <div className="flex items-center">
-                      <Check className="w-5 h-5 mr-2 text-green-300" />
-                      Free forever plan
-                    </div>
-                  </motion.div>
-                </div>
-
-                <motion.div
-                  initial={{ opacity: 0, x: 50 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.8, delay: 0.4 }}
-                  className="relative hidden md:block"
-                >
-                  <div className="relative">
-                    <img
-                      src="/images/square-modern-hero-customer-ordering-glasses.png"
-                      alt="OptiProfit Data Visualization"
-                      className="w-full h-auto rounded-xl shadow-2xl border-4 border-white/20"
-                    />
-                    <div className="absolute -bottom-6 -left-6 bg-white dark:bg-[#1F2623] rounded-lg shadow-xl p-4 backdrop-blur-sm border border-gray-200 dark:border-gray-700">
-                      <div className="flex items-center gap-3">
-                        <div className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full p-2">
-                          <TrendingUp className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <div className="text-2xl font-bold text-gray-900 dark:text-white">+32%</div>
-                          <div className="text-sm text-gray-600 dark:text-gray-300">Avg. Profit Increase</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
+        {/* Hero Section - Simple & Clean */}
+        <section ref={heroRef} className="mb-16">
+          <div className="max-w-4xl mx-auto text-center">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight"
+            >
+              Stop Guessing.<br />
+              Start <span className="text-blue-600 dark:text-blue-400">Profiting</span>.
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed"
+            >
+              OptiProfit transforms how optical businesses calculate frame profits, track inventory, and make purchasing decisions. Know exactly what to charge. Maximize every sale.
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center mb-8"
+            >
+              <Link
+                to="/calculator"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl flex items-center justify-center group"
+              >
+                Start Calculating Free
+                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link
+                to="/inventory"
+                className="bg-white dark:bg-[#1F2623] hover:bg-gray-50 dark:hover:bg-[#252D29] text-gray-900 dark:text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 border border-gray-200 dark:border-gray-700 flex items-center justify-center"
+              >
+                View Inventory
+              </Link>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="flex items-center justify-center gap-6 text-sm text-gray-500 dark:text-gray-400"
+            >
+              <div className="flex items-center">
+                <Check className="w-5 h-5 mr-2 text-green-500" />
+                No credit card required
               </div>
-            </div>
+              <div className="flex items-center">
+                <Check className="w-5 h-5 mr-2 text-green-500" />
+                Free forever plan
+              </div>
+            </motion.div>
           </div>
         </section>
 
-        {/* Social Proof */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-16 text-center"
-        >
-          <p className="text-gray-600 dark:text-gray-300 mb-6">Trusted by optical professionals nationwide</p>
-          <div className="flex flex-wrap justify-center items-center gap-8 text-gray-400 dark:text-gray-500">
-            <div className="flex items-center gap-2">
-              <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-              <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-              <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-              <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-              <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-              <span className="ml-2 text-gray-700 dark:text-gray-200 font-semibold">5.0 rating</span>
+        {/* Supported Vendors Section */}
+        <section ref={vendorsRef} className="mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="max-w-5xl mx-auto"
+          >
+            <div className="text-center mb-10">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium mb-4">
+                <Building2 className="w-4 h-4" />
+                Supported Vendors
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                We Parse Orders From These Companies
+              </h2>
+              <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                Forward your order confirmation emails from any of these vendors and we'll automatically extract all frame details.
+              </p>
             </div>
-            <div className="text-gray-700 dark:text-gray-200">
-              <span className="font-bold text-blue-600 dark:text-blue-400">500+</span> frames analyzed monthly
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {supportedVendors.map((vendor, index) => (
+                <motion.div
+                  key={vendor.name}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                  className="bg-white dark:bg-[#1F2623] rounded-xl p-5 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all duration-300"
+                >
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{vendor.name}</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{vendor.description}</p>
+                </motion.div>
+              ))}
             </div>
-            <div className="text-gray-700 dark:text-gray-200">
-              <span className="font-bold text-blue-600 dark:text-blue-400">$2M+</span> in profit optimized
-            </div>
-          </div>
-        </motion.section>
+
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="text-center text-gray-500 dark:text-gray-400 mt-6 text-sm"
+            >
+              More vendors coming soon. Have a specific vendor you'd like us to support?{' '}
+              <a href="mailto:support@optiprofit.com" className="text-blue-600 dark:text-blue-400 hover:underline">Let us know</a>
+            </motion.p>
+          </motion.div>
+        </section>
 
         {/* The Problem Section */}
         <section className="mb-20">
