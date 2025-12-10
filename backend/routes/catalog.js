@@ -36,10 +36,28 @@ router.post('/check', async (req, res) => {
     try {
         const { vendorId, items } = req.body;
 
-        if (!vendorId || !items || !Array.isArray(items)) {
+        // Allow null vendorId - we'll just return items without cache matches
+        if (!items || !Array.isArray(items)) {
             return res.status(400).json({
                 success: false,
-                error: 'Missing required fields: vendorId, items (array)'
+                error: 'Missing required field: items (array)'
+            });
+        }
+
+        // If vendorId is null/undefined, return items as cache misses (no DB lookup possible)
+        if (!vendorId) {
+            console.log(`⚠️ Catalog check: vendorId is null, returning ${items.length} items as cache misses`);
+            const uncachedItems = items.map(item => ({
+                ...item,
+                cached: false,
+                needsEnrichment: true
+            }));
+            return res.status(200).json({
+                success: true,
+                items: uncachedItems,
+                cacheHits: 0,
+                cacheMisses: items.length,
+                vendorIdMissing: true
             });
         }
 
@@ -86,11 +104,18 @@ router.post('/check', async (req, res) => {
 
             if (catalogMatch.data) {
                 // CACHE HIT! Enrich item with catalog data
-                console.log(`✅ Cache HIT for ${item.model} ${item.color}`);
+                const hasUpc = catalogMatch.data.upc || item.upc;
+                const hasWholesale = catalogMatch.data.wholesale_cost != null;
+                const isComplete = hasUpc && hasWholesale;
+
+                console.log(`✅ Cache HIT for ${item.model} ${item.color} [UPC: ${hasUpc ? 'yes' : 'MISSING'}, Wholesale: ${hasWholesale ? catalogMatch.data.wholesale_cost : 'MISSING'}]`);
 
                 enrichedItems.push({
                     ...item,
                     cached: true,
+                    // Flag if cached but incomplete - may need enrichment
+                    needsEnrichment: !isComplete,
+                    cacheIncomplete: !isComplete,
                     // Enrich with catalog data
                     upc: catalogMatch.data.upc || item.upc,
                     ean: catalogMatch.data.ean || item.ean,
@@ -109,7 +134,7 @@ router.post('/check', async (req, res) => {
                     availability_status: catalogMatch.data.availability_status,
                     api_verified: true,
                     confidence_score: catalogMatch.data.confidence_score,
-                    validation_reason: 'Vendor catalog match'
+                    validation_reason: isComplete ? 'Vendor catalog match' : 'Vendor catalog match (incomplete data)'
                 });
 
                 cacheHits++;

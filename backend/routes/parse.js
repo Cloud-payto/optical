@@ -458,11 +458,17 @@ router.post('/lamy', async (req, res) => {
     }, 0);
 
     // Get vendor ID from database
-    const { data: vendor } = await supabase
+    const { data: vendor, error: vendorError } = await supabase
       .from('vendors')
       .select('id')
       .eq('code', 'LAMY')
       .single();
+
+    if (vendorError) {
+      console.warn(`[PARSE] Vendor lookup warning for LAMY:`, vendorError.message);
+    } else {
+      console.log(`✓ Found vendor ID: ${vendor?.id} for LAMY`);
+    }
 
     // Return the parsed and enriched data
     return res.status(200).json({
