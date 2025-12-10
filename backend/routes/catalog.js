@@ -127,7 +127,11 @@ router.post('/check', async (req, res) => {
                 const hasWholesale = catalogMatch.data.wholesale_cost != null;
                 const isComplete = hasUpc && hasWholesale;
 
+<<<<<<< HEAD
                 console.log(`✅ Cache HIT for ${item.model} ${item.color} (size: ${rawEyeSize} → catalog: ${catalogMatch.data.eye_size}) [UPC: ${catalogMatch.data.upc || 'NONE'}, Wholesale: ${catalogMatch.data.wholesale_cost || 'NONE'}]`);
+=======
+                console.log(`✅ Cache HIT for ${item.model} ${item.color} [UPC: ${hasUpc ? 'yes' : 'MISSING'}, Wholesale: ${hasWholesale ? catalogMatch.data.wholesale_cost : 'MISSING'}]`);
+>>>>>>> 65d83f63ca73dd782020dedbbc8f269caafbf09e
 
                 enrichedItems.push({
                     ...item,
