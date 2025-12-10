@@ -37,3 +37,6 @@ backend/data/
 
 # API Keys and sensitive files
 render_api_key.txt
+n8n/*-api-key.txt
+*-api-key.txt
+*.key

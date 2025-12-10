@@ -71,23 +71,61 @@ router.post('/modernoptical', async (req, res) => {
  * POST /api/parse/safilo
  * Parse Safilo PDF order content
  *
- * Body: { pdfBase64, accountId }
+ * Body: { pdfBase64, accountId } OR { attachments, accountId }
  * Returns: { success, accountId, vendor, order, items }
+ *
+ * Supports two modes:
+ * 1. Direct pdfBase64: Pass the PDF content directly
+ * 2. Attachments array: Extract PDF from CloudMailin attachments format
  */
 router.post('/safilo', async (req, res) => {
   try {
-    const { pdfBase64, accountId } = req.body;
+    const { pdfBase64, attachments, accountId } = req.body;
 
-    // Validate input
-    if (!pdfBase64) {
+    let pdfBuffer;
+
+    // Mode 1: Direct pdfBase64 provided
+    if (pdfBase64) {
+      pdfBuffer = Buffer.from(pdfBase64, 'base64');
+    }
+    // Mode 2: Extract PDF from attachments array (CloudMailin format)
+    else if (attachments && Array.isArray(attachments) && attachments.length > 0) {
+      // Find PDF attachment - CloudMailin format has content_type and content (base64)
+      const pdfAttachment = attachments.find(att =>
+        att.content_type === 'application/pdf' ||
+        att.content_type === 'application/octet-stream' ||
+        (att.file_name && att.file_name.toLowerCase().endsWith('.pdf'))
+      );
+
+      if (!pdfAttachment) {
+        return res.status(400).json({
+          success: false,
+          error: 'No PDF attachment found in email',
+          attachmentTypes: attachments.map(a => ({ name: a.file_name, type: a.content_type }))
+        });
+      }
+
+      // CloudMailin provides content as base64
+      const base64Content = pdfAttachment.content || pdfAttachment.data;
+      if (!base64Content) {
+        return res.status(400).json({
+          success: false,
+          error: 'PDF attachment found but no content available',
+          attachment: { name: pdfAttachment.file_name, type: pdfAttachment.content_type }
+        });
+      }
+
+      pdfBuffer = Buffer.from(base64Content, 'base64');
+      console.log(`[PARSE] Safilo: Extracted PDF from attachment: ${pdfAttachment.file_name}`);
+    }
+    // No valid PDF source
+    else {
       return res.status(400).json({
         success: false,
-        error: 'Missing required field: pdfBase64'
+        error: 'Missing required field: pdfBase64 or attachments with PDF',
+        hint: 'Safilo orders require a PDF attachment. Either provide pdfBase64 directly or pass the attachments array from the email.'
       });
     }
-
-    // Convert base64 to buffer
-    const pdfBuffer = Buffer.from(pdfBase64, 'base64');
 
     // Parse the PDF
     const safiloService = new SafiloService();
@@ -194,23 +232,60 @@ router.post('/luxottica', async (req, res) => {
  * POST /api/parse/etnia-barcelona
  * Parse Etnia Barcelona PDF order
  *
- * Body: { pdfBase64, accountId }
+ * Body: { pdfBase64, accountId } OR { attachments, accountId }
  * Returns: { success, accountId, vendor, order, items, unique_frames }
+ *
+ * Supports two modes:
+ * 1. Direct pdfBase64: Pass the PDF content directly
+ * 2. Attachments array: Extract PDF from CloudMailin attachments format
  */
 router.post('/etnia-barcelona', async (req, res) => {
   try {
-    const { pdfBase64, accountId } = req.body;
+    const { pdfBase64, attachments, accountId } = req.body;
 
-    // Validate input
-    if (!pdfBase64) {
+    let pdfBuffer;
+
+    // Mode 1: Direct pdfBase64 provided
+    if (pdfBase64) {
+      pdfBuffer = Buffer.from(pdfBase64, 'base64');
+    }
+    // Mode 2: Extract PDF from attachments array (CloudMailin format)
+    else if (attachments && Array.isArray(attachments) && attachments.length > 0) {
+      // Find PDF attachment
+      const pdfAttachment = attachments.find(att =>
+        att.content_type === 'application/pdf' ||
+        att.content_type === 'application/octet-stream' ||
+        (att.file_name && att.file_name.toLowerCase().endsWith('.pdf'))
+      );
+
+      if (!pdfAttachment) {
+        return res.status(400).json({
+          success: false,
+          error: 'No PDF attachment found in email',
+          attachmentTypes: attachments.map(a => ({ name: a.file_name, type: a.content_type }))
+        });
+      }
+
+      const base64Content = pdfAttachment.content || pdfAttachment.data;
+      if (!base64Content) {
+        return res.status(400).json({
+          success: false,
+          error: 'PDF attachment found but no content available',
+          attachment: { name: pdfAttachment.file_name, type: pdfAttachment.content_type }
+        });
+      }
+
+      pdfBuffer = Buffer.from(base64Content, 'base64');
+      console.log(`[PARSE] Etnia Barcelona: Extracted PDF from attachment: ${pdfAttachment.file_name}`);
+    }
+    // No valid PDF source
+    else {
       return res.status(400).json({
         success: false,
-        error: 'Missing required field: pdfBase64'
+        error: 'Missing required field: pdfBase64 or attachments with PDF',
+        hint: 'Etnia Barcelona orders require a PDF attachment. Either provide pdfBase64 directly or pass the attachments array from the email.'
       });
     }
-
-    // Convert base64 to buffer
-    const pdfBuffer = Buffer.from(pdfBase64, 'base64');
 
     // Parse the PDF using Etnia Barcelona service
     const etniaService = new EtniaBarcelonaService({ debug: false });

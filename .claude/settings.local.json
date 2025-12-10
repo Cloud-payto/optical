@@ -51,7 +51,17 @@
       "mcp__n8n-mcp__n8n_list_workflows",
       "mcp__n8n-mcp__n8n_executions",
       "mcp__n8n-mcp__n8n_get_workflow",
-      "mcp__n8n-mcp__n8n_update_partial_workflow"
+      "mcp__n8n-mcp__n8n_update_partial_workflow",
+      "mcp__n8n-mcp__n8n_update_full_workflow",
+      "mcp__n8n-mcp__n8n_validate_workflow",
+      "mcp__n8n-mcp__tools_documentation",
+      "mcp__n8n-mcp__get_node",
+      "Bash(git -C /mnt/c/Users/payto/OneDrive/Desktop/Software/Opti-Profit/Version1 diff frontend/pages/HomePage.tsx)",
+      "Bash(git -C /mnt/c/Users/payto/OneDrive/Desktop/Software/Opti-Profit/Version1 log --oneline -5)",
+      "Bash(git -C /mnt/c/Users/payto/OneDrive/Desktop/Software/Opti-Profit/Version1 add frontend/pages/HomePage.tsx)",
+      "Bash(git -C /mnt/c/Users/payto/OneDrive/Desktop/Software/Opti-Profit/Version1 commit -m \"$(cat <<''EOF''\nrefactor: Simplify homepage hero and add supported vendors section\n\n- Remove overwhelming gif background and hero image from hero section\n- Remove false social proof stats (5.0 rating, 500+ frames, $2M+ profit)\n- Add clean, centered text-based hero with simpler design\n- Add supported vendors section showcasing 8 parseable companies:\n  Luxottica, Safilo, Marchon, Modern Optical, Europa, I-Deal Optics,\n  Kenmark, and L''amy America\n- Clean up unused imports and variables\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git -C /mnt/c/Users/payto/OneDrive/Desktop/Software/Opti-Profit/Version1 commit -m \"$(cat <<''EOF''\nrefactor: Simplify vendor display to names only\n\n- Remove brand descriptions from vendor cards\n- Show just vendor names in a compact 8-column grid\n- Cleaner, simpler presentation of supported vendors\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git -C /mnt/c/Users/payto/OneDrive/Desktop/Software/Opti-Profit/Version1 commit -m \"$(cat <<''EOF''\nstyle: Update vendor grid to 4x2 layout with centered text\n\n- Change grid to 4 columns (2 rows of 4 vendors)\n- Center text vertically and horizontally in each card\n- Add max-width constraint for better presentation\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []
