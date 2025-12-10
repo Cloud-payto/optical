@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Package, ChevronDown, Check, Star, TrendingUp, Loader2 } from 'lucide-react';
 import { Container } from '../components/ui/Container';
-import { fetchVendors, Vendor } from '../services/api';
-import { getBrandName, VENDOR_BRANDS } from '../utils/brandNames';
+import { fetchVendors, fetchCatalogBrands, Vendor, CatalogBrands } from '../services/api';
 
 interface VendorDisplayData extends Vendor {
   id: number | string;
@@ -24,14 +23,27 @@ const VendorComparisonPage: React.FC = () => {
   const [selectedVendors, setSelectedVendors] = useState<Set<number | string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [catalogBrandsMap, setCatalogBrandsMap] = useState<Record<string, string[]>>({});
 
-  // Load vendors from Supabase
+  // Load vendors and catalog brands from Supabase
   useEffect(() => {
-    const loadVendors = async () => {
+    const loadVendorsAndBrands = async () => {
       try {
         setLoading(true);
         setError(null);
-        const vendorData = await fetchVendors();
+
+        // Fetch vendors and catalog brands in parallel
+        const [vendorData, catalogBrandsData] = await Promise.all([
+          fetchVendors(),
+          fetchCatalogBrands()
+        ]);
+
+        // Build a map of vendor_id -> brands array from catalog data
+        const brandsMap: Record<string, string[]> = {};
+        catalogBrandsData.forEach((item: CatalogBrands) => {
+          brandsMap[item.vendor_id] = item.brands;
+        });
+        setCatalogBrandsMap(brandsMap);
 
         // Transform vendor data to match VendorDisplayData interface
         const transformedVendors: VendorDisplayData[] = vendorData.map(vendor => ({
@@ -50,7 +62,7 @@ const VendorComparisonPage: React.FC = () => {
       }
     };
 
-    loadVendors();
+    loadVendorsAndBrands();
   }, []);
 
   // Filter and sort vendors
@@ -296,21 +308,21 @@ const VendorComparisonPage: React.FC = () => {
                           <div className="bg-gradient-to-br from-gray-50 to-blue-50/30 dark:from-[#181F1C]/50 dark:to-[#1F2623]/30 rounded-xl p-4 border border-gray-100 dark:border-gray-700">
                             <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Brands</div>
                             <div className="flex flex-wrap gap-2">
-                              {VENDOR_BRANDS[vendor.name]?.slice(0, 4).map((brandCode) => (
+                              {catalogBrandsMap[vendor.id]?.slice(0, 4).map((brand) => (
                                 <span
-                                  key={brandCode}
+                                  key={brand}
                                   className="px-3 py-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs font-semibold rounded-full shadow-sm"
                                 >
-                                  {getBrandName(brandCode)}
+                                  {brand}
                                 </span>
                               ))}
-                              {VENDOR_BRANDS[vendor.name] && VENDOR_BRANDS[vendor.name].length > 4 && (
+                              {catalogBrandsMap[vendor.id] && catalogBrandsMap[vendor.id].length > 4 && (
                                 <span className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-semibold rounded-full">
-                                  +{VENDOR_BRANDS[vendor.name].length - 4} more
+                                  +{catalogBrandsMap[vendor.id].length - 4} more
                                 </span>
                               )}
-                              {!VENDOR_BRANDS[vendor.name] && (
-                                <span className="text-sm text-gray-600 dark:text-gray-400">{vendor.brands}</span>
+                              {!catalogBrandsMap[vendor.id] && (
+                                <span className="text-sm text-gray-600 dark:text-gray-400">{vendor.brands || 'No brands in catalog'}</span>
                               )}
                             </div>
                           </div>

@@ -13,6 +13,17 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Get catalog brands grouped by vendor (from vendor_catalog table)
+router.get('/catalog-brands', async (req, res) => {
+  try {
+    const catalogBrands = await vendorOperations.getCatalogBrandsByVendor();
+    res.json(catalogBrands);
+  } catch (error) {
+    console.error('Error fetching catalog brands:', error);
+    res.status(500).json({ error: 'Failed to fetch catalog brands' });
+  }
+});
+
 // Get all brands (BEFORE /:vendorId to avoid conflict)
 router.get('/brands/all', async (req, res) => {
   try {

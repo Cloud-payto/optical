@@ -1399,11 +1399,57 @@ const vendorOperations = {
         .from('vendors')
         .select('*')
         .order('name', { ascending: true });
-      
+
       if (error) throw error;
       return data || [];
     } catch (error) {
       handleSupabaseError(error, 'getAllVendors');
+    }
+  },
+
+  async getCatalogBrandsByVendor() {
+    try {
+      // Get unique brands from vendor_catalog grouped by vendor
+      const { data, error } = await supabase
+        .from('vendor_catalog')
+        .select('vendor_id, vendor_name, brand')
+        .not('vendor_id', 'is', null)
+        .not('brand', 'is', null);
+
+      if (error) throw error;
+
+      // Group brands by vendor_id
+      const vendorBrandsMap = {};
+
+      (data || []).forEach(item => {
+        const vendorId = item.vendor_id;
+        const vendorName = item.vendor_name;
+        const brand = item.brand;
+
+        if (!vendorBrandsMap[vendorId]) {
+          vendorBrandsMap[vendorId] = {
+            vendor_id: vendorId,
+            vendor_name: vendorName,
+            brands: new Set()
+          };
+        }
+
+        vendorBrandsMap[vendorId].brands.add(brand);
+      });
+
+      // Convert to array format with sorted brands
+      const result = Object.values(vendorBrandsMap).map(vendor => ({
+        vendor_id: vendor.vendor_id,
+        vendor_name: vendor.vendor_name,
+        brands: Array.from(vendor.brands).sort()
+      }));
+
+      console.log(`📦 getCatalogBrandsByVendor: Found brands for ${result.length} vendors`);
+      result.forEach(v => console.log(`   - ${v.vendor_name}: ${v.brands.length} brands`));
+
+      return result;
+    } catch (error) {
+      handleSupabaseError(error, 'getCatalogBrandsByVendor');
     }
   },
 

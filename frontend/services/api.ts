@@ -455,6 +455,16 @@ export async function fetchVendors(): Promise<Vendor[]> {
   return apiRequest<Vendor[]>('/vendors');
 }
 
+export interface CatalogBrands {
+  vendor_id: string;
+  vendor_name: string;
+  brands: string[];
+}
+
+export async function fetchCatalogBrands(): Promise<CatalogBrands[]> {
+  return apiRequest<CatalogBrands[]>('/vendors/catalog-brands');
+}
+
 export async function fetchVendorById(vendorId: string): Promise<Vendor> {
   return apiRequest<Vendor>(`/vendors/${vendorId}`);
 }
