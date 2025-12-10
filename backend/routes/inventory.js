@@ -19,6 +19,12 @@ router.post('/bulk-add', async (req, res) => {
   try {
     const { accountId, vendor, order, items, emailId } = req.body;
 
+    // Helper to truncate strings to fit database columns
+    const truncate = (str, maxLen) => {
+      if (!str) return str;
+      const s = String(str);
+      return s.length > maxLen ? s.substring(0, maxLen) : s;
+    };
 
     // Validate required fields
     if (!accountId || !vendor || !order || !items || items.length === 0) {
@@ -90,12 +96,12 @@ router.post('/bulk-add', async (req, res) => {
         account_id: accountId,
         vendor_id: vendorId,
         email_id: emailId || null,
-        order_number: order.order_number,
-        reference_number: order.reference_number || null,
-        account_number: order.account_number || null,
-        customer_name: order.customer_name || null,
-        customer_code: order.customer_code || null,
-        placed_by: order.placed_by || order.rep_name || null,
+        order_number: truncate(order.order_number, 100),
+        reference_number: truncate(order.reference_number, 100) || null,
+        account_number: truncate(order.account_number, 50) || null,
+        customer_name: truncate(order.customer_name, 200) || null,
+        customer_code: truncate(order.customer_code, 50) || null,
+        placed_by: truncate(order.placed_by || order.rep_name, 100) || null,
         order_date: order.order_date || null,
         total_pieces: order.total_pieces || items.length,
         status: 'pending'
@@ -115,21 +121,21 @@ router.post('/bulk-add', async (req, res) => {
     const inventoryItems = items.map(item => ({
       account_id: accountId,
       order_id: orderId,
-      sku: item.sku,
-      brand: item.brand,
-      model: item.model,
-      color: item.color,
-      color_code: item.color_code || null,
-      color_name: item.color_name || null,
-      size: item.size || null,
-      full_size: item.full_size || null,
-      temple_length: item.temple_length || null,
+      sku: truncate(item.sku, 100),
+      brand: truncate(item.brand, 100),
+      model: truncate(item.model, 100),
+      color: truncate(item.color, 100),
+      color_code: truncate(item.color_code, 50) || null,
+      color_name: truncate(item.color_name, 100) || null,
+      size: truncate(item.size, 50) || null,
+      full_size: truncate(item.full_size, 50) || null,
+      temple_length: truncate(item.temple_length, 20) || null,
       quantity: item.quantity || 1,
       vendor_id: vendorId,
       status: 'pending',
       email_id: emailId || null,
       wholesale_price: item.wholesale_price || null,
-      upc: item.upc || null,
+      upc: truncate(item.upc, 50) || null,
       in_stock: item.in_stock || null,
       api_verified: item.api_verified || false,
       enriched_data: item.enriched_data || {

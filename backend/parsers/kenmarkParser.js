@@ -15,7 +15,22 @@ const cheerio = require('cheerio');
  * @returns {object} Parsed order data
  */
 function parseKenmarkHtml(html, plainText) {
-    const textToUse = plainText || html;
+    // Strip HTML tags from html content to create clean text for regex matching
+    const stripHtml = (str) => {
+        if (!str) return '';
+        return str
+            .replace(/<br\s*\/?>/gi, '\n')  // Convert <br> to newlines
+            .replace(/<[^>]+>/g, ' ')        // Remove all HTML tags
+            .replace(/&nbsp;/g, ' ')         // Convert &nbsp; to space
+            .replace(/&amp;/g, '&')          // Convert &amp; to &
+            .replace(/&lt;/g, '<')           // Convert &lt;
+            .replace(/&gt;/g, '>')           // Convert &gt;
+            .replace(/\s+/g, ' ')            // Collapse whitespace
+            .trim();
+    };
+
+    // Use plainText if available, otherwise strip HTML for text matching
+    const textToUse = plainText || stripHtml(html);
 
     // Identify vendor
     const vendor = 'Kenmark';
@@ -26,7 +41,11 @@ function parseKenmarkHtml(html, plainText) {
     const orderNumberMatch = textToUse.match(/(?:Order Number|Receipt for Order Number)[:\s]*(\d+)/i);
     const orderNumber = orderNumberMatch ? orderNumberMatch[1] : '';
 
-    const repName = textToUse.match(/Placed By Rep:\s*([^\n]+)/)?.[1]?.trim() || '';
+    // Extract rep name - clean it and limit length
+    let repName = textToUse.match(/Placed By Rep:\s*([A-Za-z\s]+)/)?.[1]?.trim() || '';
+    repName = repName.substring(0, 100); // Limit to 100 chars
+
+    // Extract order date - ensure it's just the date format
     const orderDate = textToUse.match(/Date:\s*([\d\/]+)/)?.[1]?.trim() || '';
 
     console.log('📋 Order Details:');
