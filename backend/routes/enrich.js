@@ -553,7 +553,8 @@ router.post('/idealoptics/single', async (req, res) => {
  * Body: {
  *   accountId: string (UUID),
  *   orderNumber: string,
- *   items?: array (optional - if provided, enrich these items; otherwise fetch from DB)
+ *   items?: array (optional - if provided, enrich these items; otherwise fetch from DB),
+ *   skipDbUpdate?: boolean (if true, only return enriched data without updating DB - useful for pre-bulk-add enrichment)
  * }
  *
  * Returns: {
@@ -565,12 +566,13 @@ router.post('/idealoptics/single', async (req, res) => {
  */
 router.post('/marchon', async (req, res) => {
   try {
-    const { accountId, orderNumber, items } = req.body;
+    const { accountId, orderNumber, items, skipDbUpdate } = req.body;
 
     console.log('[ENRICH] Marchon enrichment request received');
     console.log('  Account ID:', accountId);
     console.log('  Order Number:', orderNumber);
     console.log('  Items provided:', items ? items.length : 'No, will fetch from DB');
+    console.log('  Skip DB Update:', skipDbUpdate ? 'Yes' : 'No');
 
     // Validate required fields
     if (!accountId || !orderNumber) {
@@ -670,16 +672,46 @@ router.post('/marchon', async (req, res) => {
     const enrichedCount = enrichedItems.filter(item => item.api_verified === true).length;
     console.log(`[ENRICH] Total: ${enrichedItems.length} items (${itemsNeedingEnrichment.length} enriched via API, ${itemsWithCachedData.length} from cache)`);
 
-    // Update items in database with enriched data
+    // If skipDbUpdate is true, just return the enriched data without updating the database
+    // This is useful when enrichment happens BEFORE items are bulk-added to the database
+    if (skipDbUpdate) {
+      console.log('[ENRICH] Skipping DB update - returning enriched items for bulk-add');
+      return res.status(200).json({
+        success: true,
+        message: `Enriched ${enrichedCount} of ${enrichedItems.length} items with API data (DB update skipped)`,
+        enrichedItems: enrichedItems,
+        enrichedCount: enrichedCount,
+        totalItems: enrichedItems.length,
+        skippedDbUpdate: true
+      });
+    }
+
+    // Update items in database with enriched data (only if items have IDs)
     try {
       console.log('[ENRICH] Updating items in database...');
 
-      const updatePromises = enrichedItems.map(enrichedItem => {
-        if (!enrichedItem.id) {
-          console.error('[ENRICH] Item missing ID:', enrichedItem);
-          return Promise.resolve({ error: 'Missing ID', data: null });
-        }
+      // Filter out items without IDs - they haven't been created in DB yet
+      const itemsWithIds = enrichedItems.filter(item => item.id);
+      const itemsWithoutIds = enrichedItems.filter(item => !item.id);
 
+      if (itemsWithoutIds.length > 0) {
+        console.log(`[ENRICH] ${itemsWithoutIds.length} items don't have DB IDs yet - skipping their DB update`);
+      }
+
+      if (itemsWithIds.length === 0) {
+        console.log('[ENRICH] No items have DB IDs - returning enriched data only');
+        return res.status(200).json({
+          success: true,
+          message: `Enriched ${enrichedCount} of ${enrichedItems.length} items with API data (no DB IDs to update)`,
+          enrichedItems: enrichedItems,
+          enrichedCount: enrichedCount,
+          totalItems: enrichedItems.length,
+          updatedInDb: 0,
+          note: 'Items do not have database IDs yet - enriched data returned for bulk-add'
+        });
+      }
+
+      const updatePromises = itemsWithIds.map(enrichedItem => {
         return supabase
           .from('inventory')
           .update({

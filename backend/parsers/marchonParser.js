@@ -113,6 +113,12 @@ function parseMarchonHtml(html, plainText) {
 
 /**
  * Extract customer information from email
+ *
+ * Handles multiple HTML formats from forwarded emails:
+ * 1. Original: <strong>Customer:</strong><br>
+ * 2. Zoho forwarded: <b><span class="font" style="...">Customer:</span></b><br>
+ * 3. Gmail/Outlook forwarded: <strong><span style="...">Customer:</span></strong><br>
+ * 4. Plain text: Customer:\r\n or *Customer:*\r\n (markdown style)
  */
 function extractCustomerInfo(html, textToUse) {
     const customerInfo = {
@@ -129,33 +135,120 @@ function extractCustomerInfo(html, textToUse) {
         shipToPostalCode: ''
     };
 
-    // Extract customer name and account number
-    // Format: "FAMILY TREE EYE CARE (3075807)"
-    const customerMatch = textToUse.match(/Customer[:\s]*<br>\s*([^(]+)\s*\((\d+)\)/i) ||
-                          textToUse.match(/Customer[:\s]*\n\s*([^(]+)\s*\((\d+)\)/i);
-    if (customerMatch) {
-        customerInfo.customerName = customerMatch[1].trim();
-        customerInfo.accountNumber = customerMatch[2].trim();
+    // Use Cheerio to parse the HTML and extract text more reliably
+    let normalizedText = textToUse;
+
+    // If we have HTML, try to use Cheerio to extract structured data
+    if (html) {
+        try {
+            const $ = cheerio.load(html);
+
+            // Get all text content, preserving line breaks
+            normalizedText = $.text()
+                .replace(/\r\n/g, '\n')
+                .replace(/\r/g, '\n');
+        } catch (e) {
+            console.log('📋 Could not parse HTML with Cheerio, using text fallback');
+        }
+    }
+
+    // Normalize the text for easier regex matching
+    // Remove markdown asterisks around labels (e.g., *Customer:* -> Customer:)
+    normalizedText = normalizedText.replace(/\*([^*]+)\*/g, '$1');
+
+    // Multiple patterns to match customer info across different email formats
+    // Pattern 1: Standard format - "Customer:" followed by "NAME (ACCOUNT)" on same or next line
+    // Pattern 2: HTML format with <br> - "Customer:</...><br>NAME (ACCOUNT)<br>"
+    // Pattern 3: Plain text with newlines - "Customer:\nNAME (ACCOUNT)\n"
+
+    // First, try to find customer name and account using a flexible pattern
+    // This looks for "Customer" label followed by NAME (7-digit account number)
+    const customerPatterns = [
+        // HTML with various tag wrappers followed by <br>
+        /Customer[:\s]*(?:<\/[^>]+>)*(?:<[^>]*>)*<br[^>]*>\s*([^(<\n]+)\s*\((\d{7})\)/i,
+        // Plain text with newline
+        /Customer[:\s]*[\r\n]+\s*([^(\r\n]+)\s*\((\d{7})\)/i,
+        // Same line (no line break)
+        /Customer[:\s]+([^(\r\n<]+)\s*\((\d{7})\)/i,
+        // Fallback: just look for NAME (7-digit) pattern after "Customer" within 200 chars
+        /Customer[:\s\S]{0,50}?([A-Z][A-Z\s&'.,-]+[A-Z])\s*\((\d{7})\)/i
+    ];
+
+    for (const pattern of customerPatterns) {
+        const match = textToUse.match(pattern) || normalizedText.match(pattern);
+        if (match) {
+            customerInfo.customerName = match[1].trim();
+            customerInfo.accountNumber = match[2].trim();
+            console.log(`📋 Customer found via pattern: ${customerInfo.customerName} (${customerInfo.accountNumber})`);
+            break;
+        }
+    }
+
+    // If still no customer info, try extracting from subject line or fallback
+    if (!customerInfo.customerName) {
+        // Try subject line pattern: "Marchon Order Confirmation for CUSTOMER NAME"
+        const subjectMatch = textToUse.match(/Marchon Order Confirmation for\s+([^\r\n<]+)/i);
+        if (subjectMatch) {
+            customerInfo.customerName = subjectMatch[1].trim();
+            console.log(`📋 Customer name from subject: ${customerInfo.customerName}`);
+        }
     }
 
     // Extract customer address (follows customer name)
-    const addressMatch = textToUse.match(/Customer[:\s]*<br>\s*[^(]+\(\d+\)<br>\s*([^<]+)<br>\s*([^,]+),\s*([A-Z]{2})\s*(\d{5})/i);
-    if (addressMatch) {
-        customerInfo.customerAddress = addressMatch[1].trim();
-        customerInfo.customerCity = addressMatch[2].trim();
-        customerInfo.customerState = addressMatch[3].trim();
-        customerInfo.customerPostalCode = addressMatch[4].trim();
+    // Pattern: NAME (ACCOUNT)<br>ADDRESS<br>CITY, STATE ZIP
+    const addressPatterns = [
+        // HTML with <br> tags
+        /Customer[:\s\S]*?\(\d{7}\)[^<]*<br[^>]*>\s*([^<\n]+)<br[^>]*>\s*([^,<\n]+),\s*([A-Z]{2})\s*(\d{5})/i,
+        // Plain text with newlines
+        /Customer[:\s\S]*?\(\d{7}\)\s*[\r\n]+\s*([^\r\n]+)[\r\n]+\s*([^,\r\n]+),\s*([A-Z]{2})\s*(\d{5})/i
+    ];
+
+    for (const pattern of addressPatterns) {
+        const match = textToUse.match(pattern) || normalizedText.match(pattern);
+        if (match) {
+            customerInfo.customerAddress = match[1].trim();
+            customerInfo.customerCity = match[2].trim();
+            customerInfo.customerState = match[3].trim();
+            customerInfo.customerPostalCode = match[4].trim();
+            console.log(`📋 Customer address found: ${customerInfo.customerAddress}, ${customerInfo.customerCity}, ${customerInfo.customerState} ${customerInfo.customerPostalCode}`);
+            break;
+        }
     }
 
     // Extract Ship To info
-    // Format: "Ship To\nALMA DAVID YAMAMOTO (3075807)\n67 S HIGLEY RD STE 104\nGILBERT, AZ 85296"
-    const shipToMatch = textToUse.match(/Ship To[:\s]*<br>\s*([^(]+)\s*\((\d+)\)<br>\s*([^<]+)<br>\s*([^,]+),\s*([A-Z]{2})\s*(\d{5})/i);
-    if (shipToMatch) {
-        customerInfo.shipToName = shipToMatch[1].trim();
-        customerInfo.shipToAddress = shipToMatch[3].trim();
-        customerInfo.shipToCity = shipToMatch[4].trim();
-        customerInfo.shipToState = shipToMatch[5].trim();
-        customerInfo.shipToPostalCode = shipToMatch[6].trim();
+    // Similar pattern variations as Customer
+    const shipToPatterns = [
+        // HTML with various tag wrappers followed by <br>
+        /Ship\s*To[:\s]*(?:<\/[^>]+>)*(?:<[^>]*>)*<br[^>]*>\s*([^(<\n]+)\s*\((\d{7})\)<br[^>]*>\s*([^<\n]+)<br[^>]*>\s*([^,<\n]+),\s*([A-Z]{2})\s*(\d{5})/i,
+        // Plain text with newlines
+        /Ship\s*To[:\s]*[\r\n]+\s*([^(\r\n]+)\s*\((\d{7})\)[\r\n]+\s*([^\r\n]+)[\r\n]+\s*([^,\r\n]+),\s*([A-Z]{2})\s*(\d{5})/i,
+        // Fallback: just capture name and account
+        /Ship\s*To[:\s\S]{0,50}?([A-Z][A-Z\s&'.,-]+[A-Z])\s*\((\d{7})\)/i
+    ];
+
+    for (const pattern of shipToPatterns) {
+        const match = textToUse.match(pattern) || normalizedText.match(pattern);
+        if (match) {
+            customerInfo.shipToName = match[1].trim();
+            // Check if we got full address info (6 groups) or just name/account (2 groups)
+            if (match[3]) {
+                customerInfo.shipToAddress = match[3].trim();
+                customerInfo.shipToCity = match[4].trim();
+                customerInfo.shipToState = match[5].trim();
+                customerInfo.shipToPostalCode = match[6].trim();
+            }
+            console.log(`📋 Ship To found: ${customerInfo.shipToName}`);
+            break;
+        }
+    }
+
+    // If we still don't have an account number, try to find any 7-digit number in parentheses
+    if (!customerInfo.accountNumber) {
+        const fallbackAccountMatch = textToUse.match(/\((\d{7})\)/);
+        if (fallbackAccountMatch) {
+            customerInfo.accountNumber = fallbackAccountMatch[1];
+            console.log(`📋 Account number from fallback: ${customerInfo.accountNumber}`);
+        }
     }
 
     return customerInfo;
