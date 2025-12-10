@@ -1022,7 +1022,7 @@ router.post('/europa/single', async (req, res) => {
 });
 
 /**
- * POST /api/enrich/lamy
+ * POST /api/enrich/lamy (also /api/enrich/lamyamerica)
  * Enrich L'amyamerica items with API data (UPC, pricing, stock status)
  * Uses model-based search when UPC is not available
  *
@@ -1040,7 +1040,7 @@ router.post('/europa/single', async (req, res) => {
  *   enrichedCount: number
  * }
  */
-router.post('/lamy', async (req, res) => {
+const lamyEnrichHandler = async (req, res) => {
   try {
     const { accountId, orderNumber, items, skipDbUpdate } = req.body;
 
@@ -1246,7 +1246,11 @@ router.post('/lamy', async (req, res) => {
       message: error.message
     });
   }
-});
+};
+
+// Register both route aliases for L'amy enrichment
+router.post('/lamy', lamyEnrichHandler);
+router.post('/lamyamerica', lamyEnrichHandler);
 
 /**
  * POST /api/enrich/lamy/single
