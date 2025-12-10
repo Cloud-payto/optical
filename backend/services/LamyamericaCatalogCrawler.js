@@ -154,7 +154,7 @@ class LamyamericaCatalogCrawler {
         const { data, error } = await supabase
             .from('vendors')
             .select('id')
-            .eq('code', 'lamyamerica')
+            .eq('code', 'LAMY')
             .single();
 
         if (error || !data) {

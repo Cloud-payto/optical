@@ -461,7 +461,7 @@ router.post('/lamy', async (req, res) => {
     const { data: vendor } = await supabase
       .from('vendors')
       .select('id')
-      .eq('code', 'lamyamerica')
+      .eq('code', 'LAMY')
       .single();
 
     // Return the parsed and enriched data
