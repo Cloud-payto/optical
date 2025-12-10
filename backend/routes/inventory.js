@@ -49,18 +49,48 @@ router.post('/bulk-add', async (req, res) => {
       });
     }
 
-    // Look up vendor UUID by name
+    // Look up vendor UUID by name OR code (flexible matching)
     let vendorId = null;
     if (vendor) {
-      const { data: vendorData, error: vendorError } = await supabase
+      // First try exact match on name
+      let { data: vendorData, error: vendorError } = await supabase
         .from('vendors')
-        .select('id')
+        .select('id, name')
         .ilike('name', vendor)
         .single();
 
+      // If not found by name, try matching by code (case-insensitive)
+      if (!vendorData || vendorError) {
+        const { data: vendorByCode, error: codeError } = await supabase
+          .from('vendors')
+          .select('id, name')
+          .ilike('code', vendor)
+          .single();
+
+        if (vendorByCode && !codeError) {
+          vendorData = vendorByCode;
+          vendorError = null;
+        }
+      }
+
+      // If still not found, try partial match on name (for cases like 'lamyamerica' -> "L'amyamerica")
+      if (!vendorData || vendorError) {
+        const { data: vendorByPartial, error: partialError } = await supabase
+          .from('vendors')
+          .select('id, name')
+          .ilike('name', `%${vendor}%`)
+          .limit(1)
+          .single();
+
+        if (vendorByPartial && !partialError) {
+          vendorData = vendorByPartial;
+          vendorError = null;
+        }
+      }
+
       if (vendorData && !vendorError) {
         vendorId = vendorData.id;
-        console.log(`✓ Found vendor ID: ${vendorId} for ${vendor}`);
+        console.log(`✓ Found vendor ID: ${vendorId} for ${vendor} (matched: ${vendorData.name})`);
 
         // NOTE: Vendor is NOT auto-added to account_vendors here
         // User must explicitly import via "Import from Inventory" button
@@ -69,7 +99,7 @@ router.post('/bulk-add', async (req, res) => {
           console.log(`ℹ️  Vendor account #${order.account_number} detected for ${vendor} (not auto-added to account)`);
         }
       } else {
-        console.warn(`Vendor '${vendor}' not found in vendors table`);
+        console.warn(`Vendor '${vendor}' not found in vendors table (tried name, code, and partial match)`);
       }
     }
 
