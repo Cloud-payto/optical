@@ -24,8 +24,8 @@ const axios = require('axios');
 class MarchonService {
     constructor(options = {}) {
         this.config = {
-            // API Configuration
-            apiUrl: 'https://www.mymarchon.com/ProductCatologWebWeb/Frame/sku',
+            // API Configuration (note: double slash is required)
+            apiUrl: 'https://www.mymarchon.com//ProductCatologWebWeb/Frame/sku',
             timeout: options.timeout || 15000,
             maxRetries: options.maxRetries || 3,
             retryDelay: options.retryDelay || 1000,
@@ -295,13 +295,24 @@ class MarchonService {
             return this.cache.get(cacheKey);
         }
 
+        // Marchon API requires POST with JSON body
+        const payload = {
+            style: styleName,
+            itemType: 'FRAME',
+            orderType: 'STOCK',
+            salesOrg: '2010',
+            distChannel: '10',
+            userCredential: {
+                salesOrg: '2010',
+                language: 'en_US',
+                countryCode: 'US'
+            }
+        };
+
         for (let attempt = 1; attempt <= this.config.maxRetries; attempt++) {
             try {
-                // Marchon API expects style name as URL parameter
-                const response = await axios.get(`${this.config.apiUrl}`, {
-                    params: {
-                        sku: styleName
-                    },
+                // Marchon API expects POST request with JSON body
+                const response = await axios.post(this.config.apiUrl, payload, {
                     headers: this.config.headers,
                     timeout: this.config.timeout
                 });
