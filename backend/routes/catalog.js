@@ -36,10 +36,28 @@ router.post('/check', async (req, res) => {
     try {
         const { vendorId, items } = req.body;
 
-        if (!vendorId || !items || !Array.isArray(items)) {
+        // Allow null vendorId - we'll just return items without cache matches
+        if (!items || !Array.isArray(items)) {
             return res.status(400).json({
                 success: false,
-                error: 'Missing required fields: vendorId, items (array)'
+                error: 'Missing required field: items (array)'
+            });
+        }
+
+        // If vendorId is null/undefined, return items as cache misses (no DB lookup possible)
+        if (!vendorId) {
+            console.log(`⚠️ Catalog check: vendorId is null, returning ${items.length} items as cache misses`);
+            const uncachedItems = items.map(item => ({
+                ...item,
+                cached: false,
+                needsEnrichment: true
+            }));
+            return res.status(200).json({
+                success: true,
+                items: uncachedItems,
+                cacheHits: 0,
+                cacheMisses: items.length,
+                vendorIdMissing: true
             });
         }
 
@@ -50,6 +68,12 @@ router.post('/check', async (req, res) => {
         let cacheMisses = 0;
 
         for (const item of items) {
+            // Extract eye size - handle various formats like "50", "50-18-140", etc.
+            const rawEyeSize = item.eye_size || item.size || '';
+            // Extract just the eye measurement (first 2 digits)
+            const eyeSizeMatch = String(rawEyeSize).match(/^(\d{2})/);
+            const eyeSizeNum = eyeSizeMatch ? eyeSizeMatch[1] : rawEyeSize;
+
             // Tier 1: Exact match (vendor + model + color + size)
             let catalogMatch = await supabase
                 .from('vendor_catalog')
@@ -57,9 +81,22 @@ router.post('/check', async (req, res) => {
                 .eq('vendor_id', vendorId)
                 .ilike('model', item.model || '')
                 .ilike('color', item.color || '')
-                .eq('eye_size', item.eye_size || item.size)
+                .eq('eye_size', rawEyeSize)
                 .limit(1)
                 .single();
+
+            // Tier 1.5: Try matching with just eye size number (e.g., "50" matches "50-18-140")
+            if (catalogMatch.error && eyeSizeNum && eyeSizeNum !== rawEyeSize) {
+                catalogMatch = await supabase
+                    .from('vendor_catalog')
+                    .select('*')
+                    .eq('vendor_id', vendorId)
+                    .ilike('model', item.model || '')
+                    .ilike('color', item.color || '')
+                    .or(`eye_size.eq.${eyeSizeNum},eye_size.like.${eyeSizeNum}-%,eye_size.like.${eyeSizeNum}/%`)
+                    .limit(1)
+                    .single();
+            }
 
             // Tier 2: UPC match (if available)
             if (catalogMatch.error && item.upc) {
@@ -72,7 +109,7 @@ router.post('/check', async (req, res) => {
                     .single();
             }
 
-            // Tier 3: Model + color fuzzy match (without size)
+            // Tier 3: Model + color fuzzy match (without size - may return wrong size variant)
             if (catalogMatch.error && item.model && item.color) {
                 catalogMatch = await supabase
                     .from('vendor_catalog')
@@ -86,11 +123,18 @@ router.post('/check', async (req, res) => {
 
             if (catalogMatch.data) {
                 // CACHE HIT! Enrich item with catalog data
-                console.log(`✅ Cache HIT for ${item.model} ${item.color}`);
+                const hasUpc = catalogMatch.data.upc || item.upc;
+                const hasWholesale = catalogMatch.data.wholesale_cost != null;
+                const isComplete = hasUpc && hasWholesale;
+
+                console.log(`✅ Cache HIT for ${item.model} ${item.color} (size: ${rawEyeSize} → catalog: ${catalogMatch.data.eye_size}) [UPC: ${catalogMatch.data.upc || 'NONE'}, Wholesale: ${catalogMatch.data.wholesale_cost || 'NONE'}]`);
 
                 enrichedItems.push({
                     ...item,
                     cached: true,
+                    // Flag if cached but incomplete - may need enrichment
+                    needsEnrichment: !isComplete,
+                    cacheIncomplete: !isComplete,
                     // Enrich with catalog data
                     upc: catalogMatch.data.upc || item.upc,
                     ean: catalogMatch.data.ean || item.ean,
@@ -109,7 +153,7 @@ router.post('/check', async (req, res) => {
                     availability_status: catalogMatch.data.availability_status,
                     api_verified: true,
                     confidence_score: catalogMatch.data.confidence_score,
-                    validation_reason: 'Vendor catalog match'
+                    validation_reason: isComplete ? 'Vendor catalog match' : 'Vendor catalog match (incomplete data)'
                 });
 
                 cacheHits++;
@@ -125,10 +169,11 @@ router.post('/check', async (req, res) => {
 
             } else {
                 // CACHE MISS - needs enrichment
-                console.log(`❌ Cache MISS for ${item.model} ${item.color}`);
+                console.log(`❌ Cache MISS for ${item.model} ${item.color} (searched size: ${rawEyeSize}, eyeNum: ${eyeSizeNum})`);
                 enrichedItems.push({
                     ...item,
-                    cached: false
+                    cached: false,
+                    needsEnrichment: true
                 });
                 cacheMisses++;
             }
