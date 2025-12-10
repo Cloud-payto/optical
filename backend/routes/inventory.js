@@ -10,6 +10,7 @@ const parserRegistry = require('../parsers');
  * Body: {
  *   accountId: string (UUID),
  *   vendor: string,
+ *   vendorId?: string (UUID - optional, if provided skips vendor lookup),
  *   order: { order_number, customer_name, order_date, etc. },
  *   items: [ { sku, brand, model, color, quantity, etc. } ],
  *   emailId?: number (optional - for tracking which email this came from)
@@ -17,7 +18,7 @@ const parserRegistry = require('../parsers');
  */
 router.post('/bulk-add', async (req, res) => {
   try {
-    const { accountId, vendor, order, items, emailId } = req.body;
+    const { accountId, vendor, vendorId: providedVendorId, order, items, emailId } = req.body;
 
     // Helper to truncate strings to fit database columns
     const truncate = (str, maxLen) => {
@@ -50,8 +51,14 @@ router.post('/bulk-add', async (req, res) => {
     }
 
     // Look up vendor UUID by name OR code (flexible matching)
-    let vendorId = null;
-    if (vendor) {
+    // If vendorId is already provided, use it directly
+    let vendorId = providedVendorId || null;
+
+    console.log('[BULK-ADD] Vendor lookup:', { vendor, providedVendorId, usingProvidedId: !!providedVendorId });
+
+    if (vendorId) {
+      console.log(`✓ Using provided vendor ID: ${vendorId}`);
+    } else if (vendor) {
       // First try exact match on name
       let { data: vendorData, error: vendorError } = await supabase
         .from('vendors')
