@@ -345,8 +345,13 @@ function extractOrderItems($) {
             // Skip header rows and empty rows
             if (cells.length < 4) return;
             if (cells.eq(0).hasClass('x_secondaryheader')) return;
+
+            // Check for gray background (header rows) - handles multiple formats:
+            // - #CCCCCC (hex format from original email)
+            // - rgb(204, 204, 204) (rgb format from forwarded/cleaned emails)
             const bg = cells.eq(0).css('background') || cells.eq(0).attr('style') || '';
-            if (bg.includes('CCCCCC') || bg.includes('#CCCCCC')) return;
+            if (bg.includes('CCCCCC') || bg.includes('#CCCCCC') ||
+                bg.includes('rgb(204, 204, 204)') || bg.includes('rgb(204,204,204)')) return;
 
             const styleName = cells.eq(0).text().trim();
             const color = cells.eq(1).text().trim();
@@ -355,10 +360,12 @@ function extractOrderItems($) {
             const notes = cells.eq(4) ? cells.eq(4).text().trim() : '';
 
             // Skip if style name is empty, contains only whitespace/nbsp, or is a total/summary row
+            // Also skip header rows where first cell is exactly "Style Name"
             // Also skip rows where style name contains "Total" or "Quantity" (summary rows)
             if (!styleName ||
                 styleName.length === 0 ||
                 styleName === '\u00A0' || // Non-breaking space
+                styleName === 'Style Name' || // Header row text
                 styleName.toLowerCase().includes('total') ||
                 styleName.toLowerCase().includes('quantity')) return;
 
