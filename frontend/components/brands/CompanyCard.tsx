@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, ChevronUp, Eye, Building2, Package, Edit3, Percent, Plus } from 'lucide-react';
+import { ChevronDown, ChevronUp, Eye, Building2, Package, Edit3, Percent, Plus, AlertTriangle } from 'lucide-react';
 import { Company } from '../../types';
 
 interface CompanyCardProps {
@@ -52,6 +52,15 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company, onViewBrandDetails, 
     return Math.round(((wholesale - yourCost) / wholesale) * 100);
   };
 
+  // Check if a brand is missing pricing (needs Your Cost to calculate inventory value)
+  const isBrandMissingPricing = (brand: { yourCost?: number }): boolean => {
+    return !brand.yourCost || brand.yourCost <= 0;
+  };
+
+  // Count brands missing pricing for this company
+  const brandsWithMissingPricing = company.brands.filter(isBrandMissingPricing);
+  const hasMissingPricing = brandsWithMissingPricing.length > 0;
+
   const handleEditCompany = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent expanding the card
     onEditCompany(company.id);
@@ -81,9 +90,17 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company, onViewBrandDetails, 
                   <span className="text-sm text-gray-600 dark:text-gray-400 font-mono">(#{company.accountNumber})</span>
                 )}
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {company.brands.length} {company.brands.length === 1 ? 'brand' : 'brands'}
-              </p>
+              <div className="flex items-center space-x-2">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {company.brands.length} {company.brands.length === 1 ? 'brand' : 'brands'}
+                </p>
+                {hasMissingPricing && (
+                  <div className="flex items-center space-x-1 text-amber-600 dark:text-amber-400" title={`${brandsWithMissingPricing.length} brand${brandsWithMissingPricing.length > 1 ? 's' : ''} missing pricing`}>
+                    <AlertTriangle className="h-4 w-4" />
+                    <span className="text-xs font-medium">{brandsWithMissingPricing.length} missing pricing</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -140,14 +157,26 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company, onViewBrandDetails, 
                   const discountPercentage = brand.wholesaleCost && brand.yourCost
                     ? calculateDiscountPercentage(brand.wholesaleCost, brand.yourCost)
                     : 0;
+                  const missingPricing = isBrandMissingPricing(brand);
 
                   return (
                     <div
                       key={brand.id}
-                      className="flex items-center justify-between p-3 bg-white dark:bg-[#1F2623] rounded-lg border border-gray-200 dark:border-gray-700"
+                      className={`flex items-center justify-between p-3 bg-white dark:bg-[#1F2623] rounded-lg border ${
+                        missingPricing
+                          ? 'border-amber-300 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20'
+                          : 'border-gray-200 dark:border-gray-700'
+                      }`}
                     >
                       <div className="flex-1">
-                        <h5 className="text-sm font-medium text-gray-900 dark:text-white">{brand.name}</h5>
+                        <div className="flex items-center space-x-2">
+                          <h5 className="text-sm font-medium text-gray-900 dark:text-white">{brand.name}</h5>
+                          {missingPricing && (
+                            <div className="flex items-center space-x-1 text-amber-600 dark:text-amber-400" title="Missing pricing information">
+                              <AlertTriangle className="h-3.5 w-3.5" />
+                            </div>
+                          )}
+                        </div>
                         <div className="flex items-center space-x-4 mt-1">
                           <p className="text-xs text-gray-500 dark:text-gray-400">
                             Wholesale: {brand.wholesaleCost && brand.wholesaleCost > 0
