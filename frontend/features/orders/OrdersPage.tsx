@@ -13,7 +13,7 @@ import { Filter } from 'lucide-react';
 
 export function OrdersPage() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'pending' | 'partial' | 'confirmed'>('pending');
+  const [activeTab, setActiveTab] = useState<'pending' | 'partial' | 'confirmed' | 'archived'>('pending');
   const [selectedVendor, setSelectedVendor] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'date' | 'vendor'>('date');
 
@@ -59,16 +59,21 @@ export function OrdersPage() {
     return sorted;
   }, [orders, selectedVendor, sortBy]);
 
-  const tabs = [
+  const leftTabs = [
     { key: 'pending' as const, label: 'Pending Orders', count: 0 },
     { key: 'partial' as const, label: 'Partial Orders', count: 0 },
     { key: 'confirmed' as const, label: 'Confirmed Orders', count: 0 },
   ];
 
+  const rightTabs = [
+    { key: 'archived' as const, label: 'Archived', count: 0 },
+  ];
+
   // Update the count for the active tab
-  const activeTabIndex = tabs.findIndex(tab => tab.key === activeTab);
+  const allTabs = [...leftTabs, ...rightTabs];
+  const activeTabIndex = allTabs.findIndex(tab => tab.key === activeTab);
   if (activeTabIndex !== -1) {
-    tabs[activeTabIndex].count = orders?.length || 0;
+    allTabs[activeTabIndex].count = orders?.length || 0;
   }
 
   return (
@@ -84,31 +89,61 @@ export function OrdersPage() {
 
       {/* Tabs */}
       <div className="border-b border-gray-200 dark:border-gray-700">
-        <nav className="-mb-px flex space-x-8">
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.key;
-            return (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                data-demo={tab.key === 'pending' ? 'pending-orders-tab' : undefined}
-                className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  isActive
-                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-                }`}
-              >
-                {tab.label}
-                {tab.count > 0 && (
-                  <span className={`ml-2 py-0.5 px-2 rounded-full text-xs ${
-                    isActive ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'bg-gray-100 dark:bg-[#1F2623] text-gray-600 dark:text-gray-300'
-                  }`}>
-                    {tab.count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+        <nav className="-mb-px flex justify-between">
+          {/* Left-aligned tabs */}
+          <div className="flex space-x-8">
+            {leftTabs.map((tab) => {
+              const isActive = activeTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  data-demo={tab.key === 'pending' ? 'pending-orders-tab' : undefined}
+                  className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                    isActive
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}
+                >
+                  {tab.label}
+                  {tab.count > 0 && (
+                    <span className={`ml-2 py-0.5 px-2 rounded-full text-xs ${
+                      isActive ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'bg-gray-100 dark:bg-[#1F2623] text-gray-600 dark:text-gray-300'
+                    }`}>
+                      {tab.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Right-aligned tabs */}
+          <div className="flex space-x-8">
+            {rightTabs.map((tab) => {
+              const isActive = activeTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                    isActive
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}
+                >
+                  {tab.label}
+                  {tab.count > 0 && (
+                    <span className={`ml-2 py-0.5 px-2 rounded-full text-xs ${
+                      isActive ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'bg-gray-100 dark:bg-[#1F2623] text-gray-600 dark:text-gray-300'
+                    }`}>
+                      {tab.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </nav>
       </div>
 
