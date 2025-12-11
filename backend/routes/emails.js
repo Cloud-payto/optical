@@ -78,6 +78,18 @@ router.post('/create', async (req, res) => {
     if (parsedData) {
       await emailOperations.updateEmailWithParsedData(emailRecord.id, parsedData);
       console.log('[EMAIL CREATE] Email updated with parsed data');
+
+      // Save vendor account number if present in parsedData
+      const accountNumber = parsedData.account_number || parsedData.order?.account_number;
+      if (accountNumber && vendorId && accountId) {
+        try {
+          await emailOperations.saveOrUpdateVendorAccountNumber(accountId, vendorId, accountNumber);
+          console.log('[EMAIL CREATE] Vendor account number saved:', accountNumber);
+        } catch (accountNumError) {
+          console.error('[EMAIL CREATE] Failed to save vendor account number:', accountNumError.message);
+          // Don't fail the request, just log the error
+        }
+      }
     }
 
     return res.status(201).json({
