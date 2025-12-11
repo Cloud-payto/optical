@@ -165,48 +165,54 @@ function extractAccountInfo($) {
     };
 
     try {
-        // Find the Account Information table (works with both old CSS classes and new <strong> tags)
-        let accountTable = $('td.x_tableheader').filter((i, elem) => {
-            return $(elem).text().trim() === 'Account Information';
+        // Find the Account Information table - look for text containing "Account Information"
+        let accountTable = $('td').filter((i, elem) => {
+            const text = $(elem).text().trim();
+            return text.includes('Account Information');
         }).closest('table');
 
-        // If not found with old method, try finding with strong/bold tags
-        if (!accountTable.length) {
-            accountTable = $('td').filter((i, elem) => {
-                const $elem = $(elem);
-                const text = $elem.text().trim();
-                const hasStrong = $elem.find('strong').length > 0;
-                return hasStrong && text.includes('Account Information');
-            }).closest('table');
-        }
-
         if (accountTable.length) {
-            // Find the data row (skip header rows with gray background or strong tags)
+            console.log('🔍 Found Account Information table');
+
+            // Find the data row (skip header rows)
             accountTable.find('tr').each((i, row) => {
                 const $row = $(row);
                 const cells = $row.find('td');
 
-                // Skip if this is a header row
+                // Skip rows with less than 5 cells
                 if (cells.length < 5) return;
-                const bg = cells.eq(0).css('background') || cells.eq(0).attr('style') || '';
-                if (bg.includes('CCCCCC') || bg.includes('#CCCCCC')) return;
+
+                // Skip header rows - check for x_secondaryheader class or x_tableheader class
+                if (cells.eq(0).hasClass('x_secondaryheader') || cells.eq(0).hasClass('x_tableheader')) return;
+
+                // Skip rows with strong tags (these are headers)
                 if (cells.eq(0).find('strong').length > 0) return;
 
-                // This should be the data row
-                const account = cells.eq(0).text().trim();
+                // Skip rows where the first cell contains header text
+                const firstCellText = cells.eq(0).text().trim();
+                if (firstCellText.includes('Account Information') ||
+                    firstCellText === 'Account' ||
+                    firstCellText === 'Contact Name') return;
+
+                // This should be the data row - verify it looks like account data
+                const account = firstCellText;
                 const contact = cells.eq(1).text().trim();
 
-                // Check if this looks like data (not empty, not header text)
-                if (account && !account.includes('Account') && account.length < 20) {
+                // Account numbers typically start with a letter and are alphanumeric
+                // Contact names are typically longer and contain spaces
+                if (account && account.length > 0 && account.length < 20) {
                     accountInfo.accountNumber = account;
                     accountInfo.contactName = contact;
                     accountInfo.address = cells.eq(2).text().trim();
                     accountInfo.city = cells.eq(3).text().trim();
                     accountInfo.state = cells.eq(4).text().trim();
                     accountInfo.postalCode = cells.eq(5).text().trim();
+                    console.log(`🔍 Found account data row: ${account}, ${contact}`);
                     return false; // Break out of loop
                 }
             });
+        } else {
+            console.log('⚠️ Account Information table not found');
         }
 
         console.log(`🏢 Account: ${accountInfo.accountNumber} - ${accountInfo.contactName}`);
@@ -230,45 +236,50 @@ function extractShippingAddress($) {
     };
 
     try {
-        // Find the Shipping Address table
-        let shippingTable = $('td.x_tableheader').filter((i, elem) => {
-            return $(elem).text().trim() === 'Shipping Address';
+        // Find the Shipping Address table - look for text containing "Shipping Address"
+        let shippingTable = $('td').filter((i, elem) => {
+            const text = $(elem).text().trim();
+            return text.includes('Shipping Address') && $(elem).find('strong').length > 0;
         }).closest('table');
 
-        // If not found, try with strong tags
-        if (!shippingTable.length) {
-            shippingTable = $('td').filter((i, elem) => {
-                const $elem = $(elem);
-                const text = $elem.text().trim();
-                const hasStrong = $elem.find('strong').length > 0;
-                return hasStrong && text.includes('Shipping Address');
-            }).closest('table');
-        }
-
         if (shippingTable.length) {
+            console.log('🔍 Found Shipping Address table');
+
             // Find the data row (skip header rows)
             shippingTable.find('tr').each((i, row) => {
                 const $row = $(row);
                 const cells = $row.find('td');
 
-                // Skip if this is a header row
+                // Skip rows with less than 4 cells
                 if (cells.length < 4) return;
-                const bg = cells.eq(0).css('background') || cells.eq(0).attr('style') || '';
-                if (bg.includes('CCCCCC') || bg.includes('#CCCCCC')) return;
+
+                // Skip header rows - check for x_secondaryheader class or x_tableheader class
+                if (cells.eq(0).hasClass('x_secondaryheader') || cells.eq(0).hasClass('x_tableheader')) return;
+
+                // Skip rows with strong tags (these are headers)
                 if (cells.eq(0).find('strong').length > 0) return;
 
-                // This should be the data row
-                const address = cells.eq(0).text().trim();
+                // Skip rows where first cell contains header text
+                const firstCellText = cells.eq(0).text().trim();
+                if (firstCellText.includes('Shipping Address') ||
+                    firstCellText === 'City' ||
+                    firstCellText === 'State') return;
 
-                // Check if this looks like an address
-                if (address && address.length > 5 && !address.includes('Shipping Address')) {
+                // This should be the data row - verify it looks like an address
+                const address = firstCellText;
+
+                // Addresses are typically longer than 5 characters
+                if (address && address.length > 5) {
                     shipping.address = address;
                     shipping.city = cells.eq(1).text().trim();
                     shipping.state = cells.eq(2).text().trim();
                     shipping.postal_code = cells.eq(3).text().trim();
+                    console.log(`🔍 Found shipping data row: ${address}`);
                     return false; // Break out of loop
                 }
             });
+        } else {
+            console.log('⚠️ Shipping Address table not found');
         }
 
         console.log(`📦 Shipping: ${shipping.city}, ${shipping.state} ${shipping.postal_code}`);
@@ -343,8 +354,13 @@ function extractOrderItems($) {
             const quantityText = cells.eq(3).text().trim();
             const notes = cells.eq(4) ? cells.eq(4).text().trim() : '';
 
-            // Skip if style name is empty or is a total/summary row
-            if (!styleName || styleName.toLowerCase().includes('total') || styleName.includes('&nbsp;')) return;
+            // Skip if style name is empty, contains only whitespace/nbsp, or is a total/summary row
+            // Also skip rows where style name contains "Total" or "Quantity" (summary rows)
+            if (!styleName ||
+                styleName.length === 0 ||
+                styleName === '\u00A0' || // Non-breaking space
+                styleName.toLowerCase().includes('total') ||
+                styleName.toLowerCase().includes('quantity')) return;
 
             const quantity = parseInt(quantityText) || 1;
 
