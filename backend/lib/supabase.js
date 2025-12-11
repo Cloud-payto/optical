@@ -1845,17 +1845,28 @@ const vendorOperations = {
       });
       console.log('User has', userVendorIds.length, 'vendors added:', userVendorIds);
 
-      // THEN: Get only those vendors with their brands
-      const { data, error } = await supabase
+      // Get vendor info (without brands - we'll get brands from account_brands)
+      const { data: vendors, error: vendorError } = await supabase
         .from('vendors')
+        .select('id, name, code, domain, is_active, settings')
+        .in('id', userVendorIds);
+
+      if (vendorError) throw vendorError;
+
+      // Get ONLY the brands the user has in account_brands (discovered/imported brands)
+      // Join with brands table to get brand details
+      const { data: accountBrands, error: accountBrandsError } = await supabase
+        .from('account_brands')
         .select(`
           id,
-          name,
-          code,
-          domain,
-          is_active,
-          settings,
-          brands!vendor_id(
+          account_id,
+          vendor_id,
+          brand_id,
+          wholesale_cost,
+          tariff_tax,
+          discount_percentage,
+          notes,
+          brands!brand_id (
             id,
             name,
             category,
@@ -1867,55 +1878,44 @@ const vendorOperations = {
             notes
           )
         `)
-        .in('id', userVendorIds);
+        .eq('account_id', userId)
+        .in('vendor_id', userVendorIds);
 
-      if (error) throw error;
+      if (accountBrandsError) throw accountBrandsError;
 
-      // Get user-specific pricing for each vendor/brand combination
-      const vendorIds = data?.map(v => v.id) || [];
-      const brandIds = data?.flatMap(v => v.brands?.map(b => b.id) || []) || [];
+      console.log('Found', accountBrands?.length || 0, 'account_brands for user');
 
-      let accountBrands = [];
-      if (vendorIds.length > 0) {
-        console.log('🔥 DEBUG: Fetching account_brands for userId:', userId, 'vendorIds:', vendorIds);
+      // Build vendor objects with ONLY user's discovered brands
+      const vendorsWithPricing = (vendors || []).map(vendor => {
+        // Filter account_brands to this vendor and map to brand objects
+        const userBrandsForVendor = (accountBrands || [])
+          .filter(ab => ab.vendor_id === vendor.id && ab.brands)
+          .map(ab => ({
+            id: ab.brands.id,
+            name: ab.brands.name,
+            category: ab.brands.category,
+            tier: ab.brands.tier,
+            wholesale_cost: ab.brands.wholesale_cost,
+            msrp: ab.brands.msrp,
+            map_price: ab.brands.map_price,
+            is_active: ab.brands.is_active,
+            notes: ab.brands.notes,
+            // User-specific pricing from account_brands
+            effective_wholesale_cost: ab.wholesale_cost || ab.brands.wholesale_cost || 0,
+            account_brand: {
+              id: ab.id,
+              wholesale_cost: ab.wholesale_cost,
+              tariff_tax: ab.tariff_tax,
+              discount_percentage: ab.discount_percentage,
+              notes: ab.notes
+            }
+          }));
 
-        const { data: accountBrandData, error: accountBrandError } = await supabase
-          .from('account_brands')
-          .select('*')
-          .eq('account_id', userId)
-          .in('vendor_id', vendorIds);
-
-        if (accountBrandError) throw accountBrandError;
-        accountBrands = accountBrandData || [];
-
-        console.log('🔥 DEBUG: Found account_brands data:', accountBrands.length, 'records');
-        console.log('🔥 DEBUG: Account brands:', accountBrands);
-      }
-
-      // Merge vendor data with user pricing
-      const vendorsWithPricing = (data || []).map(vendor => {
-        const brandsWithAccountData = (vendor.brands || []).map(brand => {
-          const accountBrand = accountBrands.find(ab =>
-            ab.vendor_id === vendor.id && ab.brand_id === brand.id
-          );
-
-          if (accountBrand) {
-            console.log('🔥 DEBUG: Found account_brand for brand:', brand.name, 'data:', accountBrand);
-          } else {
-            console.log('🔥 DEBUG: No account_brand found for brand:', brand.name, 'vendor:', vendor.id, 'brand:', brand.id);
-          }
-
-          return {
-            ...brand,
-            // Use COALESCE logic: account wholesale cost OR global brand default
-            effective_wholesale_cost: accountBrand?.wholesale_cost || brand.wholesale_cost || 0,
-            account_brand: accountBrand
-          };
-        });
+        console.log(`Vendor ${vendor.name}: ${userBrandsForVendor.length} user brands`);
 
         return {
           ...vendor,
-          brands: brandsWithAccountData,
+          brands: userBrandsForVendor,
           account_number: vendorAccountNumbers[vendor.id] || null
         };
       });
