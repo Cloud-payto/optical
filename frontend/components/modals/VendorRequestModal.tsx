@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Package, X, Send, AlertCircle, Building2 } from 'lucide-react';
+import { Package, X, Send, AlertCircle, Building2, Mail } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { getApiEndpoint } from '../../lib/api-config';
@@ -14,13 +14,14 @@ const VendorRequestModal: React.FC<VendorRequestModalProps> = ({ isOpen, onClose
   const { user } = useAuth();
   const [vendorName, setVendorName] = useState('');
   const [vendorWebsite, setVendorWebsite] = useState('');
-  const [reason, setReason] = useState('');
+  const [canProvideEmail, setCanProvideEmail] = useState<'yes' | 'no' | ''>('');
+  const [emailCount, setEmailCount] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!vendorName.trim() || !reason.trim()) {
+    if (!vendorName.trim() || !canProvideEmail) {
       toast.error('Please fill in required fields');
       return;
     }
@@ -32,6 +33,11 @@ const VendorRequestModal: React.FC<VendorRequestModalProps> = ({ isOpen, onClose
 
     setIsSubmitting(true);
 
+    // Build reason string from email availability
+    const reason = canProvideEmail === 'yes'
+      ? `Can provide vendor confirmation email(s): ${emailCount || '1'} sample(s) available`
+      : 'Cannot provide vendor confirmation email at this time';
+
     try {
       const response = await fetch(getApiEndpoint('/feedback/vendor-request'), {
         method: 'POST',
@@ -41,7 +47,7 @@ const VendorRequestModal: React.FC<VendorRequestModalProps> = ({ isOpen, onClose
         body: JSON.stringify({
           vendorName: vendorName.trim(),
           vendorWebsite: vendorWebsite.trim() || null,
-          reason: reason.trim(),
+          reason: reason,
           userId: user.id,
           userEmail: user.email || 'unknown@email.com',
         }),
@@ -56,7 +62,8 @@ const VendorRequestModal: React.FC<VendorRequestModalProps> = ({ isOpen, onClose
       toast.success('Vendor request submitted successfully! We\'ll review it soon.');
       setVendorName('');
       setVendorWebsite('');
-      setReason('');
+      setCanProvideEmail('');
+      setEmailCount('');
       onClose();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to submit vendor request';
@@ -148,19 +155,67 @@ const VendorRequestModal: React.FC<VendorRequestModalProps> = ({ isOpen, onClose
               </div>
 
               <div>
-                <label htmlFor="vendor-reason" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Why do you need this vendor? <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Can you provide us with a Vendor Order Confirmation email? <span className="text-red-500">*</span>
                 </label>
-                <textarea
-                  id="vendor-reason"
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  placeholder="Tell us why this vendor would be helpful for your business..."
-                  rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
-                  disabled={isSubmitting}
-                />
+                <div className="flex space-x-4">
+                  <button
+                    type="button"
+                    onClick={() => setCanProvideEmail('yes')}
+                    className={`flex-1 py-2 px-4 rounded-lg border-2 transition-all flex items-center justify-center space-x-2 ${
+                      canProvideEmail === 'yes'
+                        ? 'border-green-500 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300'
+                    }`}
+                    disabled={isSubmitting}
+                  >
+                    <Mail className="h-4 w-4" />
+                    <span>Yes, I can</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCanProvideEmail('no')}
+                    className={`flex-1 py-2 px-4 rounded-lg border-2 transition-all ${
+                      canProvideEmail === 'no'
+                        ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300'
+                    }`}
+                    disabled={isSubmitting}
+                  >
+                    <span>No, not yet</span>
+                  </button>
+                </div>
               </div>
+
+              {canProvideEmail === 'yes' && (
+                <div>
+                  <label htmlFor="email-count" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    How many sample emails can you provide?
+                  </label>
+                  <input
+                    id="email-count"
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={emailCount}
+                    onChange={(e) => setEmailCount(e.target.value)}
+                    placeholder="e.g., 3"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-shadow bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                    disabled={isSubmitting}
+                  />
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    We'll reach out to you to collect the sample emails for parser development.
+                  </p>
+                </div>
+              )}
+
+              {canProvideEmail === 'no' && (
+                <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-3">
+                  <p className="text-sm text-orange-700 dark:text-orange-300">
+                    No problem! We'll add this vendor to our wishlist. Having a sample order confirmation email helps us build the parser faster, so let us know if you get one in the future.
+                  </p>
+                </div>
+              )}
 
               {/* Footer */}
               <div className="flex items-center justify-end space-x-3 pt-2">

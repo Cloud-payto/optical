@@ -1,8 +1,9 @@
 import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import FeatureCard from '../components/features/FeatureCard';
 import { Container } from '../components/ui/Container';
+import VendorRequestModal from '../components/modals/VendorRequestModal';
 import {
   Calculator,
   BarChart3,
@@ -55,6 +56,9 @@ const HomePage = () => {
   const howItWorksRef = useRef<HTMLDivElement>(null);
   const benefitsRef = useRef<HTMLDivElement>(null);
   const vendorsRef = useRef<HTMLDivElement>(null);
+
+  // Vendor request modal state
+  const [isVendorRequestModalOpen, setIsVendorRequestModalOpen] = useState(false);
 
   const features = [
     {
@@ -294,7 +298,12 @@ const HomePage = () => {
               className="text-center text-gray-500 dark:text-gray-400 mt-6 text-sm"
             >
               More vendors coming soon. Have a specific vendor you'd like us to support?{' '}
-              <a href="mailto:support@optiprofit.com" className="text-blue-600 dark:text-blue-400 hover:underline">Let us know</a>
+              <button
+                onClick={() => setIsVendorRequestModalOpen(true)}
+                className="text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                Let us know
+              </button>
             </motion.p>
           </motion.div>
         </section>
@@ -599,6 +608,12 @@ const HomePage = () => {
         </section>
         </Container>
       </div>
+
+      {/* Vendor Request Modal */}
+      <VendorRequestModal
+        isOpen={isVendorRequestModalOpen}
+        onClose={() => setIsVendorRequestModalOpen(false)}
+      />
     </div>
   );
 };
