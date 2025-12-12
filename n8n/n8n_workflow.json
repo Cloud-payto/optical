@@ -1,0 +1,791 @@
+{
+  "name": "n8n_workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "9f96a3ec-cf85-40f4-9bc9-338424768726",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -3168,
+        192
+      ],
+      "id": "82f31adf-10cf-49eb-afc9-fe0edaa9103a",
+      "name": "Webhook",
+      "webhookId": "9f96a3ec-cf85-40f4-9bc9-338424768726"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract account ID (UUID) from CloudMailin forwarding address\nconst email = $input.item.json;\n\nlet accountId = null;\n\n// Method 1: Extract UUID from envelope.to (CloudMailin format)\n// Format: prefix+UUID@cloudmailin.net\nif (email.body?.envelope?.to) {\n  const match = email.body.envelope.to.match(/\\+([a-f0-9-]{36})@/i);\n  if (match) accountId = match[1];\n}\n\n// Method 2: Try recipients array\nif (!accountId && email.body?.envelope?.recipients?.[0]) {\n  const match = email.body.envelope.recipients[0].match(/\\+([a-f0-9-]{36})@/i);\n  if (match) accountId = match[1];\n}\n\n// Method 3: Try headers.to\nif (!accountId && email.body?.headers?.to) {\n  const match = email.body.headers.to.match(/\\+([a-f0-9-]{36})@/i);\n  if (match) accountId = match[1];\n}\n\n// Validation\nif (!accountId) {\n  throw new Error('Unable to extract account ID from email');\n}\n\nreturn {\n  json: {\n    ...email,\n    accountId,\n    extractedAt: new Date().toISOString()\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2976,
+        192
+      ],
+      "id": "84a1a6a0-1085-4a1d-9d08-c6ea38828732",
+      "name": "Extract Account ID"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/emails/detect-vendor",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"html\": {{ JSON.stringify($json.body.html) }},\n  \"plain\": {{ JSON.stringify($json.body.plain) }},\n  \"subject\": {{ JSON.stringify($json.body.headers.subject) }},\n  \"from\": {{ JSON.stringify($json.body.headers.from) }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2752,
+        192
+      ],
+      "id": "118f394c-18e9-48cc-bd31-15fb13609b72",
+      "name": "Detect Vendor (API)",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/parse/clean-email",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"html\": {{ JSON.stringify($('Extract Account ID').item.json.body.html) }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2528,
+        192
+      ],
+      "id": "3ce15dae-eb67-47e3-8991-58952c934ff0",
+      "name": "Clean Email",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const email = $('Extract Account ID').item.json;\nconst detection = $('Detect Vendor (API)').item.json;\nconst cleaned = $('Clean Email').item.json;\n\n// Generate vendorKey from vendorName (lowercase, no spaces)\nconst vendorName = detection.vendorName || detection.vendor || 'Unknown';\nconst vendorKey = vendorName.toLowerCase().replace(/[^a-z0-9]/g, '');\n\n// Merge all data\nreturn {\n  json: {\n    // Email data\n    accountId: email.accountId,\n    subject: email.body?.headers?.subject || '',\n    from: email.body?.headers?.from || '',\n    receivedAt: email.body?.headers?.date || new Date().toISOString(),\n\n    // Email content (prefer cleaned HTML)\n    html: cleaned?.cleanedHtml || email.body?.html,\n    originalHtml: email.body?.html,\n    plain: email.body?.plain,\n    attachments: email.body?.attachments || [],\n\n    // Vendor detection - use vendorName for display, vendorKey for routing\n    vendor: vendorName,\n    vendorKey: vendorKey,\n    confidence: detection.confidence || 0,\n\n    // Cleaning metadata\n    emailCleaned: !!cleaned?.cleanedHtml,\n    detectedProviders: cleaned?.detectedProviders || [],\n\n    // Processing metadata\n    workflowStartedAt: new Date().toISOString()\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2320,
+        192
+      ],
+      "id": "f6a6dcb6-d6e9-4b35-94e4-64ddbac18f3c",
+      "name": "Format API Response"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Inline vendor configuration (will be moved to Supabase later)\n// parseSource: 'html' = parse email HTML body, 'pdf' = parse PDF attachment\nconst vendorConfigs = {\n  'modernoptical': { vendorKey: 'modernoptical', requiresEnrichment: true, parseSource: 'html' },\n  'safilo': { vendorKey: 'safilo', requiresEnrichment: false, parseSource: 'pdf' },\n  'luxottica': { vendorKey: 'luxottica', requiresEnrichment: false, parseSource: 'html' },\n  'europa': { vendorKey: 'europa', requiresEnrichment: false, parseSource: 'html' },\n  'etniabarcelona': { vendorKey: 'etnia-barcelona', requiresEnrichment: false, parseSource: 'pdf' },\n  'idealoptics': { vendorKey: 'idealoptics', requiresEnrichment: true, parseSource: 'html' },\n  'lamyamerica': { vendorKey: 'lamy', requiresEnrichment: false, parseSource: 'html' },\n  'kenmark': { vendorKey: 'kenmark', requiresEnrichment: false, parseSource: 'html' },\n  'marchon': { vendorKey: 'marchon', requiresEnrichment: true, parseSource: 'html' },\n  'clearvision': { vendorKey: 'clearvision', requiresEnrichment: false, parseSource: 'html' }\n};\n\nconst data = $input.item.json;\n\n// Use vendorKey for lookup (already lowercase, no spaces from Format API Response)\nconst lookupKey = data.vendorKey || data.vendor?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';\nconst config = vendorConfigs[lookupKey];\n\nif (!config) {\n  return {\n    json: {\n      ...data,\n      vendorConfig: null,\n      routeTo: 'unknown_vendor',\n      _debug: { lookupKey, availableKeys: Object.keys(vendorConfigs) }\n    }\n  };\n}\n\n// Route based on enrichment needs (parseSource is handled in Parse Vendor Email node)\nreturn {\n  json: {\n    ...data,\n    vendorConfig: config,\n    routeTo: config.requiresEnrichment ? 'enrichment_handler' : 'standard_processor'\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2096,
+        192
+      ],
+      "id": "d4786053-a93d-47cb-a98a-77f3b5c10e6c",
+      "name": "Load Vendor Config"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.item.json;\n\n// Check if config loaded\nif (!data.vendorConfig) {\n  return {\n    json: {\n      ...data,\n      error: 'Vendor configuration not found',\n      routeTo: 'unknown_vendor'\n    }\n  };\n}\n\n// Validation passed\nreturn {\n  json: {\n    ...data\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1872,
+        192
+      ],
+      "id": "96278dbf-08e5-4cac-8141-672e2fc36c0d",
+      "name": "Validate Vendor Config"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.routeTo }}",
+                    "rightValue": "unknown_vendor",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "unknown_vendor"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.routeTo }}",
+                    "rightValue": "standard_processor",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "standard_processor"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.routeTo }}",
+                    "rightValue": "enrichment_handler",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "enrichment_handler"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        -1648,
+        192
+      ],
+      "id": "e528f8b9-ce40-4136-b51b-c9cb6b8d0e39",
+      "name": "Route by Vendor Type"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://optical-express-api.onrender.com/api/parse/{{ $json.vendorConfig.vendorKey }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ (() => {\n  const parseSource = $json.vendorConfig?.parseSource || 'html';\n  const basePayload = { accountId: $json.accountId };\n  \n  if (parseSource === 'pdf') {\n    // PDF vendors: send attachments array for backend to extract PDF\n    return JSON.stringify({\n      ...basePayload,\n      attachments: $json.attachments || []\n    });\n  } else {\n    // HTML vendors: send HTML content\n    return JSON.stringify({\n      ...basePayload,\n      html: $json.html,\n      plainText: $json.plain\n    });\n  }\n})() }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1424,
+        96
+      ],
+      "id": "a17de6cf-348b-486f-8697-42bd49e616d7",
+      "name": "Parse Vendor Email"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/catalog/check",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"vendorId\": {{ JSON.stringify($json.vendorId) }},\n  \"items\": {{ JSON.stringify($json.items) }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1200,
+        96
+      ],
+      "id": "4f17eab4-3ee3-4e46-8546-7bb3dd50a823",
+      "name": "Check Catalog"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get parsed data and catalog check results\nconst parsedData = $('Parse Vendor Email').item.json;\nconst catalogCheck = $('Check Catalog').item.json;\nconst originalData = $('Validate Vendor Config').item.json;\n\n// Merge catalog check info into items\nconst itemsWithCatalogInfo = parsedData.items.map(item => {\n  // Find matching cached item from catalog check\n  const catalogInfo = catalogCheck.items?.find(c => \n    c.sku === item.sku || \n    c.sku === item.model ||\n    c.model === item.model\n  );\n  \n  // If cached, use cached data for UPC and pricing\n  const isCached = catalogInfo?.cached === true;\n  \n  // Item needs enrichment if:\n  // 1. Catalog says it needs enrichment (missing UPC or incomplete data), OR\n  // 2. Not cached at all AND vendor requires enrichment\n  const needsEnrichment = catalogInfo?.needsEnrichment || \n                          catalogInfo?.cacheIncomplete ||\n                          (!isCached && originalData.vendorConfig?.requiresEnrichment);\n  \n  return {\n    ...item,\n    // Use cached UPC if available, otherwise use parsed UPC\n    upc: catalogInfo?.upc || item.upc,\n    // Use cached wholesale price if available\n    wholesale_price: catalogInfo?.wholesale_price || catalogInfo?.wholesale_cost || item.wholesale_price,\n    // Use cached MSRP if available\n    msrp: catalogInfo?.msrp || item.msrp,\n    sku: item.sku || item.model,\n    model: item.model || item.sku,\n    description: item.description || `${item.brand} ${item.model} ${item.color}`.trim(),\n    existsInCatalog: isCached,\n    catalogPrice: catalogInfo?.wholesale_price || catalogInfo?.wholesale_cost || catalogInfo?.catalogPrice,\n    needsEnrichment: needsEnrichment,\n    cached: isCached\n  };\n});\n\n// CRITICAL: Use DYNAMIC vendor data from parser response\nconst vendor = parsedData.vendor || originalData.vendor;\nconst vendorKey = parsedData.vendorKey || originalData.vendorKey;\nconst vendorId = parsedData.vendorId;\nconst accountId = parsedData.accountId || originalData.accountId;\n\n// IMPORTANT: Extract account_number from parsed data (order or top level)\nconst accountNumber = parsedData.account_number || parsedData.accountNumber || \n                      parsedData.order?.account_number || parsedData.order?.accountNumber || null;\n\n// Get email metadata from original data\nconst fromEmail = originalData.from || '';\nconst subject = originalData.subject || '';\n\n// Determine if we need enrichment:\n// - At least one item needs enrichment (missing UPC or flagged by catalog as incomplete)\n// This now respects the catalog's needsEnrichment flag regardless of vendor config\nconst shouldEnrich = itemsWithCatalogInfo.some(item => item.needsEnrichment);\n\nconsole.log(`Vendor: ${vendor}, vendorId: ${vendorId}, requiresEnrichment config: ${originalData.vendorConfig?.requiresEnrichment}`);\nconsole.log(`Account Number: ${accountNumber}`);\nconsole.log(`Items needing enrichment: ${itemsWithCatalogInfo.filter(i => i.needsEnrichment).length}/${itemsWithCatalogInfo.length}`);\nconsole.log(`Should enrich (based on actual item needs): ${shouldEnrich}`);\n\nreturn {\n  json: {\n    vendor: vendor,\n    vendorKey: vendorKey,\n    vendorId: vendorId,\n    accountId: accountId,\n    accountNumber: accountNumber,\n    from: fromEmail,\n    subject: subject,\n    order: parsedData.order,\n    items: itemsWithCatalogInfo,\n    catalogCheckResult: catalogCheck,\n\n    // For Create Email Record API - include parsed data with account_number!\n    emailData: {\n      vendor: vendor,\n      vendorId: vendorId,\n      accountId: accountId,\n      from: fromEmail,\n      subject: subject,\n      html: originalData.html,\n      plainText: originalData.plain,\n      parsedData: {\n        order: parsedData.order,\n        items: itemsWithCatalogInfo,\n        vendor: vendor,\n        vendorId: vendorId,\n        account_number: accountNumber\n      },\n      parseStatus: 'success'\n    },\n\n    // For Bulk-Add Items API - needs vendor (name), vendorId, order object, items\n    bulkAddData: {\n      accountId: accountId,\n      vendor: vendor,\n      vendorId: vendorId,  // Include vendorId directly to skip lookup\n      order: {\n        order_number: parsedData.order?.order_number,\n        order_date: parsedData.order?.order_date,\n        customer_name: parsedData.order?.customer_name,\n        rep_name: parsedData.order?.rep_name,\n        account_number: accountNumber\n      },\n      items: itemsWithCatalogInfo.map(item => ({\n        sku: item.sku || item.model,\n        model: item.model,\n        brand: item.brand,\n        color: item.color,\n        color_code: item.color_code,\n        size: item.size || item.eye_size,\n        description: item.description,\n        quantity: item.quantity,\n        wholesale_price: item.wholesale_price,\n        upc: item.upc\n      }))\n    },\n\n    // For Cache to Catalog API - needs model, brand per item\n    cacheData: {\n      vendorId: vendorId,\n      items: itemsWithCatalogInfo.map(item => ({\n        model: item.model,\n        brand: item.brand,\n        color: item.color,\n        color_code: item.color_code,\n        color_name: item.color_name,\n        size: item.size || item.eye_size,\n        sku: item.sku || item.model,\n        description: item.description,\n        wholesale_price: item.wholesale_price,\n        upc: item.upc,\n        image_url: item.image_url,\n        product_url: item.product_url\n      }))\n    },\n\n    // Check if enrichment needed - now based on actual item needs, not just vendor config\n    needsEnrichment: shouldEnrich\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -992,
+        96
+      ],
+      "id": "e1d054ee-1a2c-490d-9285-b9291807677b",
+      "name": "Prepare Email Data"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition1",
+              "leftValue": "={{ $json.needsEnrichment }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -768,
+        96
+      ],
+      "id": "8f698efb-7e3a-4d58-b5e6-52ef11079c93",
+      "name": "If cached"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://optical-express-api.onrender.com/api/enrich/{{ $json.vendorKey }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"accountId\": {{ JSON.stringify($json.accountId) }},\n  \"orderNumber\": {{ JSON.stringify($json.order && $json.order.order_number ? $json.order.order_number : null) }},\n  \"items\": {{ JSON.stringify($json.items.filter(item => item.needsEnrichment)) }},\n  \"skipDbUpdate\": true\n}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -544,
+        -16
+      ],
+      "id": "895aee9f-e018-4436-b925-6bbe722406b9",
+      "name": "Enrich",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Merge enriched data back into items\nconst preparedData = $('Prepare Email Data').item.json;\nconst enrichedResult = $('Enrich').item.json;\n\n// Create lookup map of enriched items by model (Marchon uses model for matching)\nconst enrichedMap = new Map();\nif (enrichedResult?.enrichedItems) {\n  // Marchon enrichment returns enrichedItems array\n  enrichedResult.enrichedItems.forEach(item => {\n    const key = item.model || item.sku;\n    if (key) enrichedMap.set(key.toUpperCase(), item);\n  });\n} else if (enrichedResult?.items) {\n  // Fallback for other vendors\n  enrichedResult.items.forEach(item => {\n    const key = item.model || item.sku;\n    if (key) enrichedMap.set(key.toUpperCase(), item);\n  });\n}\n\nconsole.log('Enrichment map size:', enrichedMap.size);\n\n// Merge enriched data into items\nconst mergedItems = preparedData.items.map(item => {\n  const lookupKey = (item.model || item.sku || '').toUpperCase();\n  const enrichedInfo = enrichedMap.get(lookupKey);\n  \n  if (enrichedInfo) {\n    console.log(`Enriched ${item.model}: UPC=${enrichedInfo.upc}, Wholesale=${enrichedInfo.wholesale_price}`);\n  }\n  \n  return {\n    ...item,\n    // Marchon enrichment fields\n    upc: enrichedInfo?.upc || item.upc,\n    wholesale_price: enrichedInfo?.wholesale_price || item.wholesale_price,\n    msrp: enrichedInfo?.msrp || item.msrp,\n    in_stock: enrichedInfo?.in_stock ?? item.in_stock,\n    api_verified: enrichedInfo?.api_verified || false,\n    confidence_score: enrichedInfo?.confidence_score,\n    // Enrichment metadata\n    enriched: !!enrichedInfo,\n    enriched_data: enrichedInfo?.enriched_data || item.enriched_data\n  };\n});\n\n// Preserve account number from prepared data\nconst accountNumber = preparedData.accountNumber;\n\n// Update all data structures with enriched items\nreturn {\n  json: {\n    ...preparedData,\n    items: mergedItems,\n    emailData: {\n      ...preparedData.emailData,\n      parsedData: {\n        ...preparedData.emailData.parsedData,\n        items: mergedItems,\n        account_number: accountNumber\n      }\n    },\n    bulkAddData: {\n      ...preparedData.bulkAddData,\n      vendorId: preparedData.vendorId,  // Preserve vendorId\n      order: {\n        ...preparedData.bulkAddData.order,\n        account_number: accountNumber\n      },\n      items: mergedItems.map(item => ({\n        sku: item.sku || item.model,\n        model: item.model,\n        brand: item.brand,\n        color: item.color,\n        color_code: item.color_code,\n        size: item.size || item.eye_size,\n        description: item.description,\n        quantity: item.quantity,\n        upc: item.upc,\n        wholesale_price: item.wholesale_price,\n        msrp: item.msrp,\n        in_stock: item.in_stock,\n        api_verified: item.api_verified\n      }))\n    },\n    cacheData: {\n      ...preparedData.cacheData,\n      items: mergedItems.map(item => ({\n        model: item.model,\n        brand: item.brand,\n        color: item.color,\n        color_code: item.color_code,\n        color_name: item.color_name,\n        size: item.size || item.eye_size,\n        sku: item.sku || item.model,\n        description: item.description,\n        price: item.wholesale_price || item.price,\n        upc: item.upc,\n        image_url: item.image_url,\n        product_url: item.product_url,\n        msrp: item.msrp,\n        wholesale_price: item.wholesale_price\n      }))\n    },\n    enrichmentApplied: true,\n    enrichmentStats: {\n      totalItems: mergedItems.length,\n      enrichedCount: mergedItems.filter(i => i.enriched).length,\n      apiVerifiedCount: mergedItems.filter(i => i.api_verified).length\n    }\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -320,
+        -16
+      ],
+      "id": "7845035c-fd19-4818-8581-a3ab0dc311d3",
+      "name": "Merge Enrichment Results"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/emails/create",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.emailData) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -112,
+        96
+      ],
+      "id": "ac29edd9-1e46-49a6-81b6-be0d294d28f9",
+      "name": "Create Email Record",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/inventory/bulk-add",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n  // Try to get enriched data first, fall back to prepared data\n  (() => {\n    try {\n      const enriched = $('Merge Enrichment Results').item.json;\n      if (enriched && enriched.bulkAddData) {\n        return JSON.stringify(enriched.bulkAddData);\n      }\n    } catch (e) {\n      // Merge Enrichment Results didn't run (cached path)\n    }\n    return JSON.stringify($('Prepare Email Data').item.json.bulkAddData);\n  })()\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        112,
+        96
+      ],
+      "id": "4076d436-fb2f-43f8-b58e-4a6260ba8db3",
+      "name": "Bulk-Add Items",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://optical-express-api.onrender.com/api/catalog/cache",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n  // Try to get enriched data first, fall back to prepared data\n  (() => {\n    try {\n      const enriched = $('Merge Enrichment Results').item.json;\n      if (enriched && enriched.cacheData) {\n        return JSON.stringify(enriched.cacheData);\n      }\n    } catch (e) {\n      // Merge Enrichment Results didn't run (cached path)\n    }\n    return JSON.stringify($('Prepare Email Data').item.json.cacheData);\n  })()\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        336,
+        96
+      ],
+      "id": "72d24df8-56d1-4fe8-a7e7-700d1860370b",
+      "name": "Cache to Catalog",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get results from all three sequential nodes\nlet emailResult = {};\nlet bulkAddResult = {};\nlet cacheResult = {};\n\ntry {\n  emailResult = $('Create Email Record').item.json || {};\n} catch (e) {\n  emailResult = { error: 'Node not executed' };\n}\n\ntry {\n  bulkAddResult = $('Bulk-Add Items').item.json || {};\n} catch (e) {\n  bulkAddResult = { error: 'Node not executed' };\n}\n\ntry {\n  cacheResult = $('Cache to Catalog').item.json || {};\n} catch (e) {\n  cacheResult = { error: 'Node not executed' };\n}\n\n// Try to get data from enrichment path first, fall back to prepared data\nlet preparedData;\ntry {\n  const enrichedData = $('Merge Enrichment Results').item.json;\n  if (enrichedData) {\n    preparedData = enrichedData;\n  } else {\n    preparedData = $('Prepare Email Data').item.json;\n  }\n} catch (e) {\n  // Enrichment path wasn't taken, use prepared data\n  preparedData = $('Prepare Email Data').item.json;\n}\n\n// Check for any failures (look for error property or success:false)\nconst failures = [];\nif (emailResult.error || emailResult.success === false) {\n  failures.push(`Create Email Record: ${emailResult.error || 'Failed'}`);\n}\nif (bulkAddResult.error || bulkAddResult.success === false) {\n  failures.push(`Bulk-Add Items: ${bulkAddResult.error || 'Failed'}`);\n}\nif (cacheResult.error || cacheResult.success === false) {\n  failures.push(`Cache to Catalog: ${cacheResult.error || 'Failed'}`);\n}\n\nreturn {\n  json: {\n    success: failures.length === 0,\n    message: failures.length === 0 ? 'Order processed successfully' : `Partial failure: ${failures.join(', ')}`,\n\n    // Results from each step\n    emailRecordId: emailResult.emailId || emailResult.email?.id,\n    itemsAdded: bulkAddResult.itemsAdded || bulkAddResult.addedCount || 0,\n    itemsCached: cacheResult.itemsCached || cacheResult.cachedCount || 0,\n\n    // Summary\n    vendor: preparedData.vendor,\n    orderId: preparedData.order?.order_number,\n    itemsProcessed: preparedData.items?.length || 0,\n\n    // For metrics\n    workflowStartedAt: $('Format API Response').item.json.workflowStartedAt,\n    workflowEndedAt: new Date().toISOString(),\n\n    // Failures (if any)\n    failures: failures.length > 0 ? failures : null,\n    \n    // Debug info\n    _debug: {\n      emailResult: emailResult,\n      bulkAddResult: bulkAddResult,\n      cacheResult: cacheResult,\n      usedEnrichmentPath: preparedData.enrichmentApplied || false\n    }\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        96
+      ],
+      "id": "86c15fa9-41a2-46c5-8b50-16fd172e89e9",
+      "name": "Merge Results"
+    },
+    {
+      "parameters": {
+        "tableId": "emails",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "account_id",
+              "fieldValue": "={{ $json.accountId }}"
+            },
+            {
+              "fieldId": "from_email",
+              "fieldValue": "={{ $json.from }}"
+            },
+            {
+              "fieldId": "to_email"
+            },
+            {
+              "fieldId": "subject",
+              "fieldValue": "={{ $json.subject }}"
+            },
+            {
+              "fieldId": "raw_data",
+              "fieldValue": "={{ $json }}"
+            },
+            {
+              "fieldId": "plain_text",
+              "fieldValue": "={{ $json.plain }}"
+            },
+            {
+              "fieldId": "html_text",
+              "fieldValue": "={{ $json.html }}"
+            },
+            {
+              "fieldId": "parse_status",
+              "fieldValue": "failed"
+            },
+            {
+              "fieldId": "vendor_detected",
+              "fieldValue": "={{ $json.vendor }}"
+            },
+            {
+              "fieldId": "confidence",
+              "fieldValue": "={{ $json.confidence }}"
+            },
+            {
+              "fieldId": "reason",
+              "fieldValue": "={{ $json.error || 'Vendor not configured or detection failed' }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -1424,
+        288
+      ],
+      "id": "6a61a595-3fa6-42a4-a1f4-f946667858f0",
+      "name": "Handle Unknown Vendor",
+      "credentials": {
+        "supabaseApi": {
+          "id": "TXCUnZqEhts5gkjI",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://pwuqilgfqbwgxsqvkkyt.supabase.co/rest/v1/webhook_test_payloads",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3dXFpbGdmcWJ3Z3hzcXZra3l0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQxODQ1NzIsImV4cCI6MjAzOTc2MDU3Mn0.SYji0mCgLhKmEQvsXToSpoaS_zsO8Sg4PLRD23SlfM0"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3dXFpbGdmcWJ3Z3hzcXZra3l0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQxODQ1NzIsImV4cCI6MjAzOTc2MDU3Mn0.SYji0mCgLhKmEQvsXToSpoaS_zsO8Sg4PLRD23SlfM0"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"vendor_code\": {{ JSON.stringify($json.body?.headers?.from?.toLowerCase().includes('safilo') ? 'SAFILO' : $json.body?.headers?.from?.toLowerCase().includes('marchon') ? 'MARCHON' : $json.body?.headers?.from?.toLowerCase().includes('luxottica') ? 'LUXOTTICA' : $json.body?.headers?.from?.toLowerCase().includes('modern') ? 'MODERN' : $json.body?.headers?.from?.toLowerCase().includes('europa') ? 'EUROPA' : $json.body?.headers?.from?.toLowerCase().includes('kenmark') ? 'KENMARK' : $json.body?.headers?.from?.toLowerCase().includes('ideal') ? 'IDEAL' : $json.body?.headers?.from?.toLowerCase().includes('lamy') ? 'LAMY' : $json.body?.headers?.from?.toLowerCase().includes('etnia') ? 'ETNIA' : 'UNKNOWN') }},\n  \"vendor_name\": {{ JSON.stringify($json.body?.headers?.from || 'Unknown') }},\n  \"payload\": {{ JSON.stringify($json) }},\n  \"description\": {{ JSON.stringify('Captured: ' + ($json.body?.headers?.subject || 'No subject')) }}\n}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "d58515c5-d825-4b4a-8c32-b4b6b38e6ec1",
+      "name": "Capture Test Payload",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -3168,
+        400
+      ],
+      "continueOnFail": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Account ID",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Capture Test Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Account ID": {
+      "main": [
+        [
+          {
+            "node": "Detect Vendor (API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detect Vendor (API)": {
+      "main": [
+        [
+          {
+            "node": "Clean Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean Email": {
+      "main": [
+        [
+          {
+            "node": "Format API Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format API Response": {
+      "main": [
+        [
+          {
+            "node": "Load Vendor Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Vendor Config": {
+      "main": [
+        [
+          {
+            "node": "Validate Vendor Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Vendor Config": {
+      "main": [
+        [
+          {
+            "node": "Route by Vendor Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Vendor Type": {
+      "main": [
+        [
+          {
+            "node": "Handle Unknown Vendor",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Parse Vendor Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Parse Vendor Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Vendor Email": {
+      "main": [
+        [
+          {
+            "node": "Check Catalog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Catalog": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email Data": {
+      "main": [
+        [
+          {
+            "node": "If cached",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If cached": {
+      "main": [
+        [
+          {
+            "node": "Enrich",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Email Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enrich": {
+      "main": [
+        [
+          {
+            "node": "Merge Enrichment Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Enrichment Results": {
+      "main": [
+        [
+          {
+            "node": "Create Email Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Email Record": {
+      "main": [
+        [
+          {
+            "node": "Bulk-Add Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bulk-Add Items": {
+      "main": [
+        [
+          {
+            "node": "Cache to Catalog",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cache to Catalog": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "8ff5ee02-7696-44d9-8d80-0cc7d80cf0fc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "755d69fd97946ae86204aaf9353f2da391bb20edeb5619afdf676315f69f4cd2"
+  },
+  "id": "HCl4lPcN9UK15Y0X",
+  "tags": []
+}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, ChevronUp, Archive, Trash2, RotateCcw, DollarSign } from 'lucide-react';
+import { ChevronDown, ChevronUp, Archive, Trash2, RotateCcw, DollarSign, AlertTriangle } from 'lucide-react';
 import type { InventoryItem } from '../types/inventory.types';
 import {
   calculateReturnWindow,
@@ -155,8 +155,23 @@ export function ModernInventoryTable({
                   <div className="text-sm text-gray-500 dark:text-gray-400">{item.model || 'Unknown Model'}</div>
                 </div>
 
-                {/* UPC */}
-                <div className="text-sm font-medium text-gray-900 dark:text-white">{item.upc || 'N/A'}</div>
+                {/* UPC (with SKU fallback) */}
+                <div className="text-sm font-medium">
+                  {item.upc ? (
+                    <span className="text-gray-900 dark:text-white">{item.upc}</span>
+                  ) : item.sku ? (
+                    <div className="flex items-center gap-1.5 group relative">
+                      <AlertTriangle className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                      <span className="text-gray-500 dark:text-gray-400">{item.sku}</span>
+                      {/* Tooltip */}
+                      <div className="absolute bottom-full left-0 mb-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                        SKU shown — UPC not available
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="text-gray-400 dark:text-gray-500">N/A</span>
+                  )}
+                </div>
 
                 {/* Color */}
                 <div className="text-sm text-gray-700 dark:text-gray-300">{item.color || 'N/A'}</div>

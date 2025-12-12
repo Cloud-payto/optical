@@ -12,6 +12,7 @@ const { parseKenmarkHtml, validateParsedData: validateKenmarkData } = require('.
 const KenmarkService = require('../parsers/KenmarkService');
 const { parseEuropaHtml, validateParsedData: validateEuropaData } = require('../parsers/europaParser');
 const { parseMarchonHtml, validateParsedData: validateMarchonData } = require('../parsers/marchonParser');
+const { parseClearVisionHtml, validateParsedData: validateClearVisionData } = require('../parsers/clearvisionParser');
 const { normalizeEmail, detectProviders } = require('../utils/emailNormalizer');
 const { supabase } = require('../lib/supabase');
 
@@ -1005,6 +1006,141 @@ router.post('/marchon', async (req, res) => {
     return res.status(500).json({
       success: false,
       error: 'Failed to parse Marchon email',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/parse/clearvision
+ * Parse ClearVision Optical HTML email content
+ *
+ * Body: { html, plainText, accountId }
+ * Returns: { success, accountId, vendor, order, items, unique_frames }
+ */
+router.post('/clearvision', async (req, res) => {
+  try {
+    const { html, plainText, accountId } = req.body;
+
+    // Validate input
+    if (!html && !plainText) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: html or plainText must be provided'
+      });
+    }
+
+    // Parse the email content
+    const parsedData = parseClearVisionHtml(html, plainText);
+
+    // Validate parsed data
+    const validation = validateClearVisionData(parsedData);
+    if (!validation.valid) {
+      console.error('[PARSE] ClearVision validation failed:', validation.errors);
+      return res.status(400).json({
+        success: false,
+        error: 'Email parsing validation failed',
+        errors: validation.errors,
+        warnings: validation.warnings
+      });
+    }
+
+    if (validation.warnings.length > 0) {
+      console.warn('[PARSE] ClearVision warnings:', validation.warnings);
+    }
+
+    // Get unique frames (brand + model combinations)
+    const uniqueFramesSet = new Set();
+    const uniqueFrames = [];
+    parsedData.items.forEach(item => {
+      const key = `${item.brand}-${item.model}`;
+      if (!uniqueFramesSet.has(key)) {
+        uniqueFramesSet.add(key);
+        uniqueFrames.push({
+          brand: item.brand,
+          model: item.model
+        });
+      }
+    });
+
+    // Map items to standard format
+    const items = parsedData.items.map(item => ({
+      brand: item.brand,
+      model: item.model,
+      color: item.color,
+      color_code: item.colorCode,
+      color_name: item.colorName,
+      size: item.size,
+      eye_size: item.eyeSize,
+      bridge: item.bridge,
+      temple: item.temple,
+      quantity: item.quantity,
+      sku: item.sku,
+      part_number: item.partNumber,
+      wholesale_price: item.listPrice,
+      description: item.description,
+      image_url: item.imageUrl
+    }));
+
+    // Calculate total pieces and wholesale total
+    const totalPieces = items.reduce((sum, item) => sum + item.quantity, 0);
+    const totalWholesale = items.reduce((sum, item) => {
+      const price = item.wholesale_price || 0;
+      return sum + (price * item.quantity);
+    }, 0);
+
+    // Get vendor ID from database
+    const { data: vendor } = await supabase
+      .from('vendors')
+      .select('id')
+      .eq('code', 'CLEARVISION')
+      .single();
+
+    // Return the parsed data
+    return res.status(200).json({
+      success: true,
+      accountId: accountId,
+      vendor: 'clearvision',
+      vendorId: vendor?.id,
+      order: {
+        order_number: parsedData.orderNumber,
+        customer_name: parsedData.customerName,
+        order_date: parsedData.orderDate,
+        rep_name: parsedData.repName,
+        account_number: parsedData.accountNumber,
+        total_pieces: totalPieces,
+        total_wholesale: totalWholesale > 0 ? totalWholesale : null,
+        terms: parsedData.terms,
+        ship_method: parsedData.shipMethod,
+        territory: parsedData.territory
+      },
+      customer: {
+        name: parsedData.customerName,
+        address: parsedData.customerAddress,
+        city: parsedData.customerCity,
+        state: parsedData.customerState,
+        postal_code: parsedData.customerPostalCode,
+        phone: parsedData.customerPhone
+      },
+      shipping_address: {
+        name: parsedData.shipToName,
+        address: parsedData.shipToAddress,
+        city: parsedData.shipToCity,
+        state: parsedData.shipToState,
+        postal_code: parsedData.shipToPostalCode
+      },
+      items: items,
+      unique_frames: uniqueFrames,
+      validation: {
+        warnings: validation.warnings
+      }
+    });
+
+  } catch (error) {
+    console.error('[PARSE] Error parsing ClearVision email:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to parse ClearVision email',
       message: error.message
     });
   }
