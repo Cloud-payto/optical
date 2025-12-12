@@ -367,15 +367,23 @@ function extractItems($) {
     $('table').each((tableIndex, table) => {
         const $table = $(table);
         const headerRow = $table.find('tr').first();
-        const headers = headerRow.find('th');
+
+        // Try to find headers - some emails use <th>, others use <td> with <b> tags
+        let headers = headerRow.find('th');
+        let headerCells = headers;
+
+        // If no <th> elements, check for <td> elements (ClearVision uses <td> with <b> tags)
+        if (headers.length === 0) {
+            headerCells = headerRow.find('td');
+        }
 
         // Check if this is the items table
         let hasSku = false;
         let hasModel = false;
         let hasQty = false;
 
-        headers.each((i, th) => {
-            const text = $(th).text().trim().toLowerCase();
+        headerCells.each((i, cell) => {
+            const text = $(cell).text().trim().toLowerCase();
             if (text === 'sku') hasSku = true;
             if (text === 'model') hasModel = true;
             if (text.includes('qty')) hasQty = true;
@@ -387,8 +395,8 @@ function extractItems($) {
 
         // Get column indices
         const columnIndices = {};
-        headers.each((i, th) => {
-            const text = $(th).text().trim().toLowerCase();
+        headerCells.each((i, cell) => {
+            const text = $(cell).text().trim().toLowerCase();
             if (text === 'line no.') columnIndices.lineNo = i;
             if (text === 'sku') columnIndices.sku = i;
             if (text === 'model') columnIndices.model = i;
