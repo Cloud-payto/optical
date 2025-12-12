@@ -33,13 +33,16 @@ interface VendorCapabilities {
 
 const vendorCapabilities: VendorCapabilities[] = [
   { name: 'Modern Optical', wholesalePrice: true, upc: true, model: true, size: true, brand: true },
-  { name: 'Luxottica', wholesalePrice: false, upc: true, model: true, size: true, brand: true },
-  { name: 'Safilo', wholesalePrice: false, upc: true, model: true, size: true, brand: true },
-  { name: 'Marchon', wholesalePrice: false, upc: true, model: true, size: true, brand: true },
-  { name: 'Europa', wholesalePrice: true, upc: true, model: true, size: true, brand: true },
-  { name: 'I-Deal Optics', wholesalePrice: true, upc: false, model: true, size: true, brand: true },
-  { name: 'Kenmark', wholesalePrice: false, upc: true, model: true, size: true, brand: true },
-  { name: "L'amy America", wholesalePrice: false, upc: true, model: true, size: true, brand: true },
+  { name: 'Luxottica', wholesalePrice: true, upc: true, model: true, size: true, brand: true },
+  { name: 'Safilo', wholesalePrice: true, upc: true, model: true, size: true, brand: true },
+  { name: 'Marchon', wholesalePrice: true, upc: true, model: true, size: true, brand: true },
+  { name: 'Europa', wholesalePrice: false, upc: true, model: true, size: true, brand: true },
+  { name: 'I-Deal Optics', wholesalePrice: false, upc: true, model: true, size: true, brand: true },
+  { name: 'Kenmark', wholesalePrice: true, upc: true, model: true, size: true, brand: true },
+  { name: "L'amy America", wholesalePrice: true, upc: true, model: true, size: true, brand: true },
+  { name: 'Kering', wholesalePrice: true, upc: false, model: false, size: false, brand: false },
+  { name: 'ClearVision', wholesalePrice: true, upc: false, model: true, size: true, brand: true },
+  { name: 'Etnia Barcelona', wholesalePrice: true, upc: true, model: true, size: true, brand: true },
 ];
 
 // Simple list for backwards compatibility
