@@ -45,18 +45,6 @@ export function OrderItemsList({ items, vendor }: OrderItemsListProps) {
 
   return (
     <div className="space-y-4">
-      {/* SKU Warning Banner for vendors that don't use UPC */}
-      {usesSku && (
-        <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-          <svg className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span className="text-sm text-amber-700 dark:text-amber-300">
-            <strong>{vendor}</strong> uses SKU codes instead of UPC barcodes. SKUs are vendor-specific identifiers and may not scan at checkout.
-          </span>
-        </div>
-      )}
-
       {/* Items Table */}
       <div className="overflow-x-auto">
         <table className="w-full">
