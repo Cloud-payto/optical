@@ -873,11 +873,9 @@ const ProfitCalculator: React.FC = () => {
                     <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                   </div>
                   <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="10000"
+                    type="text"
                     inputMode="decimal"
+                    pattern="[0-9]*\.?[0-9]*"
                     id="yourCost"
                     className={`block w-full pl-10 pr-3 py-2 border ${
                       yourCostWarning
@@ -934,11 +932,9 @@ const ProfitCalculator: React.FC = () => {
                     <span className="text-gray-400 dark:text-gray-500 text-sm">%</span>
                   </div>
                   <input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    max="100"
+                    type="text"
                     inputMode="decimal"
+                    pattern="[0-9]*\.?[0-9]*"
                     id="discountPercentage"
                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                     value={discountPercentage}
@@ -973,11 +969,9 @@ const ProfitCalculator: React.FC = () => {
                   <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="10000"
+                  type="text"
                   inputMode="decimal"
+                  pattern="[0-9]*\.?[0-9]*"
                   id="wholesaleCost"
                   className={`block w-full pl-10 pr-3 py-2 border ${
                     wholesaleCostWarning
@@ -1018,11 +1012,9 @@ const ProfitCalculator: React.FC = () => {
                   <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="1000"
+                  type="text"
                   inputMode="decimal"
+                  pattern="[0-9]*\.?[0-9]*"
                   id="tariffTax"
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                   value={tariffTax}
@@ -1030,8 +1022,6 @@ const ProfitCalculator: React.FC = () => {
                     const validated = validateCurrencyInput(e.target.value, 0, 1000);
                     if (validated !== null) {
                       setTariffTax(validated);
-                    } else if (e.target.value === '') {
-                      setTariffTax(0);
                     }
                   }}
                   onBlur={() => {
@@ -1092,11 +1082,9 @@ const ProfitCalculator: React.FC = () => {
                   <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="50000"
+                  type="text"
                   inputMode="decimal"
+                  pattern="[0-9]*\.?[0-9]*"
                   id="retailPrice"
                   className={`block w-full pl-10 pr-3 py-2 border ${
                     retailPriceWarning
@@ -1157,11 +1145,9 @@ const ProfitCalculator: React.FC = () => {
                   <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="50000"
+                  type="text"
                   inputMode="decimal"
+                  pattern="[0-9]*\.?[0-9]*"
                   id="insuranceCoverage"
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                   value={insuranceCoverage}
@@ -1195,11 +1181,9 @@ const ProfitCalculator: React.FC = () => {
                   <DollarSignIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                 </div>
                 <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="1000"
+                  type="text"
                   inputMode="decimal"
+                  pattern="[0-9]*\.?[0-9]*"
                   id="insuranceReimbursement"
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                   value={insuranceReimbursement}

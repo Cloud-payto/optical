@@ -18,12 +18,20 @@ export const validateCurrencyInput = (
   min: number = 0,
   max: number = 10000
 ): number | null => {
-  // Handle empty string - return minimum value (usually 0) to allow clearing inputs
+  // Handle empty string - return null to allow field to be empty during editing
+  // The onBlur handler should convert empty to min value
   if (value === '' || value === null || value === undefined) {
-    return min;
+    return null;
   }
 
-  const num = typeof value === 'string' ? parseFloat(value) : value;
+  // For string values starting with "0" followed by digits (like "07"),
+  // strip leading zeros to handle the case where user types after clearing to 0
+  let processedValue = value;
+  if (typeof value === 'string' && /^0[0-9]/.test(value)) {
+    processedValue = value.replace(/^0+/, '') || '0';
+  }
+
+  const num = typeof processedValue === 'string' ? parseFloat(processedValue) : processedValue;
 
   // Return null if not a valid number (e.g., "abc")
   if (isNaN(num)) return null;
@@ -46,12 +54,18 @@ export const validateCurrencyInput = (
 export const validatePercentageInput = (
   value: string | number
 ): number | null => {
-  // Handle empty string - return 0 to allow clearing inputs
+  // Handle empty string - return null to allow field to be empty during editing
   if (value === '' || value === null || value === undefined) {
-    return 0;
+    return null;
   }
 
-  const num = typeof value === 'string' ? parseFloat(value) : value;
+  // Strip leading zeros (like "07" -> "7")
+  let processedValue = value;
+  if (typeof value === 'string' && /^0[0-9]/.test(value)) {
+    processedValue = value.replace(/^0+/, '') || '0';
+  }
+
+  const num = typeof processedValue === 'string' ? parseFloat(processedValue) : processedValue;
 
   if (isNaN(num)) return null;
 
