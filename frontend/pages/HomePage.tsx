@@ -21,17 +21,29 @@ import {
   Building2
 } from 'lucide-react';
 
-// Supported vendors we can parse emails from
-const supportedVendors = [
-  'Luxottica',
-  'Safilo',
-  'Marchon',
-  'Modern Optical',
-  'Europa',
-  'I-Deal Optics',
-  'Kenmark',
-  "L'amy America",
+// Vendor capabilities - what data we can extract from each vendor
+interface VendorCapabilities {
+  name: string;
+  wholesalePrice: boolean;
+  upc: boolean;
+  model: boolean;
+  size: boolean;
+  brand: boolean;
+}
+
+const vendorCapabilities: VendorCapabilities[] = [
+  { name: 'Modern Optical', wholesalePrice: true, upc: true, model: true, size: true, brand: true },
+  { name: 'Luxottica', wholesalePrice: false, upc: true, model: true, size: true, brand: true },
+  { name: 'Safilo', wholesalePrice: false, upc: true, model: true, size: true, brand: true },
+  { name: 'Marchon', wholesalePrice: false, upc: true, model: true, size: true, brand: true },
+  { name: 'Europa', wholesalePrice: true, upc: true, model: true, size: true, brand: true },
+  { name: 'I-Deal Optics', wholesalePrice: true, upc: false, model: true, size: true, brand: true },
+  { name: 'Kenmark', wholesalePrice: false, upc: true, model: true, size: true, brand: true },
+  { name: "L'amy America", wholesalePrice: false, upc: true, model: true, size: true, brand: true },
 ];
+
+// Simple list for backwards compatibility
+const supportedVendors = vendorCapabilities.map(v => v.name);
 
 const HomePage = () => {
   // Create refs for each section
@@ -212,17 +224,61 @@ const HomePage = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
-              {supportedVendors.map((vendor, index) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
+              {vendorCapabilities.map((vendor, index) => (
                 <motion.div
-                  key={vendor}
+                  key={vendor.name}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: index * 0.05 }}
-                  className="bg-white dark:bg-[#1F2623] rounded-lg px-4 py-4 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md transition-all duration-300 flex items-center justify-center"
+                  className="bg-white dark:bg-[#1F2623] rounded-xl p-4 border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg transition-all duration-300"
                 >
-                  <span className="font-medium text-gray-900 dark:text-white text-sm">{vendor}</span>
+                  <h3 className="font-semibold text-gray-900 dark:text-white text-base mb-3 text-center border-b border-gray-100 dark:border-gray-700 pb-2">
+                    {vendor.name}
+                  </h3>
+                  <div className="space-y-1.5 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Wholesale Price</span>
+                      {vendor.wholesalePrice ? (
+                        <Check className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <span className="w-4 h-4 text-gray-300 dark:text-gray-600">—</span>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">UPC</span>
+                      {vendor.upc ? (
+                        <Check className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <span className="w-4 h-4 text-gray-300 dark:text-gray-600">—</span>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Model</span>
+                      {vendor.model ? (
+                        <Check className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <span className="w-4 h-4 text-gray-300 dark:text-gray-600">—</span>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Size</span>
+                      {vendor.size ? (
+                        <Check className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <span className="w-4 h-4 text-gray-300 dark:text-gray-600">—</span>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600 dark:text-gray-400">Brand</span>
+                      {vendor.brand ? (
+                        <Check className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <span className="w-4 h-4 text-gray-300 dark:text-gray-600">—</span>
+                      )}
+                    </div>
+                  </div>
                 </motion.div>
               ))}
             </div>

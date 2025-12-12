@@ -57,7 +57,7 @@ export function OrderItemsList({ items, vendor }: OrderItemsListProps) {
                     <svg className="w-3.5 h-3.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="absolute bottom-full left-0 mb-2 hidden group-hover:block w-48 p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-50 pointer-events-none">
+                    <span className="absolute bottom-full left-0 mb-2 hidden group-hover:block w-48 p-2 bg-gray-900 text-white text-xs rounded shadow-xl z-[9999] pointer-events-none">
                       This vendor uses SKU codes instead of UPC barcodes
                     </span>
                   </span>
@@ -88,7 +88,7 @@ export function OrderItemsList({ items, vendor }: OrderItemsListProps) {
                     {usesSku ? (
                       <span className="group relative cursor-help">
                         {item.sku || item.upc || 'N/A'}
-                        <span className="absolute bottom-full left-0 mb-1 hidden group-hover:block w-40 p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-50 pointer-events-none">
+                        <span className="absolute bottom-full left-0 mb-1 hidden group-hover:block w-40 p-2 bg-gray-900 text-white text-xs rounded shadow-xl z-[9999] pointer-events-none">
                           SKU (not a UPC barcode)
                         </span>
                       </span>
