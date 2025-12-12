@@ -18,9 +18,14 @@ export const validateCurrencyInput = (
   min: number = 0,
   max: number = 10000
 ): number | null => {
+  // Handle empty string - return minimum value (usually 0) to allow clearing inputs
+  if (value === '' || value === null || value === undefined) {
+    return min;
+  }
+
   const num = typeof value === 'string' ? parseFloat(value) : value;
 
-  // Return null if not a valid number
+  // Return null if not a valid number (e.g., "abc")
   if (isNaN(num)) return null;
 
   // Clamp to minimum
@@ -41,6 +46,11 @@ export const validateCurrencyInput = (
 export const validatePercentageInput = (
   value: string | number
 ): number | null => {
+  // Handle empty string - return 0 to allow clearing inputs
+  if (value === '' || value === null || value === undefined) {
+    return 0;
+  }
+
   const num = typeof value === 'string' ? parseFloat(value) : value;
 
   if (isNaN(num)) return null;
