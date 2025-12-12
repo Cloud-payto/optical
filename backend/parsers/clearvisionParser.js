@@ -153,7 +153,8 @@ function extractCustomerInfo($, textToUse) {
 
     // Extract Customer Name
     // Format: "Customer: Arizona Vision Therapy Center"
-    const customerNameMatch = textToUse.match(/Customer[:\s]*([^\n<]+?)(?:\s*Customer Email|\s*$)/im);
+    // Note: Must NOT match "Customer ID:" - use negative lookahead
+    const customerNameMatch = textToUse.match(/Customer(?!\s*ID)[:\s]+([^\n<]+?)(?:\s*Customer Email|\s*$)/im);
     if (customerNameMatch) {
         customerInfo.customerName = customerNameMatch[1].trim();
     }

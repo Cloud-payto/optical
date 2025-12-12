@@ -6,11 +6,17 @@
 import React from 'react';
 import { OrderItem } from '../types/order.types';
 
+// Vendors that use SKU instead of UPC
+const SKU_ONLY_VENDORS = ['ClearVision', 'clearvision', 'CLEARVISION'];
+
 interface OrderItemsListProps {
   items: OrderItem[];
+  vendor?: string;
 }
 
-export function OrderItemsList({ items }: OrderItemsListProps) {
+export function OrderItemsList({ items, vendor }: OrderItemsListProps) {
+  // Check if this vendor uses SKU instead of UPC
+  const usesSku = vendor ? SKU_ONLY_VENDORS.some(v => v.toLowerCase() === vendor.toLowerCase()) : false;
   if (!items || items.length === 0) {
     return (
       <div className="text-center py-4 text-gray-500 dark:text-gray-400">
@@ -39,12 +45,38 @@ export function OrderItemsList({ items }: OrderItemsListProps) {
 
   return (
     <div className="space-y-4">
+      {/* SKU Warning Banner for vendors that don't use UPC */}
+      {usesSku && (
+        <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+          <svg className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span className="text-sm text-amber-700 dark:text-amber-300">
+            <strong>{vendor}</strong> uses SKU codes instead of UPC barcodes. SKUs are vendor-specific identifiers and may not scan at checkout.
+          </span>
+        </div>
+      )}
+
       {/* Items Table */}
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">UPC</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">
+                {usesSku ? (
+                  <span className="flex items-center gap-1 group relative cursor-help">
+                    SKU
+                    <svg className="w-3.5 h-3.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="absolute bottom-full left-0 mb-2 hidden group-hover:block w-48 p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-10">
+                      This vendor uses SKU codes instead of UPC barcodes
+                    </span>
+                  </span>
+                ) : (
+                  'UPC'
+                )}
+              </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Brand</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Model</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Color</th>
@@ -65,7 +97,16 @@ export function OrderItemsList({ items }: OrderItemsListProps) {
               return (
                 <tr key={item.id || index} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                   <td className="px-4 py-3 font-mono text-xs text-gray-700 dark:text-gray-300">
-                    {item.upc || item.sku || 'N/A'}
+                    {usesSku ? (
+                      <span className="group relative cursor-help">
+                        {item.sku || item.upc || 'N/A'}
+                        <span className="absolute bottom-full left-0 mb-1 hidden group-hover:block w-40 p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-10">
+                          SKU (not a UPC barcode)
+                        </span>
+                      </span>
+                    ) : (
+                      item.upc || item.sku || 'N/A'
+                    )}
                   </td>
                   <td className="px-4 py-3 font-medium text-sm text-gray-900 dark:text-white">{item.brand}</td>
                   <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{item.model}</td>

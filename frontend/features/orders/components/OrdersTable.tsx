@@ -257,7 +257,7 @@ export function OrdersTable({
                           </div>
 
                           {/* Order Items */}
-                          <OrderItemsList items={order.items} />
+                          <OrderItemsList items={order.items} vendor={order.vendor} />
                         </div>
                       </td>
                     </tr>
