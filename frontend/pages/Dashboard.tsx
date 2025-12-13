@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Container } from '../components/ui/Container';
 import { fetchDashboardStats, fetchInventoryByVendor, DashboardStats, VendorInventoryStats, PaginationMetadata } from '../services/api';
-import { PackageIcon, DollarSignIcon, ShoppingCartIcon, ClockIcon, ChevronDownIcon, ChevronRightIcon, ArrowUpDown, AlertTriangleIcon } from 'lucide-react';
+import { PackageIcon, DollarSignIcon, ShoppingCartIcon, ClockIcon, ChevronDownIcon, ChevronRightIcon, ArrowUpDown, AlertTriangleIcon, WalletIcon, TrendingUpIcon, LayoutGridIcon } from 'lucide-react';
 import DemoButton from '../components/demo/DemoButton';
 
 const DashboardPage: React.FC = () => {
@@ -146,6 +146,40 @@ const DashboardPage: React.FC = () => {
                 <ShoppingCartIcon className="w-5 h-5 text-purple-600 dark:text-purple-400" />
               </div>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats?.totalOrders || 0}</p>
+            </div>
+          </div>
+
+          {/* Second Row Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div className="bg-white dark:bg-[#1F2623] rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-gray-700 dark:text-gray-200 font-medium">Actual Inventory Cost</p>
+                <WalletIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(stats?.actualInventoryCost || 0)}</p>
+            </div>
+            <div className="bg-white dark:bg-[#1F2623] rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-gray-700 dark:text-gray-200 font-medium">Average Profit Margin</p>
+                <TrendingUpIcon className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+              </div>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats?.averageProfitMargin || 0}%</p>
+            </div>
+            {/* TODO: Placeholder box 3 - add future metric here */}
+            <div className="bg-white dark:bg-[#1F2623] rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-gray-700 dark:text-gray-200 font-medium">Coming Soon</p>
+                <LayoutGridIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+              </div>
+              <p className="text-2xl font-bold text-gray-400 dark:text-gray-500">--</p>
+            </div>
+            {/* TODO: Placeholder box 4 - add future metric here */}
+            <div className="bg-white dark:bg-[#1F2623] rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-gray-700 dark:text-gray-200 font-medium">Coming Soon</p>
+                <LayoutGridIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+              </div>
+              <p className="text-2xl font-bold text-gray-400 dark:text-gray-500">--</p>
             </div>
           </div>
 

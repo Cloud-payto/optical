@@ -1205,12 +1205,62 @@ const statsOperations = {
         return sum + (item.wholesale_price * item.quantity || 0);
       }, 0);
 
+      // Get inventory with brand info for actual cost calculation
+      const { data: inventoryWithBrands } = await supabase
+        .from('inventory')
+        .select('brand, wholesale_price, msrp, quantity')
+        .eq('account_id', userId)
+        .eq('status', 'current');
+
+      // Get account_brands for this user to get actual costs
+      const { data: accountBrands } = await supabase
+        .from('account_brands')
+        .select('wholesale_cost, tariff_tax, brand:brands(name)')
+        .eq('account_id', userId);
+
+      // Create a map of brand name to actual cost
+      const brandCostMap = new Map();
+      (accountBrands || []).forEach(ab => {
+        if (ab.brand?.name && ab.wholesale_cost) {
+          const actualCost = (ab.wholesale_cost || 0) + (ab.tariff_tax || 0);
+          brandCostMap.set(ab.brand.name.toLowerCase(), actualCost);
+        }
+      });
+
+      // Calculate actual inventory cost and profit margins
+      let actualInventoryCost = 0;
+      let totalProfitMargin = 0;
+      let itemsWithMargin = 0;
+
+      (inventoryWithBrands || []).forEach(item => {
+        const quantity = item.quantity || 1;
+        const brandName = (item.brand || '').toLowerCase();
+
+        // Get actual cost from account_brands, fallback to wholesale_price
+        const actualCostPerUnit = brandCostMap.get(brandName) || item.wholesale_price || 0;
+        actualInventoryCost += actualCostPerUnit * quantity;
+
+        // Calculate profit margin if we have both cost and MSRP
+        const msrp = item.msrp || 0;
+        if (actualCostPerUnit > 0 && msrp > 0) {
+          const margin = ((msrp - actualCostPerUnit) / msrp) * 100;
+          totalProfitMargin += margin;
+          itemsWithMargin++;
+        }
+      });
+
+      const averageProfitMargin = itemsWithMargin > 0
+        ? Math.round((totalProfitMargin / itemsWithMargin) * 10) / 10
+        : 0;
+
       return {
         totalOrders: totalOrders || 0,
         totalInventory: totalInventory || 0,
         totalValue: totalValue || 0,
         pendingItems: pendingItems || 0,
-        itemsWithMissingPrices: itemsWithMissingPrices || 0
+        itemsWithMissingPrices: itemsWithMissingPrices || 0,
+        actualInventoryCost: actualInventoryCost || 0,
+        averageProfitMargin: averageProfitMargin || 0
       };
     } catch (error) {
       handleSupabaseError(error, 'getDashboardStats');
@@ -1542,17 +1592,20 @@ const vendorOperations = {
       console.log('🔥 DEBUG: saveAccountBrand - Start');
       console.log('🔥 DEBUG: userId (account_id):', userId);
       console.log('🔥 DEBUG: brandData received:', brandData);
-      
-      const { 
-        brand_id, 
+
+      const {
+        brand_id,
         brand_name,  // New field for creating brands
-        vendor_id, 
+        vendor_id,
         global_wholesale_cost,
         msrp,        // Retail price for brands table
         wholesale_cost,
         tariff_tax,
         discount_percentage,
-        notes 
+        notes,
+        cascadeToInventory = false,  // Update ALL inventory items (not just missing prices)
+        cascadeToOrders = false,     // Update confirmed orders too
+        previewOnly = false          // Just return counts, don't actually update
       } = brandData;
 
       let finalBrandId = brand_id;
@@ -1717,7 +1770,14 @@ const vendorOperations = {
 
       console.log('✅ Successfully saved account brand:', accountBrand);
 
-      // Step 3: Update inventory items with missing prices for this brand
+      // Step 3: Handle inventory and order price cascading
+      let cascadeResults = {
+        inventoryItemsAffected: 0,
+        ordersAffected: 0,
+        inventoryUpdated: false,
+        ordersUpdated: false
+      };
+
       if (wholesale_cost && wholesale_cost > 0) {
         try {
           console.log(`🔍 Attempting to update inventory prices for brand_id: ${finalBrandId}, vendor_id: ${vendor_id}, wholesale_cost: ${wholesale_cost}`);
@@ -1731,71 +1791,82 @@ const vendorOperations = {
 
           if (brandError) {
             console.error('⚠️  Error fetching brand info:', brandError);
-            return;
-          }
-
-          if (brandInfo) {
+          } else if (brandInfo) {
             console.log(`🔍 Found brand name: "${brandInfo.name}"`);
 
             // Create normalized version for matching (remove spaces, hyphens, lowercase)
             const normalizedBrandName = brandInfo.name.toLowerCase().replace(/[\s-]/g, '');
             console.log(`🔍 Normalized brand name: "${normalizedBrandName}"`);
 
-            // Get ALL inventory items for this vendor with missing prices
-            const { data: allVendorItems, error: fetchError } = await supabase
+            // Determine which items to fetch based on cascade flags
+            let inventoryQuery = supabase
               .from('inventory')
-              .select('id, brand, wholesale_price, model')
+              .select('id, brand, wholesale_price, model, status')
               .eq('account_id', userId)
-              .eq('vendor_id', vendor_id)
-              .or('wholesale_price.is.null,wholesale_price.eq.0');
+              .eq('vendor_id', vendor_id);
+
+            // If NOT cascading to all, only get items with missing prices
+            if (!cascadeToInventory) {
+              inventoryQuery = inventoryQuery.or('wholesale_price.is.null,wholesale_price.eq.0');
+            }
+
+            const { data: allVendorItems, error: fetchError } = await inventoryQuery;
 
             if (fetchError) {
               console.error('⚠️  Error fetching inventory items:', fetchError);
-              return;
+            } else {
+              console.log(`🔍 Found ${allVendorItems?.length || 0} total inventory items for this vendor`);
+
+              // Filter items that match the brand name (fuzzy matching)
+              const matchingItems = (allVendorItems || []).filter(item => {
+                if (!item.brand) return false;
+                const normalizedItemBrand = item.brand.toLowerCase().replace(/[\s-]/g, '');
+                return normalizedItemBrand === normalizedBrandName;
+              });
+
+              cascadeResults.inventoryItemsAffected = matchingItems.length;
+              console.log(`🔍 Found ${matchingItems.length} items matching brand "${brandInfo.name}"`);
+
+              // If previewOnly, just return the counts without updating
+              if (previewOnly) {
+                console.log('📊 Preview mode - not updating, just returning counts');
+              } else if (matchingItems.length > 0) {
+                console.log('📋 Sample items to update:', matchingItems.slice(0, 3).map(i => ({
+                  id: i.id,
+                  brand: i.brand,
+                  model: i.model,
+                  current_price: i.wholesale_price
+                })));
+
+                // Get the IDs of items to update
+                const itemIds = matchingItems.map(item => item.id);
+
+                // Update the matched items
+                const { data: updatedItems, error: updateError } = await supabase
+                  .from('inventory')
+                  .update({
+                    wholesale_price: wholesale_cost,
+                    updated_at: new Date().toISOString()
+                  })
+                  .in('id', itemIds)
+                  .select('id, brand, model');
+
+                if (updateError) {
+                  console.error('⚠️  Error updating inventory prices:', updateError);
+                } else if (updatedItems && updatedItems.length > 0) {
+                  cascadeResults.inventoryUpdated = true;
+                  console.log(`✅ Successfully updated ${updatedItems.length} inventory item(s) with new pricing $${wholesale_cost} for brand "${brandInfo.name}"`);
+                }
+              } else {
+                console.log(`ℹ️  No inventory items matched brand "${brandInfo.name}".`);
+              }
             }
 
-            console.log(`🔍 Found ${allVendorItems?.length || 0} total inventory items for this vendor with missing prices`);
-
-            // Filter items that match the brand name (fuzzy matching)
-            const matchingItems = (allVendorItems || []).filter(item => {
-              if (!item.brand) return false;
-              const normalizedItemBrand = item.brand.toLowerCase().replace(/[\s-]/g, '');
-              return normalizedItemBrand === normalizedBrandName;
-            });
-
-            console.log(`🔍 Found ${matchingItems.length} items matching brand "${brandInfo.name}" after fuzzy matching`);
-            if (matchingItems.length > 0) {
-              console.log('📋 Sample items to update:', matchingItems.slice(0, 3).map(i => ({
-                id: i.id,
-                brand: i.brand,
-                model: i.model,
-                current_price: i.wholesale_price
-              })));
-
-              // Get the IDs of items to update
-              const itemIds = matchingItems.map(item => item.id);
-
-              // Update the matched items
-              const { data: updatedItems, error: updateError } = await supabase
-                .from('inventory')
-                .update({
-                  wholesale_price: wholesale_cost,
-                  updated_at: new Date().toISOString()
-                })
-                .in('id', itemIds)
-                .select('id, brand, model');
-
-              if (updateError) {
-                console.error('⚠️  Error updating inventory prices:', updateError);
-              } else if (updatedItems && updatedItems.length > 0) {
-                console.log(`✅ Successfully updated ${updatedItems.length} inventory item(s) with new pricing $${wholesale_cost} for brand "${brandInfo.name}"`);
-                console.log('📋 Updated items:', updatedItems.map(i => ({ id: i.id, brand: i.brand, model: i.model })));
-              }
-            } else {
-              console.log(`ℹ️  No inventory items matched brand "${brandInfo.name}". Brand names in inventory for this vendor:`);
-              const uniqueBrands = [...new Set((allVendorItems || []).map(i => i.brand).filter(Boolean))];
-              console.log(`   Available brands: ${uniqueBrands.join(', ')}`);
-              console.log(`   Looking for: "${brandInfo.name}" (normalized: "${normalizedBrandName}")`);
+            // Handle order cascading if requested
+            if (cascadeToOrders && !previewOnly) {
+              // TODO: Implement order price cascading
+              // This would update order_items or recalculate order totals
+              console.log('📦 Order cascading requested but not yet implemented');
             }
           }
         } catch (inventoryUpdateError) {
@@ -1807,7 +1878,8 @@ const vendorOperations = {
       const finalResult = {
         account_brand: accountBrand,
         brand_id: finalBrandId, // Return the real brand ID for frontend update
-        success: true
+        success: true,
+        cascade: cascadeResults
       };
 
       return finalResult;

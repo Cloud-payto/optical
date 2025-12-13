@@ -489,14 +489,37 @@ export async function fetchAccountBrands(userId?: string): Promise<UserVendorPri
   return apiRequest<UserVendorPricing[]>(`/vendors/pricing/${currentUserId}`);
 }
 
-export async function saveAccountBrand(brandData: Partial<UserVendorPricing>, userId?: string): Promise<UserVendorPricing[]> {
+export interface CascadeOptions {
+  cascadeToInventory?: boolean;
+  cascadeToOrders?: boolean;
+  previewOnly?: boolean;
+}
+
+export interface CascadeResults {
+  inventoryItemsAffected: number;
+  ordersAffected: number;
+  inventoryUpdated: boolean;
+  ordersUpdated: boolean;
+}
+
+export interface SaveAccountBrandResponse {
+  success: boolean;
+  account_brand?: UserVendorPricing;
+  brand_id?: string;
+  cascade?: CascadeResults;
+}
+
+export async function saveAccountBrand(
+  brandData: Partial<UserVendorPricing> & CascadeOptions,
+  userId?: string
+): Promise<SaveAccountBrandResponse> {
   const currentUserId = userId || await getCurrentUserIdFromSession();
-  
-  const result = await apiRequest<UserVendorPricing[]>(`/vendors/pricing/${currentUserId}`, {
+
+  const result = await apiRequest<SaveAccountBrandResponse>(`/vendors/pricing/${currentUserId}`, {
     method: 'POST',
     body: JSON.stringify(brandData),
   });
-  
+
   return result;
 }
 
@@ -557,6 +580,8 @@ export interface DashboardStats {
   totalValue: number;
   pendingItems: number;
   itemsWithMissingPrices: number;
+  actualInventoryCost: number;
+  averageProfitMargin: number;
 }
 
 export interface BrandStats {
