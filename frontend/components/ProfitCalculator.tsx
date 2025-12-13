@@ -70,6 +70,7 @@ const loadSavedCalculations = (): SavedCalculation[] => {
 const ProfitCalculator: React.FC = () => {
   const { isDemo, demoData, notifyUserAction } = useDemo();
   const [yourCost, setYourCost] = useState<number>(47);
+  const [isFreeFrame, setIsFreeFrame] = useState<boolean>(false); // For frames received free (vendor promotions)
   const [wholesaleCost, setWholesaleCost] = useState<number>(72);
   const [tariffTax, setTariffTax] = useState<number>(0);
   const [discountPercentage, setDiscountPercentage] = useState<number>(10); // Default 10% discount
@@ -865,8 +866,32 @@ const ProfitCalculator: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4" data-demo="cost-fields" data-tour="cost-fields">
               {/* Your Actual Cost */}
               <div className="space-y-2">
-                <label htmlFor="yourCost" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                  Your Actual Cost
+                <label htmlFor="yourCost" className="block text-sm font-medium text-gray-700 dark:text-gray-200 flex justify-between">
+                  <span>Your Actual Cost</span>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="freeFrame"
+                      className="mr-2 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 dark:border-gray-600 rounded"
+                      checked={isFreeFrame}
+                      onChange={(e) => {
+                        setIsFreeFrame(e.target.checked);
+                        if (e.target.checked) {
+                          setYourCost(0);
+                          setDiscountPercentage(100);
+                          setYourCostWarning(null);
+                        } else {
+                          // Reset to calculated value from wholesale
+                          const defaultCost = calculateYourCostFromDiscount(wholesaleCost, 10);
+                          setYourCost(formatToDecimals(defaultCost, 2));
+                          setDiscountPercentage(10);
+                        }
+                      }}
+                    />
+                    <label htmlFor="freeFrame" className="text-xs text-gray-500 dark:text-gray-400">
+                      Free Frame
+                    </label>
+                  </div>
                 </label>
                 <div className="relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -881,11 +906,16 @@ const ProfitCalculator: React.FC = () => {
                       yourCostWarning
                         ? 'border-yellow-500 focus:ring-yellow-500 focus:border-yellow-500'
                         : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
-                    } rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white`}
-                    value={yourCost}
-                    onFocus={() => setIsEditingYourCost(true)}
+                    } rounded-md ${
+                      isFreeFrame
+                        ? 'bg-green-50 dark:bg-green-900/20 cursor-not-allowed'
+                        : 'bg-white dark:bg-[#1F2623]'
+                    } text-gray-800 dark:text-white`}
+                    value={isFreeFrame ? '0.00' : yourCost}
+                    onFocus={() => !isFreeFrame && setIsEditingYourCost(true)}
                     onChange={(e) => {
-                      const validated = validateCurrencyInput(e.target.value, 0, 10000);
+                      if (isFreeFrame) return;
+                      const validated = validateCurrencyInput(e.target.value, 0.01, 10000);
                       if (validated !== null) {
                         setYourCost(validated);
                         setIsEditingDiscount(false);
@@ -895,6 +925,7 @@ const ProfitCalculator: React.FC = () => {
                       }
                     }}
                     onBlur={() => {
+                      if (isFreeFrame) return;
                       const formatted = formatToDecimals(yourCost, 2);
                       setYourCost(formatted);
                       // ✅ FIX: Set ref BEFORE updating discount to signal this change came from yourCost
@@ -905,6 +936,7 @@ const ProfitCalculator: React.FC = () => {
                       // Now safe to reset editing flag
                       setIsEditingYourCost(false);
                     }}
+                    readOnly={isFreeFrame}
                   />
                 </div>
 
@@ -917,9 +949,15 @@ const ProfitCalculator: React.FC = () => {
                   </div>
                 )}
 
-                <p className="text-xs text-gray-500 dark:text-gray-400 italic">
-                  Calculated from wholesale cost - {discountPercentage.toFixed(1)}% discount
-                </p>
+                {isFreeFrame ? (
+                  <p className="text-xs text-green-600 dark:text-green-400 italic">
+                    Free frame from vendor promotion
+                  </p>
+                ) : (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+                    Calculated from wholesale cost - {discountPercentage.toFixed(1)}% discount
+                  </p>
+                )}
               </div>
 
               {/* Discount Percentage */}

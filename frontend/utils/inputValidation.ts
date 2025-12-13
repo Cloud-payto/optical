@@ -18,10 +18,10 @@ export const validateCurrencyInput = (
   min: number = 0,
   max: number = 10000
 ): number | null => {
-  // Handle empty string - return null to allow field to be empty during editing
-  // The onBlur handler should convert empty to min value
+  // Handle empty string - return minimum value (typically 0.01 for costs)
+  // This prevents the "stuck at last digit" bug
   if (value === '' || value === null || value === undefined) {
-    return null;
+    return min;
   }
 
   // For string values starting with "0" followed by digits (like "07"),
@@ -54,9 +54,9 @@ export const validateCurrencyInput = (
 export const validatePercentageInput = (
   value: string | number
 ): number | null => {
-  // Handle empty string - return null to allow field to be empty during editing
+  // Handle empty string - return 0 (minimum for percentage)
   if (value === '' || value === null || value === undefined) {
-    return null;
+    return 0;
   }
 
   // Strip leading zeros (like "07" -> "7")
