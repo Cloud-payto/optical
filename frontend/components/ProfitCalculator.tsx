@@ -70,10 +70,14 @@ const loadSavedCalculations = (): SavedCalculation[] => {
 const ProfitCalculator: React.FC = () => {
   const { isDemo, demoData, notifyUserAction } = useDemo();
   const [yourCost, setYourCost] = useState<number>(47);
+  const [yourCostDisplay, setYourCostDisplay] = useState<string>('47'); // Raw display value for input
   const [isFreeFrame, setIsFreeFrame] = useState<boolean>(false); // For frames received free (vendor promotions)
   const [wholesaleCost, setWholesaleCost] = useState<number>(72);
+  const [wholesaleCostDisplay, setWholesaleCostDisplay] = useState<string>('72');
   const [tariffTax, setTariffTax] = useState<number>(0);
+  const [tariffTaxDisplay, setTariffTaxDisplay] = useState<string>('0');
   const [discountPercentage, setDiscountPercentage] = useState<number>(10); // Default 10% discount
+  const [discountDisplay, setDiscountDisplay] = useState<string>('10');
   const [isEditingDiscount, setIsEditingDiscount] = useState<boolean>(false); // Track if user is manually editing discount
   const [isEditingYourCost, setIsEditingYourCost] = useState<boolean>(false); // Track if user is manually editing your cost
   const isUpdatingFromYourCostRef = useRef<boolean>(false); // Track if discount is being updated from yourCost input
@@ -181,14 +185,16 @@ const ProfitCalculator: React.FC = () => {
   // Update Your Cost when wholesale cost or discount % changes (but not when user is manually editing Your Cost)
   useEffect(() => {
     // Skip if user is editing yourCost OR if discount was just updated from yourCost input
-    if (!isEditingYourCost && !isUpdatingFromYourCostRef.current) {
+    if (!isEditingYourCost && !isUpdatingFromYourCostRef.current && !isFreeFrame) {
       const newYourCost = calculateYourCostFromDiscount(wholesaleCost, discountPercentage);
       // Format to avoid floating-point precision issues
-      setYourCost(formatToDecimals(newYourCost, 2));
+      const formatted = formatToDecimals(newYourCost, 2);
+      setYourCost(formatted);
+      setYourCostDisplay(formatted.toString());
     }
     // Reset the ref after checking
     isUpdatingFromYourCostRef.current = false;
-  }, [wholesaleCost, discountPercentage, isEditingYourCost]);
+  }, [wholesaleCost, discountPercentage, isEditingYourCost, isFreeFrame]);
 
   // Calculate retail price based on multiplier when not using manual price
   useEffect(() => {
@@ -419,9 +425,15 @@ const ProfitCalculator: React.FC = () => {
   
   const handleLoadSavedCalculation = (calculation: SavedCalculation) => {
     setYourCost(calculation.yourCost);
+    setYourCostDisplay(calculation.yourCost.toString());
     setWholesaleCost(calculation.wholesaleCost);
-    setTariffTax(calculation.tariffTax || 0); // Handle older saved calculations that might not have tariffTax
+    setWholesaleCostDisplay(calculation.wholesaleCost.toString());
+    const tariff = calculation.tariffTax || 0;
+    setTariffTax(tariff);
+    setTariffTaxDisplay(tariff.toString());
     setRetailPrice(calculation.retailPrice);
+    // Reset free frame when loading
+    setIsFreeFrame(calculation.yourCost === 0);
     setInsuranceCoverage(calculation.insuranceCoverage);
     setInsuranceReimbursement(calculation.insuranceReimbursement);
     
@@ -878,13 +890,18 @@ const ProfitCalculator: React.FC = () => {
                         setIsFreeFrame(e.target.checked);
                         if (e.target.checked) {
                           setYourCost(0);
+                          setYourCostDisplay('0.00');
                           setDiscountPercentage(100);
+                          setDiscountDisplay('100');
                           setYourCostWarning(null);
                         } else {
                           // Reset to calculated value from wholesale
                           const defaultCost = calculateYourCostFromDiscount(wholesaleCost, 10);
-                          setYourCost(formatToDecimals(defaultCost, 2));
+                          const formatted = formatToDecimals(defaultCost, 2);
+                          setYourCost(formatted);
+                          setYourCostDisplay(formatted.toString());
                           setDiscountPercentage(10);
+                          setDiscountDisplay('10');
                         }
                       }}
                     />
@@ -911,28 +928,38 @@ const ProfitCalculator: React.FC = () => {
                         ? 'bg-green-50 dark:bg-green-900/20 cursor-not-allowed'
                         : 'bg-white dark:bg-[#1F2623]'
                     } text-gray-800 dark:text-white`}
-                    value={isFreeFrame ? '0.00' : yourCost}
+                    value={isFreeFrame ? '0.00' : yourCostDisplay}
                     onFocus={() => !isFreeFrame && setIsEditingYourCost(true)}
                     onChange={(e) => {
                       if (isFreeFrame) return;
-                      const validated = validateCurrencyInput(e.target.value, 0.01, 10000);
+                      const rawValue = e.target.value;
+                      setYourCostDisplay(rawValue); // Always update display
+
+                      const validated = validateCurrencyInput(rawValue, 0.01, 10000);
                       if (validated !== null) {
                         setYourCost(validated);
                         setIsEditingDiscount(false);
-                        // Check for warnings
                         const warning = getValidationWarning('Your Actual Cost', validated, 0.01, 10000);
                         setYourCostWarning(warning);
+                      } else if (rawValue === '') {
+                        // Allow empty during editing, use 0 for calculations
+                        setYourCost(0);
+                        setYourCostWarning(null);
                       }
                     }}
                     onBlur={() => {
                       if (isFreeFrame) return;
-                      const formatted = formatToDecimals(yourCost, 2);
+                      // On blur, enforce minimum and format
+                      const finalValue = yourCost < 0.01 ? 0.01 : yourCost;
+                      const formatted = formatToDecimals(finalValue, 2);
                       setYourCost(formatted);
+                      setYourCostDisplay(formatted.toString());
                       // ✅ FIX: Set ref BEFORE updating discount to signal this change came from yourCost
                       isUpdatingFromYourCostRef.current = true;
                       // Update discount % based on finalized Your Cost
                       const newDiscount = calculateDiscountFromYourCost(wholesaleCost, formatted);
                       setDiscountPercentage(formatToDecimals(newDiscount, 1));
+                      setDiscountDisplay(formatToDecimals(newDiscount, 1).toString());
                       // Now safe to reset editing flag
                       setIsEditingYourCost(false);
                     }}
@@ -975,19 +1002,24 @@ const ProfitCalculator: React.FC = () => {
                     pattern="[0-9]*\.?[0-9]*"
                     id="discountPercentage"
                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
-                    value={discountPercentage}
+                    value={discountDisplay}
                     onFocus={() => setIsEditingDiscount(true)}
                     onChange={(e) => {
-                      const validated = validatePercentageInput(e.target.value);
+                      const rawValue = e.target.value;
+                      setDiscountDisplay(rawValue);
+
+                      const validated = validatePercentageInput(rawValue);
                       if (validated !== null) {
                         setDiscountPercentage(validated);
                         setIsEditingYourCost(false);
-                        // Your Cost will auto-update via useEffect
+                      } else if (rawValue === '') {
+                        setDiscountPercentage(0);
                       }
                     }}
                     onBlur={() => {
                       const formatted = formatToDecimals(discountPercentage, 1);
                       setDiscountPercentage(formatted);
+                      setDiscountDisplay(formatted.toString());
                       setIsEditingDiscount(false);
                     }}
                   />
@@ -1016,18 +1048,26 @@ const ProfitCalculator: React.FC = () => {
                       ? 'border-yellow-500 focus:ring-yellow-500 focus:border-yellow-500'
                       : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500'
                   } rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white`}
-                  value={wholesaleCost}
+                  value={wholesaleCostDisplay}
                   onChange={(e) => {
-                    const validated = validateCurrencyInput(e.target.value, 0, 10000);
+                    const rawValue = e.target.value;
+                    setWholesaleCostDisplay(rawValue);
+
+                    const validated = validateCurrencyInput(rawValue, 0, 10000);
                     if (validated !== null) {
                       setWholesaleCost(validated);
                       const warning = getValidationWarning('Wholesale Cost', validated, 0.01, 10000);
                       setWholesaleCostWarning(warning);
+                    } else if (rawValue === '') {
+                      setWholesaleCost(0);
+                      setWholesaleCostWarning(null);
                     }
                   }}
                   onBlur={() => {
-                    const formatted = formatToDecimals(wholesaleCost, 2);
+                    const finalValue = wholesaleCost < 0.01 ? 0.01 : wholesaleCost;
+                    const formatted = formatToDecimals(finalValue, 2);
                     setWholesaleCost(formatted);
+                    setWholesaleCostDisplay(formatted.toString());
                   }}
                 />
               </div>
@@ -1055,16 +1095,22 @@ const ProfitCalculator: React.FC = () => {
                   pattern="[0-9]*\.?[0-9]*"
                   id="tariffTax"
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#1F2623] text-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
-                  value={tariffTax}
+                  value={tariffTaxDisplay}
                   onChange={(e) => {
-                    const validated = validateCurrencyInput(e.target.value, 0, 1000);
+                    const rawValue = e.target.value;
+                    setTariffTaxDisplay(rawValue);
+
+                    const validated = validateCurrencyInput(rawValue, 0, 1000);
                     if (validated !== null) {
                       setTariffTax(validated);
+                    } else if (rawValue === '') {
+                      setTariffTax(0);
                     }
                   }}
                   onBlur={() => {
                     const formatted = formatToDecimals(tariffTax, 2);
                     setTariffTax(formatted);
+                    setTariffTaxDisplay(formatted.toString());
                   }}
                 />
               </div>

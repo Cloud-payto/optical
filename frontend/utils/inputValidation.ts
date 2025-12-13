@@ -18,10 +18,10 @@ export const validateCurrencyInput = (
   min: number = 0,
   max: number = 10000
 ): number | null => {
-  // Handle empty string - return minimum value (typically 0.01 for costs)
-  // This prevents the "stuck at last digit" bug
+  // Handle empty string - return null to allow empty field during editing
+  // The onBlur handler should set to min value when field loses focus
   if (value === '' || value === null || value === undefined) {
-    return min;
+    return null;
   }
 
   // For string values starting with "0" followed by digits (like "07"),
@@ -36,8 +36,8 @@ export const validateCurrencyInput = (
   // Return null if not a valid number (e.g., "abc")
   if (isNaN(num)) return null;
 
-  // Clamp to minimum
-  if (num < min) return min;
+  // Clamp to minimum (but allow values being typed - min is enforced on blur)
+  if (num < min) return num; // Allow typing small numbers, enforce min on blur
 
   // Clamp to maximum
   if (num > max) return max;
