@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Save, Building2, User, Phone, Mail, Globe, Package, Plus, Trash2, DollarSign } from 'lucide-react';
 import { Company, Brand } from '../../types';
+import { SensitiveText } from '../ui/SensitiveText';
 
 interface CompanyDetailsModalProps {
   isOpen: boolean;
@@ -122,7 +123,7 @@ const CompanyDetailsModal: React.FC<CompanyDetailsModalProps> = ({
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                     {formData.name}
                     {formData.accountNumber && (
-                      <span className="text-sm text-gray-600 dark:text-gray-400 font-mono ml-2">(#{formData.accountNumber})</span>
+                      <SensitiveText type="account" className="text-sm text-gray-600 dark:text-gray-400 font-mono ml-2">(#{formData.accountNumber})</SensitiveText>
                     )}
                   </h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400">Company Details</p>

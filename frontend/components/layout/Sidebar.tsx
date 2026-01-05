@@ -17,6 +17,7 @@ import {
   ShoppingCart,
   Glasses,
   Eye,
+  EyeOff,
   FileText,
   RotateCcw,
   Bug,
@@ -26,6 +27,7 @@ import {
 import BugReportModal from '../modals/BugReportModal';
 import VendorRequestModal from '../modals/VendorRequestModal';
 import { SettingsModal } from '../modals/SettingsModal';
+import { usePresentationMode } from '../../contexts/PresentationModeContext';
 
 // Modern nested navigation structure
 const navigationConfig = [
@@ -77,6 +79,7 @@ const Sidebar: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const { isPresentationMode, togglePresentationMode } = usePresentationMode();
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -128,6 +131,22 @@ const Sidebar: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Presentation Mode Indicator */}
+      {isPresentationMode && (
+        <button
+          onClick={togglePresentationMode}
+          className={`mx-4 mt-3 flex items-center px-3 py-2 rounded-lg bg-purple-100 dark:bg-purple-900/30 border border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors ${
+            isCollapsed ? 'justify-center' : 'space-x-2'
+          }`}
+          title="Presentation Mode Active - Click to disable"
+        >
+          <EyeOff className="h-4 w-4 flex-shrink-0" />
+          {!isCollapsed && (
+            <span className="text-xs font-medium">Presentation Mode</span>
+          )}
+        </button>
+      )}
 
       {/* Navigation */}
       <nav className="flex-1 p-4 overflow-y-auto">

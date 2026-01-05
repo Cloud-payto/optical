@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, Package, Calendar, User, Hash, ShoppingBag } from 'lucide-react';
 import { Order } from '../types/order.types';
 import { OrderActions } from './OrderActions';
+import { SensitiveText } from '../../../components/ui/SensitiveText';
 import { OrderItemsList } from './OrderItemsList';
 import { PartialOrderBadge } from './PartialOrderBadge';
 
@@ -133,7 +134,7 @@ export function OrdersTable({
                     >
                       <div className="flex items-center gap-2">
                         <Hash className="h-4 w-4 text-gray-400" />
-                        <span className="font-medium text-gray-900 dark:text-white">{order.order_number}</span>
+                        <SensitiveText type="order" className="font-medium text-gray-900 dark:text-white">{order.order_number}</SensitiveText>
                       </div>
                     </td>
 
@@ -155,7 +156,7 @@ export function OrdersTable({
                     >
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4 text-gray-400" />
-                        <span className="text-gray-700 dark:text-gray-300">{order.customer_name || 'N/A'}</span>
+                        <SensitiveText type="customer" className="text-gray-700 dark:text-gray-300">{order.customer_name || 'N/A'}</SensitiveText>
                       </div>
                     </td>
 
@@ -237,7 +238,7 @@ export function OrdersTable({
                               {order.account_number && (
                                 <div className="text-sm">
                                   <span className="text-gray-600 dark:text-gray-400">Account #:</span>{' '}
-                                  <span className="font-mono font-semibold text-gray-900 dark:text-white">{order.account_number}</span>
+                                  <SensitiveText type="account" className="font-mono font-semibold text-gray-900 dark:text-white">{order.account_number}</SensitiveText>
                                 </div>
                               )}
                               {order.rep_name && (

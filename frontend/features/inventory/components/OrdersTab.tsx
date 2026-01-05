@@ -3,6 +3,7 @@ import { SearchIcon, MailIcon, ChevronDownIcon, ChevronRightIcon, CheckIcon, Eye
 import { motion, AnimatePresence } from 'framer-motion';
 import { OrderData, EmailData } from '../../../services/api';
 import { extractVendorFromEmail } from '../utils/vendorHelpers';
+import { SensitiveText } from '../../../components/ui/SensitiveText';
 
 interface OrdersTabProps {
   // Sub-tab state
@@ -169,14 +170,14 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({
                           </td>
                           <td className="px-4 py-3 whitespace-normal text-sm">
                             <div className="flex flex-col">
-                              <span className="font-medium text-gray-900 dark:text-white">#{order.order_number}</span>
+                              <SensitiveText type="order" className="font-medium text-gray-900 dark:text-white">#{order.order_number}</SensitiveText>
                               {order.subject && (
                                 <span className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">{order.subject}</span>
                               )}
                             </div>
                           </td>
                           <td className="px-4 py-3 whitespace-normal text-sm text-gray-900 dark:text-white">
-                            {order.customer_name || 'N/A'}
+                            <SensitiveText type="customer">{order.customer_name || 'N/A'}</SensitiveText>
                           </td>
                           <td className="px-4 py-3 whitespace-normal text-sm text-gray-500 dark:text-gray-400">
                             {formatOrderDate(order.order_date)}
@@ -345,14 +346,14 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({
                           </td>
                           <td className="px-4 py-3 whitespace-normal text-sm">
                             <div className="flex flex-col">
-                              <span className="font-medium text-gray-900 dark:text-white">#{order.order_number}</span>
+                              <SensitiveText type="order" className="font-medium text-gray-900 dark:text-white">#{order.order_number}</SensitiveText>
                               {order.subject && (
                                 <span className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">{order.subject}</span>
                               )}
                             </div>
                           </td>
                           <td className="px-4 py-3 whitespace-normal text-sm text-gray-900 dark:text-white">
-                            {order.customer_name || 'N/A'}
+                            <SensitiveText type="customer">{order.customer_name || 'N/A'}</SensitiveText>
                           </td>
                           <td className="px-4 py-3 whitespace-normal text-sm text-gray-500 dark:text-gray-400">
                             {formatOrderDate(order.order_date)}

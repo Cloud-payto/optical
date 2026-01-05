@@ -6,6 +6,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { DemoProvider } from './contexts/DemoContext';
 import { PracticeProfileProvider } from './contexts/PracticeProfileContext';
+import { PresentationModeProvider } from './contexts/PresentationModeContext';
 import DemoProviderComponent from './components/demo/DemoProvider';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -45,6 +46,7 @@ function App() {
           <PracticeProfileProvider>
             <Router>
               <ThemeProvider>
+                <PresentationModeProvider>
                 <DemoProvider>
                 <DemoProviderComponent>
                   <div className="min-h-screen">
@@ -98,6 +100,7 @@ function App() {
                   </div>
                 </DemoProviderComponent>
                 </DemoProvider>
+                </PresentationModeProvider>
               </ThemeProvider>
             </Router>
           </PracticeProfileProvider>

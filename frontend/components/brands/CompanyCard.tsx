@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ChevronUp, Eye, Building2, Package, Edit3, Percent, Plus, AlertTriangle } from 'lucide-react';
 import { Company } from '../../types';
+import { SensitiveText } from '../ui/SensitiveText';
 
 interface CompanyCardProps {
   company: Company;
@@ -87,7 +88,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ company, onViewBrandDetails, 
               <div className="flex items-center space-x-2">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{company.name}</h3>
                 {company.accountNumber && (
-                  <span className="text-sm text-gray-600 dark:text-gray-400 font-mono">(#{company.accountNumber})</span>
+                  <SensitiveText type="account" className="text-sm text-gray-600 dark:text-gray-400 font-mono">(#{company.accountNumber})</SensitiveText>
                 )}
               </div>
               <div className="flex items-center space-x-2">
