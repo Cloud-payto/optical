@@ -167,6 +167,7 @@ class ModernOpticalCatalogCrawler {
 
             if (variant) {
                 console.log(`   ✅ Found matching variant: UPC=${variant.upc}, Wholesale=$${variant.wholesale}`);
+                console.log(`   📏 Full sizing: ${variant.eyeSize}-${variant.bridge}-${variant.temple} (A:${variant.a}, B:${variant.b}, DBL:${variant.dbl}, ED:${variant.ed})`);
                 return {
                     ...item,
                     upc: variant.upc || item.upc,
@@ -176,11 +177,17 @@ class ModernOpticalCatalogCrawler {
                     bridge: variant.bridge || item.bridge,
                     temple: variant.temple || item.temple,
                     full_size: variant.size || item.full_size,
+                    // Include all measurements from API
+                    a: variant.a || item.a,
+                    b: variant.b || item.b,
+                    dbl: variant.dbl || item.dbl,
+                    ed: variant.ed || item.ed,
                     sku: variant.sku || item.sku,
                     in_stock: variant.isInStock || variant.availableStatus === 'in stock',
                     material: variant.material || product.material || item.material,
                     gender: variant.gender || product.gender || item.gender,
                     color_code: variant.colorCode || item.color_code,
+                    color_name: variant.color || item.color_name,
                     api_verified: true,
                     enriched: true,
                     confidence_score: 100,

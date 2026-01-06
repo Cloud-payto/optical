@@ -175,11 +175,20 @@ router.post('/modernoptical', async (req, res) => {
               enriched_at: new Date().toISOString(),
               confidence_score: enrichedItem.confidence_score,
               validation_reason: enrichedItem.validation_reason,
+              // Store all sizing fields in enriched_data
+              color_name: enrichedItem.color_name,
               color_code: enrichedItem.color_code,
               full_size: enrichedItem.full_size,
+              eye_size: enrichedItem.eye_size,
+              bridge: enrichedItem.bridge,
               temple: enrichedItem.temple,
+              a: enrichedItem.a,
+              b: enrichedItem.b,
+              dbl: enrichedItem.dbl,
+              ed: enrichedItem.ed,
               material: enrichedItem.material,
-              gender: enrichedItem.gender
+              gender: enrichedItem.gender,
+              sku: enrichedItem.sku
             }
           })
           .eq('id', enrichedItem.id)
