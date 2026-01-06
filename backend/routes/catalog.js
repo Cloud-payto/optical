@@ -125,9 +125,10 @@ router.post('/check', async (req, res) => {
                 // CACHE HIT! Enrich item with catalog data
                 const hasUpc = catalogMatch.data.upc || item.upc;
                 const hasWholesale = catalogMatch.data.wholesale_cost != null;
-                const isComplete = hasUpc && hasWholesale;
+                const hasFullSizing = catalogMatch.data.full_size || (catalogMatch.data.bridge && catalogMatch.data.temple_length);
+                const isComplete = hasUpc && hasWholesale && hasFullSizing;
 
-                console.log(`✅ Cache HIT for ${item.model} ${item.color} (size: ${rawEyeSize} → catalog: ${catalogMatch.data.eye_size}) [UPC: ${catalogMatch.data.upc || 'NONE'}, Wholesale: ${catalogMatch.data.wholesale_cost || 'NONE'}]`);
+                console.log(`✅ Cache HIT for ${item.model} ${item.color} (size: ${rawEyeSize} → catalog: ${catalogMatch.data.eye_size}) [UPC: ${catalogMatch.data.upc || 'NONE'}, Wholesale: ${catalogMatch.data.wholesale_cost || 'NONE'}, FullSize: ${catalogMatch.data.full_size || 'NONE'}]`);
 
                 enrichedItems.push({
                     ...item,
@@ -145,6 +146,10 @@ router.post('/check', async (req, res) => {
                     material: catalogMatch.data.material || item.material,
                     gender: catalogMatch.data.gender || item.gender,
                     fit_type: catalogMatch.data.fit_type || item.fit_type,
+                    // Include full sizing fields
+                    full_size: catalogMatch.data.full_size || item.full_size,
+                    bridge: catalogMatch.data.bridge || item.bridge,
+                    temple_length: catalogMatch.data.temple_length || item.temple_length,
                     a_measurement: catalogMatch.data.a_measurement || item.a,
                     b_measurement: catalogMatch.data.b_measurement || item.b,
                     dbl: catalogMatch.data.dbl || item.dbl,
