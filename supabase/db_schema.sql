@@ -223,11 +223,13 @@ CREATE TABLE public.inventory (
   created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
   received boolean,
+  location_id uuid,
   CONSTRAINT inventory_pkey PRIMARY KEY (id),
   CONSTRAINT inventory_email_id_fkey FOREIGN KEY (email_id) REFERENCES public.emails(id),
   CONSTRAINT inventory_account_id_fkey FOREIGN KEY (account_id) REFERENCES public.accounts(id),
   CONSTRAINT inventory_vendor_id_fkey FOREIGN KEY (vendor_id) REFERENCES public.vendors(id),
-  CONSTRAINT inventory_order_id_fkey FOREIGN KEY (order_id) REFERENCES public.orders(id)
+  CONSTRAINT inventory_order_id_fkey FOREIGN KEY (order_id) REFERENCES public.orders(id),
+  CONSTRAINT inventory_location_id_fkey FOREIGN KEY (location_id) REFERENCES public.practice_locations(id)
 );
 CREATE TABLE public.notifications (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
@@ -270,6 +272,38 @@ CREATE TABLE public.orders (
   CONSTRAINT orders_account_id_fkey FOREIGN KEY (account_id) REFERENCES public.accounts(id),
   CONSTRAINT orders_vendor_id_fkey FOREIGN KEY (vendor_id) REFERENCES public.vendors(id),
   CONSTRAINT orders_email_id_fkey FOREIGN KEY (email_id) REFERENCES public.emails(id)
+);
+-- ============================================
+-- PRACTICE LOCATIONS TABLE (Multi-Location Support)
+-- ============================================
+
+-- practice_locations: Stores physical locations/stores for practices
+-- - Links to accounts via account_id
+-- - Each account can have multiple locations
+-- - One location can be marked as primary (is_primary)
+-- - Soft delete via is_active flag
+-- - Used for inventory assignment during order confirmation
+
+-- inventory.location_id: Links inventory items to specific locations
+-- - NULL for legacy items without location assignment
+-- - Required for new inventory confirmations in multi-location practices
+
+CREATE TABLE public.practice_locations (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  account_id uuid NOT NULL,
+  name character varying(200) NOT NULL,
+  address text,
+  city character varying(100),
+  state character varying(50),
+  zip_code character varying(20),
+  phone character varying(20),
+  is_primary boolean DEFAULT false,
+  is_active boolean DEFAULT true,
+  created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT practice_locations_pkey PRIMARY KEY (id),
+  CONSTRAINT practice_locations_account_id_fkey FOREIGN KEY (account_id) REFERENCES public.accounts(id) ON DELETE CASCADE,
+  CONSTRAINT practice_locations_account_id_name_key UNIQUE (account_id, name)
 );
 CREATE TABLE public.practice_profiles (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),

@@ -104,12 +104,13 @@ export function ModernInventoryTable({
   return (
     <div className="bg-white dark:bg-[#1F2623] rounded-xl shadow-sm overflow-hidden">
       {/* Table Header */}
-      <div className="grid grid-cols-[40px_80px_1.5fr_150px_1fr_100px_100px_180px_140px] gap-4 px-6 py-3 bg-gray-50 dark:bg-[#181F1C]/50 border-b border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+      <div className="grid grid-cols-[40px_80px_1.5fr_150px_1fr_120px_100px_100px_180px_140px] gap-4 px-6 py-3 bg-gray-50 dark:bg-[#181F1C]/50 border-b border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
         <div className="flex items-center">#</div>
         <div>Image</div>
         <div>Brand • Model</div>
         <div>UPC</div>
         <div>Color</div>
+        <div>Location</div>
         <div>Size</div>
         <div>Stock</div>
         <div>Return Window</div>
@@ -131,7 +132,7 @@ export function ModernInventoryTable({
               }`}
             >
               {/* Collapsed Row */}
-              <div className="grid grid-cols-[40px_80px_1.5fr_150px_1fr_100px_100px_180px_140px] gap-4 px-6 py-4 items-center">
+              <div className="grid grid-cols-[40px_80px_1.5fr_150px_1fr_120px_100px_100px_180px_140px] gap-4 px-6 py-4 items-center">
                 {/* Checkbox */}
                 <div>
                   <input
@@ -175,6 +176,11 @@ export function ModernInventoryTable({
 
                 {/* Color */}
                 <div className="text-sm text-gray-700 dark:text-gray-300">{item.color || 'N/A'}</div>
+
+                {/* Location */}
+                <div className="text-sm text-gray-700 dark:text-gray-300">
+                  {item.location?.name || <span className="text-gray-400 dark:text-gray-500">—</span>}
+                </div>
 
                 {/* Size */}
                 <div className="text-sm text-gray-700 dark:text-gray-300">{item.size || 'N/A'}</div>
@@ -347,6 +353,11 @@ export function ModernInventoryTable({
                         <div>
                           <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Brand</div>
                           <div className="text-sm text-gray-900 dark:text-white">{item.brand || 'N/A'}</div>
+                        </div>
+
+                        <div>
+                          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Location</div>
+                          <div className="text-sm text-gray-900 dark:text-white">{item.location?.name || 'Not assigned'}</div>
                         </div>
 
                         <div>

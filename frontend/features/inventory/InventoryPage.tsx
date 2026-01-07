@@ -48,23 +48,26 @@ export function InventoryPage() {
   const { archiveItem, restoreItem, deleteItem, markAsSold } = useInventoryManagement();
 
   // Extract unique values for filters
-  const { vendors, brands, colors } = useMemo(() => {
-    if (!rawInventory) return { vendors: [], brands: [], colors: [] };
+  const { vendors, brands, colors, locations } = useMemo(() => {
+    if (!rawInventory) return { vendors: [], brands: [], colors: [], locations: [] };
 
     const vendorSet = new Set<string>();
     const brandSet = new Set<string>();
     const colorSet = new Set<string>();
+    const locationSet = new Set<string>();
 
     rawInventory.forEach(item => {
       if (item.vendor?.name) vendorSet.add(item.vendor.name);
       if (item.brand) brandSet.add(item.brand);
       if (item.color) colorSet.add(item.color);
+      if (item.location?.name) locationSet.add(item.location.name);
     });
 
     return {
       vendors: Array.from(vendorSet).sort(),
       brands: Array.from(brandSet).sort(),
-      colors: Array.from(colorSet).sort()
+      colors: Array.from(colorSet).sort(),
+      locations: Array.from(locationSet).sort()
     };
   }, [rawInventory]);
 
@@ -83,6 +86,9 @@ export function InventoryPage() {
     }
     if (filters.color) {
       filtered = filtered.filter(item => item.color === filters.color);
+    }
+    if (filters.location) {
+      filtered = filtered.filter(item => item.location?.name === filters.location);
     }
 
     // Apply sorting
@@ -111,6 +117,22 @@ export function InventoryPage() {
 
           // Then sort by model within the same brand
           return (a.model || '').localeCompare(b.model || '');
+        });
+        break;
+      case 'location':
+        filtered.sort((a, b) => {
+          // Items with no location go to the end
+          const aLocation = a.location?.name || '';
+          const bLocation = b.location?.name || '';
+          if (!aLocation && bLocation) return 1;
+          if (aLocation && !bLocation) return -1;
+
+          // Then sort by location name
+          const locationCompare = aLocation.localeCompare(bLocation);
+          if (locationCompare !== 0) return locationCompare;
+
+          // Then by brand within the same location
+          return (a.brand || '').localeCompare(b.brand || '');
         });
         break;
       case 'stock':
@@ -323,6 +345,7 @@ export function InventoryPage() {
         vendors={vendors}
         brands={brands}
         colors={colors}
+        locations={locations}
         returnReportCount={returnReportItems.length}
         onOpenReturnReport={handleOpenReturnReport}
       />

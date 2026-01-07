@@ -26,6 +26,10 @@ export interface InventoryItem {
     order_date?: string;
     customer_name?: string;
   };
+  location?: {
+    id?: string;
+    name?: string;
+  };
   status?: 'pending' | 'current' | 'archived' | 'sold';
   order_number?: string;
   account_number?: string;
@@ -55,7 +59,8 @@ export interface InventoryFilters {
   vendor?: string;
   brand?: string;
   color?: string;
-  sortBy?: 'newest' | 'oldest' | 'return_window' | 'brand' | 'stock';
+  location?: string;
+  sortBy?: 'newest' | 'oldest' | 'return_window' | 'brand' | 'stock' | 'location';
   searchTerm?: string;
 }
 

@@ -8,6 +8,7 @@ interface InventoryFiltersProps {
   vendors: string[];
   brands: string[];
   colors: string[];
+  locations: string[];
   returnReportCount?: number;
   onOpenReturnReport?: () => void;
 }
@@ -18,6 +19,7 @@ export function InventoryFilters({
   vendors,
   brands,
   colors,
+  locations,
   returnReportCount = 0,
   onOpenReturnReport
 }: InventoryFiltersProps) {
@@ -31,6 +33,10 @@ export function InventoryFilters({
 
   const handleColorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onFilterChange({ ...filters, color: e.target.value || undefined });
+  };
+
+  const handleLocationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    onFilterChange({ ...filters, location: e.target.value || undefined });
   };
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -91,6 +97,23 @@ export function InventoryFilters({
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
           </div>
 
+          {/* Location Filter */}
+          {locations.length > 0 && (
+            <div className="relative">
+              <select
+                value={filters.location || ''}
+                onChange={handleLocationChange}
+                className="appearance-none bg-white border border-gray-300 rounded-xl px-4 py-2.5 pr-10 text-sm text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all min-w-[160px]"
+              >
+                <option value="">All Locations</option>
+                {locations.map(location => (
+                  <option key={location} value={location}>{location}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+            </div>
+          )}
+
           {/* Sort By */}
           <div className="relative">
             <select
@@ -103,6 +126,7 @@ export function InventoryFilters({
               <option value="oldest">Oldest First</option>
               <option value="return_window">Return Window (Closing Soon)</option>
               <option value="brand">Brand (A-Z)</option>
+              <option value="location">Location (A-Z)</option>
               <option value="stock">Stock (High-Low)</option>
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
