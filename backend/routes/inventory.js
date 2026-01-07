@@ -13,12 +13,13 @@ const parserRegistry = require('../parsers');
  *   vendorId?: string (UUID - optional, if provided skips vendor lookup),
  *   order: { order_number, customer_name, order_date, etc. },
  *   items: [ { sku, brand, model, color, quantity, etc. } ],
- *   emailId?: number (optional - for tracking which email this came from)
+ *   emailId?: number (optional - for tracking which email this came from),
+ *   locationId?: string (UUID - optional, location to assign inventory to)
  * }
  */
 router.post('/bulk-add', async (req, res) => {
   try {
-    const { accountId, vendor, vendorId: providedVendorId, order, items, emailId } = req.body;
+    const { accountId, vendor, vendorId: providedVendorId, order, items, emailId, locationId } = req.body;
 
     // Helper to truncate strings to fit database columns
     const truncate = (str, maxLen) => {
@@ -175,6 +176,7 @@ router.post('/bulk-add', async (req, res) => {
       upc: truncate(item.upc, 50) || null,
       in_stock: item.in_stock || null,
       api_verified: item.api_verified || false,
+      location_id: locationId || null,
       enriched_data: item.enriched_data || {
         order_number: order.order_number,
         order: order
@@ -291,13 +293,38 @@ router.delete('/:userId/:itemId', async (req, res) => {
 
 // POST /api/inventory/:userId/confirm/:orderNumber - Confirm pending order items
 // Supports both full and partial order confirmation
-// Body: { frameIds?: string[], confirmAll?: boolean }
+// Body: { frameIds?: string[], confirmAll?: boolean, locationId?: string }
 router.post('/:userId/confirm/:orderNumber', async (req, res) => {
   try {
     const { userId, orderNumber } = req.params;
-    const { frameIds, confirmAll } = req.body || {};
+    const { frameIds, confirmAll, locationId } = req.body || {};
 
     console.log(`📦 Confirming order ${orderNumber} for user ${userId}`);
+    console.log(`📍 Location ID: ${locationId || 'Not specified'}`);
+
+    // If locationId provided, validate it belongs to the user's account
+    if (locationId) {
+      const { data: locationCheck, error: locationError } = await supabase
+        .from('practice_locations')
+        .select('id, is_active')
+        .eq('id', locationId)
+        .eq('account_id', userId)
+        .single();
+
+      if (locationError || !locationCheck) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid location specified'
+        });
+      }
+
+      if (!locationCheck.is_active) {
+        return res.status(400).json({
+          success: false,
+          error: 'Cannot assign inventory to inactive location'
+        });
+      }
+    }
 
     // Backward compatibility: if no body, confirm all
     const shouldConfirmAll = !frameIds || frameIds.length === 0 || confirmAll === true;
@@ -313,7 +340,8 @@ router.post('/:userId/confirm/:orderNumber', async (req, res) => {
       userId,
       {
         frameIds: shouldConfirmAll ? null : frameIds,
-        confirmAll: shouldConfirmAll
+        confirmAll: shouldConfirmAll,
+        locationId: locationId || null
       }
     );
 
@@ -325,7 +353,8 @@ router.post('/:userId/confirm/:orderNumber', async (req, res) => {
         orderStatus: result.orderStatus,  // 'partial', 'confirmed', etc.
         totalItems: result.totalItems,
         receivedItems: result.receivedItems,
-        pendingItems: result.pendingItems
+        pendingItems: result.pendingItems,
+        locationId: locationId || null
       });
     } else {
       res.status(200).json({

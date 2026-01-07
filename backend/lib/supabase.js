@@ -272,10 +272,10 @@ const inventoryOperations = {
 
   async confirmPendingOrder(orderNumber, userId, options = {}) {
     try {
-      const { frameIds = null, confirmAll = false } = options;
+      const { frameIds = null, confirmAll = false, locationId = null } = options;
 
       console.log(`🔍 confirmPendingOrder called with orderNumber: "${orderNumber}", userId: "${userId}"`);
-      console.log(`📋 Options:`, { frameIds: frameIds?.length || 'all', confirmAll });
+      console.log(`📋 Options:`, { frameIds: frameIds?.length || 'all', confirmAll, locationId });
 
       // First, try to find the order with vendor information
       const { data: order, error: orderError } = await supabase
@@ -399,17 +399,24 @@ const inventoryOperations = {
       // Update items to received=true, status='current', and set received_date
       console.log(`🔄 Marking ${itemsToConfirm.length} items as received...`);
       console.log(`📝 Sample item IDs to update:`, itemsToConfirm.slice(0, 3).map(i => i.id));
+      if (locationId) {
+        console.log(`📍 Assigning to location: ${locationId}`);
+      }
 
       const currentDate = new Date().toISOString().split('T')[0];
+
+      // Build update data, conditionally including location_id
+      const updateData = {
+        received: true,
+        received_date: currentDate,
+        status: 'current',
+        ...(locationId && { location_id: locationId })
+      };
 
       const updatePromises = itemsToConfirm.map(item =>
         supabase
           .from('inventory')
-          .update({
-            received: true,
-            received_date: currentDate,
-            status: 'current'
-          })
+          .update(updateData)
           .eq('id', item.id)
           .select()
       );
@@ -585,7 +592,8 @@ const inventoryOperations = {
         orderStatus: statusResult.status,
         totalItems: statusResult.totalItems,
         receivedItems: statusResult.receivedItems,
-        pendingItems: statusResult.pendingItems
+        pendingItems: statusResult.pendingItems,
+        locationId: locationId
       };
     } catch (error) {
       handleSupabaseError(error, 'confirmPendingOrder');
