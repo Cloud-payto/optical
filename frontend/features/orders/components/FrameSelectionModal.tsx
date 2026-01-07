@@ -6,15 +6,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Package, CheckSquare, Square, AlertCircle } from 'lucide-react';
+import { X, Package, CheckSquare, Square, AlertCircle, MapPin } from 'lucide-react';
 import { Order } from '../types/order.types';
 import { FrameSelectionItem } from './FrameSelectionItem';
+import { useAuth } from '../../../contexts/AuthContext';
+import { useLocations, useLocationSummary } from '../../../hooks/useLocations';
 
 interface FrameSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
   order: Order;
-  onConfirm: (frameIds: string[]) => void;
+  onConfirm: (frameIds: string[], locationId: string | null) => void;
   isLoading?: boolean;
 }
 
@@ -27,6 +29,17 @@ export function FrameSelectionModal({
 }: FrameSelectionModalProps) {
   // Initialize with all frames selected by default
   const [selectedFrames, setSelectedFrames] = useState<Set<string>>(new Set());
+
+  // Location state and hooks
+  const { user } = useAuth();
+  const accountId = user?.id;
+  const { data: locationsData } = useLocations(accountId);
+  const { data: locationSummary } = useLocationSummary(accountId);
+  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
+
+  const locations = locationsData?.locations || [];
+  const isMultiLocation = locationSummary?.isMultiLocation || false;
+  const defaultLocationId = locationSummary?.defaultLocationId || null;
 
   // Filter items to show only unreceived frames for partial orders
   // For new/pending orders, show all items
@@ -59,6 +72,13 @@ export function FrameSelectionModal({
     }
   }, [isOpen, displayItems]);
 
+  // Auto-select default location for single-location practices
+  useEffect(() => {
+    if (!isMultiLocation && defaultLocationId && !selectedLocationId) {
+      setSelectedLocationId(defaultLocationId);
+    }
+  }, [isMultiLocation, defaultLocationId, selectedLocationId]);
+
   const toggleFrame = (frameId: string) => {
     setSelectedFrames(prev => {
       const newSet = new Set(prev);
@@ -85,8 +105,15 @@ export function FrameSelectionModal({
     if (selectedFrames.size === 0) {
       return; // Validation: prevent confirmation with 0 frames
     }
-    onConfirm(Array.from(selectedFrames));
+    // Pass locationId (selected or default for single-location)
+    onConfirm(Array.from(selectedFrames), selectedLocationId || defaultLocationId);
   };
+
+  // Check if confirm should be disabled (for multi-location, require selection)
+  const isConfirmDisabled =
+    selectedFrames.size === 0 ||
+    isLoading ||
+    (isMultiLocation && !selectedLocationId);
 
   const allSelected = selectedFrames.size === displayItems.length;
   const noneSelected = selectedFrames.size === 0;
@@ -194,6 +221,47 @@ export function FrameSelectionModal({
               )}
             </div>
 
+            {/* Location Selector - Show when locations exist */}
+            {locations.length > 0 && (
+              <div className="px-6 py-3 border-b border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-blue-900/10">
+                <div className="flex items-center gap-2 mb-2">
+                  <MapPin className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Assign to Location
+                    {isMultiLocation && <span className="text-red-500 ml-1">*</span>}
+                  </span>
+                </div>
+
+                {isMultiLocation ? (
+                  <select
+                    value={selectedLocationId || ''}
+                    onChange={(e) => setSelectedLocationId(e.target.value || null)}
+                    className="block w-full md:w-[300px] px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1F2623] text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Select a location...</option>
+                    {locations.map((location) => (
+                      <option key={location.id} value={location.id}>
+                        {location.name}
+                        {location.is_primary ? ' (Primary)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Inventory will be assigned to: <strong className="text-gray-900 dark:text-white">{locations[0]?.name}</strong>
+                  </p>
+                )}
+
+                {/* Warning when location is required but not selected */}
+                {isMultiLocation && !selectedLocationId && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    Please select a location to continue
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Scrollable Table - Paper-like Layout */}
             <div className="flex-1 overflow-y-auto">
               <table className="w-full border-collapse">
@@ -274,7 +342,7 @@ export function FrameSelectionModal({
                 </button>
                 <button
                   onClick={handleConfirm}
-                  disabled={noneSelected || isLoading}
+                  disabled={isConfirmDisabled}
                   className="px-5 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {isLoading ? (

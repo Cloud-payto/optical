@@ -209,7 +209,7 @@ export function OrdersPage() {
         isLoading={isLoading}
         onConfirm={
           (activeTab === 'pending' || activeTab === 'partial')
-            ? (orderNumber, frameIds) => confirmOrder.mutate({ orderNumber, frameIds })
+            ? (orderNumber, frameIds, locationId) => confirmOrder.mutate({ orderNumber, frameIds, locationId })
             : undefined
         }
         onArchive={activeTab === 'confirmed' ? (orderId) => archiveOrder.mutate(orderId) : undefined}

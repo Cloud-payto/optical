@@ -13,7 +13,7 @@ import { PartialOrderBadge } from './PartialOrderBadge';
 
 interface OrdersTableProps {
   orders: Order[];
-  onConfirm?: (orderNumber: string, frameIds?: string[]) => void;
+  onConfirm?: (orderNumber: string, frameIds?: string[], locationId?: string | null) => void;
   onArchive?: (orderId: number) => void;
   onDelete?: (orderId: number) => void;
   isLoading?: boolean;

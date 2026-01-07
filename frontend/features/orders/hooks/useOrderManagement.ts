@@ -11,8 +11,8 @@ export function useOrderManagement() {
   const queryClient = useQueryClient();
 
   const confirmOrder = useMutation({
-    mutationFn: ({ orderNumber, frameIds }: { orderNumber: string; frameIds?: string[] }) =>
-      confirmPendingOrder(orderNumber, frameIds),
+    mutationFn: ({ orderNumber, frameIds, locationId }: { orderNumber: string; frameIds?: string[]; locationId?: string | null }) =>
+      confirmPendingOrder(orderNumber, frameIds, locationId),
     onSuccess: (data) => {
       // Invalidate both orders and inventory since confirming affects both
       queryClient.invalidateQueries({ queryKey: ['orders'] });

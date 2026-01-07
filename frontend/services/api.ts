@@ -213,6 +213,7 @@ export interface ConfirmOrderResponse {
 export async function confirmPendingOrder(
   orderNumber: string,
   frameIds?: string[],
+  locationId?: string | null,
   userId?: string
 ): Promise<ConfirmOrderResponse> {
   const currentUserId = userId || await getCurrentUserIdFromSession();
@@ -221,6 +222,7 @@ export async function confirmPendingOrder(
     method: 'POST',
     body: JSON.stringify({
       frameIds,
+      locationId,
       confirmAll: !frameIds || frameIds.length === 0
     }),
   });

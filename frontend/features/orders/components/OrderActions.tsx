@@ -18,7 +18,7 @@ import { Order } from '../types/order.types';
 
 interface OrderActionsProps {
   order: Order;
-  onConfirm?: (orderNumber: string, frameIds?: string[]) => void;
+  onConfirm?: (orderNumber: string, frameIds?: string[], locationId?: string | null) => void;
   onArchive?: (orderId: number) => void;
   onDelete?: (orderId: number) => void;
   isConfirming?: boolean;
@@ -59,9 +59,9 @@ export function OrderActions({
     }
   };
 
-  const handleFrameConfirmation = (frameIds: string[]) => {
+  const handleFrameConfirmation = (frameIds: string[], locationId: string | null) => {
     if (onConfirm) {
-      onConfirm(order.order_number, frameIds);
+      onConfirm(order.order_number, frameIds, locationId);
       setShowFrameSelection(false);
     }
   };

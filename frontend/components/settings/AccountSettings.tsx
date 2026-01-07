@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Building2, Lock, Palette, Loader2, Stethoscope, EyeOff } from 'lucide-react';
+import { User, Building2, Lock, Palette, Loader2, Stethoscope, EyeOff, MapPin } from 'lucide-react';
 import { ProfileSection } from './ProfileSection';
 import { BusinessSection } from './BusinessSection';
 import { SecuritySection } from './SecuritySection';
 import { ThemeSection } from './ThemeSection';
 import { PracticeProfileSection } from './PracticeProfileSection';
 import { PresentationSection } from './PresentationSection';
+import { LocationsSection } from './LocationsSection';
 import { getCurrentAccount } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
-type TabId = 'profile' | 'business' | 'practice' | 'security' | 'theme' | 'presentation';
+type TabId = 'profile' | 'business' | 'practice' | 'locations' | 'security' | 'theme' | 'presentation';
 
 interface Tab {
   id: TabId;
@@ -23,6 +24,7 @@ const tabs: Tab[] = [
   { id: 'profile', label: 'Profile', icon: User },
   { id: 'business', label: 'Business', icon: Building2 },
   { id: 'practice', label: 'Practice Profile', icon: Stethoscope },
+  { id: 'locations', label: 'Locations', icon: MapPin },
   { id: 'security', label: 'Security', icon: Lock },
   { id: 'theme', label: 'Theme', icon: Palette },
   { id: 'presentation', label: 'Presentation', icon: EyeOff },
@@ -144,6 +146,8 @@ export const AccountSettings: React.FC = () => {
               )}
 
               {activeTab === 'practice' && <PracticeProfileSection />}
+
+              {activeTab === 'locations' && <LocationsSection />}
 
               {activeTab === 'security' && <SecuritySection />}
 
