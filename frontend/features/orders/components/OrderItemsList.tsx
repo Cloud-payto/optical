@@ -42,6 +42,7 @@ export function OrderItemsList({ items, vendor }: OrderItemsListProps) {
   }, 0);
 
   const hasAnyPrices = items.some(item => item.wholesale_price != null && item.wholesale_price > 0);
+  const hasAnyLocations = items.some(item => item.location?.name);
 
   return (
     <div className="space-y-4">
@@ -69,6 +70,9 @@ export function OrderItemsList({ items, vendor }: OrderItemsListProps) {
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Model</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Color</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Size</th>
+              {hasAnyLocations && (
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Location</th>
+              )}
               <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase">Qty</th>
               {hasAnyPrices && (
                 <>
@@ -100,6 +104,11 @@ export function OrderItemsList({ items, vendor }: OrderItemsListProps) {
                   <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{item.model}</td>
                   <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{item.color}</td>
                   <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">{item.size}</td>
+                  {hasAnyLocations && (
+                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                      {item.location?.name || <span className="text-gray-400">—</span>}
+                    </td>
+                  )}
                   <td className="px-4 py-3 text-right font-semibold text-sm text-gray-900 dark:text-white">{item.quantity}</td>
                   {hasAnyPrices && (
                     <>

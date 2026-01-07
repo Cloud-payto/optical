@@ -14,6 +14,10 @@ export interface OrderItem {
   quantity: number;
   vendor: string;
   wholesale_price?: number;
+  location?: {
+    id?: string;
+    name?: string;
+  };
 }
 
 export interface Order {

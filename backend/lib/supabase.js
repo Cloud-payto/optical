@@ -881,7 +881,7 @@ const orderOperations = {
         .select(`
           *,
           vendor:vendors(name),
-          items:inventory(*)
+          items:inventory(*, location:practice_locations(id, name))
         `)
         .eq('account_id', userId)
         .order('created_at', { ascending: false });
@@ -945,7 +945,7 @@ const orderOperations = {
         .select(`
           *,
           vendor:vendors(name),
-          items:inventory(*)
+          items:inventory(*, location:practice_locations(id, name))
         `)
         .eq('id', orderId)
         .eq('account_id', userId)
